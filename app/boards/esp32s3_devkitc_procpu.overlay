@@ -1,0 +1,14 @@
+/ {
+    aliases {
+        gpio38 = &gpio_38;
+        gpioc = &gpio1;
+    };
+
+    gpio_pins: gpio_pins {
+        compatible = "gpio-leds";
+
+        gpio_38: gpio_38 {
+            gpios = <&gpio1 6 GPIO_ACTIVE_HIGH>;
+        };
+    };
+};
