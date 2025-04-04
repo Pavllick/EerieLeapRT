@@ -2,9 +2,9 @@
 
 #include <zephyr/kernel.h>
 
-namespace eerie_leap::domain::adc_domain::controllers {
+namespace eerie_leap::domain::adc_domain::services {
 
-class MeasurementProcessor {
+class MeasurementService {
 private:
     static constexpr int kStackSize = 500;
     static constexpr int kPriority = K_PRIO_PREEMPT(8);
@@ -20,4 +20,4 @@ public:
     k_tid_t Start();
 };
 
-} // namespace eerie_leap::domain::adc_domain::controllers
+} // namespace eerie_leap::domain::adc_domain::services
