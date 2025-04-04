@@ -6,7 +6,7 @@
                 "${workspaceFolder}/**"
             ],
             "cStandard": "c17",
-            "cppStandard": "gnu++20"
+            "cppStandard": "gnu++23"
         }
     ],
     "version": 4

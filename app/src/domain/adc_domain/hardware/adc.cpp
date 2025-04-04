@@ -1,0 +1,33 @@
+#include <stdexcept>
+#include <zephyr/logging/log.h>
+
+#include "adc.h"
+
+namespace eerie_leap::domain::adc_domain::hardware {
+
+LOG_MODULE_REGISTER(adc_logger);
+
+int Adc::Initialize() { 
+    LOG_INF("Adc initialization started.");
+
+    LOG_INF("Adc initialized successfully.");
+
+    return 0;
+}
+
+void Adc::UpdateConfiguration(AdcConfig config) {
+    adc_config = config;
+    LOG_INF("Adc configuration updated.");
+}
+
+int Adc::ReadChannel(int channel) {
+    if(!adc_config)
+        throw std::runtime_error("ADC config is not set!");
+
+    if(channel < 0 || channel > adc_config->channel_count)
+        throw std::invalid_argument("ADC channel out of range!");
+
+    return channel * 10;
+}
+
+}  // namespace eerie_leap::domain::adc_domain::hardware

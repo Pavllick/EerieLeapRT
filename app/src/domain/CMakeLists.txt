@@ -11,7 +11,7 @@ endmacro()
 
 SUBDIRLIST(SUBDIRS ${CMAKE_CURRENT_SOURCE_DIR})
 
-# Add all folders (applications) in this folder.
+# Add all folders (domain) in this folder.
 message("Domain")
 FOREACH(subdir ${SUBDIRS})
     add_subdirectory(${subdir})

@@ -1,15 +1,15 @@
 #include <stdio.h>
 #include <zephyr/kernel.h>
 
-#include "threads/measurement_processing_thread.h"
+#include "domain/adc_domain/controllers/measurement_processor.h"
 
-using namespace eerie_leap::threads;
+using namespace eerie_leap::domain::adc_domain::controllers;
 
 #define SLEEP_TIME_MS 3000
 
 int main(void) {
-    MeasurementProcessingThread measurement_processing_thread;
-    measurement_processing_thread.Start();
+    MeasurementProcessor measurement_processor;
+    measurement_processor.Start();
 
     while (true) {
         printf("Hello world\n");
