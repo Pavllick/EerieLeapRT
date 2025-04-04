@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <zephyr/kernel.h>
 
-#include "domain/adc_domain/services/measurement_service.h"
+#include "domain/sensor_domain/services/measurement_service.h"
 
-using namespace eerie_leap::domain::adc_domain::services;
+using namespace eerie_leap::domain::sensor_domain::services;
 
 #define SLEEP_TIME_MS 3000
 

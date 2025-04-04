@@ -2,8 +2,9 @@
 
 #include "measurement_service.h"
 #include "domain/adc_domain/hardware/adc.h"
+#include "domain/sensor_domain/models/sensor_reading.h"
 
-namespace eerie_leap::domain::adc_domain::services {
+namespace eerie_leap::domain::sensor_domain::services {
 
 using namespace eerie_leap::domain;
 
@@ -32,4 +33,4 @@ void MeasurementService::EntryPoint() {
     adc.Initialize();
 }
 
-} // namespace eerie_leap::domain::adc_domain::services
+} // namespace eerie_leap::domain::sensor_domain::services

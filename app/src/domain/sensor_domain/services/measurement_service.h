@@ -2,7 +2,7 @@
 
 #include <zephyr/kernel.h>
 
-namespace eerie_leap::domain::adc_domain::services {
+namespace eerie_leap::domain::sensor_domain::services {
 
 class MeasurementService {
 private:
@@ -20,4 +20,4 @@ public:
     k_tid_t Start();
 };
 
-} // namespace eerie_leap::domain::adc_domain::services
+} // namespace eerie_leap::domain::sensor_domain::services

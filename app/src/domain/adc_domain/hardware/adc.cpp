@@ -16,15 +16,15 @@ int Adc::Initialize() {
 }
 
 void Adc::UpdateConfiguration(AdcConfig config) {
-    adc_config = config;
+    adc_config_ = config;
     LOG_INF("Adc configuration updated.");
 }
 
 int Adc::ReadChannel(int channel) {
-    if(!adc_config)
+    if(!adc_config_)
         throw std::runtime_error("ADC config is not set!");
 
-    if(channel < 0 || channel > adc_config->channel_count)
+    if(channel < 0 || channel > adc_config_->channel_count)
         throw std::invalid_argument("ADC channel out of range!");
 
     return channel * 10;

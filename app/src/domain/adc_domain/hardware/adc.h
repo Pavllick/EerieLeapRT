@@ -8,7 +8,7 @@ namespace eerie_leap::domain::adc_domain::hardware {
 
 class Adc {
 private:
-    std::optional<AdcConfig> adc_config;
+    std::optional<AdcConfig> adc_config_;
 
 public:
     Adc() = default;
