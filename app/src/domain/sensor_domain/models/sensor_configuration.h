@@ -11,7 +11,8 @@ struct SensorConfiguration {
     SensorType type;
     std::optional<int> channel;
     std::optional<CalibrationData> calibration;
-    std::optional<char*> conversion_expression;
+    std::optional<std::string> conversion_expression_raw;
+    std::optional<std::string> conversion_expression_sanitized;
 };
 
 } // namespace eerie_leap::domain::sensor_domain::models

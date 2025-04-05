@@ -2,9 +2,9 @@
 
 namespace eerie_leap::domain::sensor_domain::models {
 
-    enum class SensorType {
-        PHYSICAL_ANALOG,
-        VIRTUAL_ANALOG
-    };
+enum class ReadingMetadataTag {
+    VOLTAGE,
+    RAW_VALUE
+};
 
 } // namespace eerie_leap::domain::sensor_domain::models

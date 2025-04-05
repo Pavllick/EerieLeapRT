@@ -11,10 +11,10 @@
 namespace eerie_leap::domain::sensor_domain::models {
 
     struct SensorReading {
-        std::string id;
+        std::optional<std::string> id;
         std::unique_ptr<Sensor> sensor;
-        double value;
-        time_t  timestamp;
+        std::optional<double> value;
+        std::optional<time_t> timestamp;
         ReadingMetadata metadata;
         ReadingStatus status = ReadingStatus::UNINITIALIZED;
         std::optional<std::string> error_message;

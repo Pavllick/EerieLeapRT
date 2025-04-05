@@ -12,8 +12,8 @@ private:
 
     K_KERNEL_STACK_MEMBER(stack_area, kStackSize);
 
-    k_tid_t thread_id;
-    k_thread thread_data;
+    k_tid_t thread_id_;
+    k_thread thread_data_;
     void EntryPoint();
 
 public:
