@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include <time.h>
+
 #include "sensor.h"
 #include "reading_metadata.h"
 #include "reading_status.h"

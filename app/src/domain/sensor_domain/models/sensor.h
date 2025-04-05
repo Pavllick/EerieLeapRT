@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+
 #include "sensor_metadata.h"
 #include "sensor_configuration.h"
 

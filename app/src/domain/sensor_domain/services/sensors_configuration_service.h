@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+
 #include "domain/sensor_domain/models/sensor.h"
 
 namespace eerie_leap::domain::sensor_domain::services {

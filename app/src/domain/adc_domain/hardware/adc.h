@@ -2,6 +2,7 @@
 
 #include <optional>
 #include <stdio.h>
+
 #include "adc_config.h"
 
 namespace eerie_leap::domain::adc_domain::hardware {

@@ -3,6 +3,7 @@
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
+
 #include "domain/sensor_domain/models/sensor.h"
 
 namespace eerie_leap::domain::sensor_domain::utilities {

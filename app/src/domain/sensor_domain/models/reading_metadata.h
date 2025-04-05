@@ -2,6 +2,7 @@
 
 #include <unordered_map>
 #include <string>
+
 #include "reading_metadata_tag.h"
 
 namespace eerie_leap::domain::sensor_domain::models {

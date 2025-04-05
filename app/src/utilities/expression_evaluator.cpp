@@ -1,44 +1,41 @@
+#include <stdexcept>
 #include <regex>
+
+#include "expression_evaluator.h"
 #include "exprtk_configuration.h"
 #include "libs/exprtk/exprtk.hpp"
-#include "expression_evaluator.h"
 
 namespace eerie_leap::utilities {
 
-double ExpressionEvaluator::Evaluate(const std::string& expression2, double raw_value, const std::unordered_map<std::string, double>& variables) {
-    // return 1.4;
+static const std::regex& sensorIdRegex() {
+    static const std::regex regex_instance(R"(\{([a-z_][a-z0-9_]*)\})");
+    
+    return regex_instance;
+}
 
+double ExpressionEvaluator::Evaluate(const std::string& expression, double x, const std::unordered_map<std::string, double>& variables) {
     typedef exprtk::symbol_table<double> symbol_table_t;
     typedef exprtk::expression<double>   expression_t;
     typedef exprtk::parser<double>       parser_t;
 
-    const std::string expression_string = "z := x - (3 * y)";
-
-    double x = double(123.456);
-    double y = double(98.98);
-    double z = double(0.0);
-
     symbol_table_t symbol_table;
-    symbol_table.add_variable("x",x);
-    symbol_table.add_variable("y",y);
-    symbol_table.add_variable("z",z);
+    symbol_table.add_constants();
+    symbol_table.add_variable("x", x);
 
-    expression_t expression;
-    expression.register_symbol_table(symbol_table);
+    for (const auto& [key, value] : variables) {
+        double unwrapped_value = value;
+        symbol_table.add_variable(key, unwrapped_value);
+    }
+
+    expression_t evaluator;
+    evaluator.register_symbol_table(symbol_table);
 
     parser_t parser;
 
-    if (!parser.compile(expression_string, expression)) {
-        // printf("Compilation error...\n");
-        return -1.0;
-    }
+    if (!parser.compile(expression, evaluator))
+        throw std::runtime_error("Failed to compile expression: " + expression);
 
-    return expression.value();
-}
-
-static const std::regex& sensorIdRegex() {
-    static const std::regex regex_instance(R"(\{([a-z_][a-z0-9_]*)\})");
-    return regex_instance;
+    return evaluator.value();
 }
 
 std::unordered_set<std::string> ExpressionEvaluator::ExtractSensorIds(const std::string& expression) {
