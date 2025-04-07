@@ -8,7 +8,7 @@ using namespace eerie_leap::domain::sensor_domain::models;
 
 class VoltageConverter {
 public:
-    static double ConvertVoltageToRawValue(const SensorConfiguration& configuration, double voltage);
+    static double ConvertVoltageToValue(const SensorConfiguration& configuration, double voltage);
 };
 
 } // namespace eerie_leap::domain::sensor_domain::utilities

@@ -2,7 +2,6 @@
 
 #include <optional>
 #include <string>
-#include <memory>
 #include <time.h>
 
 #include "sensor.h"
@@ -13,12 +12,14 @@ namespace eerie_leap::domain::sensor_domain::models {
 
     struct SensorReading {
         std::optional<std::string> id;
-        std::unique_ptr<Sensor> sensor;
+        const Sensor& sensor;
         std::optional<double> value;
         std::optional<time_t> timestamp;
         ReadingMetadata metadata;
         ReadingStatus status = ReadingStatus::UNINITIALIZED;
         std::optional<std::string> error_message;
+
+        SensorReading(const Sensor& sensor) : sensor(sensor) {}
     };
 
 }

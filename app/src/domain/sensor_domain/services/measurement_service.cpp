@@ -41,38 +41,56 @@ void MeasurementService::EntryPoint() {
     Adc adc;
     adc.Initialize();
 
-    Sensor s1;
-    s1.id = "sensor1";
-    s1.configuration.conversion_expression_sanitized = "x + {sensor2} + 1";
-    s1.configuration.type = SensorType::PHYSICAL_ANALOG;
+    // auto sensor_reading = std::make_shared<SensorReading>(sensor);
 
-    Sensor s2;
-    s2.id = "sensor2";
-    s2.configuration.conversion_expression_sanitized = "(x + 6) * 2";
-    s2.configuration.type = SensorType::PHYSICAL_ANALOG;
+    sensors_configuration_service_ = std::make_shared<SensorsConfigurationService>();
 
-    Sensor s3;
-    s3.id = "sensor3";
-    s3.configuration.conversion_expression_sanitized = "x + {sensor2} + {sensor1} + {sensor4} + 1";
-    s3.configuration.type = SensorType::PHYSICAL_ANALOG;
+    sensor_readings_frame_ = std::make_shared<SensorReadingsFrame>();
+    sensors_reader_ = std::make_shared<SensorsReader>(adc, *sensor_readings_frame_);
+    sensor_processor_ = std::make_shared<SensorProcessor>(*sensor_readings_frame_);
 
-    Sensor s4;
-    s4.id = "sensor4";
-    s4.configuration.conversion_expression_sanitized = "{sensor2} + 8";
-    s4.configuration.type = SensorType::VIRTUAL_ANALOG;
+    // Sensor s1;
+    // s1.id = "sensor1";
+    // s1.configuration.conversion_expression_sanitized = "x + {sensor2} + 1";
+    // s1.configuration.type = SensorType::PHYSICAL_ANALOG;
 
-    // s2, s1, s3, s4
+    // Sensor s2;
+    // s2.id = "sensor2";
+    // s2.configuration.conversion_expression_sanitized = "(x + 6) * 2";
+    // s2.configuration.type = SensorType::PHYSICAL_ANALOG;
 
-    // std::vector<Sensor> sensors = {s4, s3, s1, s1};
+    // Sensor s3;
+    // s3.id = "sensor3";
+    // s3.configuration.conversion_expression_sanitized = "x + {sensor2} + {sensor1} + {sensor4} + 1";
+    // s3.configuration.type = SensorType::PHYSICAL_ANALOG;
 
-    SensorsOrderResolver resolver;
-    resolver.AddSensor(s4);
-    resolver.AddSensor(s3);
-    resolver.AddSensor(s2);
-    resolver.AddSensor(s1);
-    auto res = resolver.GetProcessingOrder();
+    // Sensor s4;
+    // s4.id = "sensor4";
+    // s4.configuration.conversion_expression_sanitized = "{sensor2} + 8";
+    // s4.configuration.type = SensorType::VIRTUAL_ANALOG;
 
-    printf("Exp %f\n", 35.0f);
+    // // s2, s1, s3, s4
+
+    // // std::vector<Sensor> sensors = {s4, s3, s1, s1};
+
+    // SensorsOrderResolver resolver;
+    // resolver.AddSensor(s4);
+    // resolver.AddSensor(s3);
+    // resolver.AddSensor(s2);
+    // resolver.AddSensor(s1);
+    // auto res = resolver.GetProcessingOrder();
+
+    // printf("Exp %f\n", 35.0f);
+}
+
+void MeasurementService::ProcessSensorsReading() {
+    sensor_readings_frame_->ClearReadings();
+    
+    auto sensors = sensors_configuration_service_->GetSensors();
+    sensors_reader_->ReadSensors(sensors);
+
+    for(const auto& sensor : sensors)
+        sensor_processor_->ProcessSensorReading(*sensor_readings_frame_->GetReading(sensor.id));
 }
 
 } // namespace eerie_leap::domain::sensor_domain::services

@@ -18,25 +18,23 @@ void SensorProcessor::ProcessSensorReading(SensorReading& reading) {
     
     try {
         double voltage = reading.value.value();
-        double raw_value = VoltageConverter::ConvertVoltageToRawValue(
-            reading.sensor->configuration, voltage);
+        double raw_value = VoltageConverter::ConvertVoltageToValue(
+            reading.sensor.configuration, voltage);
         double value = raw_value;
 
-        if(reading.sensor->configuration.conversion_expression_sanitized.has_value())
+        if(reading.sensor.configuration.conversion_expression_sanitized.has_value())
             value = ExpressionEvaluator::Evaluate(
-                reading.sensor->configuration.conversion_expression_sanitized.value(),
+                reading.sensor.configuration.conversion_expression_sanitized.value(),
                 value,
-                sensor_readings_frame_.GetAllReadings());
+                sensor_readings_frame_.GetReadingsValues());
 
-        if(reading.sensor->configuration.type == SensorType::PHYSICAL_ANALOG) {
+        if(reading.sensor.configuration.type == SensorType::PHYSICAL_ANALOG) {
             reading.metadata.AddTag(ReadingMetadataTag::VOLTAGE, std::to_string(voltage));
             reading.metadata.AddTag(ReadingMetadataTag::RAW_VALUE, std::to_string(raw_value));
         }
 
         reading.value = value;
         reading.status = ReadingStatus::PROCESSED;
-        
-        sensor_readings_frame_.AddReading(reading.id.value(), value);
     } catch (const std::exception& e) {
         reading.status = ReadingStatus::ERROR;
         reading.error_message = e.what();

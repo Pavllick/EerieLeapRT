@@ -6,7 +6,7 @@ namespace eerie_leap::domain::sensor_domain::utilities {
 
 using namespace eerie_leap::domain::sensor_domain::models;
 
-double ConvertVoltageToRawValue(const SensorConfiguration& configuration, double voltage) {
+double VoltageConverter::ConvertVoltageToValue(const SensorConfiguration& configuration, double voltage) {
     if(configuration.type != SensorType::PHYSICAL_ANALOG)
         throw std::invalid_argument("Invalid sensor type for voltage conversion");
 
