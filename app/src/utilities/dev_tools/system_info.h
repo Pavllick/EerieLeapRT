@@ -14,8 +14,8 @@ public:
      *  @param cpu cpu to analyze, ignored if THREAD_ANALYZER_AUTO_SEPARATE_CORES=n
      */
     static void print_thread_info(int cpu = 0);
-    static void print_stack_info(int cpu = 0);
-    static void print_cpu_info(int cpu = 0);
+    static void print_stack_info(int cpu = 0, const char *thread_name = nullptr);
+    static void print_cpu_info(int cpu = 0, const char *thread_name = nullptr);
     static void print_heap_info();
 };
 

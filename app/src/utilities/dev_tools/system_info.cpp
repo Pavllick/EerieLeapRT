@@ -16,31 +16,42 @@ void SystemInfo::print_thread_info(int cpu) {
     thread_analyzer_print(cpu);
 }
 
-static void print_stack_info_callback(struct thread_analyzer_info *info) {
-	size_t pcnt = (info->stack_used * 100U) / info->stack_size;
+static const char* stack_info_thread_name_filter = nullptr;
+static void print_stack_info_callback(thread_analyzer_info* info) {
+    if (stack_info_thread_name_filter != nullptr && strcmp(stack_info_thread_name_filter, info->name) != 0)
+        return;
+
+    // Print stack usage information
+    size_t used_percent = (info->stack_used * 100U) / info->stack_size;
     
     LOG_INF("  %-14s: Unused %zu Usage %zu / %zu (%zu %%)",
-		info->name,
-		info->stack_size - info->stack_used,
+        info->name,
+        info->stack_size - info->stack_used,
         info->stack_used,
-		info->stack_size,
-        pcnt);
+        info->stack_size,
+        used_percent);
 }
 
-void SystemInfo::print_stack_info(int cpu) {
+void SystemInfo::print_stack_info(int cpu, const char *thread_name) {
+    stack_info_thread_name_filter = thread_name;
+
     LOG_INF("Stack analyze for threads:");
-    thread_analyzer_run(print_stack_info_callback, cpu);
+    thread_analyzer_run((print_stack_info_callback), cpu);
 }
 
-static void print_cpu_info_callback(struct thread_analyzer_info *info) {
-	size_t pcnt = (info->stack_used * 100U) / info->stack_size;
-    
+static const char* cpu_info_thread_name_filter = nullptr;
+static void print_cpu_info_callback(thread_analyzer_info *info) {
+    if (cpu_info_thread_name_filter != nullptr && strcmp(cpu_info_thread_name_filter, info->name) != 0)
+        return;
+
     LOG_INF("  %-14s: CPU Load: %u %%",
 		info->name,
 		info->utilization);
 }
 
-void SystemInfo::print_cpu_info(int cpu) {
+void SystemInfo::print_cpu_info(int cpu, const char *thread_name) {
+    cpu_info_thread_name_filter = thread_name;
+
     LOG_INF("CPU analyze for threads:");
     thread_analyzer_run(print_cpu_info_callback, cpu);
 }
@@ -50,10 +61,14 @@ static void print_heap_stats(sys_heap *heap) {
 
     sys_heap_runtime_stats_get(heap, &stats);
 
-    LOG_INF("  %-14p: Unused %zu, Usage %zu, Max Alloc %zu",
+    size_t used_percent = (stats.allocated_bytes * 100U) / (stats.free_bytes + stats.allocated_bytes);
+
+    LOG_INF("  %-14p: Unused %zu Usage %zu / %zu (%zu %%), Max Alloc %zu",
         heap,
         stats.free_bytes,
         stats.allocated_bytes,
+        stats.free_bytes + stats.allocated_bytes,
+        used_percent,
         stats.max_allocated_bytes);
 
     // printf("\t%zu - address %p ", index, heap_p[index]);
