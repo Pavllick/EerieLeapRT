@@ -35,8 +35,12 @@ static void print_stack_info_callback(thread_analyzer_info* info) {
 void SystemInfo::print_stack_info(int cpu, const char *thread_name) {
     stack_info_thread_name_filter = thread_name;
 
+#ifdef CONFIG_THREAD_ANALYZER
     LOG_INF("Stack analyze for threads:");
     thread_analyzer_run((print_stack_info_callback), cpu);
+#else
+    LOG_ERR("Thread analyzer is not supprted.");
+#endif
 }
 
 static const char* cpu_info_thread_name_filter = nullptr;
@@ -52,8 +56,12 @@ static void print_cpu_info_callback(thread_analyzer_info *info) {
 void SystemInfo::print_cpu_info(int cpu, const char *thread_name) {
     cpu_info_thread_name_filter = thread_name;
 
+#ifdef CONFIG_THREAD_ANALYZER
     LOG_INF("CPU analyze for threads:");
     thread_analyzer_run(print_cpu_info_callback, cpu);
+#else
+    LOG_ERR("Thread analyzer is not supprted.");
+#endif
 }
 
 static void print_heap_stats(sys_heap *heap) {
