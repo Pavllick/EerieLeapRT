@@ -1,6 +1,5 @@
 #include <stdexcept>
 #include <regex>
-#include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 
 #include "expression_evaluator.h"
@@ -9,6 +8,7 @@
 namespace eerie_leap::utilities::math_parser {
 
 LOG_MODULE_REGISTER(expression_evaluator_logger);
+K_MUTEX_DEFINE(expression_eval_mutex_);
 
 using namespace mu;
 
@@ -25,6 +25,8 @@ ExpressionEvaluator::ExpressionEvaluator(const std::string& expression_raw) : ex
 }
 
 double ExpressionEvaluator::Evaluate(double x, const std::unordered_map<std::string, double>& variables) const {
+    k_mutex_lock(&expression_eval_mutex_, K_FOREVER);
+
     parser_->SetExpr(expression_);
 
     parser_->DefineVar("x", &x);
@@ -32,8 +34,12 @@ double ExpressionEvaluator::Evaluate(double x, const std::unordered_map<std::str
         double unwrapped_value = value;
         parser_->DefineVar(key, &unwrapped_value);
     }
+
+    double res = parser_->Eval();
+
+    k_mutex_unlock(&expression_eval_mutex_);
     
-    return parser_->Eval();
+    return res;
 }
 
 std::unordered_set<std::string> ExpressionEvaluator::ExtractVariables() const {

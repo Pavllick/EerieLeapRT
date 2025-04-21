@@ -16,7 +16,6 @@ void SensorsReader::ReadSensors(std::vector<Sensor>& sensors) {
         // sensor_reading.timestamp = time(nullptr);
 
         if (sensor.configuration.type == SensorType::PHYSICAL_ANALOG) {
-            // Read the physical sensor
             auto reading = adc_.ReadChannel(sensor.configuration.channel.value());
             sensor_reading->value = reading;
             sensor_reading->status = ReadingStatus::RAW;

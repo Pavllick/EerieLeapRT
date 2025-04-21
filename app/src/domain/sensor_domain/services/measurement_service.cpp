@@ -9,13 +9,11 @@
 #include "domain/sensor_domain/events/sensor_reading_event.h"
 #include "utilities/math_parser/expression_evaluator.h"
 #include "utilities/dev_tools/system_info.h"
-#include "domain/sensor_domain/utilities/sensors_order_resolver.h"
 
 namespace eerie_leap::domain::sensor_domain::services {
 
 using namespace eerie_leap::domain::adc_domain::hardware;
 using namespace eerie_leap::domain::sensor_domain::models;
-using namespace eerie_leap::domain::sensor_domain::utilities;
 using namespace eerie_leap::utilities::math_parser;
 using namespace eerie_leap::utilities::dev_tools;
 
@@ -40,9 +38,14 @@ void MeasurementService::ThreadTrampoline(void* instance, void* p2, void* p3) {
 void MeasurementService::EntryPoint() {
     LOG_INF("Measurement Service started");
 
-    SystemInfo::print_thread_info();
-
+    k_mutex_init(&sensors_reading_mutex_);
+    
     Adc adc;
+    adc.UpdateConfiguration(AdcConfig{
+        .channel_count = 8,
+        .resolution = 12,
+        .reference_voltage = 3.3
+    });
     adc.Initialize();
 
     sensors_configuration_service_ = std::make_shared<SensorsConfigurationService>();
@@ -51,10 +54,17 @@ void MeasurementService::EntryPoint() {
     sensors_reader_ = std::make_shared<SensorsReader>(adc, *sensor_readings_frame_);
     sensor_processor_ = std::make_shared<SensorProcessor>(*sensor_readings_frame_);
 
+    while (true) {
+        ProcessSensorsReading();
+        k_msleep(READING_INTERVAL_MS_);
+    }
+    
     return;
 }
 
 void MeasurementService::ProcessSensorsReading() {
+    k_mutex_lock(&sensors_reading_mutex_, K_FOREVER);
+
     sensor_readings_frame_->ClearReadings();
     
     auto sensors = sensors_configuration_service_->GetSensors();
@@ -62,6 +72,12 @@ void MeasurementService::ProcessSensorsReading() {
 
     for(const auto& sensor : sensors)
         sensor_processor_->ProcessSensorReading(*sensor_readings_frame_->GetReading(sensor.id));
+
+    for (const auto& reading : sensor_readings_frame_->GetReadings())
+    printf("Sensor ID: %s, Value: %f\n", reading.first.c_str(), reading.second->value.value());
+        // LOG_INF("Sensor ID: %s, Value: %f", reading.first.c_str(), reading.second->value.value());
+
+    k_mutex_unlock(&sensors_reading_mutex_);
 }
 
 } // namespace eerie_leap::domain::sensor_domain::services

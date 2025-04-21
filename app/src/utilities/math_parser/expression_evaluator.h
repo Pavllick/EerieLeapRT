@@ -4,6 +4,7 @@
 #include <vector>
 #include <unordered_set>
 #include <unordered_map>
+#include <zephyr/kernel.h>
 #include <muParser.h>
 
 namespace eerie_leap::utilities::math_parser {

@@ -1,5 +1,6 @@
 #include <stdexcept>
 #include <zephyr/logging/log.h>
+#include <zephyr/random/random.h>
 
 #include "adc.h"
 
@@ -27,7 +28,9 @@ int Adc::ReadChannel(int channel) {
     if(channel < 0 || channel > adc_config_->channel_count)
         throw std::invalid_argument("ADC channel out of range!");
 
-    return channel * 10;
+    auto random_value = (sys_rand32_get() % 20) + 1;
+
+    return random_value;
 }
 
 }  // namespace eerie_leap::domain::adc_domain::hardware

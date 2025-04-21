@@ -13,7 +13,7 @@ private:
     std::vector<Sensor> ordered_sensors_;
 
 public:
-    SensorsConfigurationService() = default;
+    SensorsConfigurationService();
     void UpdateSensors(const std::vector<Sensor>& sensors);
     const std::vector<Sensor>& GetSensors() const;
 };
