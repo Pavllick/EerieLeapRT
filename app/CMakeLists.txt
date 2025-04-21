@@ -13,7 +13,7 @@ add_compile_options(-std=c++2b)
 
 # Add muParser
 add_subdirectory(
-    ${CMAKE_SOURCE_DIR}/../modules/muparser
+    ${CMAKE_SOURCE_DIR}/src/libs/muparser
     ${CMAKE_BINARY_DIR}/muparser  # Binary dir (build output location)
 )
 
@@ -30,4 +30,4 @@ target_include_directories(app PRIVATE src)
 target_link_libraries(app PRIVATE muparser)
 
 # Print paths for debugging
-message(STATUS "muParser include path: ${CMAKE_CURRENT_SOURCE_DIR}/modules/muparser/include")
+# message(STATUS "muParser include path: ${CMAKE_CURRENT_SOURCE_DIR}/modules/muparser/include")
