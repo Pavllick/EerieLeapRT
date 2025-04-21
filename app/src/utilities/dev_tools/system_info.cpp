@@ -58,7 +58,6 @@ void SystemInfo::print_cpu_info(int cpu, const char *thread_name) {
 
 static void print_heap_stats(sys_heap *heap) {
     sys_memory_stats stats;
-
     sys_heap_runtime_stats_get(heap, &stats);
 
     size_t used_percent = (stats.allocated_bytes * 100U) / (stats.free_bytes + stats.allocated_bytes);
@@ -70,12 +69,6 @@ static void print_heap_stats(sys_heap *heap) {
         stats.free_bytes + stats.allocated_bytes,
         used_percent,
         stats.max_allocated_bytes);
-
-    // printf("\t%zu - address %p ", index, heap_p[index]);
-    // printf("allocated %zu, free %zu, max allocated %zu\n",
-    //     stats.allocated_bytes,
-    //     stats.free_bytes,
-    //     stats.max_allocated_bytes);
 }
 
 void SystemInfo::print_heap_info() {

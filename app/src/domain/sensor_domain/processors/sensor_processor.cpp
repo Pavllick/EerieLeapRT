@@ -1,7 +1,6 @@
 #include <stdexcept>
 
 #include "sensor_processor.h"
-#include "utilities/expression_evaluator.h"
 #include "domain/sensor_domain/models/reading_status.h"
 #include "domain/sensor_domain/models/reading_metadata_tag.h"
 #include "domain/sensor_domain/utilities/voltage_converter.h"
@@ -22,9 +21,8 @@ void SensorProcessor::ProcessSensorReading(SensorReading& reading) {
             reading.sensor.configuration, voltage);
         double value = raw_value;
 
-        if(reading.sensor.configuration.conversion_expression_sanitized.has_value())
-            value = ExpressionEvaluator::Evaluate(
-                reading.sensor.configuration.conversion_expression_sanitized.value(),
+        if(reading.sensor.configuration.expression_evaluator.has_value())
+            value = reading.sensor.configuration.expression_evaluator.value().Evaluate(
                 value,
                 sensor_readings_frame_.GetReadingsValues());
 

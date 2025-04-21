@@ -2,19 +2,21 @@
 #include <algorithm>
 
 #include "sensors_order_resolver.h"
-#include "utilities/expression_evaluator.h"
 #include "domain/sensor_domain/models/sensor_type.h"
 
 namespace eerie_leap::domain::sensor_domain::utilities {
 
-using namespace eerie_leap::utilities;
 using namespace eerie_leap::domain::sensor_domain::models;
 
 void SensorsOrderResolver::AddSensor(const Sensor& sensor) {
     sensors_[sensor.id] = sensor;
 
-    auto sensorIds = ExpressionEvaluator::ExtractSensorIds(sensor.configuration.conversion_expression_sanitized.value_or(""));
-    dependencies_[sensor.id] = std::unordered_set<std::string>(sensorIds.begin(), sensorIds.end());
+    if(sensor.configuration.expression_evaluator.has_value()) {
+        auto sensorIds = sensor.configuration.expression_evaluator.value().ExtractVariables();
+        dependencies_[sensor.id] = std::unordered_set<std::string>(sensorIds.begin(), sensorIds.end());
+    } else {
+        dependencies_[sensor.id] = {};
+    }
 }
 
 bool SensorsOrderResolver::HasCyclicDependency(
