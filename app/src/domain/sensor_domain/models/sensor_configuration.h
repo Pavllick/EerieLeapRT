@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <optional>
 #include <string>
 
@@ -15,7 +16,7 @@ struct SensorConfiguration {
     SensorType type;
     std::optional<int> channel;
     std::optional<CalibrationData> calibration;
-    std::optional<ExpressionEvaluator> expression_evaluator;
+    std::shared_ptr<ExpressionEvaluator> expression_evaluator = nullptr;
 };
 
 } // namespace eerie_leap::domain::sensor_domain::models

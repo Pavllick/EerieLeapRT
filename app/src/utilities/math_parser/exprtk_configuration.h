@@ -1,6 +1,0 @@
-#define exprtk_disable_rtti
-#define exprtk_disable_break_continue
-#define exprtk_disable_return_statement
-#define exprtk_disable_rtl_io
-#define exprtk_disable_rtl_io_file
-#define exprtk_disable_rtl_vecops

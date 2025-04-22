@@ -3,7 +3,6 @@
 #include <zephyr/logging/log.h>
 
 #include "expression_evaluator.h"
-#include "exprtk_configuration.h"
 
 namespace eerie_leap::utilities::math_parser {
 
@@ -12,30 +11,29 @@ K_MUTEX_DEFINE(expression_eval_mutex_);
 
 using namespace mu;
 
-mu::Parser* ExpressionEvaluator::parser_ = new mu::Parser();
-
 static const std::regex& sensorIdRegex() {
     static const std::regex regex_instance(R"(\{([a-z_][a-z0-9_]*)\})");
     
     return regex_instance;
 }
 
-ExpressionEvaluator::ExpressionEvaluator(const std::string& expression_raw) : expression_raw_(expression_raw) {
+ExpressionEvaluator::ExpressionEvaluator(std::shared_ptr<MathParserService> math_parser_service, const std::string& expression_raw)
+    : math_parser_service_(std::move(math_parser_service)), expression_raw_(expression_raw) {
     expression_ = UnwrapVariables();
 }
 
 double ExpressionEvaluator::Evaluate(double x, const std::unordered_map<std::string, double>& variables) const {
     k_mutex_lock(&expression_eval_mutex_, K_FOREVER);
 
-    parser_->SetExpr(expression_);
+    math_parser_service_->SetExpression(expression_);
 
-    parser_->DefineVar("x", &x);
+    math_parser_service_->DefineVariable("x", &x);
     for (auto& [key, value] : variables) {
         double unwrapped_value = value;
-        parser_->DefineVar(key, &unwrapped_value);
+        math_parser_service_->DefineVariable(key, &unwrapped_value);
     }
 
-    double res = parser_->Eval();
+    double res = math_parser_service_->Evaluate();
 
     k_mutex_unlock(&expression_eval_mutex_);
     

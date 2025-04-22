@@ -48,11 +48,11 @@ void MeasurementService::EntryPoint() {
     });
     adc.Initialize();
 
-    sensors_configuration_service_ = std::make_shared<SensorsConfigurationService>();
+    sensors_configuration_service_->Initialize();
 
     sensor_readings_frame_ = std::make_shared<SensorReadingsFrame>();
-    sensors_reader_ = std::make_shared<SensorsReader>(adc, *sensor_readings_frame_);
-    sensor_processor_ = std::make_shared<SensorProcessor>(*sensor_readings_frame_);
+    sensors_reader_ = std::make_shared<SensorsReader>(adc, sensor_readings_frame_);
+    sensor_processor_ = std::make_shared<SensorProcessor>(sensor_readings_frame_);
 
     while (true) {
         ProcessSensorsReading();
@@ -73,8 +73,8 @@ void MeasurementService::ProcessSensorsReading() {
     for(const auto& sensor : sensors)
         sensor_processor_->ProcessSensorReading(*sensor_readings_frame_->GetReading(sensor.id));
 
-    for (const auto& reading : sensor_readings_frame_->GetReadings())
-    printf("Sensor ID: %s, Value: %f\n", reading.first.c_str(), reading.second->value.value());
+    // for (const auto& reading : sensor_readings_frame_->GetReadings())
+    //     printf("Sensor ID: %s, Value: %f\n", reading.first.c_str(), reading.second->value.value());
         // LOG_INF("Sensor ID: %s, Value: %f", reading.first.c_str(), reading.second->value.value());
 
     k_mutex_unlock(&sensors_reading_mutex_);

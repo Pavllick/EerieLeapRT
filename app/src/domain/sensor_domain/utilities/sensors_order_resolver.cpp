@@ -11,8 +11,8 @@ using namespace eerie_leap::domain::sensor_domain::models;
 void SensorsOrderResolver::AddSensor(const Sensor& sensor) {
     sensors_[sensor.id] = sensor;
 
-    if(sensor.configuration.expression_evaluator.has_value()) {
-        auto sensorIds = sensor.configuration.expression_evaluator.value().ExtractVariables();
+    if(sensor.configuration.expression_evaluator != nullptr) {
+        auto sensorIds = sensor.configuration.expression_evaluator->ExtractVariables();
         dependencies_[sensor.id] = std::unordered_set<std::string>(sensorIds.begin(), sensorIds.end());
     } else {
         dependencies_[sensor.id] = {};

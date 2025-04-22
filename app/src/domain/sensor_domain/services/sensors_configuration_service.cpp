@@ -1,15 +1,20 @@
+#include <memory>
+
 #include "sensors_configuration_service.h"
+#include "utilities/math_parser/math_parser_service.hpp"
 #include "domain/sensor_domain/utilities/sensors_order_resolver.h"
 #include "domain/sensor_domain/models/calibration_data.h"
 #include "utilities/math_parser/expression_evaluator.h"
 
 namespace eerie_leap::domain::sensor_domain::services {
 
+using namespace eerie_leap::utilities::math_parser;
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::domain::sensor_domain::utilities;
-using namespace eerie_leap::utilities::math_parser;
 
-SensorsConfigurationService::SensorsConfigurationService() {
+void SensorsConfigurationService::Initialize() {
+    math_parser_service_ = std::make_shared<MathParserService>();
+
     // Test Sensors
 
     CalibrationData calibration_data_1 {
@@ -19,7 +24,7 @@ SensorsConfigurationService::SensorsConfigurationService() {
         .max_value = 100.0
     };
 
-    ExpressionEvaluator expression_evaluator_1("x * 2 + 1");
+    ExpressionEvaluator expression_evaluator_1(math_parser_service_, "x * 2 + 1");
 
     Sensor sensor_1 {
         .id = "sensor_1",
@@ -32,7 +37,7 @@ SensorsConfigurationService::SensorsConfigurationService() {
             .type = SensorType::PHYSICAL_ANALOG,
             .channel = 0,
             .calibration = calibration_data_1,
-            .expression_evaluator = expression_evaluator_1
+            .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_1)
         }
     };
 
@@ -43,7 +48,7 @@ SensorsConfigurationService::SensorsConfigurationService() {
         .max_value = 200.0
     };
 
-    ExpressionEvaluator expression_evaluator_2("x * 4 + {sensor_1} + 1.6");
+    ExpressionEvaluator expression_evaluator_2(math_parser_service_, "x * 4 + {sensor_1} + 1.6");
 
     Sensor sensor_2 {
         .id = "sensor_2",
@@ -56,7 +61,7 @@ SensorsConfigurationService::SensorsConfigurationService() {
             .type = SensorType::PHYSICAL_ANALOG,
             .channel = 1,
             .calibration = calibration_data_2,
-            .expression_evaluator = expression_evaluator_2
+            .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_2)
         }
     };
 

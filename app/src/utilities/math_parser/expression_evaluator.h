@@ -1,24 +1,25 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 #include <unordered_set>
 #include <unordered_map>
 #include <zephyr/kernel.h>
-#include <muParser.h>
+
+#include "math_parser_service.hpp"
 
 namespace eerie_leap::utilities::math_parser {
 
-using namespace mu;
 class ExpressionEvaluator {
 private:
-    static mu::Parser* parser_;
+    std::shared_ptr<MathParserService> math_parser_service_;
 
     std::string expression_raw_;
     std::string expression_;
     
 public:
-    ExpressionEvaluator(const std::string& expression);
+    ExpressionEvaluator(std::shared_ptr<MathParserService> math_parser_service, const std::string& expression);
 
     std::string GetExpression() const { return expression_; }
     std::string GetRawExpression() const { return expression_raw_; }

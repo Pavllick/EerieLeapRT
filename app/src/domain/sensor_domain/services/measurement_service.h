@@ -31,7 +31,7 @@ using namespace eerie_leap::domain::sensor_domain::processors;
 ///
 class MeasurementService {
 private:
-    const int32_t READING_INTERVAL_MS_ = 2000; 
+    const int32_t READING_INTERVAL_MS_ = 100; 
     static constexpr int kStackSize = 8192;
     static constexpr int kPriority = K_PRIO_PREEMPT(8);
     static void ThreadTrampoline(void* instance, void* p2, void* p3);
@@ -51,6 +51,9 @@ private:
     void ProcessSensorsReading();
 
 public:
+    MeasurementService(std::shared_ptr<SensorsConfigurationService> sensors_configuration_service)
+        : sensors_configuration_service_(std::move(sensors_configuration_service)) { }
+
     k_tid_t Start();
 };
 

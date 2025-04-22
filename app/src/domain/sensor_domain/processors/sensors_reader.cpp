@@ -20,14 +20,14 @@ void SensorsReader::ReadSensors(std::vector<Sensor>& sensors) {
             sensor_reading->value = reading;
             sensor_reading->status = ReadingStatus::RAW;
 
-            sensor_readings_frame_.AddOrUpdateReading(sensor_reading);
+            sensor_readings_frame_->AddOrUpdateReading(sensor_reading);
         } else if (sensor.configuration.type == SensorType::VIRTUAL_ANALOG) {
             sensor_reading->status = ReadingStatus::UNINITIALIZED;
         } else {
             throw std::runtime_error("Unsupported sensor type");
         }
 
-        sensor_readings_frame_.AddOrUpdateReading(sensor_reading);
+        sensor_readings_frame_->AddOrUpdateReading(sensor_reading);
     }
     
 }

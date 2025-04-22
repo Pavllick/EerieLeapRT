@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 
 #include "domain/adc_domain/hardware/adc.h"
@@ -15,11 +16,11 @@ using namespace eerie_leap::domain::sensor_domain::utilities;
 class SensorsReader {
 private:
     Adc& adc_;
-    SensorReadingsFrame& sensor_readings_frame_;
+    std::shared_ptr<SensorReadingsFrame> sensor_readings_frame_;
     
 public:
-    SensorsReader(Adc& adc, SensorReadingsFrame& sensor_readings_frame) : 
-        adc_(adc), sensor_readings_frame_(sensor_readings_frame) {}
+    SensorsReader(Adc& adc, std::shared_ptr<SensorReadingsFrame> sensor_readings_frame) : 
+        adc_(adc), sensor_readings_frame_(std::move(sensor_readings_frame)) {}
 
     void ReadSensors(std::vector<Sensor>& sensors);
 };

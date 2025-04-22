@@ -21,10 +21,10 @@ void SensorProcessor::ProcessSensorReading(SensorReading& reading) {
             reading.sensor.configuration, voltage);
         double value = raw_value;
 
-        if(reading.sensor.configuration.expression_evaluator.has_value())
-            value = reading.sensor.configuration.expression_evaluator.value().Evaluate(
+        if(reading.sensor.configuration.expression_evaluator != nullptr)
+            value = reading.sensor.configuration.expression_evaluator->Evaluate(
                 value,
-                sensor_readings_frame_.GetReadingsValues());
+                sensor_readings_frame_->GetReadingsValues());
 
         if(reading.sensor.configuration.type == SensorType::PHYSICAL_ANALOG) {
             reading.metadata.AddTag(ReadingMetadataTag::VOLTAGE, std::to_string(voltage));
