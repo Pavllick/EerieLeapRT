@@ -1,17 +1,26 @@
 #include <memory>
+#include <chrono>
+#include <ctime>
 #include <stdio.h>
 
+#include "utilities/dev_tools/system_info.h"
+#include "utilities/time/i_time_service.h"
+#include "utilities/time/time_helpers.hpp"
+#include "utilities/time/boot_elapsed_time_service.h"
 #include "domain/sensor_domain/services/sensors_configuration_service.h"
 #include "domain/sensor_domain/services/measurement_service.h"
-#include "utilities/dev_tools/system_info.h"
 
+using namespace std::chrono;
 using namespace eerie_leap::utilities::dev_tools;
+using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::domain::sensor_domain::services;
 
 #define SLEEP_TIME_MS 10000
 
 int main(void) {
     auto sensors_configuration_service = std::make_shared<SensorsConfigurationService>();
+    std::shared_ptr<ITimeService> time_service = std::make_shared<BootElapsedTimeService>();
+    time_service->Initialize();
 
     // Placement-new construction of MeasurementService in statically allocated,
     // properly aligned memory. This ensures the internal Zephyr thread stack
@@ -28,6 +37,8 @@ int main(void) {
         // printf("Hello world\n");
         SystemInfo::print_heap_info();
         SystemInfo::print_stack_info();
+
+        // TimeHelpers::PrintTimePoint(time_service->GetCurrentTime());
 
         k_msleep(SLEEP_TIME_MS);
     }
