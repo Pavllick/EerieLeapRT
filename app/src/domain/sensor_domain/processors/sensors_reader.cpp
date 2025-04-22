@@ -11,12 +11,11 @@ using namespace eerie_leap::domain::sensor_domain::models;
 
 void SensorsReader::ReadSensors(std::vector<Sensor>& sensors) {
     for (auto& sensor : sensors) {
-        auto sensor_reading = std::make_shared<SensorReading>(sensor);
-        // sensor_reading.id = ;
-        // sensor_reading.timestamp = time(nullptr);
+        auto sensor_reading = std::make_shared<SensorReading>(guid_generator_->Generate(), sensor);
+        sensor_reading->timestamp = time_service_->GetCurrentTime();
 
         if (sensor.configuration.type == SensorType::PHYSICAL_ANALOG) {
-            auto reading = adc_.ReadChannel(sensor.configuration.channel.value());
+            auto reading = adc_->ReadChannel(sensor.configuration.channel.value());
             sensor_reading->value = reading;
             sensor_reading->status = ReadingStatus::RAW;
 

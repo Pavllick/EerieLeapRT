@@ -9,8 +9,6 @@ namespace eerie_leap::utilities::time {
 LOG_MODULE_REGISTER(time_service_logger);
 
 void BootElapsedTimeService::Initialize() {
-    initialized = true;
-
     LOG_INF("Time Service initialized");
 }
 

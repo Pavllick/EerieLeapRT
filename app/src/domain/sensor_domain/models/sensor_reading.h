@@ -2,24 +2,28 @@
 
 #include <optional>
 #include <string>
-#include <time.h>
+#include <chrono>
 
 #include "sensor.h"
 #include "reading_metadata.h"
 #include "reading_status.h"
+#include "utilities/guid/guid.hpp"
 
 namespace eerie_leap::domain::sensor_domain::models {
 
-    struct SensorReading {
-        std::optional<std::string> id;
-        const Sensor& sensor;
-        std::optional<double> value;
-        std::optional<time_t> timestamp;
-        ReadingMetadata metadata;
-        ReadingStatus status = ReadingStatus::UNINITIALIZED;
-        std::optional<std::string> error_message;
+using namespace std::chrono;
+using namespace eerie_leap::utilities::guid;
 
-        SensorReading(const Sensor& sensor) : sensor(sensor) {}
-    };
+struct SensorReading {
+    const Guid id;
+    const Sensor& sensor;
+    std::optional<double> value;
+    std::optional<system_clock::time_point> timestamp;
+    ReadingMetadata metadata;
+    ReadingStatus status = ReadingStatus::UNINITIALIZED;
+    std::optional<std::string> error_message;
+
+    SensorReading(const Guid id, const Sensor& sensor) : id(id), sensor(sensor) {}
+};
 
 }

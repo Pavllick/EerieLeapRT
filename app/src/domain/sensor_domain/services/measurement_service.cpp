@@ -3,6 +3,7 @@
 #include <zephyr/logging/log.h>
 
 #include "measurement_service.h"
+#include "utilities/time/time_helpers.hpp"
 #include "domain/adc_domain/hardware/adc.h"
 #include "domain/sensor_domain/models/sensor.h"
 #include "domain/sensor_domain/models/sensor_reading.h"
@@ -12,6 +13,7 @@
 
 namespace eerie_leap::domain::sensor_domain::services {
 
+using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::domain::adc_domain::hardware;
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::utilities::math_parser;
@@ -40,18 +42,18 @@ void MeasurementService::EntryPoint() {
 
     k_mutex_init(&sensors_reading_mutex_);
     
-    Adc adc;
-    adc.UpdateConfiguration(AdcConfig{
+    adc_ = std::make_shared<Adc>();
+    adc_->UpdateConfiguration(AdcConfig{
         .channel_count = 8,
         .resolution = 12,
         .reference_voltage = 3.3
     });
-    adc.Initialize();
+    adc_->Initialize();
 
     sensors_configuration_service_->Initialize();
 
     sensor_readings_frame_ = std::make_shared<SensorReadingsFrame>();
-    sensors_reader_ = std::make_shared<SensorsReader>(adc, sensor_readings_frame_);
+    sensors_reader_ = std::make_shared<SensorsReader>(time_service_, guid_generator_, adc_, sensor_readings_frame_);
     sensor_processor_ = std::make_shared<SensorProcessor>(sensor_readings_frame_);
 
     while (true) {
@@ -73,8 +75,14 @@ void MeasurementService::ProcessSensorsReading() {
     for(const auto& sensor : sensors)
         sensor_processor_->ProcessSensorReading(*sensor_readings_frame_->GetReading(sensor.id));
 
-    // for (const auto& reading : sensor_readings_frame_->GetReadings())
-    //     printf("Sensor ID: %s, Value: %f\n", reading.first.c_str(), reading.second->value.value());
+    for (const auto& reading : sensor_readings_frame_->GetReadings()) {
+        printf("Sensor Reading - ID: %s, Guid: %llu, Value: %.3f, Time: ",
+            reading.first.c_str(),
+            reading.second->id.AsUint64(),
+            reading.second->value.value_or(0.0f));
+        TimeHelpers::PrintTimePoint(*reading.second->timestamp);
+    }
+        // printf("Sensor ID: %s, Value: %f\n", reading.first.c_str(), reading.second->value.value());
         // LOG_INF("Sensor ID: %s, Value: %f", reading.first.c_str(), reading.second->value.value());
 
     k_mutex_unlock(&sensors_reading_mutex_);

@@ -3,6 +3,8 @@
 #include <memory>
 #include <zephyr/kernel.h>
 
+#include "utilities/time/i_time_service.h"
+#include "utilities/guid/guid_generator.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 #include "domain/sensor_domain/processors/sensors_reader.h"
 #include "domain/sensor_domain/processors/sensor_processor.h"
@@ -10,6 +12,8 @@
 
 namespace eerie_leap::domain::sensor_domain::services {
 
+using namespace eerie_leap::utilities::time;
+using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 using namespace eerie_leap::domain::sensor_domain::processors;
 
@@ -31,7 +35,7 @@ using namespace eerie_leap::domain::sensor_domain::processors;
 ///
 class MeasurementService {
 private:
-    const int32_t READING_INTERVAL_MS_ = 100; 
+    const int32_t READING_INTERVAL_MS_ = 1000; 
     static constexpr int kStackSize = 8192;
     static constexpr int kPriority = K_PRIO_PREEMPT(8);
     static void ThreadTrampoline(void* instance, void* p2, void* p3);
@@ -42,6 +46,9 @@ private:
     k_thread thread_data_;
     k_mutex sensors_reading_mutex_;
 
+    std::shared_ptr<ITimeService> time_service_;
+    std::shared_ptr<GuidGenerator> guid_generator_;
+    std::shared_ptr<Adc> adc_;
     std::shared_ptr<SensorsConfigurationService> sensors_configuration_service_;
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame_;
     std::shared_ptr<SensorsReader> sensors_reader_;
@@ -51,8 +58,8 @@ private:
     void ProcessSensorsReading();
 
 public:
-    MeasurementService(std::shared_ptr<SensorsConfigurationService> sensors_configuration_service)
-        : sensors_configuration_service_(std::move(sensors_configuration_service)) { }
+    MeasurementService(std::shared_ptr<ITimeService> time_service, std::shared_ptr<GuidGenerator> guid_generator, std::shared_ptr<SensorsConfigurationService> sensors_configuration_service)
+        : time_service_(std::move(time_service)), guid_generator_(std::move(guid_generator)), sensors_configuration_service_(std::move(sensors_configuration_service)) { }
 
     k_tid_t Start();
 };
