@@ -1,0 +1,200 @@
+#include <zephyr/fs/fs.h>
+#include <zephyr/logging/log.h>
+
+#include "fs_service.h"
+
+namespace eerie_leap::domain::fs_domain::services {
+
+LOG_MODULE_REGISTER(fs_service_logger);
+
+bool FsService::Initialize() {
+    return true;
+}
+
+bool FsService::WriteFile(const char* relative_path, const void* data_p, size_t data_size) {
+    if(!is_mounted_)
+        return false;
+
+    char full_path[256];
+    snprintf(full_path, sizeof(full_path), "%s/%s", mountpoint_->mnt_point, relative_path);
+
+    struct fs_file_t file;
+    fs_file_t_init(&file);
+
+    int rc = fs_open(&file, full_path, FS_O_WRITE | FS_O_CREATE | FS_O_TRUNC);
+    if(rc < 0) {
+        LOG_ERR("fs_open failed: %d", rc);
+        return false;
+    }
+
+    rc = fs_write(&file, data_p, data_size);
+    fs_close(&file);
+
+    if(rc < 0) {
+        LOG_ERR("fs_write failed: %d", rc);
+        return false;
+    }
+
+    return true;
+}
+
+bool FsService::ReadFile(const char* relative_path, void* data_p, size_t data_size, size_t& out_len) {
+    if(!is_mounted_)
+        return false;
+
+    char full_path[256];
+    snprintf(full_path, sizeof(full_path), "%s/%s", mountpoint_->mnt_point, relative_path);
+
+    struct fs_file_t file;
+    fs_file_t_init(&file);
+
+    int rc = fs_open(&file, full_path, FS_O_READ);
+    if(rc < 0) {
+        LOG_ERR("fs_open failed: %d", rc);
+        return false;
+    }
+
+    rc = fs_read(&file, data_p, data_size);
+    fs_close(&file);
+
+    if(rc < 0) {
+        LOG_ERR("fs_read failed: %d", rc);
+        return false;
+    }
+
+    out_len = rc;
+
+    return true;
+}
+
+bool FsService::Exists(const char* relative_path) {
+    if(!is_mounted_)
+        return false;
+
+    char full_path[256];
+    snprintf(full_path, sizeof(full_path), "%s/%s", mountpoint_->mnt_point, relative_path);
+
+    struct fs_dirent entry;
+    int rc = fs_stat(full_path, &entry);
+
+    return rc == 0;
+}
+
+bool FsService::DeleteFile(const char* relative_path) {
+    if(!is_mounted_)
+        return false;
+
+    char full_path[256];
+    snprintf(full_path, sizeof(full_path), "%s/%s", mountpoint_->mnt_point, relative_path);
+
+    int rc = fs_unlink(full_path);
+    if(rc < 0) {
+        LOG_ERR("fs_unlink failed: %d", rc);
+        return false;
+    }
+
+    return true;
+}
+
+std::vector<std::string> FsService::ListFiles(const char* relative_path) const {
+    std::vector<std::string> files;
+
+    if(!is_mounted_)
+        return files;
+
+    char full_path[256];
+    snprintf(full_path, sizeof(full_path), "%s/%s", mountpoint_->mnt_point, relative_path);
+
+    struct fs_dir_t dir;
+    struct fs_dirent entry;
+    fs_dir_t_init(&dir);
+
+    if(fs_opendir(&dir, full_path) < 0) {
+        LOG_ERR("fs_opendir failed on path: %s", full_path);
+        return files;
+    }
+
+    while(fs_readdir(&dir, &entry) == 0 && entry.name[0] != '\0') {
+        files.emplace_back(entry.name);
+    }
+
+    fs_closedir(&dir);
+
+    return files;
+}
+
+size_t FsService::GetTotalSpace() const {
+    if(!is_mounted_)
+        return 0;
+
+    struct fs_statvfs stat;
+    if(fs_statvfs(mountpoint_->mnt_point, &stat) < 0) {
+        LOG_ERR("fs_statvfs failed when querying total space");
+        return 0;
+    }
+
+    return stat.f_blocks * stat.f_bsize;
+}
+
+size_t FsService::GetUsedSpace() const {
+    if(!is_mounted_)
+        return 0;
+
+    struct fs_statvfs stat;
+    if(fs_statvfs(mountpoint_->mnt_point, &stat) < 0) {
+        LOG_ERR("fs_statvfs failed when querying used space");
+        return 0;
+    }
+
+    return (stat.f_blocks - stat.f_bfree) * stat.f_bsize;
+}
+
+
+bool FsService::Format() {
+    if(is_mounted_)
+        Unmount();
+
+    int rc = fs_mkfs(FS_LITTLEFS, (uintptr_t)MKFS_DEV_ID, NULL, 0);
+
+	if (rc < 0) {
+		LOG_ERR("Format failed");
+		return 0;
+	}
+
+    LOG_INF("Successfully formatted File System");
+    Mount();
+
+    return true;
+}
+
+bool FsService::Mount() {
+    if(is_mounted_)
+        return true;
+
+    int rc = fs_mount(mountpoint_);
+    if(rc < 0)
+        LOG_ERR("Failed to mount LittleFS: %d", rc);
+
+    is_mounted_ = (rc == 0);
+    if(is_mounted_)
+        LOG_INF("Mounted LittleFS at %s", mountpoint_->mnt_point);
+    else
+        LOG_ERR("Failed to mount even after formatting");
+
+    return is_mounted_;
+}
+
+void FsService::Unmount() {
+    if(!is_mounted_)
+        return;
+
+    int rc = fs_unmount(mountpoint_);
+    if(rc < 0) {
+        LOG_ERR("Failed to unmount LittleFS: %d", rc);
+    } else {
+        LOG_INF("Unmounted LittleFS from %s", mountpoint_->mnt_point);
+        is_mounted_ = false;
+    }
+}
+
+}

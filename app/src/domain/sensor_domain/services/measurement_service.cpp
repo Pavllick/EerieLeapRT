@@ -67,7 +67,9 @@ void MeasurementService::EntryPoint() {
 void MeasurementService::ProcessSensorsReading() {
     k_mutex_lock(&sensors_reading_mutex_, K_FOREVER);
 
-    sensor_readings_frame_->ClearReadings();
+    // TODO: To determine if clearing the readings is necessary
+    // or updating in place can improve performance.
+    // sensor_readings_frame_->ClearReadings();
     
     auto sensors = sensors_configuration_service_->GetSensors();
     sensors_reader_->ReadSensors(sensors);

@@ -2,12 +2,16 @@
 #include <chrono>
 #include <ctime>
 #include <stdio.h>
+#include <zephyr/arch/cpu.h>
+#include <zephyr/logging/log.h>
 
 #include "utilities/dev_tools/system_info.h"
 #include "utilities/time/i_time_service.h"
 #include "utilities/guid/guid_generator.h"
 #include "utilities/time/time_helpers.hpp"
 #include "utilities/time/boot_elapsed_time_service.h"
+#include "domain/fs_domain/services/i_fs_service.h"
+#include "domain/fs_domain/services/fs_service.h"
 #include "domain/sensor_domain/services/sensors_configuration_service.h"
 #include "domain/sensor_domain/services/measurement_service.h"
 
@@ -17,10 +21,15 @@ using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::domain::sensor_domain::services;
 
+using namespace eerie_leap::domain::fs_domain::services;
+
 #define SLEEP_TIME_MS 10000
 
 int main(void) {
+    std::shared_ptr<IFsService> fs_service = std::make_shared<FsService>();
+
     auto sensors_configuration_service = std::make_shared<SensorsConfigurationService>();
+
     std::shared_ptr<ITimeService> time_service = std::make_shared<BootElapsedTimeService>();
     time_service->Initialize();
 

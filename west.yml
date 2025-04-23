@@ -21,3 +21,4 @@ manifest:
           - mcuboot         # bootloader
           - esp32           # required by the esp32 board
           - hal_espressif   # required by the esp32 board
+          - littlefs        # littleFS lightweight filesystem

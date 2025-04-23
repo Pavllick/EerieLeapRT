@@ -31,8 +31,6 @@ using namespace eerie_leap::domain::sensor_domain::processors;
 /// service->Start();
 /// ```
 ///
-/// Instantiating this class on the heap or regular stack is unsafe and will cause a crash.
-///
 class MeasurementService {
 private:
     const int32_t READING_INTERVAL_MS_ = 1000; 
