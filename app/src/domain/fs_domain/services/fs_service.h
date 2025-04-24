@@ -25,11 +25,12 @@ public:
     FsService() : mountpoint_(&FS_FSTAB_ENTRY(PARTITION_NODE)), is_mounted_(true) {}
 
     bool Initialize() override;
-    bool WriteFile(const char* relative_path, const void* data_p, size_t data_size) override;
-    bool ReadFile(const char* relative_path, void* data_p, size_t data_size, size_t& out_len) override;
-    bool Exists(const char* relative_path) override;
-    bool DeleteFile(const char* relative_path) override;
-    std::vector<std::string> ListFiles(const char* relative_path) const override;
+    bool WriteFile(const std::string& relative_path, const void* data_p, size_t data_size) override;
+    bool ReadFile(const std::string& relative_path, void* data_p, size_t data_size, size_t& out_len) override;
+    bool CreateDirectory(const std::string& relative_path) override;
+    bool Exists(const std::string& relative_path) override;
+    bool DeleteFile(const std::string& relative_path) override;
+    std::vector<std::string> ListFiles(const std::string& relative_path) const override;
     size_t GetTotalSpace() const override;
     size_t GetUsedSpace() const override;
     bool Format() override;

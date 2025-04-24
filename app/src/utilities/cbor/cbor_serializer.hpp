@@ -2,7 +2,9 @@
 
 #include <optional>
 #include <array>
+#include <span>
 #include <zephyr/kernel.h>
+#include <zephyr/logging/log.h>
 #include <zcbor_common.h>
 #include <zcbor_encode.h>
 #include <zcbor_decode.h>

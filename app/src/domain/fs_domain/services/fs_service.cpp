@@ -1,3 +1,4 @@
+#include <sstream>
 #include <zephyr/fs/fs.h>
 #include <zephyr/logging/log.h>
 
@@ -11,12 +12,14 @@ bool FsService::Initialize() {
     return true;
 }
 
-bool FsService::WriteFile(const char* relative_path, const void* data_p, size_t data_size) {
-    if(!is_mounted_)
+bool FsService::WriteFile(const std::string& relative_path, const void* data_p, size_t data_size) {
+    if(!is_mounted_) {
+        LOG_ERR("Filesystem not mounted!");
         return false;
+    }
 
     char full_path[256];
-    snprintf(full_path, sizeof(full_path), "%s/%s", mountpoint_->mnt_point, relative_path);
+    snprintf(full_path, sizeof(full_path), "%s/%s", mountpoint_->mnt_point, relative_path.c_str());
 
     struct fs_file_t file;
     fs_file_t_init(&file);
@@ -38,12 +41,14 @@ bool FsService::WriteFile(const char* relative_path, const void* data_p, size_t 
     return true;
 }
 
-bool FsService::ReadFile(const char* relative_path, void* data_p, size_t data_size, size_t& out_len) {
-    if(!is_mounted_)
+bool FsService::ReadFile(const std::string& relative_path, void* data_p, size_t data_size, size_t& out_len) {
+    if(!is_mounted_) {
+        LOG_ERR("Filesystem not mounted!");
         return false;
+    }
 
     char full_path[256];
-    snprintf(full_path, sizeof(full_path), "%s/%s", mountpoint_->mnt_point, relative_path);
+    snprintf(full_path, sizeof(full_path), "%s/%s", mountpoint_->mnt_point, relative_path.c_str());
 
     struct fs_file_t file;
     fs_file_t_init(&file);
@@ -67,12 +72,44 @@ bool FsService::ReadFile(const char* relative_path, void* data_p, size_t data_si
     return true;
 }
 
-bool FsService::Exists(const char* relative_path) {
-    if(!is_mounted_)
+bool FsService::CreateDirectory(const std::string& relative_path) {
+    if(!is_mounted_) {
+        LOG_ERR("Filesystem not mounted!");
         return false;
+    }
+
+    std::istringstream stream(relative_path);
+    std::string segment;
+    std::string current;
 
     char full_path[256];
-    snprintf(full_path, sizeof(full_path), "%s/%s", mountpoint_->mnt_point, relative_path);
+    snprintf(full_path, sizeof(full_path), "%s", mountpoint_->mnt_point);
+
+    while(std::getline(stream, segment, '/')) {
+        if(segment.empty()) continue;
+
+        // Append segment to path
+        strncat(full_path, "/", sizeof(full_path) - strlen(full_path) - 1);
+        strncat(full_path, segment.c_str(), sizeof(full_path) - strlen(full_path) - 1);
+
+        int rc = fs_mkdir(full_path);
+        if(rc < 0 && rc != -EEXIST) {
+            LOG_ERR("Failed to create dir '%s': %d", full_path, rc);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool FsService::Exists(const std::string& relative_path) {
+    if(!is_mounted_) {
+        LOG_ERR("Filesystem not mounted!");
+        return false;
+    }
+
+    char full_path[256];
+    snprintf(full_path, sizeof(full_path), "%s/%s", mountpoint_->mnt_point, relative_path.c_str());
 
     struct fs_dirent entry;
     int rc = fs_stat(full_path, &entry);
@@ -80,12 +117,12 @@ bool FsService::Exists(const char* relative_path) {
     return rc == 0;
 }
 
-bool FsService::DeleteFile(const char* relative_path) {
+bool FsService::DeleteFile(const std::string& relative_path) {
     if(!is_mounted_)
         return false;
 
     char full_path[256];
-    snprintf(full_path, sizeof(full_path), "%s/%s", mountpoint_->mnt_point, relative_path);
+    snprintf(full_path, sizeof(full_path), "%s/%s", mountpoint_->mnt_point, relative_path.c_str());
 
     int rc = fs_unlink(full_path);
     if(rc < 0) {
@@ -96,14 +133,16 @@ bool FsService::DeleteFile(const char* relative_path) {
     return true;
 }
 
-std::vector<std::string> FsService::ListFiles(const char* relative_path) const {
+std::vector<std::string> FsService::ListFiles(const std::string& relative_path) const {
     std::vector<std::string> files;
 
-    if(!is_mounted_)
+    if(!is_mounted_) {
+        LOG_ERR("Filesystem not mounted!");
         return files;
+    }
 
     char full_path[256];
-    snprintf(full_path, sizeof(full_path), "%s/%s", mountpoint_->mnt_point, relative_path);
+    snprintf(full_path, sizeof(full_path), "%s/%s", mountpoint_->mnt_point, relative_path.c_str());
 
     struct fs_dir_t dir;
     struct fs_dirent entry;
@@ -124,8 +163,10 @@ std::vector<std::string> FsService::ListFiles(const char* relative_path) const {
 }
 
 size_t FsService::GetTotalSpace() const {
-    if(!is_mounted_)
+    if(!is_mounted_) {
+        LOG_ERR("Filesystem not mounted!");
         return 0;
+    }
 
     struct fs_statvfs stat;
     if(fs_statvfs(mountpoint_->mnt_point, &stat) < 0) {
