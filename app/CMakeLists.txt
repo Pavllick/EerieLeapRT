@@ -18,7 +18,7 @@ add_subdirectory(
 )
 
 # Collect all C++ source files recursively
-file(GLOB_RECURSE APP_SOURCES src/*.cpp)
+file(GLOB_RECURSE APP_SOURCES src/*.c src/*.cpp)
 
 # Add all sources to the target
 target_sources(app PRIVATE ${APP_SOURCES})
