@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 #include <optional>
 #include <string>
 
@@ -16,7 +17,7 @@ struct SensorConfiguration {
     SensorType type;
     std::optional<uint32_t> channel;
     std::optional<uint32_t> sampling_rate_ms;
-    std::optional<CalibrationData> calibration;
+    std::optional<std::vector<CalibrationData>> calibration_table;
     std::shared_ptr<ExpressionEvaluator> expression_evaluator = nullptr;
 };
 

@@ -4,10 +4,13 @@ SensorMetadataConfig = [
   ? description: tstr
 ]
 
+SensorCalibrationDataMap = { 2*100(float => float) }
+
 SensorConfigurationConfig = [
   type: uint,
   ? channel: uint,
   ? sampling_rate_ms: uint,
+  ? calibration_table: SensorCalibrationDataMap,
   ? expression: tstr
 ]
 

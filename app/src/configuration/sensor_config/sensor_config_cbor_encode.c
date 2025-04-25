@@ -26,6 +26,8 @@
 } while(0)
 
 static bool encode_SensorMetadataConfig(zcbor_state_t *state, const struct SensorMetadataConfig *input);
+static bool encode_repeated_SensorCalibrationDataMap_floatfloat(zcbor_state_t *state, const struct SensorCalibrationDataMap_floatfloat *input);
+static bool encode_SensorCalibrationDataMap(zcbor_state_t *state, const struct SensorCalibrationDataMap *input);
 static bool encode_SensorConfigurationConfig(zcbor_state_t *state, const struct SensorConfigurationConfig *input);
 static bool encode_SensorConfig(zcbor_state_t *state, const struct SensorConfig *input);
 static bool encode_SensorsConfig(zcbor_state_t *state, const struct SensorsConfig *input);
@@ -44,15 +46,39 @@ static bool encode_SensorMetadataConfig(
 	return res;
 }
 
+static bool encode_repeated_SensorCalibrationDataMap_floatfloat(
+		zcbor_state_t *state, const struct SensorCalibrationDataMap_floatfloat *input)
+{
+	zcbor_log("%s\r\n", __func__);
+
+	bool res = ((((zcbor_float64_encode(state, (&(*input).floatfloat_key))))
+	&& (zcbor_float64_encode(state, (&(*input).floatfloat)))));
+
+	log_result(state, res, __func__);
+	return res;
+}
+
+static bool encode_SensorCalibrationDataMap(
+		zcbor_state_t *state, const struct SensorCalibrationDataMap *input)
+{
+	zcbor_log("%s\r\n", __func__);
+
+	bool res = (((zcbor_map_start_encode(state, 100) && ((zcbor_multi_encode_minmax(2, 100, &(*input).floatfloat_count, (zcbor_encoder_t *)encode_repeated_SensorCalibrationDataMap_floatfloat, state, (*&(*input).floatfloat), sizeof(struct SensorCalibrationDataMap_floatfloat))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_map_end_encode(state, 100))));
+
+	log_result(state, res, __func__);
+	return res;
+}
+
 static bool encode_SensorConfigurationConfig(
 		zcbor_state_t *state, const struct SensorConfigurationConfig *input)
 {
 	zcbor_log("%s\r\n", __func__);
 
-	bool res = (((zcbor_list_start_encode(state, 4) && ((((zcbor_uint32_encode(state, (&(*input).type))))
+	bool res = (((zcbor_list_start_encode(state, 5) && ((((zcbor_uint32_encode(state, (&(*input).type))))
 	&& (!(*input).channel_present || zcbor_uint32_encode(state, (&(*input).channel)))
 	&& (!(*input).sampling_rate_ms_present || zcbor_uint32_encode(state, (&(*input).sampling_rate_ms)))
-	&& (!(*input).expression_present || zcbor_tstr_encode(state, (&(*input).expression)))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 4))));
+	&& (!(*input).calibration_table_present || encode_SensorCalibrationDataMap(state, (&(*input).calibration_table)))
+	&& (!(*input).expression_present || zcbor_tstr_encode(state, (&(*input).expression)))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 5))));
 
 	log_result(state, res, __func__);
 	return res;
@@ -89,7 +115,7 @@ int cbor_encode_SensorsConfig(
 		const struct SensorsConfig *input,
 		size_t *payload_len_out)
 {
-	zcbor_state_t states[6];
+	zcbor_state_t states[7];
 
 	return zcbor_entry_function(payload, payload_len, (void *)input, payload_len_out, states,
 		(zcbor_decoder_t *)encode_SensorsConfig, sizeof(states) / sizeof(zcbor_state_t), 1);

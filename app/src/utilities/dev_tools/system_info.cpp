@@ -85,7 +85,7 @@ void SystemInfo::print_heap_info() {
     int heaps_count = sys_heap_array_get(&heap_p);
     LOG_INF("Heap analyze, there are %zu heaps allocated at addrs:", heaps_count);
 
-    for (int i = 0; i < heaps_count; i++)
+    for (int i = 0; i < heaps_count; ++i)
         print_heap_stats(heap_p[i]);
 }
 

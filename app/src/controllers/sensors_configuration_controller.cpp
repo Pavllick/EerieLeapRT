@@ -12,11 +12,9 @@ void SensorsConfigurationController::Initialize() {
 
     // Test Sensors
 
-    CalibrationData calibration_data_1 {
-        .min_voltage = 0.0,
-        .max_voltage = 3.3,
-        .min_value = 0.0,
-        .max_value = 100.0
+    std::vector<CalibrationData> calibration_data_1 {
+        {0.0, 0.0},
+        {3.3, 100.0}
     };
 
     ExpressionEvaluator expression_evaluator_1(math_parser_service_, "x * 2 + 1");
@@ -31,16 +29,14 @@ void SensorsConfigurationController::Initialize() {
         .configuration = {
             .type = SensorType::PHYSICAL_ANALOG,
             .channel = 0,
-            .calibration = calibration_data_1,
+            .calibration_table = calibration_data_1,
             .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_1)
         }
     };
 
-    CalibrationData calibration_data_2 {
-        .min_voltage = 0.0,
-        .max_voltage = 3.3,
-        .min_value = 0.0,
-        .max_value = 200.0
+    std::vector<CalibrationData> calibration_data_2 {
+        {0.0, 0.0},
+        {3.3, 200.0}
     };
 
     ExpressionEvaluator expression_evaluator_2(math_parser_service_, "x * 4 + {sensor_1} + 1.6");
@@ -55,7 +51,7 @@ void SensorsConfigurationController::Initialize() {
         .configuration = {
             .type = SensorType::PHYSICAL_ANALOG,
             .channel = 1,
-            .calibration = calibration_data_2,
+            .calibration_table = calibration_data_2,
             .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_2)
         }
     };
@@ -90,6 +86,21 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
             sensor_config.configuration.sampling_rate_ms_present = false;
         }
 
+        if(sensor->configuration.calibration_table.has_value()) {
+            sensor_config.configuration.calibration_table_present = true;
+
+            const auto& calibration_table = sensor->configuration.calibration_table.value();
+            sensor_config.configuration.calibration_table.floatfloat_count = calibration_table.size();
+
+            for(size_t j = 0; j < calibration_table.size(); ++j) {
+                const auto& calibration_data = calibration_table[j];
+                sensor_config.configuration.calibration_table.floatfloat[j].floatfloat_key = calibration_data.voltage;
+                sensor_config.configuration.calibration_table.floatfloat[j].floatfloat = calibration_data.value;
+            }
+        } else {
+            sensor_config.configuration.calibration_table_present = false;
+        }
+
         if(sensor->configuration.expression_evaluator != nullptr) {
             sensor_config.configuration.expression_present = true;
             sensor_config.configuration.expression = CborHelpers::ToZcborString(sensor->configuration.expression_evaluator->GetRawExpression());
@@ -99,7 +110,13 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
 
         sensor_config.metadata.unit = CborHelpers::ToZcborString(sensor->metadata.unit);
         sensor_config.metadata.name = CborHelpers::ToZcborString(sensor->metadata.name);
-        sensor_config.metadata.description = CborHelpers::ToZcborString(sensor->metadata.description);
+
+        if(sensor_config.metadata.description_present) {
+            sensor_config.metadata.description_present = true;
+            sensor_config.metadata.description = CborHelpers::ToZcborString(sensor->metadata.description);
+        } else {
+            sensor_config.metadata.description_present = false;
+        }
 
         sensors_config.SensorConfig_m[i] = sensor_config;
         sensors_config.SensorConfig_m_count++;
@@ -130,20 +147,45 @@ const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfiguration
 
         sensor->id = std::string(reinterpret_cast<const char*>(sensor_config.id.value), sensor_config.id.len);
         sensor->configuration.type = static_cast<SensorType>(sensor_config.configuration.type);
-        sensor->configuration.channel = sensor_config.configuration.channel;
-        sensor->configuration.sampling_rate_ms = sensor_config.configuration.sampling_rate_ms;
-        sensor->configuration.expression_evaluator = std::make_shared<ExpressionEvaluator>(
-            math_parser_service_,
-            CborHelpers::ToStdString(sensor_config.configuration.expression));
+
+        if(sensor_config.configuration.channel_present)
+            sensor->configuration.channel = sensor_config.configuration.channel;
+        else
+            sensor->configuration.channel = std::nullopt;
+        
+        if(sensor_config.configuration.sampling_rate_ms_present)
+            sensor->configuration.sampling_rate_ms = sensor_config.configuration.sampling_rate_ms;
+        else
+            sensor->configuration.sampling_rate_ms = std::nullopt;
+
+        if(sensor_config.configuration.calibration_table_present) {
+            std::vector<CalibrationData> calibration_table;
+            for(size_t j = 0; j < sensor_config.configuration.calibration_table.floatfloat_count; ++j) {
+                const auto& calibration_data = sensor_config.configuration.calibration_table.floatfloat[j];
+
+                calibration_table.push_back({
+                    .voltage = calibration_data.floatfloat_key,
+                    .value = calibration_data.floatfloat});
+            }
+
+            sensor->configuration.calibration_table = calibration_table;
+        } else {
+            sensor->configuration.calibration_table = std::nullopt;
+        }
+
+        if(sensor_config.configuration.expression_present)
+            sensor->configuration.expression_evaluator = std::make_shared<ExpressionEvaluator>(
+                math_parser_service_,
+                CborHelpers::ToStdString(sensor_config.configuration.expression));
+        else
+            sensor->configuration.expression_evaluator = nullptr;
         
         sensor->metadata.unit = CborHelpers::ToStdString(sensor_config.metadata.unit);
         sensor->metadata.name = CborHelpers::ToStdString(sensor_config.metadata.name);
-        sensor->metadata.description = CborHelpers::ToStdString(sensor_config.metadata.description);
-
-        // sensor.configuration.calibration.min_voltage = sensor_config.calibration.min_voltage;
-        // sensor.configuration.calibration.max_voltage = sensor_config.calibration.max_voltage;
-        // sensor.configuration.calibration.min_value = sensor_config.calibration.min_value;
-        // sensor.configuration.calibration.max_value = sensor_config.calibration.max_value;
+        
+        sensor->metadata.description = sensor_config.metadata.description_present
+            ? CborHelpers::ToStdString(sensor_config.metadata.description)
+            : "";
 
         resolver.AddSensor(sensor);
     }

@@ -32,12 +32,24 @@ struct SensorMetadataConfig {
 	bool description_present;
 };
 
+struct SensorCalibrationDataMap_floatfloat {
+	double floatfloat_key;
+	double floatfloat;
+};
+
+struct SensorCalibrationDataMap {
+	struct SensorCalibrationDataMap_floatfloat floatfloat[100];
+	size_t floatfloat_count;
+};
+
 struct SensorConfigurationConfig {
 	uint32_t type;
 	uint32_t channel;
 	bool channel_present;
 	uint32_t sampling_rate_ms;
 	bool sampling_rate_ms_present;
+	struct SensorCalibrationDataMap calibration_table;
+	bool calibration_table_present;
 	struct zcbor_string expression;
 	bool expression_present;
 };

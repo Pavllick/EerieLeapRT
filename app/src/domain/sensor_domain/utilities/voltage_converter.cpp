@@ -10,14 +10,14 @@ double VoltageConverter::ConvertVoltageToValue(const SensorConfiguration& config
     if(configuration.type != SensorType::PHYSICAL_ANALOG)
         throw std::invalid_argument("Invalid sensor type for voltage conversion");
 
-    if(!configuration.calibration.has_value())
+    if(!configuration.calibration_table.has_value())
         throw std::invalid_argument("Calibration data is missing!");
 
-    auto calibration = configuration.calibration.value();
-    double voltage_range = calibration.max_voltage - calibration.min_voltage;
-    double value_range = calibration.max_value - calibration.min_value;
+    auto calibration_table = configuration.calibration_table.value();
+    double voltage_range = calibration_table[1].voltage - calibration_table[0].voltage;
+    double value_range = calibration_table[1].value - calibration_table[0].value;
 
-    return ((voltage - calibration.min_voltage) / voltage_range * value_range) + calibration.min_value;
+    return ((voltage - calibration_table[0].voltage) / voltage_range * value_range) + calibration_table[0].value;
 }
 
 } // namespace eerie_leap::domain::sensor_domain::utilities
