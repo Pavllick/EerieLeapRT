@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
@@ -13,7 +14,7 @@ using namespace eerie_leap::domain::sensor_domain::models;
 class SensorsOrderResolver {
 private:
     std::unordered_map<std::string, std::unordered_set<std::string>> dependencies_;
-    std::unordered_map<std::string, Sensor> sensors_;
+    std::unordered_map<std::string, std::shared_ptr<Sensor>> sensors_;
 
     bool HasCyclicDependency(
         const std::string& sensorId,
@@ -23,11 +24,11 @@ private:
     void ResolveDependencies(
         const std::string& sensorId,
         std::unordered_set<std::string>& visited,
-        std::vector<Sensor>& ordered_sensors);
+        std::vector<std::shared_ptr<Sensor>>& ordered_sensors);
     
 public:
-    void AddSensor(const Sensor& sensor);
-    std::vector<Sensor> GetProcessingOrder();
+    void AddSensor(std::shared_ptr<Sensor> sensor);
+    std::vector<std::shared_ptr<Sensor>> GetProcessingOrder();
 };
 
 } // namespace eerie_leap::domain::sensor_domain::utilities

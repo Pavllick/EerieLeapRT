@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <optional>
 #include <string>
 #include <chrono>
@@ -16,14 +17,14 @@ using namespace eerie_leap::utilities::guid;
 
 struct SensorReading {
     const Guid id;
-    const Sensor& sensor;
+    const std::shared_ptr<Sensor> sensor;
     std::optional<double> value;
     std::optional<system_clock::time_point> timestamp;
     ReadingMetadata metadata;
     ReadingStatus status = ReadingStatus::UNINITIALIZED;
     std::optional<std::string> error_message;
 
-    SensorReading(const Guid id, const Sensor& sensor) : id(id), sensor(sensor) {}
+    SensorReading(const Guid id, const std::shared_ptr<Sensor> sensor) : id(id), sensor(std::move(sensor)) {}
 };
 
 }

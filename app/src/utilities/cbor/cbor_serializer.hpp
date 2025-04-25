@@ -1,17 +1,19 @@
 #pragma once
 
+#include <memory>
 #include <optional>
 #include <array>
 #include <span>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
+#include <zephyr/logging/log_instance.h>
 #include <zcbor_common.h>
 #include <zcbor_encode.h>
 #include <zcbor_decode.h>
 
 namespace eerie_leap::utilities::cbor {
 
-LOG_MODULE_REGISTER(cbor_serializer_logger);
+// TODO: Figure out logging without LOG_MODULE_REGISTER and LOG_INSTANCE_PTR_DECLARE
 
 template <typename T, size_t MaxSize = 256>
 class CborSerializer {
@@ -21,14 +23,15 @@ public:
     using EncodeFn = int (*)(uint8_t*, size_t, const T*, size_t*);
     using DecodeFn = int (*)(const uint8_t*, size_t, T*, size_t*);
 
-    CborSerializer(EncodeFn encoder, DecodeFn decoder) : encodeFn_(encoder), decodeFn_(decoder) {}
+    CborSerializer(EncodeFn encoder, DecodeFn decoder)
+        : encodeFn_(encoder), decodeFn_(decoder) {}
 
     std::optional<std::span<const uint8_t>> Serialize(const T& obj, size_t *payload_len_out = nullptr) {
         static Buffer buffer{};
 
         size_t obj_size = 0;
         if(encodeFn_(buffer.data(), buffer.size(), &obj, &obj_size)) {
-            LOG_ERR("Failed to encode object!");
+            // LOG_ERR("Failed to encode object!");
             return std::nullopt;
         }
 
@@ -41,7 +44,7 @@ public:
     std::optional<T> Deserialize(std::span<const uint8_t> input) {
         T obj;
         if(decodeFn_(input.data(), input.size(), &obj, nullptr)) {
-            LOG_ERR("Failed to decode object!");
+            // LOG_ERR("Failed to decode object!");
             return std::nullopt;
         }
 

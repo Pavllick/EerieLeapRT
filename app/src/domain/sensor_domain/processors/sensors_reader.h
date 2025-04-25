@@ -28,7 +28,7 @@ public:
     SensorsReader(std::shared_ptr<ITimeService> time_service, std::shared_ptr<GuidGenerator> guid_generator, std::shared_ptr<Adc> adc, std::shared_ptr<SensorReadingsFrame> sensor_readings_frame)
         : time_service_(std::move(time_service)), guid_generator_(std::move(guid_generator)), adc_(std::move(adc)), sensor_readings_frame_(std::move(sensor_readings_frame)) {}
 
-    void ReadSensors(std::vector<Sensor>& sensors);
+    void ReadSensors(std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> sensors);
 };
 
 } // namespace eerie_leap::domain::sensor_domain::processors

@@ -50,7 +50,7 @@ void MeasurementService::EntryPoint() {
     });
     adc_->Initialize();
 
-    sensors_configuration_service_->Initialize();
+    sensors_configuration_controller_->Initialize();
 
     sensor_readings_frame_ = std::make_shared<SensorReadingsFrame>();
     sensors_reader_ = std::make_shared<SensorsReader>(time_service_, guid_generator_, adc_, sensor_readings_frame_);
@@ -71,11 +71,11 @@ void MeasurementService::ProcessSensorsReading() {
     // or updating in place can improve performance.
     // sensor_readings_frame_->ClearReadings();
     
-    auto sensors = sensors_configuration_service_->GetSensors();
+    auto sensors = sensors_configuration_controller_->Get();
     sensors_reader_->ReadSensors(sensors);
 
-    for(const auto& sensor : sensors)
-        sensor_processor_->ProcessSensorReading(*sensor_readings_frame_->GetReading(sensor.id));
+    for(const auto& sensor : *sensors)
+        sensor_processor_->ProcessSensorReading(*sensor_readings_frame_->GetReading(sensor->id));
 
     for (const auto& reading : sensor_readings_frame_->GetReadings()) {
         printf("Sensor Reading - ID: %s, Guid: %llu, Value: %.3f, Time: ",

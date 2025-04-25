@@ -7,20 +7,17 @@
 #include <zephyr/logging/log.h>
 
 #include "configuration/cbor_traits/system_config_trait.h"
+#include <configuration/cbor_traits/sensors_config_trait.h>
 #include "domain/fs_domain/services/i_fs_service.h"
 #include "utilities/cbor/cbor_serializer.hpp"
 
-#include <configuration/system_config/system_config.h>
-#include "configuration/system_config/system_config_cbor_encode.h"
-#include "configuration/system_config/system_config_cbor_decode.h"
-
 namespace eerie_leap::configuration::services {
+
+// TODO: Figure out logging without LOG_MODULE_REGISTER and LOG_INSTANCE_PTR_DECLARE
 
 using namespace eerie_leap::configuration::traits;
 using namespace eerie_leap::domain::fs_domain::services;
 using namespace eerie_leap::utilities::cbor;
-
-LOG_MODULE_REGISTER(configuration_service_logger);
 
 template <typename T>
 class ConfigurationService {
@@ -48,7 +45,7 @@ public:
         auto config_bytes = cbor_serializer_->Serialize(configuration);
 
         if (!config_bytes) {
-            LOG_ERR("Failed to serialize configuration!");
+            // LOG_ERR("Failed to serialize configuration!");
             return false;
         }
 
@@ -57,7 +54,7 @@ public:
 
     std::optional<T> Load() {
         if (!fs_service_->Exists(configuration_file_path_)) {
-            LOG_ERR("Configuration file does not exist!");
+            // LOG_ERR("Configuration file does not exist!");
             return std::nullopt;
         }
 
@@ -65,7 +62,7 @@ public:
         size_t out_len = 0;
 
         if (!fs_service_->ReadFile(configuration_file_path_, buffer.data(), buffer.size(), out_len)) {
-            LOG_ERR("Failed to read configuration file!");
+            // LOG_ERR("Failed to read configuration file!");
             return std::nullopt;
         }
 
@@ -73,7 +70,7 @@ public:
         auto configuration = cbor_serializer_->Deserialize(config_bytes);
 
         if (!configuration.has_value()) {
-            LOG_ERR("Failed to deserialize configuration!");
+            // LOG_ERR("Failed to deserialize configuration!");
             return std::nullopt;
         }
 

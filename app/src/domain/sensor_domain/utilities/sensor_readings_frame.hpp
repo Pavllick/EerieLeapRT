@@ -19,7 +19,7 @@ public:
     SensorReadingsFrame() = default;
 
     void AddOrUpdateReading(std::shared_ptr<SensorReading> sensor_reading) {
-        readings_[sensor_reading->sensor.id] = std::move(sensor_reading);
+        readings_[sensor_reading->sensor->id] = std::move(sensor_reading);
     }
 
     std::shared_ptr<SensorReading> GetReading(const std::string& sensorId) const {

@@ -8,14 +8,17 @@ namespace eerie_leap::domain::sensor_domain::utilities {
 
 using namespace eerie_leap::domain::sensor_domain::models;
 
-void SensorsOrderResolver::AddSensor(const Sensor& sensor) {
-    sensors_[sensor.id] = sensor;
+void SensorsOrderResolver::AddSensor(std::shared_ptr<Sensor> sensor) {
+    std::string sensorId = sensor->id;
+    auto expression_evaluator = sensor->configuration.expression_evaluator;
 
-    if(sensor.configuration.expression_evaluator != nullptr) {
-        auto sensorIds = sensor.configuration.expression_evaluator->ExtractVariables();
-        dependencies_[sensor.id] = std::unordered_set<std::string>(sensorIds.begin(), sensorIds.end());
+    sensors_[sensorId] = std::move(sensor);
+
+    if(expression_evaluator != nullptr) {
+        auto sensorIds = expression_evaluator->ExtractVariables();
+        dependencies_[sensorId] = std::unordered_set<std::string>(sensorIds.begin(), sensorIds.end());
     } else {
-        dependencies_[sensor.id] = {};
+        dependencies_[sensorId] = {};
     }
 }
 
@@ -48,7 +51,7 @@ bool SensorsOrderResolver::HasCyclicDependency(
 void SensorsOrderResolver::ResolveDependencies(
     const std::string& sensorId,
     std::unordered_set<std::string>& visited,
-    std::vector<Sensor>& ordered_sensors
+    std::vector<std::shared_ptr<Sensor>>& ordered_sensors
 ) {
     if(visited.contains(sensorId))
         return;
@@ -62,7 +65,7 @@ void SensorsOrderResolver::ResolveDependencies(
     ordered_sensors.push_back(sensors_.at(sensorId));
 }
 
-std::vector<Sensor> SensorsOrderResolver::GetProcessingOrder() {
+std::vector<std::shared_ptr<Sensor>> SensorsOrderResolver::GetProcessingOrder() {
     std::unordered_set<std::string> visited;
     std::unordered_set<std::string> temp;
 
@@ -73,7 +76,7 @@ std::vector<Sensor> SensorsOrderResolver::GetProcessingOrder() {
     }
 
     visited.clear();
-    std::vector<Sensor> ordered_sensors;
+    std::vector<std::shared_ptr<Sensor>> ordered_sensors;
 
     for(const auto& [sensorId, _] : sensors_) {
         ResolveDependencies(sensorId, visited, ordered_sensors);

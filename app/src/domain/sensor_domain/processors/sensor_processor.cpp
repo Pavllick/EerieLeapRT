@@ -18,15 +18,15 @@ void SensorProcessor::ProcessSensorReading(SensorReading& reading) {
     try {
         double voltage = reading.value.value();
         double raw_value = VoltageConverter::ConvertVoltageToValue(
-            reading.sensor.configuration, voltage);
+            reading.sensor->configuration, voltage);
         double value = raw_value;
 
-        if(reading.sensor.configuration.expression_evaluator != nullptr)
-            value = reading.sensor.configuration.expression_evaluator->Evaluate(
+        if(reading.sensor->configuration.expression_evaluator != nullptr)
+            value = reading.sensor->configuration.expression_evaluator->Evaluate(
                 value,
                 sensor_readings_frame_->GetReadingsValues());
 
-        if(reading.sensor.configuration.type == SensorType::PHYSICAL_ANALOG) {
+        if(reading.sensor->configuration.type == SensorType::PHYSICAL_ANALOG) {
             reading.metadata.AddTag(ReadingMetadataTag::VOLTAGE, std::to_string(voltage));
             reading.metadata.AddTag(ReadingMetadataTag::RAW_VALUE, std::to_string(raw_value));
         }

@@ -1,0 +1,22 @@
+SensorMetadataConfig = [
+  name: tstr,
+  unit: tstr,
+  ? description: tstr
+]
+
+SensorConfigurationConfig = [
+  type: uint,
+  ? channel: uint,
+  ? sampling_rate_ms: uint,
+  ? expression: tstr
+]
+
+SensorConfig = [
+  id: tstr,
+  metadata: SensorMetadataConfig,
+  configuration: SensorConfigurationConfig
+]
+
+SensorsConfig = [
+  sensors: [*SensorConfig]
+]

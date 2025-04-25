@@ -5,17 +5,19 @@
 
 #include "utilities/time/i_time_service.h"
 #include "utilities/guid/guid_generator.h"
+#include "controllers/sensors_configuration_controller.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 #include "domain/sensor_domain/processors/sensors_reader.h"
 #include "domain/sensor_domain/processors/sensor_processor.h"
-#include "sensors_configuration_service.h"
 
 namespace eerie_leap::domain::sensor_domain::services {
 
 using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::utilities::guid;
+using namespace eerie_leap::controllers;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 using namespace eerie_leap::domain::sensor_domain::processors;
+
 
 /// Service responsible for reading and processing sensor data in a dedicated thread.
 ///
@@ -44,10 +46,12 @@ private:
     k_thread thread_data_;
     k_mutex sensors_reading_mutex_;
 
+    // std::shared_ptr<SensorsConfigurationController> sensors_config_controller_;
     std::shared_ptr<ITimeService> time_service_;
     std::shared_ptr<GuidGenerator> guid_generator_;
     std::shared_ptr<Adc> adc_;
-    std::shared_ptr<SensorsConfigurationService> sensors_configuration_service_;
+
+    std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller_;
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame_;
     std::shared_ptr<SensorsReader> sensors_reader_;
     std::shared_ptr<SensorProcessor> sensor_processor_;
@@ -56,8 +60,8 @@ private:
     void ProcessSensorsReading();
 
 public:
-    MeasurementService(std::shared_ptr<ITimeService> time_service, std::shared_ptr<GuidGenerator> guid_generator, std::shared_ptr<SensorsConfigurationService> sensors_configuration_service)
-        : time_service_(std::move(time_service)), guid_generator_(std::move(guid_generator)), sensors_configuration_service_(std::move(sensors_configuration_service)) { }
+    MeasurementService(std::shared_ptr<ITimeService> time_service, std::shared_ptr<GuidGenerator> guid_generator, std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller)
+        : time_service_(std::move(time_service)), guid_generator_(std::move(guid_generator)), sensors_configuration_controller_(std::move(sensors_configuration_controller)) { }
 
     k_tid_t Start();
 };

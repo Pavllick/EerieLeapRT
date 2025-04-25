@@ -14,7 +14,8 @@ using namespace eerie_leap::utilities::math_parser;
 
 struct SensorConfiguration {
     SensorType type;
-    std::optional<int> channel;
+    std::optional<uint32_t> channel;
+    std::optional<uint32_t> sampling_rate_ms;
     std::optional<CalibrationData> calibration;
     std::shared_ptr<ExpressionEvaluator> expression_evaluator = nullptr;
 };
