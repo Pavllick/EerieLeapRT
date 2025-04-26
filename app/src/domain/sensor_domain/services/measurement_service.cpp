@@ -75,7 +75,7 @@ void MeasurementService::ProcessSensorsReading() {
     sensors_reader_->ReadSensors(sensors);
 
     for(const auto& sensor : *sensors)
-        sensor_processor_->ProcessSensorReading(*sensor_readings_frame_->GetReading(sensor->id));
+        sensor_processor_->ProcessSensorReading(sensor_readings_frame_->GetReading(sensor->id));
 
     for (const auto& reading : sensor_readings_frame_->GetReadings()) {
         printf("Sensor Reading - ID: %s, Guid: %llu, Value: %.3f, Time: ",

@@ -1,11 +1,14 @@
 #include "sensors_configuration_controller.h"
 #include "utilities/cbor/cbor_helpers.hpp"
 #include "domain/sensor_domain/utilities/sensors_order_resolver.h"
+#include "domain/sensor_domain/utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
+#include "domain/sensor_domain/utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
 
 namespace eerie_leap::controllers {
 
 using namespace eerie_leap::utilities::cbor;
 using namespace eerie_leap::domain::sensor_domain::utilities;
+using namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolator;
 
 void SensorsConfigurationController::Initialize() {
     math_parser_service_ = std::make_shared<MathParserService>();
@@ -16,8 +19,9 @@ void SensorsConfigurationController::Initialize() {
         {0.0, 0.0},
         {3.3, 100.0}
     };
+    auto calibration_data_1_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_1);
 
-    ExpressionEvaluator expression_evaluator_1(math_parser_service_, "x * 2 + 1");
+    ExpressionEvaluator expression_evaluator_1(math_parser_service_, "x * 2 + {sensor_2} + 1");
 
     Sensor sensor_1 {
         .id = "sensor_1",
@@ -29,17 +33,22 @@ void SensorsConfigurationController::Initialize() {
         .configuration = {
             .type = SensorType::PHYSICAL_ANALOG,
             .channel = 0,
-            .calibration_table = calibration_data_1,
+            .interpolation_method = InterpolationMethod::LINEAR,
+            .voltage_interpolator = std::make_shared<LinearVoltageInterpolator>(calibration_data_1_ptr),
             .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_1)
         }
     };
 
     std::vector<CalibrationData> calibration_data_2 {
         {0.0, 0.0},
+        {1.0, 29.0},
+        {2.0, 111.0},
+        {2.5, 162.0},
         {3.3, 200.0}
     };
+    auto calibration_data_2_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_2);
 
-    ExpressionEvaluator expression_evaluator_2(math_parser_service_, "x * 4 + {sensor_1} + 1.6");
+    ExpressionEvaluator expression_evaluator_2(math_parser_service_, "x * 4 + 1.6");
 
     Sensor sensor_2 {
         .id = "sensor_2",
@@ -51,12 +60,36 @@ void SensorsConfigurationController::Initialize() {
         .configuration = {
             .type = SensorType::PHYSICAL_ANALOG,
             .channel = 1,
-            .calibration_table = calibration_data_2,
+            .interpolation_method = InterpolationMethod::CUBIC_SPLINE,
+            .voltage_interpolator = std::make_shared<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
             .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_2)
         }
     };
 
-    std::vector<std::shared_ptr<Sensor>> sensors = {std::make_shared<Sensor>(sensor_1), std::make_shared<Sensor>(sensor_2)};
+    ExpressionEvaluator expression_evaluator_3(math_parser_service_, "{sensor_1} + 8.34");
+
+    Sensor sensor_3 {
+        .id = "sensor_3",
+        .metadata = {
+            .name = "Sensor 3",
+            .unit = "km/h",
+            .description = "Test Sensor 3"
+        },
+        .configuration = {
+            .type = SensorType::VIRTUAL_ANALOG,
+            .channel = std::nullopt,
+            .interpolation_method = InterpolationMethod::NONE,
+            .voltage_interpolator = nullptr,
+            .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_3)
+        }
+    };
+
+    std::vector<std::shared_ptr<Sensor>> sensors = {
+        std::make_shared<Sensor>(sensor_1),
+        std::make_shared<Sensor>(sensor_2),
+        std::make_shared<Sensor>(sensor_3)
+    };
+
     Update(std::make_shared<std::vector<std::shared_ptr<Sensor>>>(sensors));
 }
 
@@ -86,11 +119,19 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
             sensor_config.configuration.sampling_rate_ms_present = false;
         }
 
-        if(sensor->configuration.calibration_table.has_value()) {
+        sensor_config.configuration.interpolation_method = static_cast<uint32_t>(sensor->configuration.interpolation_method);
+        if(sensor->configuration.interpolation_method != InterpolationMethod::NONE) {
             sensor_config.configuration.calibration_table_present = true;
 
-            const auto& calibration_table = sensor->configuration.calibration_table.value();
+            auto& calibration_table = *sensor->configuration.voltage_interpolator->GetCalibrationTable();
             sensor_config.configuration.calibration_table.floatfloat_count = calibration_table.size();
+
+            std::sort(
+                calibration_table.begin(),
+                calibration_table.end(),
+                [](const CalibrationData& a, const CalibrationData& b) {
+                    return a.voltage < b.voltage;
+                });
 
             for(size_t j = 0; j < calibration_table.size(); ++j) {
                 const auto& calibration_data = calibration_table[j];
@@ -125,7 +166,8 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
     }
 
     sensors_config_ = std::make_shared<SensorsConfig>(sensors_config);
-    ordered_sensors_ = std::make_shared<std::vector<std::shared_ptr<Sensor>>>(resolver.GetProcessingOrder());
+    auto ordered_sensors = resolver.GetProcessingOrder();
+    ordered_sensors_ = std::make_shared<std::vector<std::shared_ptr<Sensor>>>(ordered_sensors);
 
     return sensors_configuration_service_->Save(sensors_config);
 }
@@ -158,7 +200,10 @@ const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfiguration
         else
             sensor->configuration.sampling_rate_ms = std::nullopt;
 
-        if(sensor_config.configuration.calibration_table_present) {
+        sensor->configuration.interpolation_method = static_cast<InterpolationMethod>(sensor_config.configuration.interpolation_method);
+        if(sensor->configuration.interpolation_method != InterpolationMethod::NONE
+            && sensor_config.configuration.calibration_table_present) {
+
             std::vector<CalibrationData> calibration_table;
             for(size_t j = 0; j < sensor_config.configuration.calibration_table.floatfloat_count; ++j) {
                 const auto& calibration_data = sensor_config.configuration.calibration_table.floatfloat[j];
@@ -168,9 +213,10 @@ const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfiguration
                     .value = calibration_data.floatfloat});
             }
 
-            sensor->configuration.calibration_table = calibration_table;
+            auto calibration_table_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_table);
+            sensor->configuration.voltage_interpolator = std::make_shared<LinearVoltageInterpolator>(calibration_table_ptr);
         } else {
-            sensor->configuration.calibration_table = std::nullopt;
+            sensor->configuration.voltage_interpolator = nullptr;
         }
 
         if(sensor_config.configuration.expression_present)

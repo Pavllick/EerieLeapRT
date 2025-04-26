@@ -1,8 +1,10 @@
 #include <stdexcept>
+#include <span>
 #include <regex>
 #include <zephyr/logging/log.h>
 
 #include "expression_evaluator.h"
+#include <muParser.h>
 
 namespace eerie_leap::utilities::math_parser {
 
@@ -22,28 +24,37 @@ ExpressionEvaluator::ExpressionEvaluator(std::shared_ptr<MathParserService> math
     expression_ = UnwrapVariables();
 }
 
-double ExpressionEvaluator::Evaluate(double x, const std::unordered_map<std::string, double>& variables) const {
+double ExpressionEvaluator::Evaluate(const std::unordered_map<std::string, double>& variables, std::optional<double> x) const {
     k_mutex_lock(&expression_eval_mutex_, K_FOREVER);
 
     math_parser_service_->SetExpression(expression_);
 
-    math_parser_service_->DefineVariable("x", &x);
-    for (auto& [key, value] : variables) {
-        double unwrapped_value = value;
-        math_parser_service_->DefineVariable(key, &unwrapped_value);
+    std::vector<double> values;
+    std::vector<std::string> names;
+
+    if (x.has_value()) {
+        values.push_back(x.value());
+        names.push_back("x");
     }
+
+    for (const auto& [key, value] : variables) {
+        values.push_back(value);
+        names.push_back(key);
+    }
+
+    for (size_t i = 0; i < values.size(); ++i)
+        math_parser_service_->DefineVariable(names[i], &values[i]);
 
     double res = math_parser_service_->Evaluate();
 
     k_mutex_unlock(&expression_eval_mutex_);
-    
     return res;
 }
 
 std::unordered_set<std::string> ExpressionEvaluator::ExtractVariables() const {
     std::unordered_set<std::string> expression_variables;
 
-    auto begin = std::sregex_iterator(expression_.begin(), expression_.end(), sensorIdRegex());
+    auto begin = std::sregex_iterator(expression_raw_.begin(), expression_raw_.end(), sensorIdRegex());
     auto end = std::sregex_iterator();
 
     for (auto it = begin; it != end; ++it) {

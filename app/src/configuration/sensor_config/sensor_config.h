@@ -50,6 +50,7 @@ struct SensorConfigurationConfig {
 	bool sampling_rate_ms_present;
 	struct SensorCalibrationDataMap calibration_table;
 	bool calibration_table_present;
+	uint32_t interpolation_method;
 	struct zcbor_string expression;
 	bool expression_present;
 };

@@ -14,12 +14,17 @@ using namespace eerie_leap::domain::sensor_domain::models;
 class SensorReadingsFrame {
 private:
     std::unordered_map<std::string, std::shared_ptr<SensorReading>> readings_;
+    std::unordered_map<std::string, double> readings_values_;
 
 public:
     SensorReadingsFrame() = default;
 
     void AddOrUpdateReading(std::shared_ptr<SensorReading> sensor_reading) {
-        readings_[sensor_reading->sensor->id] = std::move(sensor_reading);
+        std::string sensor_id = sensor_reading->sensor->id;
+
+        readings_[sensor_id] = std::move(sensor_reading);
+        if(readings_[sensor_id]->value.has_value())
+            readings_values_[readings_[sensor_id]->sensor->id] = readings_[sensor_id]->value.value();
     }
 
     std::shared_ptr<SensorReading> GetReading(const std::string& sensorId) const {
@@ -33,17 +38,14 @@ public:
     const std::unordered_map<std::string, std::shared_ptr<SensorReading>>& GetReadings() const {
         return readings_;
     }
-
-    const std::unordered_map<std::string, double> GetReadingsValues() const {
-        std::unordered_map<std::string, double> readings;
-        for (const auto& [id, reading] : readings_)
-            readings[id] = reading->value.value();
-
-        return readings;
+    
+    const std::unordered_map<std::string, double>& GetReadingsValues() const {
+        return readings_values_;
     }
 
     void ClearReadings() {
         readings_.clear();
+        readings_values_.clear();
     }
 };
 

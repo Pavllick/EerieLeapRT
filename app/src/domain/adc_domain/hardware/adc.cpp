@@ -21,14 +21,15 @@ void Adc::UpdateConfiguration(AdcConfig config) {
     LOG_INF("Adc configuration updated.");
 }
 
-int Adc::ReadChannel(int channel) {
+double Adc::ReadChannel(int channel) {
     if(!adc_config_)
         throw std::runtime_error("ADC config is not set!");
 
     if(channel < 0 || channel > adc_config_->channel_count)
         throw std::invalid_argument("ADC channel out of range!");
 
-    auto random_value = (sys_rand32_get() % 20) + 1;
+    uint32_t raw = sys_rand32_get();
+    double random_value = (raw / static_cast<double>(UINT32_MAX)) * 3.3;
 
     return random_value;
 }

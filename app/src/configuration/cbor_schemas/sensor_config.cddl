@@ -11,6 +11,7 @@ SensorConfigurationConfig = [
   ? channel: uint,
   ? sampling_rate_ms: uint,
   ? calibration_table: SensorCalibrationDataMap,
+  interpolation_method: uint,
   ? expression: tstr
 ]
 

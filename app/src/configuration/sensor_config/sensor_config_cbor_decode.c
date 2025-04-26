@@ -85,6 +85,7 @@ static bool decode_SensorConfigurationConfig(
 	&& ((*result).channel_present = ((zcbor_uint32_decode(state, (&(*result).channel)))), 1)
 	&& ((*result).sampling_rate_ms_present = ((zcbor_uint32_decode(state, (&(*result).sampling_rate_ms)))), 1)
 	&& ((*result).calibration_table_present = ((decode_SensorCalibrationDataMap(state, (&(*result).calibration_table)))), 1)
+	&& ((zcbor_uint32_decode(state, (&(*result).interpolation_method))))
 	&& ((*result).expression_present = ((zcbor_tstr_decode(state, (&(*result).expression)))), 1)) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
 
 	log_result(state, res, __func__);

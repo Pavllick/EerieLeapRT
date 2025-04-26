@@ -16,7 +16,7 @@ private:
 public:
     explicit SensorProcessor(std::shared_ptr<SensorReadingsFrame> sensor_readings_frame) :
         sensor_readings_frame_(std::move(sensor_readings_frame)) {}
-    void ProcessSensorReading(SensorReading& reading) override;
+    void ProcessSensorReading(std::shared_ptr<SensorReading> reading) override;
 };
 
 } // namespace eerie_leap::domain::sensor_domain::processors

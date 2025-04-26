@@ -17,7 +17,7 @@ public:
     
     int Initialize();
     void UpdateConfiguration(AdcConfig config);
-    int ReadChannel(int channel);
+    double ReadChannel(int channel);
 };
 
 }  // namespace eerie_leap::domain::adc_domain::hardware
