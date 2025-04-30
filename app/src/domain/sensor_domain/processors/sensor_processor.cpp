@@ -12,9 +12,6 @@ using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 
 void SensorProcessor::ProcessSensorReading(std::shared_ptr<SensorReading> reading) {
-    // if(reading.status != ReadingStatus::RAW)
-    //     return;
-    
     try {
         if(reading->sensor->configuration.type == SensorType::PHYSICAL_ANALOG) {
             double voltage = reading->value.value();

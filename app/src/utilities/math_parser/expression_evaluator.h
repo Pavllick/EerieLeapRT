@@ -25,7 +25,7 @@ public:
     std::string GetExpression() const { return expression_; }
     std::string GetRawExpression() const { return expression_raw_; }
 
-    double Evaluate(const std::unordered_map<std::string, double>& variables, std::optional<double> x = std::nullopt) const;
+    double Evaluate(const std::unordered_map<std::string, double*>& variables, std::optional<double> x = std::nullopt) const;
     std::unordered_set<std::string> ExtractVariables() const;
     std::string UnwrapVariables() const;
 };

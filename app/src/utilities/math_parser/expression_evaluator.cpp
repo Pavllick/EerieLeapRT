@@ -24,30 +24,21 @@ ExpressionEvaluator::ExpressionEvaluator(std::shared_ptr<MathParserService> math
     expression_ = UnwrapVariables();
 }
 
-double ExpressionEvaluator::Evaluate(const std::unordered_map<std::string, double>& variables, std::optional<double> x) const {
+double ExpressionEvaluator::Evaluate(const std::unordered_map<std::string, double*>& variables, std::optional<double> x) const {
     k_mutex_lock(&expression_eval_mutex_, K_FOREVER);
 
     math_parser_service_->SetExpression(expression_);
+    
+    if(x.has_value())
+        math_parser_service_->DefineVariable("x", &x.value());
 
-    std::vector<double> values;
-    std::vector<std::string> names;
-
-    if (x.has_value()) {
-        values.push_back(x.value());
-        names.push_back("x");
-    }
-
-    for (const auto& [key, value] : variables) {
-        values.push_back(value);
-        names.push_back(key);
-    }
-
-    for (size_t i = 0; i < values.size(); ++i)
-        math_parser_service_->DefineVariable(names[i], &values[i]);
+    for(const auto& [key, value]: variables)
+        math_parser_service_->DefineVariable(key, value);
 
     double res = math_parser_service_->Evaluate();
 
     k_mutex_unlock(&expression_eval_mutex_);
+    
     return res;
 }
 

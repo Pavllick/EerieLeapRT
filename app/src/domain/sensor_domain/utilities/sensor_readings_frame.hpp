@@ -14,7 +14,7 @@ using namespace eerie_leap::domain::sensor_domain::models;
 class SensorReadingsFrame {
 private:
     std::unordered_map<std::string, std::shared_ptr<SensorReading>> readings_;
-    std::unordered_map<std::string, double> readings_values_;
+    std::unordered_map<std::string, double*> readings_values_;
 
 public:
     SensorReadingsFrame() = default;
@@ -23,8 +23,9 @@ public:
         std::string sensor_id = sensor_reading->sensor->id;
 
         readings_[sensor_id] = std::move(sensor_reading);
-        if(readings_[sensor_id]->value.has_value())
-            readings_values_[readings_[sensor_id]->sensor->id] = readings_[sensor_id]->value.value();
+
+        if (readings_[sensor_id]->value.has_value() && readings_[sensor_id]->status != ReadingStatus::ERROR)
+            readings_values_[sensor_id] = &readings_[sensor_id]->value.value();
     }
 
     std::shared_ptr<SensorReading> GetReading(const std::string& sensorId) const {
@@ -38,8 +39,8 @@ public:
     const std::unordered_map<std::string, std::shared_ptr<SensorReading>>& GetReadings() const {
         return readings_;
     }
-    
-    const std::unordered_map<std::string, double>& GetReadingsValues() const {
+
+    const std::unordered_map<std::string, double*>& GetReadingsValues() const {
         return readings_values_;
     }
 
