@@ -48,8 +48,9 @@ std::unordered_set<std::string> ExpressionEvaluator::ExtractVariables() const {
     auto begin = std::sregex_iterator(expression_raw_.begin(), expression_raw_.end(), sensorIdRegex());
     auto end = std::sregex_iterator();
 
-    for (auto it = begin; it != end; ++it) {
-        expression_variables.insert((*it)[1].str());
+    for(auto it = begin; it != end; ++it) {
+        if((*it)[1].compare("x") != 0)
+            expression_variables.insert((*it)[1].str());
     }
 
     return expression_variables;

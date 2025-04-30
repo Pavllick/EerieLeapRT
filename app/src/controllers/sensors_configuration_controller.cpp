@@ -21,7 +21,7 @@ void SensorsConfigurationController::Initialize() {
     };
     auto calibration_data_1_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_1);
 
-    ExpressionEvaluator expression_evaluator_1(math_parser_service_, "x * 2 + {sensor_2} + 1");
+    ExpressionEvaluator expression_evaluator_1(math_parser_service_, "{x} * 2 + {sensor_2} + 1");
 
     Sensor sensor_1 {
         .id = "sensor_1",
