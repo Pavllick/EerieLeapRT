@@ -1,7 +1,7 @@
 /*
  * Generated using zcbor version 0.9.1
  * https://github.com/NordicSemiconductor/zcbor
- * Generated with a --default-max-qty of 40
+ * Generated with a --default-max-qty of 24
  */
 
 #include <stdint.h>
@@ -12,7 +12,7 @@
 #include "sensor_config_cbor_decode.h"
 #include "zcbor_print.h"
 
-#if DEFAULT_MAX_QTY != 40
+#if DEFAULT_MAX_QTY != 24
 #error "The type file was generated with a different default_max_qty than this file"
 #endif
 
@@ -63,7 +63,7 @@ static bool decode_SensorCalibrationDataMap(
 {
 	zcbor_log("%s\r\n", __func__);
 
-	bool res = (((zcbor_map_start_decode(state) && ((zcbor_multi_decode(2, 100, &(*result).floatfloat_count, (zcbor_decoder_t *)decode_repeated_SensorCalibrationDataMap_floatfloat, state, (*&(*result).floatfloat), sizeof(struct SensorCalibrationDataMap_floatfloat))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_map_end_decode(state))));
+	bool res = (((zcbor_map_start_decode(state) && ((zcbor_multi_decode(2, 50, &(*result).floatfloat_count, (zcbor_decoder_t *)decode_repeated_SensorCalibrationDataMap_floatfloat, state, (*&(*result).floatfloat), sizeof(struct SensorCalibrationDataMap_floatfloat))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_map_end_decode(state))));
 
 	if (false) {
 		/* For testing that the types of the arguments are correct.
@@ -110,7 +110,7 @@ static bool decode_SensorsConfig(
 {
 	zcbor_log("%s\r\n", __func__);
 
-	bool res = (((zcbor_list_start_decode(state) && ((((zcbor_list_start_decode(state) && ((zcbor_multi_decode(0, 40, &(*result).SensorConfig_m_count, (zcbor_decoder_t *)decode_SensorConfig, state, (*&(*result).SensorConfig_m), sizeof(struct SensorConfig))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state)))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
+	bool res = (((zcbor_list_start_decode(state) && ((((zcbor_list_start_decode(state) && ((zcbor_multi_decode(0, 24, &(*result).SensorConfig_m_count, (zcbor_decoder_t *)decode_SensorConfig, state, (*&(*result).SensorConfig_m), sizeof(struct SensorConfig))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state)))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
 
 	if (false) {
 		/* For testing that the types of the arguments are correct.

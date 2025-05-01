@@ -1,7 +1,7 @@
 /*
  * Generated using zcbor version 0.9.1
  * https://github.com/NordicSemiconductor/zcbor
- * Generated with a --default-max-qty of 40
+ * Generated with a --default-max-qty of 24
  */
 
 #ifndef SYSTEM_CONFIG_H__
@@ -23,7 +23,7 @@ extern "C" {
  *
  *  See `zcbor --help` for more information about --default-max-qty
  */
-#define DEFAULT_MAX_QTY 40
+#define DEFAULT_MAX_QTY 24
 
 struct SystemConfig {
 	uint32_t hw_version;

@@ -6,6 +6,7 @@
 #include "utilities/time/i_time_service.h"
 #include "utilities/guid/guid_generator.h"
 #include "controllers/sensors_configuration_controller.h"
+#include "domain/adc_domain/hardware/i_adc.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 #include "domain/sensor_domain/processors/sensors_reader.h"
 #include "domain/sensor_domain/processors/sensor_processor.h"
@@ -36,7 +37,7 @@ using namespace eerie_leap::domain::sensor_domain::processors;
 class MeasurementService {
 private:
     const int32_t READING_INTERVAL_MS_ = 1000; 
-    static constexpr int kStackSize = 8192;
+    static constexpr int kStackSize = 32768;
     static constexpr int kPriority = K_PRIO_PREEMPT(8);
     static void ThreadTrampoline(void* instance, void* p2, void* p3);
 
@@ -46,10 +47,9 @@ private:
     k_thread thread_data_;
     k_mutex sensors_reading_mutex_;
 
-    // std::shared_ptr<SensorsConfigurationController> sensors_config_controller_;
     std::shared_ptr<ITimeService> time_service_;
     std::shared_ptr<GuidGenerator> guid_generator_;
-    std::shared_ptr<Adc> adc_;
+    std::shared_ptr<IAdc> adc_;
 
     std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller_;
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame_;

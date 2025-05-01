@@ -125,11 +125,11 @@ pip install zcbor
 #### Example command to generate SystemConfig helpers:
 
 ```shell
-zcbor code -sed --default-max-qty 40 -c ./app/src/configuration/cbor_schemas/system_config.cddl -t SystemConfig --output-h ./app/src/configuration/system_config/system_config_cbor.h --output-c ./app/src/configuration/system_config/system_config_cbor.c --output-h-types ./app/src/configuration/system_config/system_config.h
+zcbor code -sed --default-max-qty 24 -c ./app/src/configuration/cbor_schemas/system_config.cddl -t SystemConfig --output-h ./app/src/configuration/system_config/system_config_cbor.h --output-c ./app/src/configuration/system_config/system_config_cbor.c --output-h-types ./app/src/configuration/system_config/system_config.h
 ```
 
 #### Example command to generate SensorConfig helpers:
 
 ```shell
-zcbor code -sed --default-max-qty 40 -c ./app/src/configuration/cbor_schemas/sensor_config.cddl -t SensorsConfig --output-h ./app/src/configuration/sensor_config/sensor_config_cbor.h --output-c ./app/src/configuration/sensor_config/sensor_config_cbor.c --output-h-types ./app/src/configuration/sensor_config/sensor_config.h
+zcbor code -sed --default-max-qty 24 -c ./app/src/configuration/cbor_schemas/sensor_config.cddl -t SensorsConfig --output-h ./app/src/configuration/sensor_config/sensor_config_cbor.h --output-c ./app/src/configuration/sensor_config/sensor_config_cbor.c --output-h-types ./app/src/configuration/sensor_config/sensor_config.h
 ```

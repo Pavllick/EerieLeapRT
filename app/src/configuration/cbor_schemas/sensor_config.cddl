@@ -4,7 +4,7 @@ SensorMetadataConfig = [
   ? description: tstr
 ]
 
-SensorCalibrationDataMap = { 2*100(float => float) }
+SensorCalibrationDataMap = { 2*50(float => float) }
 
 SensorConfigurationConfig = [
   type: uint,

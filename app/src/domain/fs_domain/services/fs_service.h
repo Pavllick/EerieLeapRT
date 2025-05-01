@@ -7,7 +7,7 @@
 #include <zephyr/fs/littlefs.h>
 #include "i_fs_service.h"
 
-#define PARTITION_NODE DT_NODELABEL(lfs1)
+#define PARTITION_NODE DT_ALIAS(lfs1)
 #define MKFS_DEV_ID FIXED_PARTITION_ID(lfs1_partition)
 FS_FSTAB_DECLARE_ENTRY(PARTITION_NODE);
 

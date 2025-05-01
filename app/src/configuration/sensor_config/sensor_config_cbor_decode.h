@@ -1,7 +1,7 @@
 /*
  * Generated using zcbor version 0.9.1
  * https://github.com/NordicSemiconductor/zcbor
- * Generated with a --default-max-qty of 40
+ * Generated with a --default-max-qty of 24
  */
 
 #ifndef SENSOR_CONFIG_CBOR_DECODE_H__
@@ -17,7 +17,7 @@
 extern "C" {
 #endif
 
-#if DEFAULT_MAX_QTY != 40
+#if DEFAULT_MAX_QTY != 24
 #error "The type file was generated with a different default_max_qty than this file"
 #endif
 

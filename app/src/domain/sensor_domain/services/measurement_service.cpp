@@ -5,6 +5,7 @@
 #include "measurement_service.h"
 #include "utilities/time/time_helpers.hpp"
 #include "domain/adc_domain/hardware/adc.h"
+#include "domain/adc_domain/hardware/adc_emulator.h"
 #include "domain/sensor_domain/models/sensor.h"
 #include "domain/sensor_domain/models/sensor_reading.h"
 #include "domain/sensor_domain/events/sensor_reading_event.h"
@@ -42,11 +43,16 @@ void MeasurementService::EntryPoint() {
 
     k_mutex_init(&sensors_reading_mutex_);
     
+#ifdef CONFIG_ADC_EMUL
+    adc_ = std::make_shared<AdcEmulator>();
+#else
     adc_ = std::make_shared<Adc>();
+#endif
     adc_->UpdateConfiguration(AdcConfig{
-        .channel_count = 8,
+        .channel_count = 4,
         .resolution = 12,
-        .reference_voltage = 3.3
+        .samples = 1,
+        .sampling_interval_us = 0
     });
     adc_->Initialize();
 
@@ -57,8 +63,22 @@ void MeasurementService::EntryPoint() {
     sensor_processor_ = std::make_shared<SensorProcessor>(sensor_readings_frame_);
 
     while (true) {
+        // uint64_t start = k_uptime_get();
+
+        // for(int i = 0; i < 1000; i++) {
+        //     ProcessSensorsReading();
+        // }
+
+        // uint64_t end = k_uptime_get();
+
+        // uint64_t elapsed = end - start;
+        // uint64_t elapsed_ms = elapsed / 3000;
+
+        // printf("Elapsed time: %llu ms\n", elapsed_ms);
+        
         ProcessSensorsReading();
         k_msleep(READING_INTERVAL_MS_);
+        
     }
     
     return;

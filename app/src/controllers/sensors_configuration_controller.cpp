@@ -1,3 +1,4 @@
+#include <zephyr/logging/log.h>
 #include "sensors_configuration_controller.h"
 #include "utilities/cbor/cbor_helpers.hpp"
 #include "domain/sensor_domain/utilities/sensors_order_resolver.h"
@@ -6,11 +7,15 @@
 
 namespace eerie_leap::controllers {
 
+LOG_MODULE_REGISTER(sensors_config_ctrl_logger);
+
 using namespace eerie_leap::utilities::cbor;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 using namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolator;
 
 void SensorsConfigurationController::Initialize() {
+    LOG_INF("Sensors Configuration Controller initialization started.");
+
     math_parser_service_ = std::make_shared<MathParserService>();
 
     // Test Sensors
@@ -91,6 +96,8 @@ void SensorsConfigurationController::Initialize() {
     };
 
     Update(std::make_shared<std::vector<std::shared_ptr<Sensor>>>(sensors));
+
+    LOG_INF("Sensors Configuration Controller initialized successfully.");
 }
 
 bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> sensors) {

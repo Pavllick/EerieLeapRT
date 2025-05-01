@@ -74,9 +74,9 @@ int main(void) {
     auto* service = new (service_buffer) MeasurementService(time_service, guid_generator, sensors_configuration_controller);
     service->Start();
 
-    auto files = fs_service->ListFiles("/");
-    for(const auto& file : files)
-        printf("File name: %s\n", file.c_str());
+    // auto files = fs_service->ListFiles("/");
+    // for(const auto& file : files)
+    //     printf("File name: %s\n", file.c_str());
 
     // printf("Total memory: %d, Used memory: %d\n", fs_service->GetTotalSpace(), fs_service->GetUsedSpace());
 

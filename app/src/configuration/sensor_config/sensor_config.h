@@ -1,7 +1,7 @@
 /*
  * Generated using zcbor version 0.9.1
  * https://github.com/NordicSemiconductor/zcbor
- * Generated with a --default-max-qty of 40
+ * Generated with a --default-max-qty of 24
  */
 
 #ifndef SENSOR_CONFIG_H__
@@ -23,7 +23,7 @@ extern "C" {
  *
  *  See `zcbor --help` for more information about --default-max-qty
  */
-#define DEFAULT_MAX_QTY 40
+#define DEFAULT_MAX_QTY 24
 
 struct SensorMetadataConfig {
 	struct zcbor_string name;
@@ -38,7 +38,7 @@ struct SensorCalibrationDataMap_floatfloat {
 };
 
 struct SensorCalibrationDataMap {
-	struct SensorCalibrationDataMap_floatfloat floatfloat[100];
+	struct SensorCalibrationDataMap_floatfloat floatfloat[50];
 	size_t floatfloat_count;
 };
 
@@ -62,7 +62,7 @@ struct SensorConfig {
 };
 
 struct SensorsConfig {
-	struct SensorConfig SensorConfig_m[40];
+	struct SensorConfig SensorConfig_m[24];
 	size_t SensorConfig_m_count;
 };
 
