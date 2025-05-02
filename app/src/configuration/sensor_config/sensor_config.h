@@ -47,7 +47,6 @@ struct SensorConfigurationConfig {
 	uint32_t channel;
 	bool channel_present;
 	uint32_t sampling_rate_ms;
-	bool sampling_rate_ms_present;
 	struct SensorCalibrationDataMap calibration_table;
 	bool calibration_table_present;
 	uint32_t interpolation_method;

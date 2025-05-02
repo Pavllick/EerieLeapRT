@@ -19,7 +19,7 @@ using namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolat
 struct SensorConfiguration {
     SensorType type;
     std::optional<uint32_t> channel;
-    std::optional<uint32_t> sampling_rate_ms;
+    uint32_t sampling_rate_ms = 100;
     InterpolationMethod interpolation_method = InterpolationMethod::NONE;
 
     std::shared_ptr<IVoltageInterpolator> voltage_interpolator = nullptr;

@@ -38,6 +38,7 @@ void SensorsConfigurationController::Initialize() {
         .configuration = {
             .type = SensorType::PHYSICAL_ANALOG,
             .channel = 0,
+            .sampling_rate_ms = 1000,
             .interpolation_method = InterpolationMethod::LINEAR,
             .voltage_interpolator = std::make_shared<LinearVoltageInterpolator>(calibration_data_1_ptr),
             .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_1)
@@ -65,6 +66,7 @@ void SensorsConfigurationController::Initialize() {
         .configuration = {
             .type = SensorType::PHYSICAL_ANALOG,
             .channel = 1,
+            .sampling_rate_ms = 500,
             .interpolation_method = InterpolationMethod::CUBIC_SPLINE,
             .voltage_interpolator = std::make_shared<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
             .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_2)
@@ -83,6 +85,7 @@ void SensorsConfigurationController::Initialize() {
         .configuration = {
             .type = SensorType::VIRTUAL_ANALOG,
             .channel = std::nullopt,
+            .sampling_rate_ms = 2000,
             .interpolation_method = InterpolationMethod::NONE,
             .voltage_interpolator = nullptr,
             .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_3)
@@ -119,12 +122,7 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
             sensor_config.configuration.channel_present = false;
         }
 
-        if(sensor->configuration.sampling_rate_ms.has_value()) {
-            sensor_config.configuration.sampling_rate_ms_present = true;
-            sensor_config.configuration.sampling_rate_ms = sensor->configuration.sampling_rate_ms.value();
-        } else {
-            sensor_config.configuration.sampling_rate_ms_present = false;
-        }
+        sensor_config.configuration.sampling_rate_ms = sensor->configuration.sampling_rate_ms;
 
         sensor_config.configuration.interpolation_method = static_cast<uint32_t>(sensor->configuration.interpolation_method);
         if(sensor->configuration.interpolation_method != InterpolationMethod::NONE) {
@@ -202,10 +200,7 @@ const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfiguration
         else
             sensor->configuration.channel = std::nullopt;
         
-        if(sensor_config.configuration.sampling_rate_ms_present)
-            sensor->configuration.sampling_rate_ms = sensor_config.configuration.sampling_rate_ms;
-        else
-            sensor->configuration.sampling_rate_ms = std::nullopt;
+        sensor->configuration.sampling_rate_ms = sensor_config.configuration.sampling_rate_ms;
 
         sensor->configuration.interpolation_method = static_cast<InterpolationMethod>(sensor_config.configuration.interpolation_method);
         if(sensor->configuration.interpolation_method != InterpolationMethod::NONE

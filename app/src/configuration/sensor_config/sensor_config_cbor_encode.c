@@ -76,7 +76,7 @@ static bool encode_SensorConfigurationConfig(
 
 	bool res = (((zcbor_list_start_encode(state, 6) && ((((zcbor_uint32_encode(state, (&(*input).type))))
 	&& (!(*input).channel_present || zcbor_uint32_encode(state, (&(*input).channel)))
-	&& (!(*input).sampling_rate_ms_present || zcbor_uint32_encode(state, (&(*input).sampling_rate_ms)))
+	&& ((zcbor_uint32_encode(state, (&(*input).sampling_rate_ms))))
 	&& (!(*input).calibration_table_present || encode_SensorCalibrationDataMap(state, (&(*input).calibration_table)))
 	&& ((zcbor_uint32_encode(state, (&(*input).interpolation_method))))
 	&& (!(*input).expression_present || zcbor_tstr_encode(state, (&(*input).expression)))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 6))));

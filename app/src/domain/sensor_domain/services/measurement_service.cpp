@@ -41,8 +41,6 @@ void MeasurementService::ThreadTrampoline(void* instance, void* p2, void* p3) {
 void MeasurementService::EntryPoint() {
     LOG_INF("Measurement Service started");
 
-    k_mutex_init(&sensors_reading_mutex_);
-    
 #ifdef CONFIG_ADC_EMUL
     adc_ = std::make_shared<AdcEmulator>();
 #else
@@ -57,57 +55,11 @@ void MeasurementService::EntryPoint() {
     adc_->Initialize();
 
     sensors_configuration_controller_->Initialize();
+    processing_scheduler_service_ = std::make_shared<ProcessingSchedulerService>(time_service_, guid_generator_, adc_, sensors_configuration_controller_);
 
-    sensor_readings_frame_ = std::make_shared<SensorReadingsFrame>();
-    sensors_reader_ = std::make_shared<SensorsReader>(time_service_, guid_generator_, adc_, sensor_readings_frame_);
-    sensor_processor_ = std::make_shared<SensorProcessor>(sensor_readings_frame_);
-
-    while (true) {
-        // uint64_t start = k_uptime_get();
-
-        // for(int i = 0; i < 1000; i++) {
-        //     ProcessSensorsReading();
-        // }
-
-        // uint64_t end = k_uptime_get();
-
-        // uint64_t elapsed = end - start;
-        // uint64_t elapsed_ms = elapsed / 3000;
-
-        // printf("Elapsed time: %llu ms\n", elapsed_ms);
-        
-        ProcessSensorsReading();
-        k_msleep(READING_INTERVAL_MS_);
-        
-    }
+    processing_scheduler_service_->Start();
     
     return;
-}
-
-void MeasurementService::ProcessSensorsReading() {
-    k_mutex_lock(&sensors_reading_mutex_, K_FOREVER);
-
-    // TODO: To determine if clearing the readings is necessary
-    // or updating in place can improve performance.
-    // sensor_readings_frame_->ClearReadings();
-    
-    auto sensors = sensors_configuration_controller_->Get();
-    sensors_reader_->ReadSensors(sensors);
-
-    for(const auto& sensor : *sensors)
-        sensor_processor_->ProcessSensorReading(sensor_readings_frame_->GetReading(sensor->id));
-
-    for (const auto& reading : sensor_readings_frame_->GetReadings()) {
-        printf("Sensor Reading - ID: %s, Guid: %llu, Value: %.3f, Time: ",
-            reading.first.c_str(),
-            reading.second->id.AsUint64(),
-            reading.second->value.value_or(0.0f));
-        TimeHelpers::PrintTimePoint(*reading.second->timestamp);
-    }
-        // printf("Sensor ID: %s, Value: %f\n", reading.first.c_str(), reading.second->value.value());
-        // LOG_INF("Sensor ID: %s, Value: %f", reading.first.c_str(), reading.second->value.value());
-
-    k_mutex_unlock(&sensors_reading_mutex_);
 }
 
 } // namespace eerie_leap::domain::sensor_domain::services

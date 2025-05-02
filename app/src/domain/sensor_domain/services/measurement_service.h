@@ -7,9 +7,7 @@
 #include "utilities/guid/guid_generator.h"
 #include "controllers/sensors_configuration_controller.h"
 #include "domain/adc_domain/hardware/i_adc.h"
-#include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
-#include "domain/sensor_domain/processors/sensors_reader.h"
-#include "domain/sensor_domain/processors/sensor_processor.h"
+#include "domain/sensor_domain/services/scheduler/processing_scheduler_serivce.h"
 
 namespace eerie_leap::domain::sensor_domain::services {
 
@@ -17,7 +15,7 @@ using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::controllers;
 using namespace eerie_leap::domain::sensor_domain::utilities;
-using namespace eerie_leap::domain::sensor_domain::processors;
+using namespace eerie_leap::domain::sensor_domain::services::scheduler;
 
 
 /// Service responsible for reading and processing sensor data in a dedicated thread.
@@ -45,19 +43,15 @@ private:
 
     k_tid_t thread_id_;
     k_thread thread_data_;
-    k_mutex sensors_reading_mutex_;
 
     std::shared_ptr<ITimeService> time_service_;
     std::shared_ptr<GuidGenerator> guid_generator_;
+    
     std::shared_ptr<IAdc> adc_;
-
     std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller_;
-    std::shared_ptr<SensorReadingsFrame> sensor_readings_frame_;
-    std::shared_ptr<SensorsReader> sensors_reader_;
-    std::shared_ptr<SensorProcessor> sensor_processor_;
+    std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service_;
     
     void EntryPoint();
-    void ProcessSensorsReading();
 
 public:
     MeasurementService(std::shared_ptr<ITimeService> time_service, std::shared_ptr<GuidGenerator> guid_generator, std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller)
