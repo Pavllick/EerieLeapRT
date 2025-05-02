@@ -29,8 +29,8 @@ private:
 
     std::shared_ptr<ITimeService> time_service_;
     std::shared_ptr<GuidGenerator> guid_generator_;
-    std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller_;
     std::shared_ptr<IAdc> adc_;
+    std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller_;
 
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame_;
     std::shared_ptr<SensorReader> sensor_reader_;
@@ -39,7 +39,11 @@ private:
     static void ProcessWorkTask(k_work* work);
 
 public:
-    ProcessingSchedulerService(std::shared_ptr<ITimeService> time_service, std::shared_ptr<GuidGenerator> guid_generator, std::shared_ptr<IAdc> adc, std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller);
+    ProcessingSchedulerService(
+        std::shared_ptr<ITimeService> time_service,
+        std::shared_ptr<GuidGenerator> guid_generator,
+        std::shared_ptr<IAdc> adc,
+        std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller);
 
     void Start();
 };

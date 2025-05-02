@@ -1,24 +1,13 @@
 #include <vector>
-#include <stdio.h>
 #include <zephyr/logging/log.h>
 
 #include "measurement_service.h"
-#include "utilities/time/time_helpers.hpp"
 #include "domain/adc_domain/hardware/adc.h"
 #include "domain/adc_domain/hardware/adc_emulator.h"
-#include "domain/sensor_domain/models/sensor.h"
-#include "domain/sensor_domain/models/sensor_reading.h"
-#include "domain/sensor_domain/events/sensor_reading_event.h"
-#include "utilities/math_parser/expression_evaluator.h"
-#include "utilities/dev_tools/system_info.h"
 
 namespace eerie_leap::domain::sensor_domain::services {
 
-using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::domain::adc_domain::hardware;
-using namespace eerie_leap::domain::sensor_domain::models;
-using namespace eerie_leap::utilities::math_parser;
-using namespace eerie_leap::utilities::dev_tools;
 
 LOG_MODULE_REGISTER(measurement_service_logger);
 
@@ -27,15 +16,11 @@ k_tid_t MeasurementService::Start() {
         &thread_data_,
         stack_area_,
         K_THREAD_STACK_SIZEOF(stack_area_),
-        ThreadTrampoline,
+        [](void* instance, void* p2, void* p3) { static_cast<MeasurementService*>(instance)->EntryPoint(); },
         this, NULL, NULL,
         kPriority, 0, K_NO_WAIT);
 
     return thread_id_;
-}
-
-void MeasurementService::ThreadTrampoline(void* instance, void* p2, void* p3) {
-    static_cast<MeasurementService*>(instance)->EntryPoint();
 }
 
 void MeasurementService::EntryPoint() {

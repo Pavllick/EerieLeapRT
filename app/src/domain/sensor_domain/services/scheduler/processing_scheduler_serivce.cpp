@@ -13,8 +13,14 @@ using namespace eerie_leap::domain::sensor_domain::models;
 
 LOG_MODULE_REGISTER(processing_scheduler_logger);
 
-ProcessingSchedulerService::ProcessingSchedulerService(std::shared_ptr<ITimeService> time_service, std::shared_ptr<GuidGenerator> guid_generator, std::shared_ptr<IAdc> adc, std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller)
-    : time_service_(std::move(time_service)), guid_generator_(std::move(guid_generator)), adc_(std::move(adc)), sensors_configuration_controller_(std::move(sensors_configuration_controller)) {
+ProcessingSchedulerService::ProcessingSchedulerService(
+    std::shared_ptr<ITimeService> time_service,
+    std::shared_ptr<GuidGenerator> guid_generator,
+    std::shared_ptr<IAdc> adc, std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller)
+    : time_service_(std::move(time_service)),
+    guid_generator_(std::move(guid_generator)),
+    adc_(std::move(adc)),
+    sensors_configuration_controller_(std::move(sensors_configuration_controller)) {
 
     k_sem_init(&sync_semaphore_, 0, 1);
     k_sem_init(&sensors_processing_semaphore_, 1, 1);
@@ -53,6 +59,7 @@ void ProcessingSchedulerService::ProcessWorkTask(k_work* work) {
 void ProcessingSchedulerService::Start() {
     auto sensors = sensors_configuration_controller_->Get();
 
+    // Required to keep SensorTasks in scope until the end of the function
     std::vector<std::shared_ptr<SensorTask>> sensor_tasks;
 
     for(const auto& sensor : *sensors) {

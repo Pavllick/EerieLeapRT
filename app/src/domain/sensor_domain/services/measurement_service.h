@@ -14,7 +14,6 @@ namespace eerie_leap::domain::sensor_domain::services {
 using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::controllers;
-using namespace eerie_leap::domain::sensor_domain::utilities;
 using namespace eerie_leap::domain::sensor_domain::services::scheduler;
 
 
@@ -37,7 +36,6 @@ private:
     const int32_t READING_INTERVAL_MS_ = 1000; 
     static constexpr int kStackSize = 32768;
     static constexpr int kPriority = K_PRIO_PREEMPT(8);
-    static void ThreadTrampoline(void* instance, void* p2, void* p3);
 
     K_KERNEL_STACK_MEMBER(stack_area_, kStackSize);
 
@@ -54,8 +52,13 @@ private:
     void EntryPoint();
 
 public:
-    MeasurementService(std::shared_ptr<ITimeService> time_service, std::shared_ptr<GuidGenerator> guid_generator, std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller)
-        : time_service_(std::move(time_service)), guid_generator_(std::move(guid_generator)), sensors_configuration_controller_(std::move(sensors_configuration_controller)) { }
+    MeasurementService(
+        std::shared_ptr<ITimeService> time_service,
+        std::shared_ptr<GuidGenerator> guid_generator,
+        std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller)
+        : time_service_(std::move(time_service)),
+        guid_generator_(std::move(guid_generator)),
+        sensors_configuration_controller_(std::move(sensors_configuration_controller)) { }
 
     k_tid_t Start();
 };
