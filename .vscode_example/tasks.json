@@ -78,6 +78,13 @@
             "detail": "Run the Zephyr project using latest build"
         },
         {
+            "label": "Run Tests",
+            "type": "shell",
+            "command": "west twister -c --disable-warnings-as-errors -O ./twister-out -T ./tests",
+            "group": "none",
+            "detail": "Run tests using twister"
+        },
+        {
             "label": "Clean Build",
             "type": "shell",
             "command": "rm -rf ./build",

@@ -1,0 +1,7 @@
+common:
+  tags: utilities
+  platform_allow:
+    - native_sim
+
+tests:
+  integration.utilities: {}
