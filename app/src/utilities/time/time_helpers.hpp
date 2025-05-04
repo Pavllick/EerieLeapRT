@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <chrono>
 
 namespace eerie_leap::utilities::time {
@@ -8,7 +9,7 @@ using namespace std::chrono;
 
 class TimeHelpers {
 public:
-    static void PrintTimePoint(const std::chrono::system_clock::time_point& tp) {
+    static std::string GetFormattedString(const std::chrono::system_clock::time_point& tp) {
         using namespace std::chrono;
     
         auto duration = tp.time_since_epoch();
@@ -21,8 +22,9 @@ public:
     
         char buffer[32];
         std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &timeinfo);
-    
-        std::printf("%s.%03lld\n", buffer, static_cast<long long>(millis));
+
+        std::string formatted_time = std::string(buffer);
+        return formatted_time + "." + std::to_string(millis);
     }
 };
 

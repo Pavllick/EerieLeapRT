@@ -40,11 +40,11 @@ void ProcessingSchedulerService::ProcessWorkTask(k_work* work) {
 
             auto reading = task->sensor_readings_frame->GetReading(task->sensor->id);
 
-            printf("Sensor Reading - ID: %s, Guid: %llu, Value: %.3f, Time: ",
+            printf("Sensor Reading - ID: %s, Guid: %llu, Value: %.3f, Time: %s\n",
                 task->sensor->id.c_str(),
                 reading->id.AsUint64(),
-                reading->value.value_or(0.0f));
-            TimeHelpers::PrintTimePoint(*reading->timestamp);
+                reading->value.value_or(0.0f),
+                TimeHelpers::GetFormattedString(*reading->timestamp).c_str());
         } catch (const std::exception& e) {
             LOG_ERR("Error processing sensor: %s, Error: %s", task->sensor->id.c_str(), e.what());
         }

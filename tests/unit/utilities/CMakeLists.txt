@@ -9,9 +9,14 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# Path to muparser source and header
+set(MUPARSER_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../app/src/libs/muparser/src)
+set(MUPARSER_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../app/src/libs/muparser/include)
+file(GLOB_RECURSE MUPARSER_SOURCES ${MUPARSER_SRC_DIR}/*.cpp)
+
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/../../../app/src
-  ${CMAKE_CURRENT_SOURCE_DIR}/../../../app/src/libs/muparser/include
+  ${MUPARSER_INCLUDE_DIR}
 )
 
 # Collect all source files for the test
@@ -21,10 +26,11 @@ file(GLOB_RECURSE APP_SRC_UTILITIES_GUID
   ${APP_SRC_UTILITIES_GUID_DIR}/*.cpp
 )
 
-file(GLOB_RECURSE TEST_SOURCES *.c *.cpp)
+file(GLOB_RECURSE TEST_SOURCES src/*.c src/*.cpp)
 
 # Add all source files to the app target
 target_sources(app PRIVATE
   ${APP_SRC_UTILITIES_GUID}
   ${TEST_SOURCES}
+  ${MUPARSER_SOURCES}
 )

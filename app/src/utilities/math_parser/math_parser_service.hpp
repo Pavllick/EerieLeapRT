@@ -14,6 +14,7 @@ private:
 public:
     void SetExpression(const std::string& expression) {
         parser_.SetExpr(expression);
+        parser_.ClearVar();
     }
 
     double Evaluate() const {

@@ -18,6 +18,8 @@ private:
 
     std::string expression_raw_;
     std::string expression_;
+
+    std::string UnwrapVariables() const;
     
 public:
     ExpressionEvaluator(std::shared_ptr<MathParserService> math_parser_service, const std::string& expression);
@@ -27,7 +29,6 @@ public:
 
     double Evaluate(const std::unordered_map<std::string, double*>& variables, std::optional<double> x = std::nullopt) const;
     std::unordered_set<std::string> ExtractVariables() const;
-    std::string UnwrapVariables() const;
 };
 
 } // namespace eerie_leap::utilities::math_parser
