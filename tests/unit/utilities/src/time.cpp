@@ -1,5 +1,4 @@
 #include <memory>
-#include <stdio.h>
 #include <zephyr/kernel.h>
 #include <zephyr/ztest.h>
 

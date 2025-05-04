@@ -13,6 +13,7 @@ using namespace eerie_leap::domain::sensor_domain::models;
 
 class LinearVoltageInterpolator : public IVoltageInterpolator {
 private:
+    static const InterpolationMethod INTERPOLATION_METHOD = InterpolationMethod::LINEAR;
     std::shared_ptr<std::vector<CalibrationData>> calibration_table_;
 
 public:
@@ -52,6 +53,10 @@ public:
 
     const std::shared_ptr<std::vector<CalibrationData>> GetCalibrationTable() const override {
         return calibration_table_;
+    }
+
+    const InterpolationMethod GetInterpolationMethod() const override {
+        return INTERPOLATION_METHOD;
     }
 };
 

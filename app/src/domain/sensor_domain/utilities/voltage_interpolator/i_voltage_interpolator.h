@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include "domain/sensor_domain/utilities/voltage_interpolator/interpolation_method.h"
 #include "domain/sensor_domain/models/calibration_data.h"
 
 namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolator {
@@ -13,6 +14,7 @@ class IVoltageInterpolator {
 public:
     virtual double Interpolate(double voltage) const = 0;
     virtual const std::shared_ptr<std::vector<CalibrationData>> GetCalibrationTable() const = 0;
+    virtual const InterpolationMethod GetInterpolationMethod() const = 0;
 };
 
 } // namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolator

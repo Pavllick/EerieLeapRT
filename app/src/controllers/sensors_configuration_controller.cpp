@@ -39,7 +39,6 @@ void SensorsConfigurationController::Initialize() {
             .type = SensorType::PHYSICAL_ANALOG,
             .channel = 0,
             .sampling_rate_ms = 1000,
-            .interpolation_method = InterpolationMethod::LINEAR,
             .voltage_interpolator = std::make_shared<LinearVoltageInterpolator>(calibration_data_1_ptr),
             .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_1)
         }
@@ -67,7 +66,6 @@ void SensorsConfigurationController::Initialize() {
             .type = SensorType::PHYSICAL_ANALOG,
             .channel = 1,
             .sampling_rate_ms = 500,
-            .interpolation_method = InterpolationMethod::CUBIC_SPLINE,
             .voltage_interpolator = std::make_shared<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
             .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_2)
         }
@@ -86,8 +84,6 @@ void SensorsConfigurationController::Initialize() {
             .type = SensorType::VIRTUAL_ANALOG,
             .channel = std::nullopt,
             .sampling_rate_ms = 2000,
-            .interpolation_method = InterpolationMethod::NONE,
-            .voltage_interpolator = nullptr,
             .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_3)
         }
     };
@@ -112,7 +108,7 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
 
         SensorConfig sensor_config;
 
-        sensor_config.id = CborHelpers::ToZcborString(sensor->id);
+        sensor_config.id = CborHelpers::ToZcborString(&sensor->id);
         sensor_config.configuration.type = static_cast<uint32_t>(sensor->configuration.type);
 
         if(sensor->configuration.channel.has_value()) {
@@ -124,8 +120,11 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
 
         sensor_config.configuration.sampling_rate_ms = sensor->configuration.sampling_rate_ms;
 
-        sensor_config.configuration.interpolation_method = static_cast<uint32_t>(sensor->configuration.interpolation_method);
-        if(sensor->configuration.interpolation_method != InterpolationMethod::NONE) {
+        auto interpolation_method = sensor->configuration.voltage_interpolator != nullptr
+            ? sensor->configuration.voltage_interpolator->GetInterpolationMethod()
+            : InterpolationMethod::NONE;
+        sensor_config.configuration.interpolation_method = static_cast<uint32_t>(interpolation_method);
+        if(interpolation_method != InterpolationMethod::NONE) {
             sensor_config.configuration.calibration_table_present = true;
 
             auto& calibration_table = *sensor->configuration.voltage_interpolator->GetCalibrationTable();
@@ -149,17 +148,18 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
 
         if(sensor->configuration.expression_evaluator != nullptr) {
             sensor_config.configuration.expression_present = true;
-            sensor_config.configuration.expression = CborHelpers::ToZcborString(sensor->configuration.expression_evaluator->GetRawExpression());
+            std::string raw_expression = sensor->configuration.expression_evaluator->GetRawExpression();
+            sensor_config.configuration.expression = CborHelpers::ToZcborString(&raw_expression);
         } else {
             sensor_config.configuration.expression_present = false;
         }
 
-        sensor_config.metadata.unit = CborHelpers::ToZcborString(sensor->metadata.unit);
-        sensor_config.metadata.name = CborHelpers::ToZcborString(sensor->metadata.name);
+        sensor_config.metadata.unit = CborHelpers::ToZcborString(&sensor->metadata.unit);
+        sensor_config.metadata.name = CborHelpers::ToZcborString(&sensor->metadata.name);
 
         if(sensor_config.metadata.description_present) {
             sensor_config.metadata.description_present = true;
-            sensor_config.metadata.description = CborHelpers::ToZcborString(sensor->metadata.description);
+            sensor_config.metadata.description = CborHelpers::ToZcborString(&sensor->metadata.description);
         } else {
             sensor_config.metadata.description_present = false;
         }
@@ -202,10 +202,8 @@ const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfiguration
         
         sensor->configuration.sampling_rate_ms = sensor_config.configuration.sampling_rate_ms;
 
-        sensor->configuration.interpolation_method = static_cast<InterpolationMethod>(sensor_config.configuration.interpolation_method);
-        if(sensor->configuration.interpolation_method != InterpolationMethod::NONE
-            && sensor_config.configuration.calibration_table_present) {
-
+        auto interpolation_method = static_cast<InterpolationMethod>(sensor_config.configuration.interpolation_method);
+        if(interpolation_method != InterpolationMethod::NONE && sensor_config.configuration.calibration_table_present) {
             std::vector<CalibrationData> calibration_table;
             for(size_t j = 0; j < sensor_config.configuration.calibration_table.floatfloat_count; ++j) {
                 const auto& calibration_data = sensor_config.configuration.calibration_table.floatfloat[j];
@@ -216,7 +214,21 @@ const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfiguration
             }
 
             auto calibration_table_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_table);
-            sensor->configuration.voltage_interpolator = std::make_shared<LinearVoltageInterpolator>(calibration_table_ptr);
+            
+            switch (interpolation_method)
+            {
+            case InterpolationMethod::LINEAR:
+                sensor->configuration.voltage_interpolator = std::make_shared<LinearVoltageInterpolator>(calibration_table_ptr);
+                break;
+
+            case InterpolationMethod::CUBIC_SPLINE:
+                sensor->configuration.voltage_interpolator = std::make_shared<CubicSplineVoltageInterpolator>(calibration_table_ptr);
+                break;
+            
+            default:
+                throw std::runtime_error("Sensor uses unsupported interpolation method!");
+                break;
+            }
         } else {
             sensor->configuration.voltage_interpolator = nullptr;
         }

@@ -13,6 +13,7 @@ using namespace eerie_leap::domain::sensor_domain::models;
 
 class CubicSplineVoltageInterpolator : public IVoltageInterpolator {
 private:
+    static const InterpolationMethod INTERPOLATION_METHOD = InterpolationMethod::CUBIC_SPLINE;
     std::shared_ptr<std::vector<CalibrationData>> calibration_table_;
     std::vector<double> h_, alpha_, l_, mu_, z_;
     std::vector<double> a_, b_, c_, d_;
@@ -86,6 +87,10 @@ public:
 
     const std::shared_ptr<std::vector<CalibrationData>> GetCalibrationTable() const override {
         return calibration_table_;
+    }
+
+    const InterpolationMethod GetInterpolationMethod() const override {
+        return INTERPOLATION_METHOD;
     }
 };
 
