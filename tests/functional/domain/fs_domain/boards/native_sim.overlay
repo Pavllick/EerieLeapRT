@@ -1,0 +1,40 @@
+/ {
+	aliases {
+		lfs1 = &lfs1;
+	};
+
+	fstab {
+		compatible = "zephyr,fstab";
+		lfs1: lfs1 {
+			compatible = "zephyr,fstab,littlefs";
+			read-size = <16>;
+			prog-size = <16>;
+			cache-size = <64>;
+			lookahead-size = <32>;
+			block-cycles = <512>;
+			partition = <&lfs1_partition>;
+			mount-point = "/lfs1";
+			automount;
+		};
+	};
+};
+
+&flashcontroller0 {
+	reg = <0x00000000 DT_SIZE_M(4)>;  // 4MB flash controller
+};
+
+// HEX Flash dump can be found in the duild/flash.bin file
+&flash0 {
+	reg = <0x00000000 DT_SIZE_M(4)>;  // 4MB total flash
+
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		lfs1_partition: partition@1000 {
+			label = "lfs1_storage";
+			reg = <0x00001000 DT_SIZE_M(1)>;  // 0x00001000 offset, 1MB size
+		};
+	};
+};

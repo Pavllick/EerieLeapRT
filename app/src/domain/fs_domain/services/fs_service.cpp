@@ -133,6 +133,59 @@ bool FsService::DeleteFile(const std::string& relative_path) {
     return true;
 }
 
+bool FsService::DeleteRecursive(const std::string& relative_path) {
+    if(!is_mounted_) {
+        LOG_ERR("Filesystem not mounted!");
+        return false;
+    }
+
+    char full_path[256];
+    snprintf(full_path, sizeof(full_path), "%s/%s", mountpoint_->mnt_point, relative_path.c_str());
+
+    struct fs_dir_t dir;
+    struct fs_dirent entry;
+    fs_dir_t_init(&dir);
+
+    int rc = fs_opendir(&dir, full_path);
+    if(rc < 0) {
+        LOG_ERR("fs_opendir failed on path: %s (%d)", full_path, rc);
+        return false;
+    }
+
+    while(fs_readdir(&dir, &entry) == 0 && entry.name[0] != '\0') {
+        char entry_path[256];
+        snprintf(entry_path, sizeof(entry_path), "%s/%s", full_path, entry.name);
+
+        if(entry.type == FS_DIR_ENTRY_FILE) {
+            rc = fs_unlink(entry_path);
+            if(rc < 0) {
+                LOG_ERR("Failed to delete file: %s (%d)", entry_path, rc);
+                fs_closedir(&dir);
+                return false;
+            }
+        } else if(entry.type == FS_DIR_ENTRY_DIR) {
+            // Recurse into the directory
+            std::string child_relative = relative_path + "/" + entry.name;
+            if(!DeleteRecursive(child_relative)) {
+                fs_closedir(&dir);
+                return false;
+            }
+
+            // Remove the directory after its contents are gone
+            rc = fs_unlink(entry_path);
+            if(rc < 0) {
+                LOG_ERR("Failed to delete dir: %s (%d)", entry_path, rc);
+                fs_closedir(&dir);
+                return false;
+            }
+        }
+    }
+
+    fs_closedir(&dir);
+    return true;
+}
+
+
 std::vector<std::string> FsService::ListFiles(const std::string& relative_path) const {
     std::vector<std::string> files;
 

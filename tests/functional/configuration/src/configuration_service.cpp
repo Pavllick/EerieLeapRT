@@ -1,5 +1,4 @@
 #include <memory>
-#include <zephyr/kernel.h>
 #include <zephyr/ztest.h>
 
 #include "utilities/cbor/cbor_helpers.hpp"

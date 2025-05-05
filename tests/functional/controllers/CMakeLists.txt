@@ -9,35 +9,35 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+set(APP_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../app/src)
+include_directories(${APP_SRC_DIR})
+
 # Path to muparser source and header
-set(MUPARSER_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../app/src/libs/muparser/src)
-set(MUPARSER_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../app/src/libs/muparser/include)
+set(MUPARSER_SRC_DIR ${APP_SRC_DIR}/libs/muparser/src)
+set(MUPARSER_INCLUDE_DIR ${APP_SRC_DIR}/libs/muparser/include)
 file(GLOB_RECURSE MUPARSER_SOURCES ${MUPARSER_SRC_DIR}/*.cpp)
 
-include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}/../../../app/src
-  ${MUPARSER_INCLUDE_DIR}
-)
+include_directories(${MUPARSER_INCLUDE_DIR})
 
-set(APP_SRC_CONFIGURATION_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../app/src/configuration)
+set(APP_SRC_CONFIGURATION_DIR ${APP_SRC_DIR}/configuration)
 file(GLOB_RECURSE APP_SRC_CONFIGURATION
   ${APP_SRC_CONFIGURATION_DIR}/*.c
   ${APP_SRC_CONFIGURATION_DIR}/*.cpp
 )
 
-set(APP_SRC_CONTROLLERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../app/src/controllers)
+set(APP_SRC_CONTROLLERS_DIR ${APP_SRC_DIR}/controllers)
 file(GLOB_RECURSE APP_SRC_CONTROLLERS
   ${APP_SRC_CONTROLLERS_DIR}/*.c
   ${APP_SRC_CONTROLLERS_DIR}/*.cpp
 )
 
-set(APP_SRC_FS_DOMAIN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../app/src/domain/fs_domain)
+set(APP_SRC_FS_DOMAIN_DIR ${APP_SRC_DIR}/domain/fs_domain)
 file(GLOB_RECURSE APP_SRC_FS_DOMAIN
   ${APP_SRC_FS_DOMAIN_DIR}/*.c
   ${APP_SRC_FS_DOMAIN_DIR}/*.cpp
 )
 
-set(APP_SRC_SENSOR_DOMAIN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../app/src/domain/sensor_domain)
+set(APP_SRC_SENSOR_DOMAIN_DIR ${APP_SRC_DIR}/domain/sensor_domain)
 file(GLOB_RECURSE APP_SRC_SENSOR_DOMAIN_MODELS
   ${APP_SRC_SENSOR_DOMAIN_DIR}/models/*.c
   ${APP_SRC_SENSOR_DOMAIN_DIR}/models/*.cpp
@@ -48,7 +48,7 @@ file(GLOB_RECURSE APP_SRC_SENSOR_DOMAIN_UTILITIES
 )
 
 # Collect all source files for the test
-set(APP_SRC_UTILITIES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../app/src/utilities)
+set(APP_SRC_UTILITIES_DIR ${APP_SRC_DIR}/utilities)
 file(GLOB_RECURSE APP_SRC_UTILITIES
   ${APP_SRC_UTILITIES_DIR}/*.c
   ${APP_SRC_UTILITIES_DIR}/*.cpp
