@@ -1,5 +1,4 @@
 #include <memory>
-#include <stdio.h>
 #include <zephyr/kernel.h>
 #include <zephyr/ztest.h>
 
@@ -58,11 +57,11 @@ ZTEST(configuration_service, test_SensorsConfig_Save_config_successfully_saved) 
     std::string sensor_1_expression = "({var_d} + {y}) * 4";
     SensorConfigurationConfig configuration_config_1 = {
         .type = 1,
+        .sampling_rate_ms = 210,
+        .interpolation_method = 1,
         .channel = 6,
         .channel_present = true,
-        .sampling_rate_ms = 210,
         .calibration_table_present = false,
-        .interpolation_method = 1,
         .expression = CborHelpers::ToZcborString(&sensor_1_expression),
         .expression_present = true
     };
@@ -98,12 +97,12 @@ ZTEST(configuration_service, test_SensorsConfig_Save_config_successfully_saved) 
     std::string sensor_2_expression = "({x} - 8 * {var_d}) / {f}";
     SensorConfigurationConfig configuration_config_2 = {
         .type = 1,
+        .sampling_rate_ms = 250,
+        .interpolation_method = 1,
         .channel = 6,
         .channel_present = true,
-        .sampling_rate_ms = 250,
         .calibration_table = calibration_data_map_2,
         .calibration_table_present = true,
-        .interpolation_method = 1,
         .expression = CborHelpers::ToZcborString(&sensor_2_expression),
         .expression_present = true
     };
@@ -137,11 +136,11 @@ ZTEST(configuration_service, test_SensorsConfig_Load_config_successfully_saved_a
     std::string sensor_1_expression = "({var_d} + {y}) * 4";
     SensorConfigurationConfig configuration_config_1 = {
         .type = 1,
+        .sampling_rate_ms = 210,
+        .interpolation_method = 1,
         .channel = 6,
         .channel_present = true,
-        .sampling_rate_ms = 210,
         .calibration_table_present = false,
-        .interpolation_method = 1,
         .expression = CborHelpers::ToZcborString(&sensor_1_expression),
         .expression_present = true
     };
@@ -177,12 +176,12 @@ ZTEST(configuration_service, test_SensorsConfig_Load_config_successfully_saved_a
     std::string sensor_2_expression = "({x} - 8 * {var_d}) / {f}";
     SensorConfigurationConfig configuration_config_2 = {
         .type = 1,
+        .sampling_rate_ms = 250,
+        .interpolation_method = 1,
         .channel = 6,
         .channel_present = true,
-        .sampling_rate_ms = 250,
         .calibration_table = calibration_data_map_2,
         .calibration_table_present = true,
-        .interpolation_method = 1,
         .expression = CborHelpers::ToZcborString(&sensor_2_expression),
         .expression_present = true
     };

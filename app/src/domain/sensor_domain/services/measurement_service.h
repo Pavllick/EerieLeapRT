@@ -5,6 +5,7 @@
 
 #include "utilities/time/i_time_service.h"
 #include "utilities/guid/guid_generator.h"
+#include "utilities/math_parser/math_parser_service.hpp"
 #include "controllers/sensors_configuration_controller.h"
 #include "domain/adc_domain/hardware/i_adc.h"
 #include "domain/sensor_domain/services/scheduler/processing_scheduler_serivce.h"
@@ -13,6 +14,7 @@ namespace eerie_leap::domain::sensor_domain::services {
 
 using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::utilities::guid;
+using namespace eerie_leap::utilities::math_parser;
 using namespace eerie_leap::controllers;
 using namespace eerie_leap::domain::sensor_domain::services::scheduler;
 
@@ -46,10 +48,12 @@ private:
     std::shared_ptr<GuidGenerator> guid_generator_;
     
     std::shared_ptr<IAdc> adc_;
+    std::shared_ptr<MathParserService> math_parser_service_;
     std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller_;
     std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service_;
     
     void EntryPoint();
+    void SetupTestSensors();
 
 public:
     MeasurementService(

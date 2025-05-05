@@ -44,12 +44,12 @@ struct SensorCalibrationDataMap {
 
 struct SensorConfigurationConfig {
 	uint32_t type;
+	uint32_t sampling_rate_ms;
+	uint32_t interpolation_method;
 	uint32_t channel;
 	bool channel_present;
-	uint32_t sampling_rate_ms;
 	struct SensorCalibrationDataMap calibration_table;
 	bool calibration_table_present;
-	uint32_t interpolation_method;
 	struct zcbor_string expression;
 	bool expression_present;
 };

@@ -27,7 +27,7 @@ private:
 
     std::string configuration_name_;
     std::shared_ptr<IFsService> fs_service_;
-    std::shared_ptr<CborSerializer<T>> cbor_serializer_;
+    std::shared_ptr<CborSerializer<T, sizeof(T)>> cbor_serializer_;
 
     const std::string configuration_file_path_ = configuration_dir_ + "/" + configuration_name_ + ".cbor";
     
@@ -35,7 +35,7 @@ public:
     ConfigurationService(std::string configuration_name, std::shared_ptr<IFsService> fs_service) 
         : configuration_name_(configuration_name), fs_service_(std::move(fs_service)) {
 
-        cbor_serializer_ = std::make_shared<CborSerializer<T>>(CborTrait<T>::Encode, CborTrait<T>::Decode);
+        cbor_serializer_ = std::make_shared<CborSerializer<T, sizeof(T)>>(CborTrait<T>::Encode, CborTrait<T>::Decode);
 
         if (!fs_service_->Exists(configuration_dir_))
             fs_service_->CreateDirectory(configuration_dir_);

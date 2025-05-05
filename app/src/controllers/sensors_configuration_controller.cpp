@@ -13,100 +13,25 @@ using namespace eerie_leap::utilities::cbor;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 using namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolator;
 
-void SensorsConfigurationController::Initialize() {
+void SensorsConfigurationController::Initialize(std::shared_ptr<MathParserService> math_parser_service) {
     LOG_INF("Sensors Configuration Controller initialization started.");
 
-    math_parser_service_ = std::make_shared<MathParserService>();
-
-    // Test Sensors
-
-    std::vector<CalibrationData> calibration_data_1 {
-        {0.0, 0.0},
-        {3.3, 100.0}
-    };
-    auto calibration_data_1_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_1);
-
-    ExpressionEvaluator expression_evaluator_1(math_parser_service_, "{x} * 2 + {sensor_2} + 1");
-
-    Sensor sensor_1 {
-        .id = "sensor_1",
-        .metadata = {
-            .name = "Sensor 1",
-            .unit = "km/h",
-            .description = "Test Sensor 1"
-        },
-        .configuration = {
-            .type = SensorType::PHYSICAL_ANALOG,
-            .channel = 0,
-            .sampling_rate_ms = 1000,
-            .voltage_interpolator = std::make_shared<LinearVoltageInterpolator>(calibration_data_1_ptr),
-            .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_1)
-        }
-    };
-
-    std::vector<CalibrationData> calibration_data_2 {
-        {0.0, 0.0},
-        {1.0, 29.0},
-        {2.0, 111.0},
-        {2.5, 162.0},
-        {3.3, 200.0}
-    };
-    auto calibration_data_2_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_2);
-
-    ExpressionEvaluator expression_evaluator_2(math_parser_service_, "x * 4 + 1.6");
-
-    Sensor sensor_2 {
-        .id = "sensor_2",
-        .metadata = {
-            .name = "Sensor 2",
-            .unit = "km/h",
-            .description = "Test Sensor 2"
-        },
-        .configuration = {
-            .type = SensorType::PHYSICAL_ANALOG,
-            .channel = 1,
-            .sampling_rate_ms = 500,
-            .voltage_interpolator = std::make_shared<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
-            .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_2)
-        }
-    };
-
-    ExpressionEvaluator expression_evaluator_3(math_parser_service_, "{sensor_1} + 8.34");
-
-    Sensor sensor_3 {
-        .id = "sensor_3",
-        .metadata = {
-            .name = "Sensor 3",
-            .unit = "km/h",
-            .description = "Test Sensor 3"
-        },
-        .configuration = {
-            .type = SensorType::VIRTUAL_ANALOG,
-            .channel = std::nullopt,
-            .sampling_rate_ms = 2000,
-            .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_3)
-        }
-    };
-
-    std::vector<std::shared_ptr<Sensor>> sensors = {
-        std::make_shared<Sensor>(sensor_1),
-        std::make_shared<Sensor>(sensor_2),
-        std::make_shared<Sensor>(sensor_3)
-    };
-
-    Update(std::make_shared<std::vector<std::shared_ptr<Sensor>>>(sensors));
+    math_parser_service_ = math_parser_service;
 
     LOG_INF("Sensors Configuration Controller initialized successfully.");
 }
 
 bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> sensors) {
     SensorsConfig sensors_config;
+    memset(&sensors_config, 0, sizeof(sensors_config));
+
     SensorsOrderResolver resolver;
 
     for(size_t i = 0; i < sensors->size(); ++i) {
         const auto& sensor = sensors->at(i);
 
         SensorConfig sensor_config;
+        memset(&sensor_config, 0, sizeof(sensor_config));
 
         sensor_config.id = CborHelpers::ToZcborString(&sensor->id);
         sensor_config.configuration.type = static_cast<uint32_t>(sensor->configuration.type);
@@ -148,8 +73,7 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
 
         if(sensor->configuration.expression_evaluator != nullptr) {
             sensor_config.configuration.expression_present = true;
-            std::string raw_expression = sensor->configuration.expression_evaluator->GetRawExpression();
-            sensor_config.configuration.expression = CborHelpers::ToZcborString(&raw_expression);
+            sensor_config.configuration.expression = CborHelpers::ToZcborString(sensor->configuration.expression_evaluator->GetRawExpression());
         } else {
             sensor_config.configuration.expression_present = false;
         }
@@ -157,9 +81,9 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
         sensor_config.metadata.unit = CborHelpers::ToZcborString(&sensor->metadata.unit);
         sensor_config.metadata.name = CborHelpers::ToZcborString(&sensor->metadata.name);
 
-        if(sensor_config.metadata.description_present) {
+        if(sensor->metadata.description.has_value()) {
             sensor_config.metadata.description_present = true;
-            sensor_config.metadata.description = CborHelpers::ToZcborString(&sensor->metadata.description);
+            sensor_config.metadata.description = CborHelpers::ToZcborString(&sensor->metadata.description.value());
         } else {
             sensor_config.metadata.description_present = false;
         }
@@ -174,6 +98,7 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
     auto ordered_sensors = resolver.GetProcessingOrder();
     ordered_sensors_ = std::make_shared<std::vector<std::shared_ptr<Sensor>>>(ordered_sensors);
 
+    LOG_INF("Going to save.");
     return sensors_configuration_service_->Save(sensors_config);
 }
 

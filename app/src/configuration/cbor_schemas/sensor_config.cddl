@@ -8,10 +8,10 @@ SensorCalibrationDataMap = { 2*50(float => float) }
 
 SensorConfigurationConfig = [
   type: uint,
-  ? channel: uint,
   sampling_rate_ms: uint,
-  ? calibration_table: SensorCalibrationDataMap,
   interpolation_method: uint,
+  ? channel: uint,
+  ? calibration_table: SensorCalibrationDataMap,
   ? expression: tstr
 ]
 

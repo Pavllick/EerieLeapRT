@@ -27,7 +27,7 @@ public:
         sensors_config_(nullptr),
         ordered_sensors_(nullptr) {}
 
-    void Initialize();
+    void Initialize(std::shared_ptr<MathParserService> math_parser_service);
     bool Update(const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> sensors);
     const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> Get();
 };

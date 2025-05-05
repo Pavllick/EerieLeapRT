@@ -1,0 +1,7 @@
+common:
+  tags: controller
+  platform_allow:
+    - native_sim
+
+tests:
+  functional.controller: {}
