@@ -23,6 +23,7 @@ double AdcEmulator::ReadChannel(int channel) {
     if(channel < 0 || channel > adc_config_->channel_count)
         throw std::invalid_argument("ADC channel out of range!");
 
+#ifdef CONFIG_ADC_EMUL
     uint32_t raw = sys_rand32_get();
     uint16_t input_mv = static_cast<uint16_t>((static_cast<uint64_t>(raw) * 3301) >> 32);
     int err = adc_emul_const_value_set(adc_device_, channel, input_mv);
@@ -30,6 +31,7 @@ double AdcEmulator::ReadChannel(int channel) {
         printf("Could not set constant value (%d)\n", err);
         return 0;
     }
+#endif
 
     return Adc::ReadChannel(channel);
 }
