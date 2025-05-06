@@ -23,7 +23,7 @@ template <typename T>
 class ConfigurationService {
 private:
     const std::string configuration_dir_ = "config";
-    static const size_t max_config_buffer_size_ = 512;
+    static const size_t load_buffer_size_ = sizeof(T) + 256;
 
     std::string configuration_name_;
     std::shared_ptr<IFsService> fs_service_;
@@ -58,7 +58,7 @@ public:
             return std::nullopt;
         }
 
-        std::array<uint8_t, max_config_buffer_size_> buffer = {};
+        std::array<uint8_t, load_buffer_size_> buffer = {};
         size_t out_len = 0;
 
         if (!fs_service_->ReadFile(configuration_file_path_, buffer.data(), buffer.size(), out_len)) {
