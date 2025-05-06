@@ -1,6 +1,7 @@
 #include <array>
 #include <memory>
 #include <string>
+#include <cstdint>
 #include <unordered_set>
 #include <zephyr/ztest.h>
 
@@ -31,15 +32,15 @@ void SetupFiles(std::shared_ptr<FsService> fs_service, std::string& name_prefix)
     bool result = fs_service->CreateDirectory(dir_path);
     zassert_true(result);
 
-    std::string file_path_1 = "/test_" + name_prefix + "_dir/test_" + name_prefix + "_file_1.txt";
+    std::string file_path_1 = "test_" + name_prefix + "_dir/test_" + name_prefix + "_file_1.txt";
     result = fs_service->WriteFile(file_path_1, &test_data, sizeof(test_data));
     zassert_true(result);
 
-    std::string file_path_2 = "/test_" + name_prefix + "_dir/test_" + name_prefix + "_file_2.txt";
+    std::string file_path_2 = "test_" + name_prefix + "_dir/test_" + name_prefix + "_file_2.txt";
     result = fs_service->WriteFile(file_path_2, &test_data, sizeof(test_data));
     zassert_true(result);
 
-    std::string file_path_3 = "/test_" + name_prefix + "_dir/test_" + name_prefix + "_file_3.txt";
+    std::string file_path_3 = "test_" + name_prefix + "_dir/test_" + name_prefix + "_file_3.txt";
     result = fs_service->WriteFile(file_path_3, &test_data, sizeof(test_data));
     zassert_true(result);
 
@@ -128,7 +129,7 @@ ZTEST(fs_service, test_ListFiles) {
     std::string dir_path = "test_" + name_prefix + "_dir";
     SetupFiles(fs_service, name_prefix);
 
-    auto core_files = fs_service->ListFiles("/");
+    auto core_files = fs_service->ListFiles();
     zassert_equal(core_files.size(), 2);
 
     std::unordered_set<std::string> core_files_set;
@@ -140,7 +141,7 @@ ZTEST(fs_service, test_ListFiles) {
 
     auto dir_files = fs_service->ListFiles("test_" + name_prefix + "_dir");
     zassert_equal(dir_files.size(), 3);
-    
+
     std::unordered_set<std::string> dir_files_set;
     for(auto name : dir_files)
         dir_files_set.insert(name);
@@ -156,7 +157,7 @@ ZTEST(fs_service, test_Delete) {
     std::string dir_path = "test_" + name_prefix + "_dir";
     SetupFiles(fs_service, name_prefix);
 
-    auto core_files = fs_service->ListFiles("/");
+    auto core_files = fs_service->ListFiles();
     zassert_equal(core_files.size(), 2);
 
     std::unordered_set<std::string> core_files_set;
@@ -167,7 +168,7 @@ ZTEST(fs_service, test_Delete) {
 
     auto dir_files = fs_service->ListFiles(dir_path);
     zassert_equal(dir_files.size(), 3);
-    
+
     std::unordered_set<std::string> dir_files_set;
     for(auto name : dir_files)
         dir_files_set.insert(name);
@@ -178,7 +179,7 @@ ZTEST(fs_service, test_Delete) {
     fs_service->DeleteFile(dir_path + "/test_Delete_file_2.txt");
     dir_files = fs_service->ListFiles(dir_path);
     zassert_equal(dir_files.size(), 2);
-    
+
     dir_files_set.clear();
     for(auto name : dir_files)
         dir_files_set.insert(name);
@@ -187,7 +188,7 @@ ZTEST(fs_service, test_Delete) {
     zassert_equal(dir_files_set.count("test_Delete_file_3.txt"), 1);
 
     fs_service->DeleteFile("test_Delete_file_4.txt");
-    core_files = fs_service->ListFiles("/");
+    core_files = fs_service->ListFiles();
     zassert_equal(core_files.size(), 1);
 
     core_files_set.clear();
@@ -200,41 +201,41 @@ ZTEST(fs_service, test_Delete) {
 ZTEST(fs_service, test_DeleteRecursive) {
     auto fs_service = std::make_shared<FsService>();
 
-    auto core_files = fs_service->ListFiles("/");
+    auto core_files = fs_service->ListFiles();
     zassert_equal(core_files.size(), 0);
 
     std::string name_prefix = "DeleteRecursive";
     std::string dir_path = "test_" + name_prefix + "_dir";
     SetupFiles(fs_service, name_prefix);
 
-    core_files = fs_service->ListFiles("/");
+    core_files = fs_service->ListFiles();
     zassert_equal(core_files.size(), 2);
 
     auto dir_files = fs_service->ListFiles(dir_path);
     zassert_equal(dir_files.size(), 3);
 
-    fs_service->DeleteRecursive("/");
-    core_files = fs_service->ListFiles("/");
+    fs_service->DeleteRecursive();
+    core_files = fs_service->ListFiles();
     zassert_equal(core_files.size(), 0);
 }
 
 ZTEST(fs_service, test_Format) {
     auto fs_service = std::make_shared<FsService>();
 
-    auto core_files = fs_service->ListFiles("/");
+    auto core_files = fs_service->ListFiles();
     zassert_equal(core_files.size(), 0);
 
     std::string name_prefix = "Format";
     std::string dir_path = "test_" + name_prefix + "_dir";
     SetupFiles(fs_service, name_prefix);
 
-    core_files = fs_service->ListFiles("/");
+    core_files = fs_service->ListFiles();
     zassert_equal(core_files.size(), 2);
 
     auto dir_files = fs_service->ListFiles(dir_path);
     zassert_equal(dir_files.size(), 3);
 
     fs_service->Format();
-    core_files = fs_service->ListFiles("/");
+    core_files = fs_service->ListFiles();
     zassert_equal(core_files.size(), 0);
 }

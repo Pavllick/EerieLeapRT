@@ -30,8 +30,8 @@ public:
     bool CreateDirectory(const std::string& relative_path) override;
     bool Exists(const std::string& relative_path) override;
     bool DeleteFile(const std::string& relative_path) override;
-    bool DeleteRecursive(const std::string& relative_path) override;
-    std::vector<std::string> ListFiles(const std::string& relative_path) const override;
+    bool DeleteRecursive(const std::string& relative_path = "") override;
+    std::vector<std::string> ListFiles(const std::string& relative_path = "") const override;
     size_t GetTotalSpace() const override;
     size_t GetUsedSpace() const override;
     bool Format() override;

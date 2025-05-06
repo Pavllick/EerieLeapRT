@@ -13,8 +13,8 @@ public:
     virtual bool CreateDirectory(const std::string& relative_path) = 0;
     virtual bool Exists(const std::string& relative_path) = 0;
     virtual bool DeleteFile(const std::string& relative_path) = 0;
-    virtual bool DeleteRecursive(const std::string& relative_path) = 0;
-    virtual std::vector<std::string> ListFiles(const std::string& relative_path) const = 0;
+    virtual bool DeleteRecursive(const std::string& relative_path = "") = 0;
+    virtual std::vector<std::string> ListFiles(const std::string& relative_path = "") const = 0;
     virtual size_t GetTotalSpace() const = 0;
     virtual size_t GetUsedSpace() const = 0;
     virtual bool Format() = 0;

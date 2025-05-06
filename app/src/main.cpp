@@ -1,12 +1,9 @@
 #include <memory>
-#include <chrono>
 #include <ctime>
-#include <stdio.h>
 #include <zephyr/arch/cpu.h>
 #include <zephyr/logging/log.h>
 
 #include "utilities/dev_tools/system_info.h"
-#include "utilities/time/i_time_service.h"
 #include "utilities/guid/guid_generator.h"
 #include "utilities/time/boot_elapsed_time_service.h"
 #include "domain/fs_domain/services/fs_service.h"
@@ -36,7 +33,7 @@ int main(void) {
     time_service->Initialize();
 
     auto guid_generator = std::make_shared<GuidGenerator>();
-    
+
     auto system_config_service = std::make_shared<ConfigurationService<SystemConfig>>("system_config", fs_service);
     auto sensors_config_service = std::make_shared<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
 

@@ -28,7 +28,7 @@ double AdcEmulator::ReadChannel(int channel) {
     uint16_t input_mv = static_cast<uint16_t>((static_cast<uint64_t>(raw) * 3301) >> 32);
     int err = adc_emul_const_value_set(adc_device_, channel, input_mv);
     if(err < 0) {
-        printf("Could not set constant value (%d)\n", err);
+        LOG_ERR("Could not set constant value (%d)", err);
         return 0;
     }
 #endif

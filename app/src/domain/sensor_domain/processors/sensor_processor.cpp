@@ -1,5 +1,4 @@
 #include <stdexcept>
-#include <stdio.h>
 
 #include "sensor_processor.h"
 #include "domain/sensor_domain/models/reading_status.h"

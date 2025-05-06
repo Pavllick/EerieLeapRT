@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <cstdint>
 #include <zcbor_common.h>
 
 namespace eerie_leap::utilities::cbor {

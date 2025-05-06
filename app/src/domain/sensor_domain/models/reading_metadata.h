@@ -10,7 +10,7 @@ namespace eerie_leap::domain::sensor_domain::models {
 struct ReadingMetadata {
     std::unordered_map<ReadingMetadataTag, std::string> tags;
 
-    void AddTag(ReadingMetadataTag key, std::string value) {
+    void AddTag(ReadingMetadataTag key, const std::string& value) {
         tags[key] = value;
     }
 };

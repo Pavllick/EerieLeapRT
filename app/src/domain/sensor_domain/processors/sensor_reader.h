@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <vector>
 
 #include "utilities/time/i_time_service.h"
 #include "utilities/guid/guid_generator.h"
@@ -23,7 +22,7 @@ private:
     std::shared_ptr<GuidGenerator> guid_generator_;
     std::shared_ptr<IAdc> adc_;
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame_;
-    
+
 public:
     SensorReader(std::shared_ptr<ITimeService> time_service, std::shared_ptr<GuidGenerator> guid_generator, std::shared_ptr<IAdc> adc, std::shared_ptr<SensorReadingsFrame> sensor_readings_frame)
         : time_service_(std::move(time_service)), guid_generator_(std::move(guid_generator)), adc_(std::move(adc)), sensor_readings_frame_(std::move(sensor_readings_frame)) {}

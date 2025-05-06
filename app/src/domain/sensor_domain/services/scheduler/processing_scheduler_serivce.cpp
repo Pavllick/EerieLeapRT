@@ -2,7 +2,6 @@
 #include <vector>
 #include <zephyr/sys/util.h>
 
-#include "domain/sensor_domain/models/sensor.h"
 #include "utilities/time/time_helpers.hpp"
 #include "sensor_task.hpp"
 #include "processing_scheduler_serivce.h"

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <cstdint>
 #include <string>
 #include <optional>
 #include <span>
@@ -30,9 +31,9 @@ private:
     std::shared_ptr<CborSerializer<T, sizeof(T)>> cbor_serializer_;
 
     const std::string configuration_file_path_ = configuration_dir_ + "/" + configuration_name_ + ".cbor";
-    
+
 public:
-    ConfigurationService(std::string configuration_name, std::shared_ptr<IFsService> fs_service) 
+    ConfigurationService(std::string configuration_name, std::shared_ptr<IFsService> fs_service)
         : configuration_name_(configuration_name), fs_service_(std::move(fs_service)) {
 
         cbor_serializer_ = std::make_shared<CborSerializer<T, sizeof(T)>>(CborTrait<T>::Encode, CborTrait<T>::Decode);

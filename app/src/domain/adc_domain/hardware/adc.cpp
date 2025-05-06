@@ -32,7 +32,7 @@ int Adc::Initialize() {
 		}
 
 		if(channel_configs_[i].reference == ADC_REF_INTERNAL)
-		references_mv_[i] = adc_ref_internal(adc_device_);
+			references_mv_[i] = adc_ref_internal(adc_device_);
 	}
 
     LOG_INF("Adc initialized successfully.");

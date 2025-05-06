@@ -1,7 +1,11 @@
 # editors
 .vscode
+.cache
 *.swp
 *~
+.editorconfig
+.clang-format
+.clang-tidy
 
 # python
 .venv

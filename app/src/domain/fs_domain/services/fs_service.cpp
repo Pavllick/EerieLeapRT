@@ -1,6 +1,7 @@
 #include <sstream>
 #include <zephyr/fs/fs.h>
 #include <zephyr/logging/log.h>
+#include <filesystem>
 
 #include "fs_service.h"
 
@@ -18,13 +19,13 @@ bool FsService::WriteFile(const std::string& relative_path, const void* data_p, 
         return false;
     }
 
-    char full_path[256];
-    snprintf(full_path, sizeof(full_path), "%s/%s", mountpoint_->mnt_point, relative_path.c_str());
+    std::filesystem::path full_path(mountpoint_->mnt_point);
+    full_path /= relative_path;
 
     struct fs_file_t file;
     fs_file_t_init(&file);
 
-    int rc = fs_open(&file, full_path, FS_O_WRITE | FS_O_CREATE | FS_O_TRUNC);
+    int rc = fs_open(&file, full_path.string().c_str(), FS_O_WRITE | FS_O_CREATE | FS_O_TRUNC);
     if(rc < 0) {
         LOG_ERR("fs_open failed: %d", rc);
         return false;
@@ -47,13 +48,13 @@ bool FsService::ReadFile(const std::string& relative_path, void* data_p, size_t 
         return false;
     }
 
-    char full_path[256];
-    snprintf(full_path, sizeof(full_path), "%s/%s", mountpoint_->mnt_point, relative_path.c_str());
+    std::filesystem::path full_path(mountpoint_->mnt_point);
+    full_path /= relative_path;
 
     struct fs_file_t file;
     fs_file_t_init(&file);
 
-    int rc = fs_open(&file, full_path, FS_O_READ);
+    int rc = fs_open(&file, full_path.string().c_str(), FS_O_READ);
     if(rc < 0) {
         LOG_ERR("fs_open failed: %d", rc);
         return false;
@@ -80,21 +81,17 @@ bool FsService::CreateDirectory(const std::string& relative_path) {
 
     std::istringstream stream(relative_path);
     std::string segment;
-    std::string current;
-
-    char full_path[256];
-    snprintf(full_path, sizeof(full_path), "%s", mountpoint_->mnt_point);
+    std::filesystem::path full_path(mountpoint_->mnt_point);
 
     while(std::getline(stream, segment, '/')) {
         if(segment.empty()) continue;
 
         // Append segment to path
-        strncat(full_path, "/", sizeof(full_path) - strlen(full_path) - 1);
-        strncat(full_path, segment.c_str(), sizeof(full_path) - strlen(full_path) - 1);
+        full_path /= segment;
 
-        int rc = fs_mkdir(full_path);
+        int rc = fs_mkdir(full_path.string().c_str());
         if(rc < 0 && rc != -EEXIST) {
-            LOG_ERR("Failed to create dir '%s': %d", full_path, rc);
+            LOG_ERR("Failed to create dir '%s': %d", full_path.string().c_str(), rc);
             return false;
         }
     }
@@ -108,11 +105,11 @@ bool FsService::Exists(const std::string& relative_path) {
         return false;
     }
 
-    char full_path[256];
-    snprintf(full_path, sizeof(full_path), "%s/%s", mountpoint_->mnt_point, relative_path.c_str());
+    std::filesystem::path full_path(mountpoint_->mnt_point);
+    full_path /= relative_path;
 
     struct fs_dirent entry;
-    int rc = fs_stat(full_path, &entry);
+    int rc = fs_stat(full_path.string().c_str(), &entry);
 
     return rc == 0;
 }
@@ -121,10 +118,10 @@ bool FsService::DeleteFile(const std::string& relative_path) {
     if(!is_mounted_)
         return false;
 
-    char full_path[256];
-    snprintf(full_path, sizeof(full_path), "%s/%s", mountpoint_->mnt_point, relative_path.c_str());
+    std::filesystem::path full_path(mountpoint_->mnt_point);
+    full_path /= relative_path;
 
-    int rc = fs_unlink(full_path);
+    int rc = fs_unlink(full_path.string().c_str());
     if(rc < 0) {
         LOG_ERR("fs_unlink failed: %d", rc);
         return false;
@@ -139,42 +136,41 @@ bool FsService::DeleteRecursive(const std::string& relative_path) {
         return false;
     }
 
-    char full_path[256];
-    snprintf(full_path, sizeof(full_path), "%s/%s", mountpoint_->mnt_point, relative_path.c_str());
+    std::filesystem::path full_path(mountpoint_->mnt_point);
+    full_path /= relative_path;
 
     struct fs_dir_t dir;
     struct fs_dirent entry;
     fs_dir_t_init(&dir);
 
-    int rc = fs_opendir(&dir, full_path);
+    int rc = fs_opendir(&dir, full_path.string().c_str());
     if(rc < 0) {
-        LOG_ERR("fs_opendir failed on path: %s (%d)", full_path, rc);
+        LOG_ERR("fs_opendir failed on path: %s (%d)", full_path.string().c_str(), rc);
         return false;
     }
 
     while(fs_readdir(&dir, &entry) == 0 && entry.name[0] != '\0') {
-        char entry_path[256];
-        snprintf(entry_path, sizeof(entry_path), "%s/%s", full_path, entry.name);
+        std::filesystem::path entry_path(full_path);
+        entry_path /= entry.name;
 
         if(entry.type == FS_DIR_ENTRY_FILE) {
-            rc = fs_unlink(entry_path);
+            rc = fs_unlink(entry_path.string().c_str());
             if(rc < 0) {
-                LOG_ERR("Failed to delete file: %s (%d)", entry_path, rc);
+                LOG_ERR("Failed to delete file: %s (%d)", entry_path.string().c_str(), rc);
                 fs_closedir(&dir);
                 return false;
             }
         } else if(entry.type == FS_DIR_ENTRY_DIR) {
             // Recurse into the directory
-            std::string child_relative = relative_path + "/" + entry.name;
-            if(!DeleteRecursive(child_relative)) {
+            if(!DeleteRecursive(entry_path.string())) {
                 fs_closedir(&dir);
                 return false;
             }
 
             // Remove the directory after its contents are gone
-            rc = fs_unlink(entry_path);
+            rc = fs_unlink(entry_path.string().c_str());
             if(rc < 0) {
-                LOG_ERR("Failed to delete dir: %s (%d)", entry_path, rc);
+                LOG_ERR("Failed to delete dir: %s (%d)", entry_path.string().c_str(), rc);
                 fs_closedir(&dir);
                 return false;
             }
@@ -194,15 +190,15 @@ std::vector<std::string> FsService::ListFiles(const std::string& relative_path) 
         return files;
     }
 
-    char full_path[256];
-    snprintf(full_path, sizeof(full_path), "%s/%s", mountpoint_->mnt_point, relative_path.c_str());
+    std::filesystem::path full_path(mountpoint_->mnt_point);
+    full_path /= relative_path;
 
     struct fs_dir_t dir;
     struct fs_dirent entry;
     fs_dir_t_init(&dir);
 
-    if(fs_opendir(&dir, full_path) < 0) {
-        LOG_ERR("fs_opendir failed on path: %s", full_path);
+    if(fs_opendir(&dir, full_path.string().c_str()) < 0) {
+        LOG_ERR("fs_opendir failed on path: %s", full_path.string().c_str());
         return files;
     }
 

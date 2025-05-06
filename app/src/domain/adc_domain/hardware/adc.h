@@ -1,8 +1,8 @@
 #pragma once
 
 #include <memory>
+#include <cstdint>
 #include <optional>
-#include <stdio.h>
 #include <zephyr/drivers/adc.h>
 
 #include "i_adc.h"
@@ -34,7 +34,7 @@ protected:
 public:
     Adc() = default;
     ~Adc() = default;
-    
+
     int Initialize() override;
     void UpdateConfiguration(AdcConfig config) override;
     double ReadChannel(int channel) override;
