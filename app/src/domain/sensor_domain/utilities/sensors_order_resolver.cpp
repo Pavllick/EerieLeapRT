@@ -12,7 +12,7 @@ void SensorsOrderResolver::AddSensor(std::shared_ptr<Sensor> sensor) {
     std::string sensorId = sensor->id;
     auto expression_evaluator = sensor->configuration.expression_evaluator;
 
-    sensors_[sensorId] = std::move(sensor);
+    sensors_[sensorId] = sensor;
 
     if(expression_evaluator != nullptr) {
         auto sensorIds = expression_evaluator->ExtractVariables();
