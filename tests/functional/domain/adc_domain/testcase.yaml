@@ -1,0 +1,9 @@
+common:
+  tags:
+    - domain
+    - adc_domain
+  platform_allow:
+    - native_sim
+
+tests:
+  functional.adc_domain: {}

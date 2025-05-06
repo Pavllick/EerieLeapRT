@@ -16,9 +16,6 @@ static uint32_t references_mv_[] = {DT_FOREACH_CHILD_SEP(ADC_NODE, CHANNEL_VREF,
 int Adc::Initialize() {
     LOG_INF("Adc initialization started.");
 
-	if(!adc_config_)
-        throw std::runtime_error("ADC config is not set!");
-
 	adc_device_ = DEVICE_DT_GET(ADC_NODE);
 
 	if(!device_is_ready(adc_device_)) {

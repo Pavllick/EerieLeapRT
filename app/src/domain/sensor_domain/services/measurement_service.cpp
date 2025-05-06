@@ -118,8 +118,7 @@ void MeasurementService::EntryPoint() {
     adc_->UpdateConfiguration(AdcConfig{
         .channel_count = 4,
         .resolution = 12,
-        .samples = 1,
-        .sampling_interval_us = 0
+        .samples = 1
     });
     adc_->Initialize();
 
