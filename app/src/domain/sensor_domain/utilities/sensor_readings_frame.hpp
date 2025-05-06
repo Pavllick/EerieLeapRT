@@ -22,7 +22,7 @@ public:
     void AddOrUpdateReading(std::shared_ptr<SensorReading> sensor_reading) {
         std::string sensor_id = sensor_reading->sensor->id;
 
-        readings_[sensor_id] = std::move(sensor_reading);
+        readings_[sensor_id] = sensor_reading;
 
         if (readings_[sensor_id]->value.has_value() && readings_[sensor_id]->status != ReadingStatus::ERROR)
             readings_values_[sensor_id] = &readings_[sensor_id]->value.value();

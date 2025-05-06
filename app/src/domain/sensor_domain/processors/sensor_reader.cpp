@@ -16,8 +16,6 @@ void SensorReader::Read(std::shared_ptr<Sensor> sensor) {
         double reading = adc_->ReadChannel(sensor->configuration.channel.value());
         sensor_reading->value = reading;
         sensor_reading->status = ReadingStatus::RAW;
-
-        sensor_readings_frame_->AddOrUpdateReading(sensor_reading);
     } else if (sensor->configuration.type == SensorType::VIRTUAL_ANALOG) {
         sensor_reading->status = ReadingStatus::UNINITIALIZED;
     } else {

@@ -35,7 +35,7 @@ using namespace eerie_leap::configuration::services;
 int main(void) {
     std::shared_ptr<IFsService> fs_service = std::make_shared<FsService>();
 
-    std::shared_ptr<ITimeService> time_service = std::make_shared<BootElapsedTimeService>();
+    auto time_service = std::make_shared<BootElapsedTimeService>();
     time_service->Initialize();
 
     auto guid_generator = std::make_shared<GuidGenerator>();

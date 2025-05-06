@@ -11,6 +11,7 @@
 namespace eerie_leap::domain::sensor_domain::services {
 
 using namespace eerie_leap::domain::adc_domain::hardware;
+using namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolator;
 
 LOG_MODULE_REGISTER(measurement_service_logger);
 
