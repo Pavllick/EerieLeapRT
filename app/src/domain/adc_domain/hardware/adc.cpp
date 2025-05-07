@@ -48,7 +48,7 @@ int Adc::Initialize() {
     return 0;
 }
 
-void Adc::UpdateConfiguration(AdcConfig config) {
+void Adc::UpdateConfiguration(AdcConfiguration config) {
     adc_config_ = config;
 
 	samples_buffer_ = std::make_unique<uint16_t[]>(adc_config_->samples);

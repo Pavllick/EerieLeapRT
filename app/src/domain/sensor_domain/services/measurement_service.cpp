@@ -116,7 +116,7 @@ void MeasurementService::EntryPoint() {
 #else
     adc_ = std::make_shared<Adc>();
 #endif
-    adc_->UpdateConfiguration(AdcConfig{
+    adc_->UpdateConfiguration(AdcConfiguration{
         .samples = 1
     });
     adc_->Initialize();

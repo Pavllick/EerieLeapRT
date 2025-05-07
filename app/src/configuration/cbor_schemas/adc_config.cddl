@@ -1,0 +1,4 @@
+AdcConfig = [
+  name: tstr,
+  samples: uint
+]

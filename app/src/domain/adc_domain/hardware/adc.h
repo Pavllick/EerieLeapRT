@@ -8,7 +8,7 @@
 #include <zephyr/drivers/adc.h>
 
 #include "i_adc.h"
-#include "adc_config.h"
+#include "adc_configuration.h"
 
 namespace eerie_leap::domain::adc_domain::hardware {
 
@@ -32,7 +32,7 @@ static const uint8_t resolutions_[] = {DT_FOREACH_CHILD_SEP(ADC_NODE, CHANNEL_RE
 
 class Adc : public IAdc {
 protected:
-    std::optional<AdcConfig> adc_config_;
+    std::optional<AdcConfiguration> adc_config_;
     const struct device* adc_device_;
     std::array<adc_sequence, dt_adc_channel_count_> sequences_;
     adc_sequence_options sequence_options_;
@@ -45,7 +45,7 @@ public:
     ~Adc() = default;
 
     int Initialize() override;
-    void UpdateConfiguration(AdcConfig config) override;
+    void UpdateConfiguration(AdcConfiguration config) override;
     double ReadChannel(int channel) override;
 };
 

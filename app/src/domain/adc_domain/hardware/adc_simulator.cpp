@@ -16,7 +16,7 @@ int AdcSimulator::Initialize() {
     return 0;
 }
 
-void AdcSimulator::UpdateConfiguration(AdcConfig config) {
+void AdcSimulator::UpdateConfiguration(AdcConfiguration config) {
     adc_config_ = config;
     LOG_INF("Adc configuration updated.");
 }

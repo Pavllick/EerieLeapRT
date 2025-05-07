@@ -3,7 +3,7 @@
 #include "utilities/guid/guid_generator.h"
 #include "utilities/time/boot_elapsed_time_service.h"
 #include "utilities/math_parser/math_parser_service.hpp"
-#include "domain/adc_domain/hardware/adc_config.h"
+#include "domain/adc_domain/hardware/adc_configuration.h"
 #include "domain/adc_domain/hardware/i_adc.h"
 #include "domain/adc_domain/hardware/adc_simulator.h"
 #include "domain/sensor_domain/utilities/sensors_order_resolver.h"
@@ -123,7 +123,7 @@ sensor_processor_HelperInstances sensor_processor_GetReadingInstances() {
 
     auto adc = std::make_shared<AdcSimulator>();
     adc->Initialize();
-    adc->UpdateConfiguration(AdcConfig {
+    adc->UpdateConfiguration(AdcConfiguration {
         .samples = 1
     });
 

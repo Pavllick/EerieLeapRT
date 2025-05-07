@@ -5,20 +5,20 @@
 #include <zephyr/random/random.h>
 
 #include "i_adc.h"
-#include "adc_config.h"
+#include "adc_configuration.h"
 
 namespace eerie_leap::domain::adc_domain::hardware {
 
 class AdcSimulator : public IAdc {
 private:
-    std::optional<AdcConfig> adc_config_;
+    std::optional<AdcConfiguration> adc_config_;
 
 public:
     AdcSimulator() = default;
     ~AdcSimulator() = default;
 
     int Initialize() override;
-    void UpdateConfiguration(AdcConfig config) override;
+    void UpdateConfiguration(AdcConfiguration config) override;
     double ReadChannel(int channel) override;
 };
 

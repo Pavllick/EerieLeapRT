@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 
-#include "domain/adc_domain/hardware/adc_config.h"
+#include "domain/adc_domain/hardware/adc_configuration.h"
 #include "domain/adc_domain/hardware/adc_simulator.h"
 #include "domain/adc_domain/hardware/adc_emulator.h"
 
@@ -13,7 +13,7 @@ using namespace eerie_leap::domain::adc_domain::hardware;
 ZTEST_SUITE(adc, NULL, NULL, NULL, NULL, NULL);
 
 void ReadChannel_has_config(std::shared_ptr<IAdc> adc) {
-    AdcConfig adc_config = {
+    AdcConfiguration adc_config = {
         .samples = 1
     };
 
@@ -71,7 +71,7 @@ ZTEST(adc, test_Emulator_ReadChannel_no_config) {
 
 
 void ReadChannel_out_of_range(std::shared_ptr<IAdc> adc) {
-    AdcConfig adc_config = {
+    AdcConfiguration adc_config = {
         .samples = 1
     };
 
