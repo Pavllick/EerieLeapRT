@@ -3,7 +3,7 @@
 		lfs1 = &lfs1;
         adc0 = &adc0;
 	};
-    
+
     fstab {
         compatible = "zephyr,fstab";
         lfs1: lfs1 {

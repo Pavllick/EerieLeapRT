@@ -10,18 +10,22 @@ namespace eerie_leap::domain::adc_domain::hardware {
 
 LOG_MODULE_REGISTER(adc_logger);
 
-/* Data array of ADC channel voltage references. */
-static uint32_t references_mv_[] = {DT_FOREACH_CHILD_SEP(ADC_NODE, CHANNEL_VREF, (,))};
-
 int Adc::Initialize() {
     LOG_INF("Adc initialization started.");
 
 	adc_device_ = DEVICE_DT_GET(ADC_NODE);
 
 	if(!device_is_ready(adc_device_)) {
-		LOG_ERR("ADC controller device %s not ready\n", adc_device_->name);
+		LOG_ERR("ADC device not ready");
 		return -1;
 	}
+
+    if(dt_adc_channel_count_ == 0) {
+        LOG_ERR("No ADC channels configured in device tree");
+        return -1;
+    }
+
+    LOG_INF("ADC initialized with %d channels", dt_adc_channel_count_);
 
 	/* Configure channels. */
 	for(size_t i = 0U; i < dt_adc_channel_count_; i++) {
@@ -31,8 +35,12 @@ int Adc::Initialize() {
 			return 0;
 		}
 
-		if(channel_configs_[i].reference == ADC_REF_INTERNAL)
-			references_mv_[i] = adc_ref_internal(adc_device_);
+        if(channel_configs_[i].reference == ADC_REF_INTERNAL)
+		    references_mv_[i] = adc_ref_internal(adc_device_);
+
+        available_channels_.insert(channel_configs_[i].channel_id);
+
+		LOG_INF("Channel %d configured", channel_configs_[i].channel_id);
 	}
 
     LOG_INF("Adc initialized successfully.");
@@ -41,9 +49,6 @@ int Adc::Initialize() {
 }
 
 void Adc::UpdateConfiguration(AdcConfig config) {
-	if(config.channel_count > (int)dt_adc_channel_count_)
-		throw std::invalid_argument("ADC channel count out of range!");
-
     adc_config_ = config;
 
 	samples_buffer_ = std::make_unique<uint16_t[]>(adc_config_->samples);
@@ -53,12 +58,14 @@ void Adc::UpdateConfiguration(AdcConfig config) {
 		.extra_samplings = static_cast<uint16_t>(adc_config_->samples - 1),
 	};
 
-	sequence_ = {
-		.options     = &sequence_options_,
-		.buffer      = samples_buffer_.get(),
-		.buffer_size = sizeof(uint16_t) * adc_config_->samples,
-		.resolution  = adc_config_->resolution,
-	};
+	for(size_t i = 0U; i < dt_adc_channel_count_; i++) {
+		sequences_[i] = {
+			.options     = &sequence_options_,
+			.buffer      = samples_buffer_.get(),
+			.buffer_size = sizeof(uint16_t) * adc_config_->samples,
+			.resolution  = resolutions_[i],
+		};
+	}
 
     LOG_INF("Adc configuration updated.");
 }
@@ -67,19 +74,19 @@ double Adc::ReadChannel(int channel) {
     if(!adc_config_)
         throw std::runtime_error("ADC config is not set!");
 
-    if(channel < 0 || channel > adc_config_->channel_count)
-        throw std::invalid_argument("ADC channel out of range!");
+    if(available_channels_.find(channel) == available_channels_.end())
+        throw std::invalid_argument("ADC channel is not available.");
 
-	sequence_.channels = BIT(channel_configs_[channel].channel_id);
+	sequences_[channel].channels = BIT(channel_configs_[channel].channel_id);
 
-    int err = adc_read(adc_device_, &sequence_);
+    int err = adc_read(adc_device_, &sequences_[channel]);
     if(err < 0) {
-        LOG_ERR("Can not read channel - %d, error: (%d)\n", channel, err);
+        LOG_ERR("Can not read channel: %d, error: (%d)\n", channel, err);
 		return 0;
     }
 
 	int32_t val_mv = GetReding();
-	err = adc_raw_to_millivolts(references_mv_[channel], channel_configs_[channel].gain, adc_config_->resolution, &val_mv);
+	err = adc_raw_to_millivolts(references_mv_[channel], channel_configs_[channel].gain, sequences_[channel].resolution, &val_mv);
 
 	if((err < 0) || references_mv_[channel] == 0) {
 		LOG_ERR("ADC conversion for channel %d to mV failed (%d)\n", channel, err);

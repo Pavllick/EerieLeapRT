@@ -117,14 +117,12 @@ sensors_reader_HelperInstances sensors_reader_GetReadingInstances() {
     auto adc = std::make_shared<AdcSimulator>();
     adc->Initialize();
     adc->UpdateConfiguration(AdcConfig {
-        .channel_count = 4,
-        .resolution = 12,
         .samples = 1
     });
 
     auto sensor_readings_frame = std::make_shared<SensorReadingsFrame>();
     auto sensor_reader = std::make_shared<SensorReader>(time_service, guid_generator, adc, sensor_readings_frame);
-    
+
     return sensors_reader_HelperInstances {
         .math_parser_service = math_parser_service,
         .sensor_readings_frame = sensor_readings_frame,

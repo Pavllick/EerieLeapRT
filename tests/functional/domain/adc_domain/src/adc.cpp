@@ -14,8 +14,6 @@ ZTEST_SUITE(adc, NULL, NULL, NULL, NULL, NULL);
 
 void ReadChannel_has_config(std::shared_ptr<IAdc> adc) {
     AdcConfig adc_config = {
-        .channel_count = 4,
-        .resolution = 12,
         .samples = 1
     };
 
@@ -26,7 +24,7 @@ void ReadChannel_has_config(std::shared_ptr<IAdc> adc) {
     for(int j = 0; j < 100; j++) {
         double total = 0;
 
-        for(int i = 0; i < adc_config.channel_count; i++) {
+        for(int i = 0; i < 4; i++) {
             double reading = adc->ReadChannel(2);
             zassert_between_inclusive(reading, 0, 3.3);
 
@@ -74,8 +72,6 @@ ZTEST(adc, test_Emulator_ReadChannel_no_config) {
 
 void ReadChannel_out_of_range(std::shared_ptr<IAdc> adc) {
     AdcConfig adc_config = {
-        .channel_count = 4,
-        .resolution = 12,
         .samples = 1
     };
 

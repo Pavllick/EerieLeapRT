@@ -20,8 +20,8 @@ double AdcEmulator::ReadChannel(int channel) {
     if(!adc_config_)
         throw std::runtime_error("ADC config is not set!");
 
-    if(channel < 0 || channel > adc_config_->channel_count)
-        throw std::invalid_argument("ADC channel out of range!");
+    if(available_channels_.find(channel) == available_channels_.end())
+        throw std::invalid_argument("ADC channel is not available.");
 
 #ifdef CONFIG_ADC_EMUL
     uint32_t raw = sys_rand32_get();

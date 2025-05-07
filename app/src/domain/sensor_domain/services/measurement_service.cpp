@@ -117,8 +117,6 @@ void MeasurementService::EntryPoint() {
     adc_ = std::make_shared<Adc>();
 #endif
     adc_->UpdateConfiguration(AdcConfig{
-        .channel_count = 4,
-        .resolution = 12,
         .samples = 1
     });
     adc_->Initialize();
@@ -127,11 +125,11 @@ void MeasurementService::EntryPoint() {
 
     sensors_configuration_controller_->Initialize(math_parser_service_);
     SetupTestSensors();
-    
+
     processing_scheduler_service_ = std::make_shared<ProcessingSchedulerService>(time_service_, guid_generator_, adc_, sensors_configuration_controller_);
 
     processing_scheduler_service_->Start();
-    
+
     return;
 }
 

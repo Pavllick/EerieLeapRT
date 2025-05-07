@@ -124,14 +124,12 @@ sensor_processor_HelperInstances sensor_processor_GetReadingInstances() {
     auto adc = std::make_shared<AdcSimulator>();
     adc->Initialize();
     adc->UpdateConfiguration(AdcConfig {
-        .channel_count = 4,
-        .resolution = 12,
         .samples = 1
     });
 
     auto sensor_readings_frame = std::make_shared<SensorReadingsFrame>();
     auto sensor_reader = std::make_shared<SensorReader>(time_service, guid_generator, adc, sensor_readings_frame);
-    
+
     return sensor_processor_HelperInstances {
         .math_parser_service = math_parser_service,
         .sensor_readings_frame = sensor_readings_frame,
@@ -172,7 +170,7 @@ ZTEST(sensor_processor, test_ProcessSensorReading) {
         SensorProcessor sensor_processor(sensor_readings_frame);
         for(auto& sensor : sensors)
             sensor_processor.ProcessSensorReading(sensor_readings_frame->GetReading(sensor->id));
-        
+
         auto proc_reading_2 = sensor_readings_frame->GetReadings().at("sensor_2");
         zassert_equal(proc_reading_2->status, ReadingStatus::PROCESSED);
         zassert_true(proc_reading_2->value.has_value());

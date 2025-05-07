@@ -8,7 +8,7 @@ namespace eerie_leap::domain::adc_domain::hardware {
 
 LOG_MODULE_REGISTER(adc_simulator_logger);
 
-int AdcSimulator::Initialize() { 
+int AdcSimulator::Initialize() {
     LOG_INF("Adc Simulator initialization started.");
 
     LOG_INF("Adc Simulator initialized successfully.");
@@ -25,7 +25,7 @@ double AdcSimulator::ReadChannel(int channel) {
     if(!adc_config_)
         throw std::runtime_error("ADC config is not set!");
 
-    if(channel < 0 || channel > adc_config_->channel_count)
+    if(channel < 0 || channel > 31)
         throw std::invalid_argument("ADC channel out of range!");
 
     uint32_t raw = sys_rand32_get();
