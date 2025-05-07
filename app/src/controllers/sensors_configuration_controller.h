@@ -32,4 +32,4 @@ public:
     const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> Get();
 };
 
-} // namespace eerie_leap::domain::sensor_domain::controllers
+} // namespace eerie_leap::controllers

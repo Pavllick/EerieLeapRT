@@ -20,6 +20,7 @@ ZTEST(configuration_service, test_SystemConfig_Save_config_successfully_saved) {
     system_config.sw_version = 2422;
 
     auto fs_service = std::make_shared<FsService>();
+    fs_service->Format();
     auto system_config_service = std::make_shared<ConfigurationService<SystemConfig>>("system_config", fs_service);
 
     auto save_res = system_config_service->Save(system_config);
@@ -32,6 +33,7 @@ ZTEST(configuration_service, test_SystemConfig_Load_config_successfully_saved_an
     system_config.sw_version = 8624;
 
     auto fs_service = std::make_shared<FsService>();
+    fs_service->Format();
     auto system_config_service = std::make_shared<ConfigurationService<SystemConfig>>("system_config", fs_service);
 
     auto save_res = system_config_service->Save(system_config);
@@ -116,6 +118,7 @@ ZTEST(configuration_service, test_SensorsConfig_Save_config_successfully_saved) 
     SensorsConfig sensors_config = { sensor_config_1, sensor_config_2 };
 
     auto fs_service = std::make_shared<FsService>();
+    fs_service->Format();
     auto sensors_config_service = std::make_shared<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
 
     auto save_res = sensors_config_service->Save(sensors_config);
@@ -200,6 +203,7 @@ ZTEST(configuration_service, test_SensorsConfig_Load_config_successfully_saved_a
 
     // Initialize services
     auto fs_service = std::make_shared<FsService>();
+    fs_service->Format();
     auto sensors_config_service = std::make_shared<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
 
     // Save config

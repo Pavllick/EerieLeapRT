@@ -8,7 +8,7 @@
 #include <zephyr/logging/log.h>
 
 #include "configuration/cbor_traits/system_config_trait.h"
-#include <configuration/cbor_traits/sensors_config_trait.h>
+#include "configuration/cbor_traits/sensors_config_trait.h"
 #include "domain/fs_domain/services/i_fs_service.h"
 #include "utilities/cbor/cbor_serializer.hpp"
 
@@ -24,19 +24,19 @@ template <typename T>
 class ConfigurationService {
 private:
     const std::string configuration_dir_ = "config";
-    static const size_t load_buffer_size_ = sizeof(T) + 256;
+    static const size_t load_buffer_size_ = sizeof(T) + 2048;
 
     std::string configuration_name_;
     std::shared_ptr<IFsService> fs_service_;
-    std::shared_ptr<CborSerializer<T, sizeof(T)>> cbor_serializer_;
+    std::shared_ptr<CborSerializer<T>> cbor_serializer_;
 
     const std::string configuration_file_path_ = configuration_dir_ + "/" + configuration_name_ + ".cbor";
 
 public:
     ConfigurationService(std::string configuration_name, std::shared_ptr<IFsService> fs_service)
-        : configuration_name_(configuration_name), fs_service_(std::move(fs_service)) {
+        : configuration_name_(std::move(configuration_name)), fs_service_(std::move(fs_service)) {
 
-        cbor_serializer_ = std::make_shared<CborSerializer<T, sizeof(T)>>(CborTrait<T>::Encode, CborTrait<T>::Decode);
+        cbor_serializer_ = std::make_shared<CborSerializer<T>>(CborTrait<T>::Encode, CborTrait<T>::Decode);
 
         if (!fs_service_->Exists(configuration_dir_))
             fs_service_->CreateDirectory(configuration_dir_);

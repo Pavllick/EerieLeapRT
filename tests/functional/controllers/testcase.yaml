@@ -1,7 +1,7 @@
 common:
-  tags: controller
+  tags: controllers
   platform_allow:
     - native_sim
 
 tests:
-  functional.controller: {}
+  functional.controllers: {}

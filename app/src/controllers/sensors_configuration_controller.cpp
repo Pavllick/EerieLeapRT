@@ -124,7 +124,7 @@ const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfiguration
             sensor->configuration.channel = sensor_config.configuration.channel;
         else
             sensor->configuration.channel = std::nullopt;
-        
+
         sensor->configuration.sampling_rate_ms = sensor_config.configuration.sampling_rate_ms;
 
         auto interpolation_method = static_cast<InterpolationMethod>(sensor_config.configuration.interpolation_method);
@@ -139,7 +139,7 @@ const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfiguration
             }
 
             auto calibration_table_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_table);
-            
+
             switch (interpolation_method)
             {
             case InterpolationMethod::LINEAR:
@@ -149,7 +149,7 @@ const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfiguration
             case InterpolationMethod::CUBIC_SPLINE:
                 sensor->configuration.voltage_interpolator = std::make_shared<CubicSplineVoltageInterpolator>(calibration_table_ptr);
                 break;
-            
+
             default:
                 throw std::runtime_error("Sensor uses unsupported interpolation method!");
                 break;
@@ -164,10 +164,10 @@ const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfiguration
                 CborHelpers::ToStdString(sensor_config.configuration.expression));
         else
             sensor->configuration.expression_evaluator = nullptr;
-        
+
         sensor->metadata.unit = CborHelpers::ToStdString(sensor_config.metadata.unit);
         sensor->metadata.name = CborHelpers::ToStdString(sensor_config.metadata.name);
-        
+
         sensor->metadata.description = sensor_config.metadata.description_present
             ? CborHelpers::ToStdString(sensor_config.metadata.description)
             : "";

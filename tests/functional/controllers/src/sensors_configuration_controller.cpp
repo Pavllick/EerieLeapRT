@@ -105,17 +105,19 @@ std::vector<std::shared_ptr<Sensor>> SetupTestSensors(std::shared_ptr<MathParser
 
 ZTEST(sensors_configuration_controller, test_SensorsConfigurationController_Save_config_successfully_saved) {
     auto fs_service = std::make_shared<FsService>();
+    fs_service->Format();
+
     auto sensors_configuration_service = std::make_shared<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
     auto sensors_configuration_controller = std::make_shared<SensorsConfigurationController>(sensors_configuration_service);
 
     auto math_parser_service = std::make_shared<MathParserService>();
     sensors_configuration_controller->Initialize(math_parser_service);
-    
+
     auto sensors = SetupTestSensors(math_parser_service);
     sensors_configuration_controller->Update(std::make_shared<std::vector<std::shared_ptr<Sensor>>>(sensors));
 
     auto saved_sensors = *sensors_configuration_controller->Get();
-    
+
     zassert_equal(saved_sensors.size(), sensors.size());
 
     for(size_t i = 0; i < sensors.size(); ++i) {
@@ -148,12 +150,14 @@ ZTEST(sensors_configuration_controller, test_SensorsConfigurationController_Save
 
 ZTEST(sensors_configuration_controller, test_SensorsConfigurationController_Save_config_and_Load) {
     auto fs_service = std::make_shared<FsService>();
+    fs_service->Format();
+
     auto sensors_configuration_service = std::make_shared<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
     auto sensors_configuration_controller = std::make_shared<SensorsConfigurationController>(sensors_configuration_service);
 
     auto math_parser_service = std::make_shared<MathParserService>();
     sensors_configuration_controller->Initialize(math_parser_service);
-    
+
     auto sensors = SetupTestSensors(math_parser_service);
     sensors_configuration_controller->Update(std::make_shared<std::vector<std::shared_ptr<Sensor>>>(sensors));
 
@@ -162,7 +166,7 @@ ZTEST(sensors_configuration_controller, test_SensorsConfigurationController_Save
     sensors_configuration_controller->Initialize(math_parser_service);
 
     auto saved_sensors = *sensors_configuration_controller->Get();
-    
+
     zassert_equal(saved_sensors.size(), sensors.size());
 
     for(size_t i = 0; i < sensors.size(); ++i) {

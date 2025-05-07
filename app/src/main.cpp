@@ -13,6 +13,7 @@
 #include "configuration/sensor_config/sensor_config.h"
 #include "configuration/services/configuration_service.hpp"
 #include "controllers/sensors_configuration_controller.h"
+#include "controllers/system_configuration_controller.h"
 
 using namespace std::chrono;
 using namespace eerie_leap::utilities::dev_tools;
@@ -37,6 +38,7 @@ int main(void) {
     auto system_config_service = std::make_shared<ConfigurationService<SystemConfig>>("system_config", fs_service);
     auto sensors_config_service = std::make_shared<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
 
+    auto system_configuration_controller = std::make_shared<SystemConfigurationController>(system_config_service);
     auto sensors_configuration_controller = std::make_shared<SensorsConfigurationController>(sensors_config_service);
 
     // Placement-new construction of MeasurementService in statically allocated,
