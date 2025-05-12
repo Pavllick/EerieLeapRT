@@ -33,6 +33,10 @@
     };
 };
 
+&psram0 {
+	size = <DT_SIZE_M(2)>;
+};
+
 &adc0 {
 	status = "okay";
 	#address-cells = <1>;

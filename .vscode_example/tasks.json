@@ -40,15 +40,15 @@
             "detail": "Build the Zephyr project using native_sim POSIX board"
         },
         {
-            "label": "Build QEMU Cortex-M3",
+            "label": "Build QEMU Cortex A9",
             "type": "shell",
-            "command": "west build -p auto -b qemu_cortex_m3 ./app",
+            "command": "west build -p auto -b qemu_cortex_a9 ./app",
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
             "problemMatcher": ["$gcc"],
-            "detail": "Build the Zephyr project using qemu_cortex_m3 board"
+            "detail": "Build the Zephyr project using qemu_cortex_a9 board"
         },
         {
             "label": "Run DBG Server",
