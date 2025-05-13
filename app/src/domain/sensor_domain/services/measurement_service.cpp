@@ -1,10 +1,12 @@
 #include <vector>
 #include <zephyr/logging/log.h>
 
-#include "utilities/memory/heap_allocator.hpp"
 #include "measurement_service.h"
-#include "domain/adc_domain/hardware/adc.h"
-#include "domain/adc_domain/hardware/adc_emulator.h"
+#include "utilities/memory/heap_allocator.hpp"
+#include "utilities/math_parser/expression_evaluator.h"
+#include "domain/adc_domain/hardware/adc_factory.hpp"
+#include "domain/sensor_domain/models/sensor.h"
+#include "domain/sensor_domain/models/calibration_data.h"
 
 #include "domain/sensor_domain/utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "domain/sensor_domain/utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
@@ -14,6 +16,8 @@ namespace eerie_leap::domain::sensor_domain::services {
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::domain::adc_domain::hardware;
 using namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolator;
+using namespace eerie_leap::domain::sensor_domain::models;
+using namespace eerie_leap::utilities::math_parser;
 
 LOG_MODULE_REGISTER(measurement_service_logger);
 
@@ -113,11 +117,7 @@ void MeasurementService::SetupTestSensors() {
 void MeasurementService::EntryPoint() {
     LOG_INF("Measurement Service started");
 
-#ifdef CONFIG_ADC_EMUL
-    adc_ = std::make_shared<AdcEmulator>();
-#else
-    adc_ = std::make_shared<Adc>();
-#endif
+    adc_ = AdcFactory::Create();
     adc_->UpdateConfiguration(AdcConfiguration{
         .samples = 1
     });
