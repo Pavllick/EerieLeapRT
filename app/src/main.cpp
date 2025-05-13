@@ -17,15 +17,18 @@
 #include "controllers/adc_configuration_controller.h"
 #include "controllers/system_configuration_controller.h"
 
-using namespace std::chrono;
+#include "domain/http_domain/services/wifi_ap_service.h"
+
 using namespace eerie_leap::utilities::dev_tools;
 using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::utilities::guid;
-using namespace eerie_leap::controllers;
-using namespace eerie_leap::domain::sensor_domain::services;
 
+using namespace eerie_leap::controllers;
+
+using namespace eerie_leap::domain::sensor_domain::services;
 using namespace eerie_leap::domain::fs_domain::services;
 using namespace eerie_leap::configuration::services;
+using namespace eerie_leap::domain::http_domain::services;
 
 #define SLEEP_TIME_MS 10000
 
@@ -55,6 +58,8 @@ int main(void) {
     alignas(ARCH_STACK_PTR_ALIGN) static uint8_t service_buffer[sizeof(MeasurementService)];
     auto* service = new (service_buffer) MeasurementService(time_service, guid_generator, sensors_configuration_controller);
     service->Start();
+
+    WifiApService::Initialize();
 
     // auto files = fs_service->ListFiles("/");
     // printf("Total memory: %d, Used memory: %d\n", fs_service->GetTotalSpace(), fs_service->GetUsedSpace());

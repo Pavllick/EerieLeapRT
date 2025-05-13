@@ -18,6 +18,11 @@
             automount;
         };
     };
+
+    ap_wifi: ap_wifi {
+        compatible = "espressif,esp32-wifi";
+        status = "okay";
+    };
 };
 
 &flash0 {
