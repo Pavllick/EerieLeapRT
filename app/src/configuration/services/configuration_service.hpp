@@ -39,7 +39,7 @@ public:
     ConfigurationService(std::string configuration_name, std::shared_ptr<IFsService> fs_service)
         : configuration_name_(std::move(configuration_name)), fs_service_(std::move(fs_service)) {
 
-        cbor_serializer_ = std::allocate_shared<CborSerializer<T>>(HeapAllocator<CborSerializer<T>>(), CborTrait<T>::Encode, CborTrait<T>::Decode);
+        cbor_serializer_ = make_shared_ext<CborSerializer<T>>(CborTrait<T>::Encode, CborTrait<T>::Decode);
 
         if (!fs_service_->Exists(configuration_dir_))
             fs_service_->CreateDirectory(configuration_dir_);
@@ -62,15 +62,15 @@ public:
             return std::nullopt;
         }
 
-        std::array<uint8_t, load_buffer_size_> buffer = {};
+        auto buffer = make_shared_ext<ExtVector>(load_buffer_size_);
         size_t out_len = 0;
 
-        if (!fs_service_->ReadFile(configuration_file_path_, buffer.data(), buffer.size(), out_len)) {
+        if (!fs_service_->ReadFile(configuration_file_path_, buffer->data(), buffer->size(), out_len)) {
             // LOG_ERR("Failed to read configuration file!");
             return std::nullopt;
         }
 
-        auto config_bytes = std::span<const uint8_t>(buffer.data(), out_len);
+        auto config_bytes = std::span<const uint8_t>(buffer->data(), out_len);
         auto configuration = cbor_serializer_->Deserialize(config_bytes);
 
         if (!configuration.has_value()) {

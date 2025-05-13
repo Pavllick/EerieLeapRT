@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstddef>
+#include <memory>
+#include <vector>
 
 #ifdef CONFIG_SHARED_MULTI_HEAP
 #include <zephyr/kernel.h>
@@ -46,5 +48,12 @@ bool operator==(const HeapAllocator<T>& lhs, const HeapAllocator<U>& rhs) { retu
 
 template <class T, class U>
 bool operator!=(const HeapAllocator<T>& lhs, const HeapAllocator<U>& rhs) { return false; }
+
+template <typename T, typename... Args>
+std::shared_ptr<T> make_shared_ext(Args&&... args) {
+    return std::allocate_shared<T>(HeapAllocator<T>(), std::forward<Args>(args)...);
+}
+
+using ExtVector = std::vector<uint8_t, HeapAllocator<uint8_t>>;
 
 } // namespace eerie_leap::utilities::memory

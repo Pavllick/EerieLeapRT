@@ -123,7 +123,7 @@ void MeasurementService::EntryPoint() {
     });
     adc_->Initialize();
 
-    math_parser_service_ = std::allocate_shared<MathParserService>(HeapAllocator<MathParserService>());
+    math_parser_service_ = make_shared_ext<MathParserService>();
 
     sensors_configuration_controller_->Initialize(math_parser_service_);
     SetupTestSensors();

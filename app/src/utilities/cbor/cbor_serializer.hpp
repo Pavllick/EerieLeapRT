@@ -2,7 +2,6 @@
 
 #include <cstdint>
 #include <optional>
-#include <vector>
 #include <array>
 #include <span>
 #include <zephyr/kernel.h>
@@ -32,21 +31,20 @@ public:
     size_t GetSerializingSize(const T& obj) {
         size_t obj_size = 0;
 
-        using ExtVec = std::vector<uint8_t, HeapAllocator<uint8_t>>;
-        auto buffer = std::allocate_shared<ExtVec>(HeapAllocator<ExtVec>(), sizeof(T));
+        auto buffer = make_shared_ext<ExtVector>(sizeof(T));
 
         for(int i = 0; i < 100; i++) {
             if(!encodeFn_(buffer->data(), buffer->size(), &obj, &obj_size))
                 return obj_size;
 
-            buffer = std::allocate_shared<ExtVec>(HeapAllocator<ExtVec>(), buffer->size() + 256);
+            buffer = make_shared_ext<ExtVector>(buffer->size() + 256);
         }
 
         return obj_size;
     }
 
-    std::shared_ptr<std::vector<uint8_t>> Serialize(const T& obj, size_t *payload_len_out = nullptr) {
-        auto buffer = std::allocate_shared<std::vector<uint8_t>>(HeapAllocator<std::vector<uint8_t>>(), GetSerializingSize(obj));
+    std::shared_ptr<ExtVector> Serialize(const T& obj, size_t *payload_len_out = nullptr) {
+        auto buffer = make_shared_ext<ExtVector>(GetSerializingSize(obj));
 
         size_t obj_size = 0;
         if(encodeFn_(buffer->data(), buffer->size(), &obj, &obj_size)) {
@@ -57,7 +55,7 @@ public:
         if (payload_len_out != nullptr)
             *payload_len_out = obj_size;
 
-        auto buffer_serialized = std::allocate_shared<std::vector<uint8_t>>(HeapAllocator<std::vector<uint8_t>>(), obj_size);
+        auto buffer_serialized = make_shared_ext<ExtVector>(obj_size);
         std::copy(buffer->data(), buffer->data() + obj_size, buffer_serialized->begin());
 
         return buffer_serialized;

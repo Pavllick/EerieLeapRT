@@ -25,7 +25,7 @@ void SensorsConfigurationController::Initialize(std::shared_ptr<MathParserServic
 }
 
 bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> sensors) {
-    auto sensors_config = std::allocate_shared<SensorsConfig>(HeapAllocator<SensorsConfig>());
+    auto sensors_config = make_shared_ext<SensorsConfig>();
     memset(sensors_config.get(), 0, sizeof(SensorsConfig));
 
     SensorsOrderResolver resolver;
@@ -33,7 +33,7 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
     for(size_t i = 0; i < sensors->size(); ++i) {
         const auto& sensor = sensors->at(i);
 
-        auto sensor_config = std::allocate_shared<SensorConfig>(HeapAllocator<SensorConfig>());
+        auto sensor_config = make_shared_ext<SensorConfig>();
         memset(sensor_config.get(), 0, sizeof(SensorConfig));
 
         sensor_config->id = CborHelpers::ToZcborString(&sensor->id);
@@ -113,7 +113,7 @@ const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfiguration
     if(!sensors_config.has_value())
         return nullptr;
 
-    sensors_config_ = std::allocate_shared<SensorsConfig>(HeapAllocator<SensorsConfig>(), sensors_config.value());
+    sensors_config_ = make_shared_ext<SensorsConfig>(sensors_config.value());
     SensorsOrderResolver resolver;
 
     for(size_t i = 0; i < sensors_config_->SensorConfig_m_count; ++i) {

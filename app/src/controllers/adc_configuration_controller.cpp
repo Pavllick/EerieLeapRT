@@ -16,7 +16,7 @@ bool AdcConfigurationController::Update(std::shared_ptr<AdcConfiguration> adc_co
     if(!adc_configuration_service_->Save(&adc_config))
         return false;
 
-    adc_config_ = std::allocate_shared<AdcConfig>(HeapAllocator<AdcConfig>(), adc_config);
+    adc_config_ = make_shared_ext<AdcConfig>(adc_config);
     adc_configuration_ = adc_configuration;
 
     return true;
@@ -35,9 +35,9 @@ std::shared_ptr<AdcConfiguration> AdcConfigurationController::Get() {
         .name = CborHelpers::ToStdString(adc_config->name),
         .samples = static_cast<uint16_t>(adc_config->samples)
     };
-    adc_configuration_ = std::allocate_shared<AdcConfiguration>(HeapAllocator<AdcConfiguration>(), adc_configuration);
+    adc_configuration_ = make_shared_ext<AdcConfiguration>(adc_configuration);
 
-    adc_config_ = std::allocate_shared<AdcConfig>(HeapAllocator<AdcConfig>(), adc_config.value());
+    adc_config_ = make_shared_ext<AdcConfig>(adc_config.value());
 
     return adc_configuration_;
 }
