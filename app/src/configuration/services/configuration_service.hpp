@@ -7,6 +7,7 @@
 #include <span>
 #include <zephyr/logging/log.h>
 
+#include "utilities/memory/heap_allocator.hpp"
 #include "configuration/cbor_traits/system_config_trait.h"
 #include "configuration/cbor_traits/adc_config_trait.h"
 #include "configuration/cbor_traits/sensors_config_trait.h"
@@ -17,6 +18,7 @@ namespace eerie_leap::configuration::services {
 
 // TODO: Figure out logging without LOG_MODULE_REGISTER and LOG_INSTANCE_PTR_DECLARE
 
+using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::configuration::traits;
 using namespace eerie_leap::domain::fs_domain::services;
 using namespace eerie_leap::utilities::cbor;
@@ -37,21 +39,21 @@ public:
     ConfigurationService(std::string configuration_name, std::shared_ptr<IFsService> fs_service)
         : configuration_name_(std::move(configuration_name)), fs_service_(std::move(fs_service)) {
 
-        cbor_serializer_ = std::make_shared<CborSerializer<T>>(CborTrait<T>::Encode, CborTrait<T>::Decode);
+        cbor_serializer_ = std::allocate_shared<CborSerializer<T>>(HeapAllocator<CborSerializer<T>>(), CborTrait<T>::Encode, CborTrait<T>::Decode);
 
         if (!fs_service_->Exists(configuration_dir_))
             fs_service_->CreateDirectory(configuration_dir_);
     }
 
-    bool Save(T &configuration) {
-        auto config_bytes = cbor_serializer_->Serialize(configuration);
+    bool Save(T* configuration) {
+        auto config_bytes = cbor_serializer_->Serialize(*configuration);
 
         if (!config_bytes) {
             // LOG_ERR("Failed to serialize configuration!");
             return false;
         }
 
-        return fs_service_->WriteFile(configuration_file_path_, config_bytes.value().data(), config_bytes.value().size());
+        return fs_service_->WriteFile(configuration_file_path_, config_bytes->data(), config_bytes->size());
     }
 
     std::optional<T> Load() {

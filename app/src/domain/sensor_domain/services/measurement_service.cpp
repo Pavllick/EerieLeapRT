@@ -1,6 +1,7 @@
 #include <vector>
 #include <zephyr/logging/log.h>
 
+#include "utilities/memory/heap_allocator.hpp"
 #include "measurement_service.h"
 #include "domain/adc_domain/hardware/adc.h"
 #include "domain/adc_domain/hardware/adc_emulator.h"
@@ -10,6 +11,7 @@
 
 namespace eerie_leap::domain::sensor_domain::services {
 
+using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::domain::adc_domain::hardware;
 using namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolator;
 
@@ -121,7 +123,7 @@ void MeasurementService::EntryPoint() {
     });
     adc_->Initialize();
 
-    math_parser_service_ = std::make_shared<MathParserService>();
+    math_parser_service_ = std::allocate_shared<MathParserService>(HeapAllocator<MathParserService>());
 
     sensors_configuration_controller_->Initialize(math_parser_service_);
     SetupTestSensors();

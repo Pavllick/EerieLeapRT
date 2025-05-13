@@ -12,7 +12,11 @@
 #include <zcbor_encode.h>
 #include <zcbor_decode.h>
 
+#include <utilities/memory/heap_allocator.hpp>
+
 namespace eerie_leap::utilities::cbor {
+
+using namespace eerie_leap::utilities::memory;
 
 // TODO: Figure out logging without LOG_MODULE_REGISTER and LOG_INSTANCE_PTR_DECLARE
 
@@ -28,30 +32,35 @@ public:
     size_t GetSerializingSize(const T& obj) {
         size_t obj_size = 0;
 
-        static std::vector<uint8_t> buffer(sizeof(T));
+        using ExtVec = std::vector<uint8_t, HeapAllocator<uint8_t>>;
+        auto buffer = std::allocate_shared<ExtVec>(HeapAllocator<ExtVec>(), sizeof(T));
+
         for(int i = 0; i < 100; i++) {
-            if(!encodeFn_(buffer.data(), buffer.size(), &obj, &obj_size))
+            if(!encodeFn_(buffer->data(), buffer->size(), &obj, &obj_size))
                 return obj_size;
 
-            buffer.resize(buffer.size() + 64);
+            buffer = std::allocate_shared<ExtVec>(HeapAllocator<ExtVec>(), buffer->size() + 256);
         }
 
         return obj_size;
     }
 
-    std::optional<std::span<const uint8_t>> Serialize(const T& obj, size_t *payload_len_out = nullptr) {
-        static std::vector<uint8_t> buffer(GetSerializingSize(obj));
+    std::shared_ptr<std::vector<uint8_t>> Serialize(const T& obj, size_t *payload_len_out = nullptr) {
+        auto buffer = std::allocate_shared<std::vector<uint8_t>>(HeapAllocator<std::vector<uint8_t>>(), GetSerializingSize(obj));
 
         size_t obj_size = 0;
-        if(encodeFn_(buffer.data(), buffer.size(), &obj, &obj_size)) {
+        if(encodeFn_(buffer->data(), buffer->size(), &obj, &obj_size)) {
             // LOG_ERR("Failed to encode object!");
-            return std::nullopt;
+            return nullptr;
         }
 
         if (payload_len_out != nullptr)
             *payload_len_out = obj_size;
 
-        return std::span<const uint8_t>(buffer.data(), obj_size);
+        auto buffer_serialized = std::allocate_shared<std::vector<uint8_t>>(HeapAllocator<std::vector<uint8_t>>(), obj_size);
+        std::copy(buffer->data(), buffer->data() + obj_size, buffer_serialized->begin());
+
+        return buffer_serialized;
     }
 
     std::optional<T> Deserialize(std::span<const uint8_t> input) {

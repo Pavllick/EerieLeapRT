@@ -1,3 +1,4 @@
+#include "utilities/memory/heap_allocator.hpp"
 #include "system_configuration_controller.h"
 
 namespace eerie_leap::controllers {
@@ -8,10 +9,10 @@ bool SystemConfigurationController::Update(std::shared_ptr<SystemConfiguration> 
         .sw_version = system_configuration->sw_version
     };
 
-    if(!system_configuration_service_->Save(system_config))
+    if(!system_configuration_service_->Save(&system_config))
         return false;
 
-    system_config_ = std::make_shared<SystemConfig>(system_config);
+    system_config_ = std::allocate_shared<SystemConfig>(HeapAllocator<SystemConfig>(), system_config);
     system_configuration_ = system_configuration;
 
     return true;
@@ -30,9 +31,9 @@ std::shared_ptr<SystemConfiguration> SystemConfigurationController::Get() {
         .hw_version = system_config->hw_version,
         .sw_version = system_config->sw_version
     };
-    system_configuration_ = std::make_shared<SystemConfiguration>(system_configuration);
+    system_configuration_ = std::allocate_shared<SystemConfiguration>(HeapAllocator<SystemConfiguration>(), system_configuration);
 
-    system_config_ = std::make_shared<SystemConfig>(system_config.value());
+    system_config_ = std::allocate_shared<SystemConfig>(HeapAllocator<SystemConfig>(), system_config.value());
 
     return system_configuration_;
 }

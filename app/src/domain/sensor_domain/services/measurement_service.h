@@ -35,7 +35,7 @@ using namespace eerie_leap::domain::sensor_domain::services::scheduler;
 ///
 class MeasurementService {
 private:
-    const int32_t READING_INTERVAL_MS_ = 1000; 
+    const int32_t READING_INTERVAL_MS_ = 1000;
     static constexpr int kStackSize = 32768;
     static constexpr int kPriority = K_PRIO_PREEMPT(8);
 
@@ -46,12 +46,12 @@ private:
 
     std::shared_ptr<ITimeService> time_service_;
     std::shared_ptr<GuidGenerator> guid_generator_;
-    
+
     std::shared_ptr<IAdc> adc_;
     std::shared_ptr<MathParserService> math_parser_service_;
     std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller_;
     std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service_;
-    
+
     void EntryPoint();
     void SetupTestSensors();
 

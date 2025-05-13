@@ -1,7 +1,11 @@
+#include "utilities/memory/heap_allocator.hpp"
 #include "utilities/cbor/cbor_helpers.hpp"
+#include <memory>
 #include "adc_configuration_controller.h"
 
 namespace eerie_leap::controllers {
+
+using namespace eerie_leap::utilities::memory;
 
 bool AdcConfigurationController::Update(std::shared_ptr<AdcConfiguration> adc_configuration) {
     AdcConfig adc_config {
@@ -9,10 +13,10 @@ bool AdcConfigurationController::Update(std::shared_ptr<AdcConfiguration> adc_co
         .samples = adc_configuration->samples
     };
 
-    if(!adc_configuration_service_->Save(adc_config))
+    if(!adc_configuration_service_->Save(&adc_config))
         return false;
 
-    adc_config_ = std::make_shared<AdcConfig>(adc_config);
+    adc_config_ = std::allocate_shared<AdcConfig>(HeapAllocator<AdcConfig>(), adc_config);
     adc_configuration_ = adc_configuration;
 
     return true;
@@ -31,9 +35,9 @@ std::shared_ptr<AdcConfiguration> AdcConfigurationController::Get() {
         .name = CborHelpers::ToStdString(adc_config->name),
         .samples = static_cast<uint16_t>(adc_config->samples)
     };
-    adc_configuration_ = std::make_shared<AdcConfiguration>(adc_configuration);
+    adc_configuration_ = std::allocate_shared<AdcConfiguration>(HeapAllocator<AdcConfiguration>(), adc_configuration);
 
-    adc_config_ = std::make_shared<AdcConfig>(adc_config.value());
+    adc_config_ = std::allocate_shared<AdcConfig>(HeapAllocator<AdcConfig>(), adc_config.value());
 
     return adc_configuration_;
 }

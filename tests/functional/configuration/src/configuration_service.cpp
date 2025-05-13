@@ -23,7 +23,7 @@ ZTEST(configuration_service, test_SystemConfig_Save_config_successfully_saved) {
     fs_service->Format();
     auto system_config_service = std::make_shared<ConfigurationService<SystemConfig>>("system_config", fs_service);
 
-    auto save_res = system_config_service->Save(system_config);
+    auto save_res = system_config_service->Save(&system_config);
     zassert_true(save_res);
 }
 
@@ -36,7 +36,7 @@ ZTEST(configuration_service, test_SystemConfig_Load_config_successfully_saved_an
     fs_service->Format();
     auto system_config_service = std::make_shared<ConfigurationService<SystemConfig>>("system_config", fs_service);
 
-    auto save_res = system_config_service->Save(system_config);
+    auto save_res = system_config_service->Save(&system_config);
     zassert_true(save_res);
 
     auto loaded_config = system_config_service->Load();
@@ -121,7 +121,7 @@ ZTEST(configuration_service, test_SensorsConfig_Save_config_successfully_saved) 
     fs_service->Format();
     auto sensors_config_service = std::make_shared<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
 
-    auto save_res = sensors_config_service->Save(sensors_config);
+    auto save_res = sensors_config_service->Save(&sensors_config);
     zassert_true(save_res);
 }
 
@@ -207,7 +207,7 @@ ZTEST(configuration_service, test_SensorsConfig_Load_config_successfully_saved_a
     auto sensors_config_service = std::make_shared<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
 
     // Save config
-    auto save_res = sensors_config_service->Save(sensors_config);
+    auto save_res = sensors_config_service->Save(&sensors_config);
     zassert_true(save_res);
 
     // Load config and verify
