@@ -27,8 +27,8 @@ k_tid_t MeasurementService::Start() {
         stack_area_,
         K_THREAD_STACK_SIZEOF(stack_area_),
         [](void* instance, void* p2, void* p3) { static_cast<MeasurementService*>(instance)->EntryPoint(); },
-        this, NULL, NULL,
-        kPriority, 0, K_NO_WAIT);
+        this, nullptr, nullptr,
+        k_priority_, 0, K_NO_WAIT);
 
     return thread_id_;
 }

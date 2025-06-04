@@ -13,10 +13,10 @@ class WifiApService {
 private:
 #ifdef CONFIG_WIFI
     static net_if *ap_interface_;
-    static wifi_connect_req_params ap_config_;
     static net_mgmt_event_callback callback_;
 
     static bool DHCPv4ServerInitialize();
+    static bool DHCPv4ServerStart();
     static bool AccessPointInitialize();
     static void EventHandler(net_mgmt_event_callback *callback, uint32_t mgmt_event, net_if *iface);
 #endif // CONFIG_WIFI

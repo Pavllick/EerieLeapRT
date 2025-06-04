@@ -36,10 +36,10 @@ using namespace eerie_leap::domain::sensor_domain::services::scheduler;
 class MeasurementService {
 private:
     const int32_t READING_INTERVAL_MS_ = 1000;
-    static constexpr int kStackSize = 32768;
-    static constexpr int kPriority = K_PRIO_PREEMPT(8);
+    static constexpr int k_stack_size_ = 32768;
+    static constexpr int k_priority_ = K_PRIO_PREEMPT(2);
 
-    K_KERNEL_STACK_MEMBER(stack_area_, kStackSize);
+    K_KERNEL_STACK_MEMBER(stack_area_, k_stack_size_);
 
     k_tid_t thread_id_;
     k_thread thread_data_;

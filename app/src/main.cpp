@@ -18,6 +18,7 @@
 #include "controllers/system_configuration_controller.h"
 
 #include "domain/http_domain/services/wifi_ap_service.h"
+#include "domain/http_domain/services/http_server.h"
 
 using namespace eerie_leap::utilities::dev_tools;
 using namespace eerie_leap::utilities::time;
@@ -55,11 +56,20 @@ int main(void) {
     //
     // DO NOT allocate this on the heap or stack — it will crash due to stack
     // alignment or lifetime issues in Zephyr.
-    alignas(ARCH_STACK_PTR_ALIGN) static uint8_t service_buffer[sizeof(MeasurementService)];
-    auto* service = new (service_buffer) MeasurementService(time_service, guid_generator, sensors_configuration_controller);
-    service->Start();
+    // alignas(ARCH_STACK_PTR_ALIGN) static uint8_t measurement_service_buffer[sizeof(MeasurementService)];
+    // auto* measurement_service = new (measurement_service_buffer) MeasurementService(time_service, guid_generator, sensors_configuration_controller);
+    // measurement_service->Start();
 
+    // NOTE: Don't use for WiFi supporting boards as WiFi is broken in Zephyr 4.1 and has memory allocation issues
+    // At least on ESP32S3, it does connect if Zephyr revision is set to "main", but heap allocations cannot be moved
+    // to the external RAM (e.g. PSRAM)
+#ifdef CONFIG_WIFI
     WifiApService::Initialize();
+#endif // CONFIG_WIFI
+
+#ifdef CONFIG_NETWORKING
+    HttpServer::Start();
+#endif // CONFIG_NETWORKING
 
     // auto files = fs_service->ListFiles("/");
     // printf("Total memory: %d, Used memory: %d\n", fs_service->GetTotalSpace(), fs_service->GetUsedSpace());
