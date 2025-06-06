@@ -14,6 +14,7 @@ using namespace eerie_leap::domain::system_domain;
 class SystemConfigurationController {
 private:
     std::shared_ptr<ConfigurationService<SystemConfig>> system_configuration_service_;
+    std::shared_ptr<ExtVector> system_config_raw_;
     std::shared_ptr<SystemConfig> system_config_;
     std::shared_ptr<SystemConfiguration> system_configuration_;
 

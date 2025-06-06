@@ -123,7 +123,7 @@ ZTEST(sensors_configuration_controller, test_SensorsConfigurationController_Save
     for(size_t i = 0; i < sensors.size(); ++i) {
         std::shared_ptr<Sensor> saved_sensor = nullptr;
         for(size_t j = 0; j < saved_sensors.size(); ++j) {
-            if(saved_sensors[j]->id == sensors[i]->id) {
+            if(strcmp(saved_sensors[j]->id.c_str(), sensors[i]->id.c_str()) == 0) {
                 saved_sensor = saved_sensors[j];
                 break;
             }
@@ -172,7 +172,7 @@ ZTEST(sensors_configuration_controller, test_SensorsConfigurationController_Save
     for(size_t i = 0; i < sensors.size(); ++i) {
         std::shared_ptr<Sensor> saved_sensor = nullptr;
         for(size_t j = 0; j < saved_sensors.size(); ++j) {
-            if(saved_sensors[j]->id == sensors[i]->id) {
+            if(strcmp(saved_sensors[j]->id.c_str(), sensors[i]->id.c_str()) == 0) {
                 saved_sensor = saved_sensors[j];
                 break;
             }

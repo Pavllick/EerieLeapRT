@@ -113,14 +113,15 @@ const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfiguration
     if(!sensors_config.has_value())
         return nullptr;
 
-    sensors_config_ = make_shared_ext<SensorsConfig>(sensors_config.value());
+    sensors_config_raw_ = sensors_config.value().config_raw;
+    sensors_config_ = sensors_config.value().config;
     SensorsOrderResolver resolver;
 
     for(size_t i = 0; i < sensors_config_->SensorConfig_m_count; ++i) {
         const auto& sensor_config = sensors_config_->SensorConfig_m[i];
         std::shared_ptr<Sensor> sensor = std::make_shared<Sensor>();
 
-        sensor->id = std::string(reinterpret_cast<const char*>(sensor_config.id.value), sensor_config.id.len);
+        sensor->id = CborHelpers::ToStdString(sensor_config.id);
         sensor->configuration.type = static_cast<SensorType>(sensor_config.configuration.type);
 
         if(sensor_config.configuration.channel_present)

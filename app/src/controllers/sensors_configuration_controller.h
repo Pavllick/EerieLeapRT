@@ -18,6 +18,7 @@ class SensorsConfigurationController {
 private:
     std::shared_ptr<MathParserService> math_parser_service_;
     std::shared_ptr<ConfigurationService<SensorsConfig>> sensors_configuration_service_;
+    std::shared_ptr<ExtVector> sensors_config_raw_;
     std::shared_ptr<SensorsConfig> sensors_config_;
     std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> ordered_sensors_;
 

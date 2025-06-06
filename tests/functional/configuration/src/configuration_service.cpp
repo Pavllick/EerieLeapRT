@@ -41,8 +41,8 @@ ZTEST(configuration_service, test_SystemConfig_Load_config_successfully_saved_an
 
     auto loaded_config = system_config_service->Load();
     zassert_true(loaded_config.has_value());
-    zassert_equal(loaded_config.value().hw_version, 46);
-    zassert_equal(loaded_config.value().sw_version, 8624);
+    zassert_equal(loaded_config.value().config->hw_version, 46);
+    zassert_equal(loaded_config.value().config->sw_version, 8624);
 }
 
 ZTEST(configuration_service, test_SensorsConfig_Save_config_successfully_saved) {
@@ -214,48 +214,48 @@ ZTEST(configuration_service, test_SensorsConfig_Load_config_successfully_saved_a
     auto loaded_config = sensors_config_service->Load();
     zassert_true(loaded_config.has_value());
 
-    auto loaded_sensors_config = loaded_config.value();
-    zassert_equal(loaded_sensors_config.SensorConfig_m_count, 2);
+    auto loaded_sensors_config = loaded_config.value().config;
+    zassert_equal(loaded_sensors_config->SensorConfig_m_count, 2);
 
     // Verify first sensor
-    zassert_str_equal(CborHelpers::ToStdString(loaded_sensors_config.SensorConfig_m[0].id).c_str(), sensor_1_id.c_str());
+    zassert_str_equal(CborHelpers::ToStdString(loaded_sensors_config->SensorConfig_m[0].id).c_str(), sensor_1_id.c_str());
 
-    zassert_str_equal(CborHelpers::ToStdString(loaded_sensors_config.SensorConfig_m[0].metadata.name).c_str(), sensor_1_name.c_str());
-    zassert_str_equal(CborHelpers::ToStdString(loaded_sensors_config.SensorConfig_m[0].metadata.unit).c_str(), sensor_1_unit.c_str());
-    zassert_false(loaded_sensors_config.SensorConfig_m[0].metadata.description_present);
+    zassert_str_equal(CborHelpers::ToStdString(loaded_sensors_config->SensorConfig_m[0].metadata.name).c_str(), sensor_1_name.c_str());
+    zassert_str_equal(CborHelpers::ToStdString(loaded_sensors_config->SensorConfig_m[0].metadata.unit).c_str(), sensor_1_unit.c_str());
+    zassert_false(loaded_sensors_config->SensorConfig_m[0].metadata.description_present);
 
-    zassert_equal(loaded_sensors_config.SensorConfig_m[0].configuration.type, 1);
-    zassert_equal(loaded_sensors_config.SensorConfig_m[0].configuration.channel, 6);
-    zassert_true(loaded_sensors_config.SensorConfig_m[0].configuration.channel_present);
-    zassert_equal(loaded_sensors_config.SensorConfig_m[0].configuration.sampling_rate_ms, 210);
-    zassert_false(loaded_sensors_config.SensorConfig_m[0].configuration.calibration_table_present);
-    zassert_equal(loaded_sensors_config.SensorConfig_m[0].configuration.interpolation_method, 1);
-    zassert_true(loaded_sensors_config.SensorConfig_m[0].configuration.expression_present);
-    zassert_str_equal(CborHelpers::ToStdString(loaded_sensors_config.SensorConfig_m[0].configuration.expression).c_str(), sensor_1_expression.c_str());
+    zassert_equal(loaded_sensors_config->SensorConfig_m[0].configuration.type, 1);
+    zassert_equal(loaded_sensors_config->SensorConfig_m[0].configuration.channel, 6);
+    zassert_true(loaded_sensors_config->SensorConfig_m[0].configuration.channel_present);
+    zassert_equal(loaded_sensors_config->SensorConfig_m[0].configuration.sampling_rate_ms, 210);
+    zassert_false(loaded_sensors_config->SensorConfig_m[0].configuration.calibration_table_present);
+    zassert_equal(loaded_sensors_config->SensorConfig_m[0].configuration.interpolation_method, 1);
+    zassert_true(loaded_sensors_config->SensorConfig_m[0].configuration.expression_present);
+    zassert_str_equal(CborHelpers::ToStdString(loaded_sensors_config->SensorConfig_m[0].configuration.expression).c_str(), sensor_1_expression.c_str());
 
     // Verify second sensor
-    zassert_str_equal(CborHelpers::ToStdString(loaded_sensors_config.SensorConfig_m[1].id).c_str(), sensor_2_id.c_str());
+    zassert_str_equal(CborHelpers::ToStdString(loaded_sensors_config->SensorConfig_m[1].id).c_str(), sensor_2_id.c_str());
 
-    zassert_str_equal(CborHelpers::ToStdString(loaded_sensors_config.SensorConfig_m[1].metadata.name).c_str(), sensor_2_name.c_str());
-    zassert_str_equal(CborHelpers::ToStdString(loaded_sensors_config.SensorConfig_m[1].metadata.unit).c_str(), sensor_2_unit.c_str());
-    zassert_true(loaded_sensors_config.SensorConfig_m[1].metadata.description_present);
-    zassert_str_equal(CborHelpers::ToStdString(loaded_sensors_config.SensorConfig_m[1].metadata.description).c_str(), sensor_2_description.c_str());
+    zassert_str_equal(CborHelpers::ToStdString(loaded_sensors_config->SensorConfig_m[1].metadata.name).c_str(), sensor_2_name.c_str());
+    zassert_str_equal(CborHelpers::ToStdString(loaded_sensors_config->SensorConfig_m[1].metadata.unit).c_str(), sensor_2_unit.c_str());
+    zassert_true(loaded_sensors_config->SensorConfig_m[1].metadata.description_present);
+    zassert_str_equal(CborHelpers::ToStdString(loaded_sensors_config->SensorConfig_m[1].metadata.description).c_str(), sensor_2_description.c_str());
 
-    zassert_equal(loaded_sensors_config.SensorConfig_m[1].configuration.type, 1);
-    zassert_equal(loaded_sensors_config.SensorConfig_m[1].configuration.channel, 6);
-    zassert_true(loaded_sensors_config.SensorConfig_m[1].configuration.channel_present);
-    zassert_equal(loaded_sensors_config.SensorConfig_m[1].configuration.sampling_rate_ms, 250);
-    zassert_true(loaded_sensors_config.SensorConfig_m[1].configuration.calibration_table_present);
-    zassert_equal(loaded_sensors_config.SensorConfig_m[1].configuration.calibration_table.floatfloat_count, 4);
-    zassert_equal(loaded_sensors_config.SensorConfig_m[1].configuration.calibration_table.floatfloat[0].floatfloat_key, 1.0);
-    zassert_equal(loaded_sensors_config.SensorConfig_m[1].configuration.calibration_table.floatfloat[0].floatfloat, 2.0);
-    zassert_equal(loaded_sensors_config.SensorConfig_m[1].configuration.calibration_table.floatfloat[1].floatfloat_key, 1.1);
-    zassert_equal(loaded_sensors_config.SensorConfig_m[1].configuration.calibration_table.floatfloat[1].floatfloat, 2.1);
-    zassert_equal(loaded_sensors_config.SensorConfig_m[1].configuration.calibration_table.floatfloat[2].floatfloat_key, 1.2);
-    zassert_equal(loaded_sensors_config.SensorConfig_m[1].configuration.calibration_table.floatfloat[2].floatfloat, 2.2);
-    zassert_equal(loaded_sensors_config.SensorConfig_m[1].configuration.calibration_table.floatfloat[3].floatfloat_key, 1.3);
-    zassert_equal(loaded_sensors_config.SensorConfig_m[1].configuration.calibration_table.floatfloat[3].floatfloat, 2.3);
-    zassert_equal(loaded_sensors_config.SensorConfig_m[1].configuration.interpolation_method, 1);
-    zassert_true(loaded_sensors_config.SensorConfig_m[1].configuration.expression_present);
-    zassert_str_equal(CborHelpers::ToStdString(loaded_sensors_config.SensorConfig_m[1].configuration.expression).c_str(), sensor_2_expression.c_str());
+    zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.type, 1);
+    zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.channel, 6);
+    zassert_true(loaded_sensors_config->SensorConfig_m[1].configuration.channel_present);
+    zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.sampling_rate_ms, 250);
+    zassert_true(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table_present);
+    zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.floatfloat_count, 4);
+    zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.floatfloat[0].floatfloat_key, 1.0);
+    zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.floatfloat[0].floatfloat, 2.0);
+    zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.floatfloat[1].floatfloat_key, 1.1);
+    zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.floatfloat[1].floatfloat, 2.1);
+    zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.floatfloat[2].floatfloat_key, 1.2);
+    zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.floatfloat[2].floatfloat, 2.2);
+    zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.floatfloat[3].floatfloat_key, 1.3);
+    zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.floatfloat[3].floatfloat, 2.3);
+    zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.interpolation_method, 1);
+    zassert_true(loaded_sensors_config->SensorConfig_m[1].configuration.expression_present);
+    zassert_str_equal(CborHelpers::ToStdString(loaded_sensors_config->SensorConfig_m[1].configuration.expression).c_str(), sensor_2_expression.c_str());
 }

@@ -14,6 +14,7 @@ using namespace eerie_leap::domain::adc_domain::hardware;
 class AdcConfigurationController {
 private:
     std::shared_ptr<ConfigurationService<AdcConfig>> adc_configuration_service_;
+    std::shared_ptr<ExtVector> adc_config_raw_;
     std::shared_ptr<AdcConfig> adc_config_;
     std::shared_ptr<AdcConfiguration> adc_configuration_;
 

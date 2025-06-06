@@ -31,13 +31,14 @@ std::shared_ptr<AdcConfiguration> AdcConfigurationController::Get() {
     if(!adc_config.has_value())
         return nullptr;
 
+    adc_config_raw_ = adc_config.value().config_raw;
+    adc_config_ = adc_config.value().config;
+
     AdcConfiguration adc_configuration {
-        .name = CborHelpers::ToStdString(adc_config->name),
-        .samples = static_cast<uint16_t>(adc_config->samples)
+        .name = CborHelpers::ToStdString(adc_config_->name),
+        .samples = static_cast<uint16_t>(adc_config_->samples)
     };
     adc_configuration_ = make_shared_ext<AdcConfiguration>(adc_configuration);
-
-    adc_config_ = make_shared_ext<AdcConfig>(adc_config.value());
 
     return adc_configuration_;
 }

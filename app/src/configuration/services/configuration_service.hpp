@@ -13,6 +13,7 @@
 #include "configuration/cbor_traits/sensors_config_trait.h"
 #include "domain/fs_domain/services/i_fs_service.h"
 #include "utilities/cbor/cbor_serializer.hpp"
+#include "loaded_config.hpp"
 
 namespace eerie_leap::configuration::services {
 
@@ -27,7 +28,7 @@ template <typename T>
 class ConfigurationService {
 private:
     const std::string configuration_dir_ = "config";
-    static const size_t load_buffer_size_ = sizeof(T) + 2048;
+    static constexpr size_t load_buffer_size_ = sizeof(T) + 2048;
 
     std::string configuration_name_;
     std::shared_ptr<IFsService> fs_service_;
@@ -56,7 +57,7 @@ public:
         return fs_service_->WriteFile(configuration_file_path_, config_bytes->data(), config_bytes->size());
     }
 
-    std::optional<T> Load() {
+    std::optional<LoadedConfig<T>> Load() {
         if (!fs_service_->Exists(configuration_file_path_)) {
             // LOG_ERR("Configuration file does not exist!");
             return std::nullopt;
@@ -65,7 +66,7 @@ public:
         auto buffer = make_shared_ext<ExtVector>(load_buffer_size_);
         size_t out_len = 0;
 
-        if (!fs_service_->ReadFile(configuration_file_path_, buffer->data(), buffer->size(), out_len)) {
+        if (!fs_service_->ReadFile(configuration_file_path_, buffer->data(), load_buffer_size_, out_len)) {
             // LOG_ERR("Failed to read configuration file!");
             return std::nullopt;
         }
@@ -73,12 +74,21 @@ public:
         auto config_bytes = std::span<const uint8_t>(buffer->data(), out_len);
         auto configuration = cbor_serializer_->Deserialize(config_bytes);
 
+        buffer->resize(out_len);
+
         if (!configuration.has_value()) {
             // LOG_ERR("Failed to deserialize configuration!");
             return std::nullopt;
         }
 
-        return configuration;
+        auto config = make_shared_ext<T>(configuration.value());
+
+        LoadedConfig<T> loaded_config {
+            .config_raw = buffer,
+            .config = config
+        };
+
+        return loaded_config;
     }
 };
 

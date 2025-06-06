@@ -27,13 +27,14 @@ std::shared_ptr<SystemConfiguration> SystemConfigurationController::Get() {
     if(!system_config.has_value())
         return nullptr;
 
+    system_config_raw_ = system_config.value().config_raw;
+    system_config_ = system_config.value().config;
+
     SystemConfiguration system_configuration {
-        .hw_version = system_config->hw_version,
-        .sw_version = system_config->sw_version
+        .hw_version = system_config_->hw_version,
+        .sw_version = system_config_->sw_version
     };
     system_configuration_ = make_shared_ext<SystemConfiguration>(system_configuration);
-
-    system_config_ = make_shared_ext<SystemConfig>(system_config.value());
 
     return system_configuration_;
 }
