@@ -17,8 +17,13 @@
 #include "controllers/adc_configuration_controller.h"
 #include "controllers/system_configuration_controller.h"
 
+#ifdef CONFIG_WIFI
 #include "domain/http_domain/services/wifi_ap_service.h"
+#endif // CONFIG_WIFI
+
+#ifdef CONFIG_NETWORKING
 #include "domain/http_domain/services/http_server.h"
+#endif // CONFIG_NETWORKING
 
 using namespace eerie_leap::utilities::dev_tools;
 using namespace eerie_leap::utilities::time;
@@ -29,7 +34,10 @@ using namespace eerie_leap::controllers;
 using namespace eerie_leap::domain::sensor_domain::services;
 using namespace eerie_leap::domain::fs_domain::services;
 using namespace eerie_leap::configuration::services;
+
+#if defined(CONFIG_WIFI) || defined(CONFIG_NETWORKING)
 using namespace eerie_leap::domain::http_domain::services;
+#endif // CONFIG_WIFI || CONFIG_NETWORKING
 
 #define SLEEP_TIME_MS 10000
 
@@ -56,9 +64,9 @@ int main(void) {
     //
     // DO NOT allocate this on the heap or stack — it will crash due to stack
     // alignment or lifetime issues in Zephyr.
-    // alignas(ARCH_STACK_PTR_ALIGN) static uint8_t measurement_service_buffer[sizeof(MeasurementService)];
-    // auto* measurement_service = new (measurement_service_buffer) MeasurementService(time_service, guid_generator, sensors_configuration_controller);
-    // measurement_service->Start();
+    alignas(ARCH_STACK_PTR_ALIGN) static uint8_t measurement_service_buffer[sizeof(MeasurementService)];
+    auto* measurement_service = new (measurement_service_buffer) MeasurementService(time_service, guid_generator, sensors_configuration_controller);
+    measurement_service->Start();
 
     // NOTE: Don't use for WiFi supporting boards as WiFi is broken in Zephyr 4.1 and has memory allocation issues
     // At least on ESP32S3, it does connect if Zephyr revision is set to "main", but heap allocations cannot be moved

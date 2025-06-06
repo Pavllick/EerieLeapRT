@@ -1,0 +1,86 @@
+From f2f4ee819b8010b49dabdc01179bb8d1d07d4841 Mon Sep 17 00:00:00 2001
+From: Marek Matej <marek.matej@espressif.com>
+Date: Thu, 27 Mar 2025 21:36:15 +0100
+Subject: [PATCH] drivers,soc: esp32s3: Supporting the PSRAM code and rodata
+
+Move SPIRAM heap under the noinit, where it get mapped.
+Fixes SPIRAM startup by moving necessary object to SRAM.
+
+Signed-off-by: Marek Matej <marek.matej@espressif.com>
+---
+ soc/espressif/esp32s3/default.ld | 20 +++++++++++++++-----
+ 1 file changed, 15 insertions(+), 5 deletions(-)
+
+diff --git a/soc/espressif/esp32s3/default.ld b/soc/espressif/esp32s3/default.ld
+index bba2fc40c4a9..2c9e91683ff8 100644
+--- a/soc/espressif/esp32s3/default.ld
++++ b/soc/espressif/esp32s3/default.ld
+@@ -396,6 +396,7 @@ SECTIONS
+     *libzephyr.a:mmu_psram_flash.*(.literal .literal.* .text .text.*)
+     *libzephyr.a:esp_psram_impl_quad.*(.literal .literal.* .text .text.*)
+     *libzephyr.a:esp_psram_impl_octal.*(.literal .literal.* .text .text.*)
++    *libzephyr.a:esp_psram.*(.literal .literal.* .text .text.*)
+ 
+     /* [mapping:hal] */
+     *libzephyr.a:efuse_hal.*(.literal .text .literal.* .text.*)
+@@ -409,6 +410,9 @@ SECTIONS
+     *libzephyr.a:systimer_hal.*(.literal .text .literal.* .text.*)
+     *libzephyr.a:spi_flash_hal_gpspi.*(.literal .text .literal.* .text.*)
+ 
++    *libzephyr.a:spi_flash_hal.*(.literal .literal.* .text .text.*)
++    *libzephyr.a:spi_flash_hal_common.*(.literal .literal.* .text .text.*)
++
+     /* [mapping:soc] */
+     *libzephyr.a:lldesc.*(.literal .literal.* .text .text.*)
+ 
+@@ -639,6 +643,7 @@ SECTIONS
+     *libzephyr.a:mmu_psram_flash.*(.rodata .rodata.*)
+     *libzephyr.a:esp_psram_impl_octal.*(.rodata .rodata.*)
+     *libzephyr.a:esp_psram_impl_quad.*(.rodata .rodata.*)
++    *libzephyr.a:esp_psram.*(.rodata .rodata.*)
+ 
+     /* [mapping:hal] */
+     *libzephyr.a:efuse_hal.*(.rodata .rodata.*)
+@@ -652,6 +657,9 @@ SECTIONS
+     *libzephyr.a:systimer_hal.*(.rodata .rodata.*)
+     *libzephyr.a:spi_flash_hal_gpspi.*(.rodata .rodata.*)
+ 
++    *libzephyr.a:spi_flash_hal.*(.rodata .rodata.* .sdata2 .sdata2.* .srodata .srodata.*)
++    *libzephyr.a:spi_flash_hal_common.*(.rodata .rodata.* .sdata2 .sdata2.* .srodata .srodata.*)
++
+     /* [mapping:soc] */
+     *libzephyr.a:lldesc.*(.rodata .rodata.*)
+ 
+@@ -1001,6 +1009,7 @@ SECTIONS
+   .ext_ram.data (NOLOAD) :
+   {
+     _ext_ram_start = ABSOLUTE(.);
++
+     _ext_ram_noinit_start = ABSOLUTE(.);
+ 
+ #ifdef CONFIG_ESP32_WIFI_NET_ALLOC_SPIRAM
+@@ -1013,6 +1022,12 @@ SECTIONS
+     . = ALIGN(16);
+     *(.ext_ram_noinit.*)
+     . = ALIGN(16);
++#ifdef CONFIG_ESP_SPIRAM_HEAP_SIZE
++    _ext_ram_heap_start = ABSOLUTE(.);
++    . += CONFIG_ESP_SPIRAM_HEAP_SIZE;
++    . = ALIGN(16);
++    _ext_ram_heap_end = ABSOLUTE(.);
++#endif
+     _ext_ram_noinit_end = ABSOLUTE(.);
+ 
+     _ext_ram_bss_start = ABSOLUTE(.);
+@@ -1020,11 +1035,6 @@ SECTIONS
+     . = ALIGN(16);
+     _ext_ram_bss_end = ABSOLUTE(.);
+ 
+-    _ext_ram_heap_start = ABSOLUTE(.);
+-    . += CONFIG_ESP_SPIRAM_HEAP_SIZE;
+-    . = ALIGN(16);
+-    _ext_ram_heap_end = ABSOLUTE(.);
+-
+     _ext_ram_end = ABSOLUTE(.);
+   } GROUP_LINK_IN(EXT_DRAM_REGION)
+ #endif /* CONFIG_ESP_SPIRAM */

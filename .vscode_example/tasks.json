@@ -4,7 +4,7 @@
         {
             "label": "Build ESP32S3",
             "type": "shell",
-            "command": "west build -p auto -b esp32s3_devkitc/esp32s3/procpu ./app",
+            "command": "west build -p auto -b esp32s3_devkitc/esp32s3/procpu --extra-conf boards/esp32s3_devkitc_procpu_net.conf ./app",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -15,7 +15,7 @@
         {
             "label": "Build ESP32S3 With Bootloader",
             "type": "shell",
-            "command": "west build -p auto -b esp32s3_devkitc/esp32s3/procpu --sysbuild ./app",
+            "command": "west build -p auto -b esp32s3_devkitc/esp32s3/procpu --sysbuild --extra-conf boards/esp32s3_devkitc_procpu_net.conf ./app",
             "group": {
                 "kind": "build",
                 "isDefault": true

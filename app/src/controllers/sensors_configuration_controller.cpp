@@ -101,7 +101,7 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
     auto ordered_sensors = resolver.GetProcessingOrder();
     ordered_sensors_ = std::make_shared<std::vector<std::shared_ptr<Sensor>>>(ordered_sensors);
 
-    LOG_INF("Going to save.");
+    LOG_INF("Saving sensors configuration.");
     return sensors_configuration_service_->Save(sensors_config.get());
 }
 
