@@ -44,7 +44,7 @@ int SensorsHttpController::sensors_config_get_handler(struct http_client_ctx *cl
                     .description = sensor->metadata.description.c_str()
                 },
                 .configuration = {
-                    .type = "PHYSICAL_ANALOG",
+                    .type = GetSensorTypeName(sensor->configuration.type).c_str(),
                     .channel = sensor->configuration.channel.value_or(0),
                     .sampling_rate_ms = sensor->configuration.sampling_rate_ms,
                     .interpolation_method = GetInterpolationMethodName(interpolation_method).c_str(),

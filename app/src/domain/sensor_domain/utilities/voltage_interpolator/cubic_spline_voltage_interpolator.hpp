@@ -45,26 +45,26 @@ public:
             h_[i] = table[i + 1].voltage - table[i].voltage;
 
         for(size_t i = 1; i < n - 1; ++i)
-            alpha_[i] = (3.0 / h_[i]) * (a_[i + 1] - a_[i]) - (3.0 / h_[i - 1]) * (a_[i] - a_[i - 1]);
+            alpha_[i] = (3.0f / h_[i]) * (a_[i + 1] - a_[i]) - (3.0f / h_[i - 1]) * (a_[i] - a_[i - 1]);
 
-        l_[0] = 1.0;
-        mu_[0] = 0.0;
-        z_[0] = 0.0;
+        l_[0] = 1.0f;
+        mu_[0] = 0.0f;
+        z_[0] = 0.0f;
 
         for(size_t i = 1; i < n - 1; ++i) {
-            l_[i] = 2.0 * (table[i + 1].voltage - table[i - 1].voltage) - h_[i - 1] * mu_[i - 1];
+            l_[i] = 2.0f * (table[i + 1].voltage - table[i - 1].voltage) - h_[i - 1] * mu_[i - 1];
             mu_[i] = h_[i] / l_[i];
             z_[i] = (alpha_[i] - h_[i - 1] * z_[i - 1]) / l_[i];
         }
 
-        l_[n - 1] = 1.0;
-        z_[n - 1] = 0.0;
-        c_[n - 1] = 0.0;
+        l_[n - 1] = 1.0f;
+        z_[n - 1] = 0.0f;
+        c_[n - 1] = 0.0f;
 
         for(int j = n - 2; j >= 0; --j) {
             c_[j] = z_[j] - mu_[j] * c_[j + 1];
-            b_[j] = (a_[j + 1] - a_[j]) / h_[j] - h_[j] * (c_[j + 1] + 2.0 * c_[j]) / 3.0;
-            d_[j] = (c_[j + 1] - c_[j]) / (3.0 * h_[j]);
+            b_[j] = (a_[j + 1] - a_[j]) / h_[j] - h_[j] * (c_[j + 1] + 2.0f * c_[j]) / 3.0f;
+            d_[j] = (c_[j + 1] - c_[j]) / (3.0f * h_[j]);
         }
     }
 
