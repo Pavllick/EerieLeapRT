@@ -20,14 +20,14 @@ private:
     std::string expression_;
 
     std::string UnwrapVariables() const;
-    
+
 public:
     ExpressionEvaluator(std::shared_ptr<MathParserService> math_parser_service, const std::string& expression);
 
     const std::string* GetExpression() const { return &expression_; }
     const std::string* GetRawExpression() const { return &expression_raw_; }
 
-    double Evaluate(const std::unordered_map<std::string, double*>& variables, std::optional<double> x = std::nullopt) const;
+    float Evaluate(const std::unordered_map<std::string, float*>& variables, std::optional<float> x = std::nullopt) const;
     std::unordered_set<std::string> ExtractVariables() const;
 };
 

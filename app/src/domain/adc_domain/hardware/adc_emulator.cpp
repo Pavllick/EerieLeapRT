@@ -16,7 +16,7 @@ int AdcEmulator::Initialize() {
     return res;
 }
 
-double AdcEmulator::ReadChannel(int channel) {
+float AdcEmulator::ReadChannel(int channel) {
     if(!adc_config_)
         throw std::runtime_error("ADC config is not set!");
 

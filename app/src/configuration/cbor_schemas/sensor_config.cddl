@@ -1,10 +1,10 @@
 SensorMetadataConfig = [
   name: tstr,
   unit: tstr,
-  ? description: tstr
+  description: tstr
 ]
 
-SensorCalibrationDataMap = { 2*50(float => float) }
+SensorCalibrationDataMap = { 2*50(float32 => float32) }
 
 SensorConfigurationConfig = [
   type: uint,

@@ -26,7 +26,7 @@
 } while(0)
 
 static bool encode_SensorMetadataConfig(zcbor_state_t *state, const struct SensorMetadataConfig *input);
-static bool encode_repeated_SensorCalibrationDataMap_floatfloat(zcbor_state_t *state, const struct SensorCalibrationDataMap_floatfloat *input);
+static bool encode_repeated_SensorCalibrationDataMap_float32float(zcbor_state_t *state, const struct SensorCalibrationDataMap_float32float *input);
 static bool encode_SensorCalibrationDataMap(zcbor_state_t *state, const struct SensorCalibrationDataMap *input);
 static bool encode_SensorConfigurationConfig(zcbor_state_t *state, const struct SensorConfigurationConfig *input);
 static bool encode_SensorConfig(zcbor_state_t *state, const struct SensorConfig *input);
@@ -40,19 +40,19 @@ static bool encode_SensorMetadataConfig(
 
 	bool res = (((zcbor_list_start_encode(state, 3) && ((((zcbor_tstr_encode(state, (&(*input).name))))
 	&& ((zcbor_tstr_encode(state, (&(*input).unit))))
-	&& (!(*input).description_present || zcbor_tstr_encode(state, (&(*input).description)))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 3))));
+	&& ((zcbor_tstr_encode(state, (&(*input).description))))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 3))));
 
 	log_result(state, res, __func__);
 	return res;
 }
 
-static bool encode_repeated_SensorCalibrationDataMap_floatfloat(
-		zcbor_state_t *state, const struct SensorCalibrationDataMap_floatfloat *input)
+static bool encode_repeated_SensorCalibrationDataMap_float32float(
+		zcbor_state_t *state, const struct SensorCalibrationDataMap_float32float *input)
 {
 	zcbor_log("%s\r\n", __func__);
 
-	bool res = ((((zcbor_float64_encode(state, (&(*input).floatfloat_key))))
-	&& (zcbor_float64_encode(state, (&(*input).floatfloat)))));
+	bool res = ((((zcbor_float32_encode(state, (&(*input).float32float_key))))
+	&& (zcbor_float32_encode(state, (&(*input).float32float)))));
 
 	log_result(state, res, __func__);
 	return res;
@@ -63,7 +63,7 @@ static bool encode_SensorCalibrationDataMap(
 {
 	zcbor_log("%s\r\n", __func__);
 
-	bool res = (((zcbor_map_start_encode(state, 50) && ((zcbor_multi_encode_minmax(2, 50, &(*input).floatfloat_count, (zcbor_encoder_t *)encode_repeated_SensorCalibrationDataMap_floatfloat, state, (*&(*input).floatfloat), sizeof(struct SensorCalibrationDataMap_floatfloat))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_map_end_encode(state, 50))));
+	bool res = (((zcbor_map_start_encode(state, 50) && ((zcbor_multi_encode_minmax(2, 50, &(*input).float32float_count, (zcbor_encoder_t *)encode_repeated_SensorCalibrationDataMap_float32float, state, (*&(*input).float32float), sizeof(struct SensorCalibrationDataMap_float32float))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_map_end_encode(state, 50))));
 
 	log_result(state, res, __func__);
 	return res;

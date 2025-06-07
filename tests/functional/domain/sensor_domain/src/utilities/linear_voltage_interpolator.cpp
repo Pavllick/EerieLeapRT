@@ -39,7 +39,7 @@ ZTEST(linear_voltage_interpolator, test_Interpolate) {
     auto calibration_data_1_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_1);
     LinearVoltageInterpolator voltage_interpolator_1(calibration_data_1_ptr);
     zassert_equal(voltage_interpolator_1.Interpolate(-1.23), 0);
-    zassert_equal(voltage_interpolator_1.Interpolate(4.26), 42.6);
+    zassert_between_inclusive(voltage_interpolator_1.Interpolate(4.26), 42.59, 42.61);
     zassert_equal(voltage_interpolator_1.Interpolate(12), 100.0);
 
     std::vector<CalibrationData> calibration_data_2 {

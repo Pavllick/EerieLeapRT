@@ -14,8 +14,8 @@ ZTEST(expression_evaluator, test_Evaluate_x_returns_x) {
     auto math_parser_service = std::make_shared<MathParserService>();
     ExpressionEvaluator expression_evaluator(math_parser_service, "x");
 
-    std::unordered_map<std::string, double*> vars;
-    double res = expression_evaluator.Evaluate(vars, 8.0);
+    std::unordered_map<std::string, float*> vars;
+    float res = expression_evaluator.Evaluate(vars, 8.0);
 
     zassert_equal(res, 8.0);
 }
@@ -24,10 +24,10 @@ ZTEST(expression_evaluator, test_Evaluate_braced_x_returns_correct_value) {
     auto math_parser_service = std::make_shared<MathParserService>();
     ExpressionEvaluator expression_evaluator(math_parser_service, "({x} + {y}) * 4");
 
-    std::unordered_map<std::string, double*> vars;
-    double y = 2.0;
+    std::unordered_map<std::string, float*> vars;
+    float y = 2.0;
     vars["y"] = &y;
-    double res = expression_evaluator.Evaluate(vars, 8.0);
+    float res = expression_evaluator.Evaluate(vars, 8.0);
 
     zassert_equal(res, 40.0);
 }
@@ -36,10 +36,10 @@ ZTEST(expression_evaluator, test_Evaluate_not_braced_x_returns_correct_value) {
     auto math_parser_service = std::make_shared<MathParserService>();
     ExpressionEvaluator expression_evaluator(math_parser_service, "(x + {y}) * 4");
 
-    std::unordered_map<std::string, double*> vars;
-    double y = 2.0;
+    std::unordered_map<std::string, float*> vars;
+    float y = 2.0;
     vars["y"] = &y;
-    double res = expression_evaluator.Evaluate(vars, 8.0);
+    float res = expression_evaluator.Evaluate(vars, 8.0);
 
     zassert_equal(res, 40.0);
 }
@@ -49,8 +49,8 @@ ZTEST(expression_evaluator, test_Evaluate_empty_expression_throws_exception) {
     auto math_parser_service = std::make_shared<MathParserService>();
     ExpressionEvaluator expression_evaluator(math_parser_service, "");
 
-    std::unordered_map<std::string, double*> vars;
-    
+    std::unordered_map<std::string, float*> vars;
+
     try {
         expression_evaluator.Evaluate(vars);
         zassert_true(true, "Evaluation expected to fail, but it didn't.");
@@ -64,18 +64,18 @@ ZTEST(expression_evaluator, test_multiple_ExpressionEvaluator_eval_correctly) {
     ExpressionEvaluator expression_evaluator1(math_parser_service, "({x} + {y}) * 4");
     ExpressionEvaluator expression_evaluator2(math_parser_service, "({x} - 8 * {var_d}) / {f}");
 
-    std::unordered_map<std::string, double*> vars1;
-    double y = 2.0;
+    std::unordered_map<std::string, float*> vars1;
+    float y = 2.0;
     vars1["y"] = &y;
-    double res1 = expression_evaluator1.Evaluate(vars1, 8.0);
+    float res1 = expression_evaluator1.Evaluate(vars1, 8.0);
     zassert_equal(res1, 40.0);
 
-    std::unordered_map<std::string, double*> vars2;
-    double var_d = 2.0;
+    std::unordered_map<std::string, float*> vars2;
+    float var_d = 2.0;
     vars2["var_d"] = &var_d;
-    double f = 2.0;
+    float f = 2.0;
     vars2["f"] = &f;
-    double res2 = expression_evaluator2.Evaluate(vars2, 80.0);
+    float res2 = expression_evaluator2.Evaluate(vars2, 80.0);
     zassert_equal(res2, 32.0);
 }
 

@@ -13,9 +13,9 @@ using namespace eerie_leap::domain::sensor_domain::utilities;
 void SensorProcessor::ProcessSensorReading(std::shared_ptr<SensorReading> reading) {
     try {
         if(reading->sensor->configuration.type == SensorType::PHYSICAL_ANALOG) {
-            double voltage = reading->value.value();
-            double raw_value = reading->sensor->configuration.voltage_interpolator->Interpolate(voltage);
-            double value = raw_value;
+            float voltage = reading->value.value();
+            float raw_value = reading->sensor->configuration.voltage_interpolator->Interpolate(voltage);
+            float value = raw_value;
 
             if(reading->sensor->configuration.expression_evaluator != nullptr) {
                 value = reading->sensor->configuration.expression_evaluator->Evaluate(

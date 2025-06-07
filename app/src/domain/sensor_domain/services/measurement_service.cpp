@@ -125,6 +125,7 @@ void MeasurementService::EntryPoint() {
 
     math_parser_service_ = make_shared_ext<MathParserService>();
 
+    // TODO: move initialization to main
     sensors_configuration_controller_->Initialize(math_parser_service_);
     SetupTestSensors();
 

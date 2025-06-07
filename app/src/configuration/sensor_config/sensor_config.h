@@ -29,17 +29,16 @@ struct SensorMetadataConfig {
 	struct zcbor_string name;
 	struct zcbor_string unit;
 	struct zcbor_string description;
-	bool description_present;
 };
 
-struct SensorCalibrationDataMap_floatfloat {
-	double floatfloat_key;
-	double floatfloat;
+struct SensorCalibrationDataMap_float32float {
+	float float32float_key;
+	float float32float;
 };
 
 struct SensorCalibrationDataMap {
-	struct SensorCalibrationDataMap_floatfloat floatfloat[50];
-	size_t floatfloat_count;
+	struct SensorCalibrationDataMap_float32float float32float[50];
+	size_t float32float_count;
 };
 
 struct SensorConfigurationConfig {

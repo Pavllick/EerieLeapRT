@@ -15,8 +15,8 @@ class CubicSplineVoltageInterpolator : public IVoltageInterpolator {
 private:
     static const InterpolationMethod INTERPOLATION_METHOD = InterpolationMethod::CUBIC_SPLINE;
     std::shared_ptr<std::vector<CalibrationData>> calibration_table_;
-    std::vector<double> h_, alpha_, l_, mu_, z_;
-    std::vector<double> a_, b_, c_, d_;
+    std::vector<float> h_, alpha_, l_, mu_, z_;
+    std::vector<float> a_, b_, c_, d_;
 
 public:
     CubicSplineVoltageInterpolator(const std::shared_ptr<std::vector<CalibrationData>>& calibration_table)
@@ -68,19 +68,19 @@ public:
         }
     }
 
-    double Interpolate(double voltage) const override {
+    float Interpolate(float voltage) const override {
         const auto& table = *calibration_table_;
-    
+
         if(voltage <= table.front().voltage)
             return table.front().value;
         if(voltage >= table.back().voltage)
             return table.back().value;
 
         auto it = std::upper_bound(table.begin(), table.end(), voltage,
-            [](double val, const CalibrationData& d) { return val < d.voltage; });
+            [](float val, const CalibrationData& d) { return val < d.voltage; });
 
         size_t i = std::distance(table.begin(), it) - 1;
-        double dx = voltage - table[i].voltage;
+        float dx = voltage - table[i].voltage;
 
         return a_[i] + b_[i] * dx + c_[i] * dx * dx + d_[i] * dx * dx * dx;
     }

@@ -17,11 +17,11 @@ public:
         parser_.ClearVar();
     }
 
-    double Evaluate() const {
+    float Evaluate() const {
         return parser_.Eval();
     }
 
-    void DefineVariable(const std::string& name, double* value) {
+    void DefineVariable(const std::string& name, float* value) {
         parser_.DefineVar(name, value);
     }
 };

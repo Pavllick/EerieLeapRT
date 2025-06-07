@@ -7,6 +7,13 @@ foreach(file ${files})
                     patch -p1 -d $ENV{ZEPHYR_BASE} -i ${CMAKE_CURRENT_SOURCE_DIR}/${file} -r - --no-backup-if-mismatch)
 endforeach()
 
+# Apply muParser patches before build
+file(GLOB_RECURSE files RELATIVE ${CMAKE_SOURCE_DIR} "patches/muParser/*.patch")
+foreach(file ${files})
+    execute_process(COMMAND
+                    patch -p1 -d ${CMAKE_SOURCE_DIR}/.. -i ${CMAKE_CURRENT_SOURCE_DIR}/${file} -r - --no-backup-if-mismatch)
+endforeach()
+
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(errie_leap)
 

@@ -76,7 +76,8 @@ int main(void) {
 #endif // CONFIG_WIFI
 
 #ifdef CONFIG_NETWORKING
-    HttpServer::Start();
+    HttpServer http_server(system_configuration_controller, adc_configuration_controller, sensors_configuration_controller);
+    http_server.Start();
 #endif // CONFIG_NETWORKING
 
     // auto files = fs_service->ListFiles("/");

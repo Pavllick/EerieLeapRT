@@ -56,7 +56,7 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
             sensor_config->configuration.calibration_table_present = true;
 
             auto& calibration_table = *sensor->configuration.voltage_interpolator->GetCalibrationTable();
-            sensor_config->configuration.calibration_table.floatfloat_count = calibration_table.size();
+            sensor_config->configuration.calibration_table.float32float_count = calibration_table.size();
 
             std::sort(
                 calibration_table.begin(),
@@ -67,8 +67,8 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
 
             for(size_t j = 0; j < calibration_table.size(); ++j) {
                 const auto& calibration_data = calibration_table[j];
-                sensor_config->configuration.calibration_table.floatfloat[j].floatfloat_key = calibration_data.voltage;
-                sensor_config->configuration.calibration_table.floatfloat[j].floatfloat = calibration_data.value;
+                sensor_config->configuration.calibration_table.float32float[j].float32float_key = calibration_data.voltage;
+                sensor_config->configuration.calibration_table.float32float[j].float32float = calibration_data.value;
             }
         } else {
             sensor_config->configuration.calibration_table_present = false;
@@ -84,12 +84,7 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
         sensor_config->metadata.unit = CborHelpers::ToZcborString(&sensor->metadata.unit);
         sensor_config->metadata.name = CborHelpers::ToZcborString(&sensor->metadata.name);
 
-        if(sensor->metadata.description.has_value()) {
-            sensor_config->metadata.description_present = true;
-            sensor_config->metadata.description = CborHelpers::ToZcborString(&sensor->metadata.description.value());
-        } else {
-            sensor_config->metadata.description_present = false;
-        }
+        sensor_config->metadata.description = CborHelpers::ToZcborString(&sensor->metadata.description);
 
         sensors_config->SensorConfig_m[i] = *sensor_config.get();
         sensors_config->SensorConfig_m_count++;
@@ -134,12 +129,12 @@ const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfiguration
         auto interpolation_method = static_cast<InterpolationMethod>(sensor_config.configuration.interpolation_method);
         if(interpolation_method != InterpolationMethod::NONE && sensor_config.configuration.calibration_table_present) {
             std::vector<CalibrationData> calibration_table;
-            for(size_t j = 0; j < sensor_config.configuration.calibration_table.floatfloat_count; ++j) {
-                const auto& calibration_data = sensor_config.configuration.calibration_table.floatfloat[j];
+            for(size_t j = 0; j < sensor_config.configuration.calibration_table.float32float_count; ++j) {
+                const auto& calibration_data = sensor_config.configuration.calibration_table.float32float[j];
 
                 calibration_table.push_back({
-                    .voltage = calibration_data.floatfloat_key,
-                    .value = calibration_data.floatfloat});
+                    .voltage = calibration_data.float32float_key,
+                    .value = calibration_data.float32float});
             }
 
             auto calibration_table_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_table);
@@ -172,9 +167,7 @@ const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfiguration
         sensor->metadata.unit = CborHelpers::ToStdString(sensor_config.metadata.unit);
         sensor->metadata.name = CborHelpers::ToStdString(sensor_config.metadata.name);
 
-        sensor->metadata.description = sensor_config.metadata.description_present
-            ? CborHelpers::ToStdString(sensor_config.metadata.description)
-            : "";
+        sensor->metadata.description = CborHelpers::ToStdString(sensor_config.metadata.description);
 
         resolver.AddSensor(sensor);
     }

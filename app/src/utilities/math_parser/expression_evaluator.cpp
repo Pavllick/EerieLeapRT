@@ -15,7 +15,7 @@ using namespace mu;
 
 static const std::regex& sensorIdRegex() {
     static const std::regex regex_instance(R"(\{([a-z_][a-z0-9_]*)\})");
-    
+
     return regex_instance;
 }
 
@@ -24,21 +24,21 @@ ExpressionEvaluator::ExpressionEvaluator(std::shared_ptr<MathParserService> math
     expression_ = UnwrapVariables();
 }
 
-double ExpressionEvaluator::Evaluate(const std::unordered_map<std::string, double*>& variables, std::optional<double> x) const {
+float ExpressionEvaluator::Evaluate(const std::unordered_map<std::string, float*>& variables, std::optional<float> x) const {
     k_mutex_lock(&expression_eval_mutex_, K_FOREVER);
 
     math_parser_service_->SetExpression(expression_);
-    
+
     if(x.has_value())
         math_parser_service_->DefineVariable("x", &x.value());
 
     for(const auto& [key, value]: variables)
         math_parser_service_->DefineVariable(key, value);
 
-    double res = math_parser_service_->Evaluate();
+    float res = math_parser_service_->Evaluate();
 
     k_mutex_unlock(&expression_eval_mutex_);
-    
+
     return res;
 }
 

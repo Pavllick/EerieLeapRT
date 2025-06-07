@@ -18,7 +18,7 @@ using namespace eerie_leap::utilities::guid;
 struct SensorReading {
     const Guid id;
     const std::shared_ptr<Sensor> sensor;
-    std::optional<double> value;
+    std::optional<float> value;
     std::optional<system_clock::time_point> timestamp;
     ReadingMetadata metadata;
     ReadingStatus status = ReadingStatus::UNINITIALIZED;

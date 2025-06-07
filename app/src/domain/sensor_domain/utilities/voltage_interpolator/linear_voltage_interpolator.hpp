@@ -24,30 +24,30 @@ public:
                 throw std::invalid_argument("Calibration data is missing or invalid!");
         }
 
-    double Interpolate(double voltage) const override {
+    float Interpolate(float voltage) const override {
         const auto& table = *calibration_table_;
-    
+
         // Edge cases: clamp to ends
         if(voltage <= table.front().voltage)
             return table.front().value;
         if(voltage >= table.back().voltage)
             return table.back().value;
-    
+
         // Binary search for the correct interval
         auto upper = std::lower_bound(
             table.begin(), table.end(), voltage,
-            [](const CalibrationData& data, double v) {
+            [](const CalibrationData& data, float v) {
                 return data.voltage < v;
             });
-    
+
         auto lower = upper - 1;
-    
-        double x0 = lower->voltage;
-        double x1 = upper->voltage;
-        double y0 = lower->value;
-        double y1 = upper->value;
-    
-        double ratio = (voltage - x0) / (x1 - x0);
+
+        float x0 = lower->voltage;
+        float x1 = upper->voltage;
+        float y0 = lower->value;
+        float y1 = upper->value;
+
+        float ratio = (voltage - x0) / (x1 - x0);
         return y0 + ratio * (y1 - y0);
     }
 

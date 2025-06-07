@@ -13,7 +13,7 @@ void SensorReader::Read(std::shared_ptr<Sensor> sensor) {
     sensor_reading->timestamp = time_service_->GetCurrentTime();
 
     if (sensor->configuration.type == SensorType::PHYSICAL_ANALOG) {
-        double reading = adc_->ReadChannel(sensor->configuration.channel.value());
+        float reading = adc_->ReadChannel(sensor->configuration.channel.value());
         sensor_reading->value = reading;
         sensor_reading->status = ReadingStatus::RAW;
     } else if (sensor->configuration.type == SensorType::VIRTUAL_ANALOG) {

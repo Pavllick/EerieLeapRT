@@ -39,8 +39,8 @@ ZTEST(cubic_spline_voltage_interpolator, test_Interpolate) {
     auto calibration_data_1_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_1);
     CubicSplineVoltageInterpolator voltage_interpolator_1(calibration_data_1_ptr);
     zassert_equal(voltage_interpolator_1.Interpolate(-1.23), 0);
-    double value = voltage_interpolator_1.Interpolate(4.26);
-    zassert_between_inclusive(value, 42.5, 43.7);
+    float value = voltage_interpolator_1.Interpolate(4.26);
+    zassert_between_inclusive(value, 42.59, 42.61);
     zassert_equal(voltage_interpolator_1.Interpolate(12), 100.0);
 
     std::vector<CalibrationData> calibration_data_2 {

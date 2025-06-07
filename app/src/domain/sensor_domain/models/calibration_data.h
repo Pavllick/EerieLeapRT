@@ -1,10 +1,10 @@
 #pragma once
 
 namespace eerie_leap::domain::sensor_domain::models {
-    
+
 struct CalibrationData {
-    double voltage;
-    double value;
+    float voltage;
+    float value;
 };
 
 } // namespace eerie_leap::domain::sensor_domain::models

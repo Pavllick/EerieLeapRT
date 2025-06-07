@@ -163,9 +163,9 @@ ZTEST(sensor_processor, test_ProcessSensorReading) {
         zassert_false(reading_3->value.has_value());
 
         auto sensor_1_voltage_interpolator = sensors[1]->configuration.voltage_interpolator;
-        double reading_1_value = sensor_1_voltage_interpolator->Interpolate(reading_1->value.value());
+        float reading_1_value = sensor_1_voltage_interpolator->Interpolate(reading_1->value.value());
         auto sensor_2_voltage_interpolator = sensors[0]->configuration.voltage_interpolator;
-        double reading_2_value = sensor_2_voltage_interpolator->Interpolate(reading_2->value.value());
+        float reading_2_value = sensor_2_voltage_interpolator->Interpolate(reading_2->value.value());
 
         SensorProcessor sensor_processor(sensor_readings_frame);
         for(auto& sensor : sensors)
@@ -174,18 +174,18 @@ ZTEST(sensor_processor, test_ProcessSensorReading) {
         auto proc_reading_2 = sensor_readings_frame->GetReadings().at("sensor_2");
         zassert_equal(proc_reading_2->status, ReadingStatus::PROCESSED);
         zassert_true(proc_reading_2->value.has_value());
-        double proc_reading_2_value = reading_2_value * 4 + 1.6;
+        float proc_reading_2_value = reading_2_value * 4 + 1.6;
         zassert_equal(proc_reading_2->value.value(), proc_reading_2_value);
 
         auto proc_reading_1 = sensor_readings_frame->GetReadings().at("sensor_1");
         zassert_equal(proc_reading_1->status, ReadingStatus::PROCESSED);
         zassert_true(proc_reading_1->value.has_value());
-        double proc_reading_1_value = reading_1_value * 2 + proc_reading_2_value + 1;
+        float proc_reading_1_value = reading_1_value * 2 + proc_reading_2_value + 1;
         zassert_equal(proc_reading_1->value.value(), proc_reading_1_value);
 
         auto proc_reading_3 = sensor_readings_frame->GetReadings().at("sensor_3");
         zassert_equal(proc_reading_3->status, ReadingStatus::PROCESSED);
         zassert_true(proc_reading_3->value.has_value());
-        double proc_reading_3_value = proc_reading_1_value + 8.34;
+        float proc_reading_3_value = proc_reading_1_value + 8.34;
         zassert_equal(proc_reading_3->value.value(), proc_reading_3_value);
 }

@@ -26,7 +26,7 @@
 } while(0)
 
 static bool decode_SensorMetadataConfig(zcbor_state_t *state, struct SensorMetadataConfig *result);
-static bool decode_repeated_SensorCalibrationDataMap_floatfloat(zcbor_state_t *state, struct SensorCalibrationDataMap_floatfloat *result);
+static bool decode_repeated_SensorCalibrationDataMap_float32float(zcbor_state_t *state, struct SensorCalibrationDataMap_float32float *result);
 static bool decode_SensorCalibrationDataMap(zcbor_state_t *state, struct SensorCalibrationDataMap *result);
 static bool decode_SensorConfigurationConfig(zcbor_state_t *state, struct SensorConfigurationConfig *result);
 static bool decode_SensorConfig(zcbor_state_t *state, struct SensorConfig *result);
@@ -40,19 +40,19 @@ static bool decode_SensorMetadataConfig(
 
 	bool res = (((zcbor_list_start_decode(state) && ((((zcbor_tstr_decode(state, (&(*result).name))))
 	&& ((zcbor_tstr_decode(state, (&(*result).unit))))
-	&& ((*result).description_present = ((zcbor_tstr_decode(state, (&(*result).description)))), 1)) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
+	&& ((zcbor_tstr_decode(state, (&(*result).description))))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
 
 	log_result(state, res, __func__);
 	return res;
 }
 
-static bool decode_repeated_SensorCalibrationDataMap_floatfloat(
-		zcbor_state_t *state, struct SensorCalibrationDataMap_floatfloat *result)
+static bool decode_repeated_SensorCalibrationDataMap_float32float(
+		zcbor_state_t *state, struct SensorCalibrationDataMap_float32float *result)
 {
 	zcbor_log("%s\r\n", __func__);
 
-	bool res = ((((zcbor_float_decode(state, (&(*result).floatfloat_key))))
-	&& (zcbor_float_decode(state, (&(*result).floatfloat)))));
+	bool res = ((((zcbor_float32_decode(state, (&(*result).float32float_key))))
+	&& (zcbor_float32_decode(state, (&(*result).float32float)))));
 
 	log_result(state, res, __func__);
 	return res;
@@ -63,13 +63,13 @@ static bool decode_SensorCalibrationDataMap(
 {
 	zcbor_log("%s\r\n", __func__);
 
-	bool res = (((zcbor_map_start_decode(state) && ((zcbor_multi_decode(2, 50, &(*result).floatfloat_count, (zcbor_decoder_t *)decode_repeated_SensorCalibrationDataMap_floatfloat, state, (*&(*result).floatfloat), sizeof(struct SensorCalibrationDataMap_floatfloat))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_map_end_decode(state))));
+	bool res = (((zcbor_map_start_decode(state) && ((zcbor_multi_decode(2, 50, &(*result).float32float_count, (zcbor_decoder_t *)decode_repeated_SensorCalibrationDataMap_float32float, state, (*&(*result).float32float), sizeof(struct SensorCalibrationDataMap_float32float))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_map_end_decode(state))));
 
 	if (false) {
 		/* For testing that the types of the arguments are correct.
 		 * A compiler error here means a bug in zcbor.
 		 */
-		decode_repeated_SensorCalibrationDataMap_floatfloat(state, (*&(*result).floatfloat));
+		decode_repeated_SensorCalibrationDataMap_float32float(state, (*&(*result).float32float));
 	}
 
 	log_result(state, res, __func__);

@@ -70,7 +70,7 @@ void Adc::UpdateConfiguration(AdcConfiguration config) {
     LOG_INF("Adc configuration updated.");
 }
 
-double Adc::ReadChannel(int channel) {
+float Adc::ReadChannel(int channel) {
     if(!adc_config_)
         throw std::runtime_error("ADC config is not set!");
 
@@ -93,7 +93,7 @@ double Adc::ReadChannel(int channel) {
 		return 0;
 	}
 
-    return (double)val_mv / 1000.0;
+    return (float)val_mv / 1000.0;
 }
 
 uint16_t Adc::GetReding() {

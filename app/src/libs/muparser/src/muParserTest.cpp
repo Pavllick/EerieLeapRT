@@ -1559,7 +1559,7 @@ namespace mu
 				p1->DefinePostfixOprt(_T("{m}"), Milli);
 				p1->DefinePostfixOprt(_T("{M}"), Mega);
 				p1->DefinePostfixOprt(_T("m"), Milli);
-				p1->DefinePostfixOprt(_T("n"), [](double value){return value * 1E-9;});
+				p1->DefinePostfixOprt(_T("n"), [](float value){return value * 1E-9f;});
 				p1->DefinePostfixOprt(_T("meg"), Mega);
 				p1->DefinePostfixOprt(_T("#"), times3);
 				p1->DefinePostfixOprt(_T("'"), sqr);

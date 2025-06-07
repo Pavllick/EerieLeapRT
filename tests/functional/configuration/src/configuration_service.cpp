@@ -49,10 +49,11 @@ ZTEST(configuration_service, test_SensorsConfig_Save_config_successfully_saved) 
     // Create first sensor config
     std::string sensor_1_name = "name 1";
     std::string sensor_1_unit = "km/h";
+    std::string sensor_1_description = "";
     SensorMetadataConfig metadata_config_1 = {
         .name = CborHelpers::ToZcborString(&sensor_1_name),
         .unit = CborHelpers::ToZcborString(&sensor_1_unit),
-        .description_present = false
+        .description = CborHelpers::ToZcborString(&sensor_1_description)
     };
 
     std::string sensor_1_expression = "({var_d} + {y}) * 4";
@@ -77,22 +78,21 @@ ZTEST(configuration_service, test_SensorsConfig_Save_config_successfully_saved) 
     // Create second sensor config
     std::string sensor_2_name = "name 2";
     std::string sensor_2_unit = "m/s";
-    std::string sensor_2_description = "Some description 2";
+    std::string sensor_2_description = "";
     SensorMetadataConfig metadata_config_2 = {
         .name = CborHelpers::ToZcborString(&sensor_2_name),
         .unit = CborHelpers::ToZcborString(&sensor_2_unit),
-        .description = CborHelpers::ToZcborString(&sensor_2_description),
-        .description_present = true
+        .description = CborHelpers::ToZcborString(&sensor_2_description)
     };
 
     SensorCalibrationDataMap calibration_data_map_2 = {
-        .floatfloat = {
+        .float32float = {
             { 1.0, 2.0 },
             { 1.1, 2.1 },
             { 1.2, 2.2 },
             { 1.3, 2.3 }
         },
-        .floatfloat_count = 4
+        .float32float_count = 4
     };
 
     std::string sensor_2_expression = "({x} - 8 * {var_d}) / {f}";
@@ -129,10 +129,11 @@ ZTEST(configuration_service, test_SensorsConfig_Load_config_successfully_saved_a
     // Create first sensor config
     std::string sensor_1_name = "name 3";
     std::string sensor_1_unit = "km/h";
+    std::string sensor_1_description = "";
     SensorMetadataConfig metadata_config_1 = {
         .name = CborHelpers::ToZcborString(&sensor_1_name),
         .unit = CborHelpers::ToZcborString(&sensor_1_unit),
-        .description_present = false
+        .description = CborHelpers::ToZcborString(&sensor_1_description)
     };
 
     std::string sensor_1_expression = "({var_d} + {y}) * 4";
@@ -161,18 +162,17 @@ ZTEST(configuration_service, test_SensorsConfig_Load_config_successfully_saved_a
     SensorMetadataConfig metadata_config_2 = {
         .name = CborHelpers::ToZcborString(&sensor_2_name),
         .unit = CborHelpers::ToZcborString(&sensor_2_unit),
-        .description = CborHelpers::ToZcborString(&sensor_2_description),
-        .description_present = true
+        .description = CborHelpers::ToZcborString(&sensor_2_description)
     };
 
     SensorCalibrationDataMap calibration_data_map_2 = {
-        .floatfloat = {
+        .float32float = {
             { 1.0, 2.0 },
             { 1.1, 2.1 },
             { 1.2, 2.2 },
             { 1.3, 2.3 }
         },
-        .floatfloat_count = 4
+        .float32float_count = 4
     };
 
     std::string sensor_2_expression = "({x} - 8 * {var_d}) / {f}";
@@ -222,7 +222,6 @@ ZTEST(configuration_service, test_SensorsConfig_Load_config_successfully_saved_a
 
     zassert_str_equal(CborHelpers::ToStdString(loaded_sensors_config->SensorConfig_m[0].metadata.name).c_str(), sensor_1_name.c_str());
     zassert_str_equal(CborHelpers::ToStdString(loaded_sensors_config->SensorConfig_m[0].metadata.unit).c_str(), sensor_1_unit.c_str());
-    zassert_false(loaded_sensors_config->SensorConfig_m[0].metadata.description_present);
 
     zassert_equal(loaded_sensors_config->SensorConfig_m[0].configuration.type, 1);
     zassert_equal(loaded_sensors_config->SensorConfig_m[0].configuration.channel, 6);
@@ -238,7 +237,6 @@ ZTEST(configuration_service, test_SensorsConfig_Load_config_successfully_saved_a
 
     zassert_str_equal(CborHelpers::ToStdString(loaded_sensors_config->SensorConfig_m[1].metadata.name).c_str(), sensor_2_name.c_str());
     zassert_str_equal(CborHelpers::ToStdString(loaded_sensors_config->SensorConfig_m[1].metadata.unit).c_str(), sensor_2_unit.c_str());
-    zassert_true(loaded_sensors_config->SensorConfig_m[1].metadata.description_present);
     zassert_str_equal(CborHelpers::ToStdString(loaded_sensors_config->SensorConfig_m[1].metadata.description).c_str(), sensor_2_description.c_str());
 
     zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.type, 1);
@@ -246,15 +244,15 @@ ZTEST(configuration_service, test_SensorsConfig_Load_config_successfully_saved_a
     zassert_true(loaded_sensors_config->SensorConfig_m[1].configuration.channel_present);
     zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.sampling_rate_ms, 250);
     zassert_true(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table_present);
-    zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.floatfloat_count, 4);
-    zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.floatfloat[0].floatfloat_key, 1.0);
-    zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.floatfloat[0].floatfloat, 2.0);
-    zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.floatfloat[1].floatfloat_key, 1.1);
-    zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.floatfloat[1].floatfloat, 2.1);
-    zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.floatfloat[2].floatfloat_key, 1.2);
-    zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.floatfloat[2].floatfloat, 2.2);
-    zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.floatfloat[3].floatfloat_key, 1.3);
-    zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.floatfloat[3].floatfloat, 2.3);
+    zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.float32float_count, 4);
+    zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.float32float[0].float32float_key, 1.0);
+    zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.float32float[0].float32float, 2.0);
+    zassert_between_inclusive(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.float32float[1].float32float_key, 1.09, 1.11);
+    zassert_between_inclusive(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.float32float[1].float32float, 2.09, 2.11);
+    zassert_between_inclusive(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.float32float[2].float32float_key, 1.19, 1.21);
+    zassert_between_inclusive(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.float32float[2].float32float, 2.19, 2.21);
+    zassert_between_inclusive(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.float32float[3].float32float_key, 1.29, 1.31);
+    zassert_between_inclusive(loaded_sensors_config->SensorConfig_m[1].configuration.calibration_table.float32float[3].float32float, 2.29, 2.31);
     zassert_equal(loaded_sensors_config->SensorConfig_m[1].configuration.interpolation_method, 1);
     zassert_true(loaded_sensors_config->SensorConfig_m[1].configuration.expression_present);
     zassert_str_equal(CborHelpers::ToStdString(loaded_sensors_config->SensorConfig_m[1].configuration.expression).c_str(), sensor_2_expression.c_str());

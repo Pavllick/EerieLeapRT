@@ -103,7 +103,7 @@ sensor_readings_frame_GetTestSensors_HelperInstances sensor_readings_frame_GetHe
     auto guid_generator = std::make_shared<GuidGenerator>();
     auto math_parser_service = std::make_shared<MathParserService>();
     auto sensor_readings_frame = std::make_shared<SensorReadingsFrame>();
-    
+
     return sensor_readings_frame_GetTestSensors_HelperInstances {
         .guid_generator = guid_generator,
         .math_parser_service = math_parser_service,
@@ -124,7 +124,7 @@ ZTEST(sensor_readings_frame, test_AddOrUpdateReading) {
 
         auto reading1 = std::make_shared<SensorReading>(guid_generator->Generate(), sensors[1]);
         sensor_readings_frame->AddOrUpdateReading(reading1);
-        
+
         readings = sensor_readings_frame->GetReadings();
         zassert_equal(readings.size(), 1);
 
@@ -257,10 +257,10 @@ ZTEST(sensor_readings_frame, test_GetReadingsValues) {
     auto readings = sensor_readings_frame->GetReadingsValues();
     zassert_equal(readings.size(), 2);
 
-    double fr_reading1 = *readings.at("sensor_1");
-    zassert_equal(fr_reading1, 2.4);
-    double fr_reading2 = *readings.at("sensor_3");
-    zassert_equal(fr_reading2, 2.6);
+    float fr_reading1 = *readings.at("sensor_1");
+    zassert_between_inclusive(fr_reading1, 2.39, 2.41);
+    float fr_reading2 = *readings.at("sensor_3");
+    zassert_between_inclusive(fr_reading2, 2.59, 2.61);
 }
 
 ZTEST(sensor_readings_frame, test_ClearReadings) {

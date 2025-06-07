@@ -20,12 +20,12 @@ void ReadChannel_has_config(std::shared_ptr<IAdc> adc) {
     adc->UpdateConfiguration(adc_config);
     adc->Initialize();
 
-    std::unordered_set<double> readings;
+    std::unordered_set<float> readings;
     for(int j = 0; j < 100; j++) {
-        double total = 0;
+        float total = 0;
 
         for(int i = 0; i < 4; i++) {
-            double reading = adc->ReadChannel(2);
+            float reading = adc->ReadChannel(2);
             zassert_between_inclusive(reading, 0, 3.3);
 
             total += reading;
