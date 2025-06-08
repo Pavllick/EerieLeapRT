@@ -11,34 +11,6 @@ namespace eerie_leap::domain::http_domain::controllers {
 
 using namespace eerie_leap::controllers;
 
-// SensorMetadataConfig = [
-//   name: tstr,
-//   unit: tstr,
-//   description: tstr
-// ]
-
-// SensorCalibrationDataMap = { 2*50(float => float) }
-
-// SensorConfigurationConfig = [
-//   type: uint,
-//   sampling_rate_ms: uint,
-//   interpolation_method: uint,
-//   ? channel: uint,
-//   ? calibration_table: SensorCalibrationDataMap,
-//   ? expression: tstr
-// ]
-
-// SensorConfig = [
-//   id: tstr,
-//   metadata: SensorMetadataConfig,
-//   configuration: SensorConfigurationConfig
-// ]
-
-// SensorsConfig = [
-//   sensors: [*SensorConfig]
-// ]
-
-
 struct SensorMetadataJsonDto {
     const char* name;
     const char* unit;
@@ -116,8 +88,6 @@ private:
     static int sensors_config_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data);
 
 public:
-    // static http_resource_detail_dynamic sensors_config_get_resource_detail;
-    // static http_resource_detail_dynamic sensors_config_post_resource_detail;
     static http_resource_detail_dynamic sensors_config_resource_detail;
 
     SensorsHttpController(std::shared_ptr<MathParserService> math_parser_service, std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller);
