@@ -93,7 +93,7 @@ float Adc::ReadChannel(int channel) {
 		return 0;
 	}
 
-    return (float)val_mv / 1000.0;
+    return (float)val_mv / 1000.0f;
 }
 
 uint16_t Adc::GetReding() {

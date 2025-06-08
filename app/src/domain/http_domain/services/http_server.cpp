@@ -16,14 +16,16 @@ LOG_MODULE_REGISTER(http_server);
 static std::shared_ptr<SensorsHttpController> sensors_http_controller_;
 
 HttpServer::HttpServer(
+    std::shared_ptr<MathParserService> math_parser_service,
     std::shared_ptr<SystemConfigurationController> system_configuration_controller,
     std::shared_ptr<AdcConfigurationController> adc_configuration_controller,
     std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller)
-    : system_configuration_controller_(std::move(system_configuration_controller)),
+    : math_parser_service_(std::move(math_parser_service)),
+    system_configuration_controller_(std::move(system_configuration_controller)),
     adc_configuration_controller_(std::move(adc_configuration_controller)),
     sensors_configuration_controller_(sensors_configuration_controller) {
 
-        sensors_http_controller_ = make_shared_ext<SensorsHttpController>(sensors_configuration_controller);
+        sensors_http_controller_ = make_shared_ext<SensorsHttpController>(math_parser_service, sensors_configuration_controller);
     }
 
 void HttpServer::Start() {
@@ -34,6 +36,6 @@ void HttpServer::Start() {
         LOG_INF("HTTP server started on port %u", http_service_port_);
 }
 
-HTTP_RESOURCE_DEFINE(sensors_config_get_resource, http_service, "/config/sensors_config", &SensorsHttpController::sensors_config_get_resource_detail);
+HTTP_RESOURCE_DEFINE(sensors_config_resource, http_service, "/config/sensors", &SensorsHttpController::sensors_config_resource_detail);
 
 } // namespace eerie_leap::domain::http_domain::services

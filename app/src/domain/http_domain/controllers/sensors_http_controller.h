@@ -103,12 +103,24 @@ static json_obj_descr sensors_descr[] = {
 
 class SensorsHttpController {
 private:
-    static int sensors_config_get_handler(struct http_client_ctx *client, enum http_data_status status, const struct http_request_ctx *request_ctx, struct http_response_ctx *response_ctx, void *user_data);
+    static std::shared_ptr<ExtVector> sensors_config_post_buffer_;
+    static std::shared_ptr<ExtVector> sensors_config_get_buffer_;
+
+    static std::shared_ptr<MathParserService> math_parser_service_;
+    static std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller_;
+
+    static void ParseSensorsConfigJson(uint8_t *buffer, size_t len);
+
+    static int sensors_config_get_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data);
+    static int sensors_config_post_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data);
+    static int sensors_config_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data);
 
 public:
-    static http_resource_detail_dynamic sensors_config_get_resource_detail;
+    // static http_resource_detail_dynamic sensors_config_get_resource_detail;
+    // static http_resource_detail_dynamic sensors_config_post_resource_detail;
+    static http_resource_detail_dynamic sensors_config_resource_detail;
 
-    explicit SensorsHttpController(std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller);
+    SensorsHttpController(std::shared_ptr<MathParserService> math_parser_service, std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller);
 };
 
 } // namespace eerie_leap::domain::http_domain::controllers

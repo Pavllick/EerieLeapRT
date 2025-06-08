@@ -14,11 +14,13 @@ using namespace eerie_leap::controllers;
 
 class HttpServer {
 private:
+    std::shared_ptr<MathParserService> math_parser_service_;
     std::shared_ptr<SystemConfigurationController> system_configuration_controller_;
     std::shared_ptr<AdcConfigurationController> adc_configuration_controller_;
     std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller_;
 public:
     HttpServer(
+        std::shared_ptr<MathParserService> math_parser_service,
         std::shared_ptr<SystemConfigurationController> system_configuration_controller,
         std::shared_ptr<AdcConfigurationController> adc_configuration_controller,
         std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller);

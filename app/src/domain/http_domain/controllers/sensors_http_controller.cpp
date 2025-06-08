@@ -1,18 +1,28 @@
+#include "domain/sensor_domain/utilities/voltage_interpolator/interpolation_method.h"
 #include "utilities/memory/heap_allocator.hpp"
+#include "domain/sensor_domain/models/sensor.h"
+#include "domain/sensor_domain/utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
+#include "domain/sensor_domain/utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
 #include "sensors_http_controller.h"
 
 namespace eerie_leap::domain::http_domain::controllers {
 
 using namespace eerie_leap::utilities::memory;
 
-std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller_ = nullptr;
+std::shared_ptr<ExtVector> SensorsHttpController::sensors_config_post_buffer_;
+std::shared_ptr<ExtVector> SensorsHttpController::sensors_config_get_buffer_;
 
-SensorsHttpController::SensorsHttpController(std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller) {
+std::shared_ptr<MathParserService> SensorsHttpController::math_parser_service_ = nullptr;
+std::shared_ptr<SensorsConfigurationController> SensorsHttpController::sensors_configuration_controller_ = nullptr;
+
+SensorsHttpController::SensorsHttpController(std::shared_ptr<MathParserService> math_parser_service, std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller) {
+    sensors_config_post_buffer_ = make_shared_ext<ExtVector>(24576);
+
+    math_parser_service_ = std::move(math_parser_service);
     sensors_configuration_controller_ = std::move(sensors_configuration_controller);
 }
 
-std::shared_ptr<ExtVector> sensors_config_get_buffer_ = nullptr;
-int SensorsHttpController::sensors_config_get_handler(struct http_client_ctx *client, enum http_data_status status, const struct http_request_ctx *request_ctx, struct http_response_ctx *response_ctx, void *user_data) {
+int SensorsHttpController::sensors_config_get_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data) {
     if (status == HTTP_SERVER_DATA_ABORTED) {
         return 0;
     }
@@ -67,13 +77,13 @@ int SensorsHttpController::sensors_config_get_handler(struct http_client_ctx *cl
         for(size_t i = 0; i < sensors.size(); ++i)
             data.sensors[i] = sensors[i];
 
-        // ssize_t encoded_size = json_calc_encoded_len(sensors_descr, ARRAY_SIZE(sensors_descr), &data);
-        size_t encoded_size = json_calc_encoded_arr_len(sensors_descr, &data);
+        ssize_t encoded_size = json_calc_encoded_len(sensors_descr, ARRAY_SIZE(sensors_descr), &data);
+        // size_t encoded_size = json_calc_encoded_arr_len(sensors_descr, &data);
         // HACK: Otherwise final JSON is being truncated by 1 byte
         sensors_config_get_buffer_ = make_shared_ext<ExtVector>(encoded_size + 1);
 
-        // json_obj_encode_buf(sensors_descr, ARRAY_SIZE(sensors_descr), &data, (char*)sensors_config_get_buffer_->data(), sensors_config_get_buffer_->size());
-        json_arr_encode_buf(sensors_descr, &data, (char*)sensors_config_get_buffer_->data(), sensors_config_get_buffer_->size());
+        json_obj_encode_buf(sensors_descr, ARRAY_SIZE(sensors_descr), &data, (char*)sensors_config_get_buffer_->data(), sensors_config_get_buffer_->size());
+        // json_arr_encode_buf(sensors_descr, &data, (char*)sensors_config_get_buffer_->data(), sensors_config_get_buffer_->size());
 
         response_ctx->body = (uint8_t*)sensors_config_get_buffer_->data();
         response_ctx->body_len = encoded_size;
@@ -83,14 +93,123 @@ int SensorsHttpController::sensors_config_get_handler(struct http_client_ctx *cl
     return 0;
 }
 
-http_resource_detail_dynamic SensorsHttpController::sensors_config_get_resource_detail = {
-    .common = {
-        .bitmask_of_supported_http_methods = BIT(HTTP_GET),
+void SensorsHttpController::ParseSensorsConfigJson(uint8_t *buffer, size_t len)
+{
+	int ret;
+	SensorsJsonDto data;
+	const int expected_return_code = BIT_MASK(ARRAY_SIZE(sensors_descr));
+
+	ret = json_obj_parse((char*)buffer, len, sensors_descr, ARRAY_SIZE(sensors_descr), &data);
+	if (ret != expected_return_code) {
+		printk("Failed to fully parse JSON payload, ret=%d\n", ret);
+		return;
+	}
+    printk("JSON payload parsed successfully\n");
+
+    std::vector<std::shared_ptr<Sensor>> sensors;
+
+    for(size_t i = 0; i < data.sensors_len; ++i) {
+        auto sensor = make_shared_ext<Sensor>();
+        sensor->id = data.sensors[i].id;
+
+        sensor->metadata.unit = data.sensors[i].metadata.unit;
+        sensor->metadata.name = data.sensors[i].metadata.name;
+        sensor->metadata.description = data.sensors[i].metadata.description;
+
+        sensor->configuration.type = GetSensorType(data.sensors[i].configuration.type);
+        sensor->configuration.channel = data.sensors[i].configuration.channel;
+        sensor->configuration.sampling_rate_ms = data.sensors[i].configuration.sampling_rate_ms;
+
+        auto interpolation_method = GetInterpolationMethod(data.sensors[i].configuration.interpolation_method);
+        if(interpolation_method != InterpolationMethod::NONE && data.sensors[i].configuration.calibration_table_len > 0) {
+            std::vector<CalibrationData> calibration_table;
+            for(size_t j = 0; j < data.sensors[i].configuration.calibration_table_len; ++j) {
+                const auto& calibration_data = data.sensors[i].configuration.calibration_table[j];
+
+                calibration_table.push_back({
+                    .voltage = calibration_data.voltage,
+                    .value = calibration_data.value});
+            }
+
+            auto calibration_table_ptr = make_shared_ext<std::vector<CalibrationData>>(calibration_table);
+
+            switch (interpolation_method) {
+            case InterpolationMethod::LINEAR:
+                sensor->configuration.voltage_interpolator = make_shared_ext<LinearVoltageInterpolator>(calibration_table_ptr);
+                break;
+
+            case InterpolationMethod::CUBIC_SPLINE:
+                sensor->configuration.voltage_interpolator = make_shared_ext<CubicSplineVoltageInterpolator>(calibration_table_ptr);
+                break;
+
+            default:
+                throw std::runtime_error("Sensor uses unsupported interpolation method!");
+                break;
+            }
+        } else {
+            sensor->configuration.voltage_interpolator = nullptr;
+        }
+
+        if(strcmp(data.sensors[i].configuration.expression, "") != 0)
+            sensor->configuration.expression_evaluator = make_shared_ext<ExpressionEvaluator>(
+                math_parser_service_,
+                std::string(data.sensors[i].configuration.expression));
+        else
+            sensor->configuration.expression_evaluator = nullptr;
+
+        sensors.push_back(sensor);
+    }
+
+    if(sensors_configuration_controller_->Update(make_shared_ext<std::vector<std::shared_ptr<Sensor>>>(sensors)))
+        printk("Sensors configuration updated successfully\n");
+    else
+        printk("Failed to update sensors configuration\n");
+}
+
+int SensorsHttpController::sensors_config_post_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data) {
+    static size_t cursor;
+
+	if (status == HTTP_SERVER_DATA_ABORTED) {
+		cursor = 0;
+		return 0;
+	}
+
+	if (request_ctx->data_len + cursor > sensors_config_post_buffer_->size()) {
+		cursor = 0;
+		return -ENOMEM;
+	}
+
+	memcpy(sensors_config_post_buffer_->data() + cursor, request_ctx->data, request_ctx->data_len);
+	cursor += request_ctx->data_len;
+
+	if (status == HTTP_SERVER_DATA_FINAL) {
+
+        printk("JSON payload received successfully, len=%zu\n", cursor);
+		ParseSensorsConfigJson(sensors_config_post_buffer_->data(), cursor);
+		cursor = 0;
+	}
+
+	return 0;
+}
+
+int SensorsHttpController::sensors_config_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data) {
+	if (client->method == HTTP_GET) {
+		return sensors_config_get_handler(client, status, request_ctx, response_ctx, user_data);
+	} else if (client->method == HTTP_POST) {
+		return sensors_config_post_handler(client, status, request_ctx, response_ctx, user_data);
+	}
+
+    return -EINVAL;
+}
+
+http_resource_detail_dynamic SensorsHttpController::sensors_config_resource_detail = {
+	.common = {
+        .bitmask_of_supported_http_methods = BIT(HTTP_GET) | BIT(HTTP_POST),
         .type = HTTP_RESOURCE_TYPE_DYNAMIC,
         .content_type = "application/json",
     },
-    .cb = sensors_config_get_handler,
-    .user_data = nullptr,
+	.cb = sensors_config_handler,
+	.user_data = nullptr,
 };
 
 } // namespace eerie_leap::domain::http_domain::controllers

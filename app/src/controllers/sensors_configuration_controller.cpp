@@ -1,6 +1,5 @@
 #include <zephyr/logging/log.h>
 
-#include <utilities/memory/heap_allocator.hpp>
 #include "sensors_configuration_controller.h"
 #include "utilities/cbor/cbor_helpers.hpp"
 #include "domain/sensor_domain/utilities/sensors_order_resolver.h"
@@ -11,7 +10,6 @@ namespace eerie_leap::controllers {
 
 LOG_MODULE_REGISTER(sensors_config_ctrl_logger);
 
-using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::cbor;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 using namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolator;
@@ -94,7 +92,7 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
 
     sensors_config_ = sensors_config;
     auto ordered_sensors = resolver.GetProcessingOrder();
-    ordered_sensors_ = std::make_shared<std::vector<std::shared_ptr<Sensor>>>(ordered_sensors);
+    ordered_sensors_ = make_shared_ext<std::vector<std::shared_ptr<Sensor>>>(ordered_sensors);
 
     LOG_INF("Saving sensors configuration.");
     return sensors_configuration_service_->Save(sensors_config.get());
@@ -114,7 +112,7 @@ const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfiguration
 
     for(size_t i = 0; i < sensors_config_->SensorConfig_m_count; ++i) {
         const auto& sensor_config = sensors_config_->SensorConfig_m[i];
-        std::shared_ptr<Sensor> sensor = std::make_shared<Sensor>();
+        std::shared_ptr<Sensor> sensor = make_shared_ext<Sensor>();
 
         sensor->id = CborHelpers::ToStdString(sensor_config.id);
         sensor->configuration.type = static_cast<SensorType>(sensor_config.configuration.type);
@@ -137,16 +135,15 @@ const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfiguration
                     .value = calibration_data.float32float});
             }
 
-            auto calibration_table_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_table);
+            auto calibration_table_ptr = make_shared_ext<std::vector<CalibrationData>>(calibration_table);
 
-            switch (interpolation_method)
-            {
+            switch (interpolation_method) {
             case InterpolationMethod::LINEAR:
-                sensor->configuration.voltage_interpolator = std::make_shared<LinearVoltageInterpolator>(calibration_table_ptr);
+                sensor->configuration.voltage_interpolator = make_shared_ext<LinearVoltageInterpolator>(calibration_table_ptr);
                 break;
 
             case InterpolationMethod::CUBIC_SPLINE:
-                sensor->configuration.voltage_interpolator = std::make_shared<CubicSplineVoltageInterpolator>(calibration_table_ptr);
+                sensor->configuration.voltage_interpolator = make_shared_ext<CubicSplineVoltageInterpolator>(calibration_table_ptr);
                 break;
 
             default:
@@ -158,7 +155,7 @@ const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfiguration
         }
 
         if(sensor_config.configuration.expression_present)
-            sensor->configuration.expression_evaluator = std::make_shared<ExpressionEvaluator>(
+            sensor->configuration.expression_evaluator = make_shared_ext<ExpressionEvaluator>(
                 math_parser_service_,
                 CborHelpers::ToStdString(sensor_config.configuration.expression));
         else
@@ -172,7 +169,7 @@ const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfiguration
         resolver.AddSensor(sensor);
     }
 
-    ordered_sensors_ = std::make_shared<std::vector<std::shared_ptr<Sensor>>>(resolver.GetProcessingOrder());
+    ordered_sensors_ = make_shared_ext<std::vector<std::shared_ptr<Sensor>>>(resolver.GetProcessingOrder());
 
     return ordered_sensors_;
 }
