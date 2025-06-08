@@ -1,10 +1,13 @@
 set(gen_dir ${ZEPHYR_BINARY_DIR}/include/generated/)
 
-set(source_file_index static_resources/index.html)
-generate_inc_file_for_target(app ${source_file_index} ${gen_dir}/index.html.gz.inc --gzip)
+foreach(web_resource
+    index.html
+    sensors_config_editor/index.html
+    sensors_config_editor/style.css
+    sensors_config_editor/editor.js)
 
-set(source_file_sensors_config_editor static_resources/sensors_config_editor.html)
-generate_inc_file_for_target(app ${source_file_sensors_config_editor} ${gen_dir}/sensors_config_editor.html.gz.inc --gzip)
+    generate_inc_file_for_target(app static_resources/${web_resource} ${gen_dir}/${web_resource}.gz.inc --gzip)
+endforeach()
 
 zephyr_linker_sources(SECTIONS sections-rom.ld)
 zephyr_linker_section(NAME http_resource_desc_http_service

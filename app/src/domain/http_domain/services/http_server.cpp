@@ -2,22 +2,20 @@
 #include <zephyr/net/http/server.h>
 #include <zephyr/net/http/service.h>
 
-#include "domain/http_domain/controllers/sensors_http_controller.h"
+#include "domain/http_domain/controllers/api/sensors_api_controller.h"
+#include "domain/http_domain/controllers/view/sensors_editor_controller.h"
 #include "http_server.h"
 
 HTTP_SERVICE_DEFINE(http_service, "0.0.0.0", &http_service_port_, 1, 10, nullptr, nullptr);
 
-static const uint8_t sensors_config_editor_html[] = {
-    #include "sensors_config_editor.html.gz.inc"
-};
-
 namespace eerie_leap::domain::http_domain::services {
 
-using namespace eerie_leap::domain::http_domain::controllers;
+using namespace eerie_leap::domain::http_domain::controllers::api;
+using namespace eerie_leap::domain::http_domain::controllers::view;
 
 LOG_MODULE_REGISTER(http_server);
 
-static std::shared_ptr<SensorsHttpController> sensors_http_controller_;
+static std::shared_ptr<SensorsApiController> sensors_http_controller_;
 
 HttpServer::HttpServer(
     std::shared_ptr<MathParserService> math_parser_service,
@@ -29,7 +27,7 @@ HttpServer::HttpServer(
     adc_configuration_controller_(std::move(adc_configuration_controller)),
     sensors_configuration_controller_(sensors_configuration_controller) {
 
-        sensors_http_controller_ = make_shared_ext<SensorsHttpController>(math_parser_service, sensors_configuration_controller);
+        sensors_http_controller_ = make_shared_ext<SensorsApiController>(math_parser_service, sensors_configuration_controller);
     }
 
 void HttpServer::Start() {
@@ -40,19 +38,10 @@ void HttpServer::Start() {
         LOG_INF("HTTP server started on port %u", http_service_port_);
 }
 
-HTTP_RESOURCE_DEFINE(sensors_config_resource, http_service, "/config/sensors", &SensorsHttpController::sensors_config_resource_detail);
+HTTP_RESOURCE_DEFINE(sensors_config_resource, http_service, "/config/sensors", &SensorsApiController::sensors_config_resource_detail);
 
-static struct http_resource_detail_static sensors_config_editor_html_resource_detail = {
-    .common = {
-        .bitmask_of_supported_http_methods = BIT(HTTP_GET),
-        .type = HTTP_RESOURCE_TYPE_STATIC,
-        .content_encoding = "gzip",
-        .content_type = "text/html; charset=utf-8",
-    },
-    .static_data = sensors_config_editor_html,
-    .static_data_len = sizeof(sensors_config_editor_html),
-};
-
-HTTP_RESOURCE_DEFINE(sensors_config_editor_html_resource, http_service, "/edit/sensors", &sensors_config_editor_html_resource_detail);
+HTTP_RESOURCE_DEFINE(sensors_config_editor_html_resource, http_service, "/editor/sensors", &SensorsEditorController::sensors_config_editor_html_resource_detail);
+HTTP_RESOURCE_DEFINE(sensors_config_editor_css_resource, http_service, "/editor/sensors/style.css", &SensorsEditorController::sensors_config_editor_css_resource_detail);
+HTTP_RESOURCE_DEFINE(sensors_config_editor_js_resource, http_service, "/editor/sensors/editor.js", &SensorsEditorController::sensors_config_editor_js_resource_detail);
 
 } // namespace eerie_leap::domain::http_domain::services

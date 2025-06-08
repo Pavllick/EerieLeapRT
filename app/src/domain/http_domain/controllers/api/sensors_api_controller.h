@@ -7,7 +7,7 @@
 
 #include "controllers/sensors_configuration_controller.h"
 
-namespace eerie_leap::domain::http_domain::controllers {
+namespace eerie_leap::domain::http_domain::controllers::api {
 
 using namespace eerie_leap::controllers;
 
@@ -73,8 +73,10 @@ static json_obj_descr sensors_descr[] = {
     JSON_OBJ_DESCR_OBJ_ARRAY(SensorsJsonDto, sensors, 24, sensors_len, sensor_descr, ARRAY_SIZE(sensor_descr)),
 };
 
-class SensorsHttpController {
+class SensorsApiController {
 private:
+    static const size_t sensors_config_post_buffer_size_ = 24576;
+
     static std::shared_ptr<ExtVector> sensors_config_post_buffer_;
     static std::shared_ptr<ExtVector> sensors_config_get_buffer_;
 
@@ -90,7 +92,7 @@ private:
 public:
     static http_resource_detail_dynamic sensors_config_resource_detail;
 
-    SensorsHttpController(std::shared_ptr<MathParserService> math_parser_service, std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller);
+    SensorsApiController(std::shared_ptr<MathParserService> math_parser_service, std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller);
 };
 
-} // namespace eerie_leap::domain::http_domain::controllers
+} // namespace eerie_leap::domain::http_domain::controllers::api

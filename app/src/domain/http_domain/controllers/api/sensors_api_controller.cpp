@@ -4,27 +4,27 @@
 #include "domain/sensor_domain/utilities/voltage_interpolator/interpolation_method.h"
 #include "domain/sensor_domain/utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "domain/sensor_domain/utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
-#include "sensors_http_controller.h"
+#include "sensors_api_controller.h"
 
-namespace eerie_leap::domain::http_domain::controllers {
+namespace eerie_leap::domain::http_domain::controllers::api {
 
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolator;
 
-std::shared_ptr<ExtVector> SensorsHttpController::sensors_config_post_buffer_;
-std::shared_ptr<ExtVector> SensorsHttpController::sensors_config_get_buffer_;
+std::shared_ptr<ExtVector> SensorsApiController::sensors_config_post_buffer_;
+std::shared_ptr<ExtVector> SensorsApiController::sensors_config_get_buffer_;
 
-std::shared_ptr<MathParserService> SensorsHttpController::math_parser_service_ = nullptr;
-std::shared_ptr<SensorsConfigurationController> SensorsHttpController::sensors_configuration_controller_ = nullptr;
+std::shared_ptr<MathParserService> SensorsApiController::math_parser_service_ = nullptr;
+std::shared_ptr<SensorsConfigurationController> SensorsApiController::sensors_configuration_controller_ = nullptr;
 
-SensorsHttpController::SensorsHttpController(std::shared_ptr<MathParserService> math_parser_service, std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller) {
-    sensors_config_post_buffer_ = make_shared_ext<ExtVector>(24576);
+SensorsApiController::SensorsApiController(std::shared_ptr<MathParserService> math_parser_service, std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller) {
+    sensors_config_post_buffer_ = make_shared_ext<ExtVector>(sensors_config_post_buffer_size_);
 
     math_parser_service_ = std::move(math_parser_service);
     sensors_configuration_controller_ = std::move(sensors_configuration_controller);
 }
 
-int SensorsHttpController::sensors_config_get_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data) {
+int SensorsApiController::sensors_config_get_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data) {
     if (status == HTTP_SERVER_DATA_ABORTED) {
         return 0;
     }
@@ -95,7 +95,7 @@ int SensorsHttpController::sensors_config_get_handler(http_client_ctx *client, e
     return 0;
 }
 
-void SensorsHttpController::ParseSensorsConfigJson(uint8_t *buffer, size_t len)
+void SensorsApiController::ParseSensorsConfigJson(uint8_t *buffer, size_t len)
 {
 	int ret;
 	SensorsJsonDto data;
@@ -168,7 +168,7 @@ void SensorsHttpController::ParseSensorsConfigJson(uint8_t *buffer, size_t len)
         printk("Failed to update sensors configuration\n");
 }
 
-int SensorsHttpController::sensors_config_post_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data) {
+int SensorsApiController::sensors_config_post_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data) {
     static size_t cursor;
 
 	if (status == HTTP_SERVER_DATA_ABORTED) {
@@ -194,7 +194,7 @@ int SensorsHttpController::sensors_config_post_handler(http_client_ctx *client, 
 	return 0;
 }
 
-int SensorsHttpController::sensors_config_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data) {
+int SensorsApiController::sensors_config_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data) {
 	if (client->method == HTTP_GET) {
 		return sensors_config_get_handler(client, status, request_ctx, response_ctx, user_data);
 	} else if (client->method == HTTP_POST) {
@@ -204,7 +204,7 @@ int SensorsHttpController::sensors_config_handler(http_client_ctx *client, enum 
     return -EINVAL;
 }
 
-http_resource_detail_dynamic SensorsHttpController::sensors_config_resource_detail = {
+http_resource_detail_dynamic SensorsApiController::sensors_config_resource_detail = {
 	.common = {
         .bitmask_of_supported_http_methods = BIT(HTTP_GET) | BIT(HTTP_POST),
         .type = HTTP_RESOURCE_TYPE_DYNAMIC,

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>JSON Config Editor</title>
+    <link rel="stylesheet" href="/editor/sensors/style.css">
+</head>
+
+<body>
+    <header>
+        <h1>JSON Config Editor</h1>
+    </header>
+
+    <div id="container">
+        <div id="loader">
+            <span>Loading config<span id="dots">...</span></span>
+        </div>
+        <pre id="editor" contenteditable="true" oninput="onEdit()" spellcheck="false"></pre>
+    </div>
+
+    <footer>
+        <button onclick="saveConfig()">Save</button>
+    </footer>
+
+    <script src="/editor/sensors/editor.js"></script>
+</body>
+
+</html>

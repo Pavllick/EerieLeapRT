@@ -1,0 +1,86 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: sans-serif;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    padding: 10px;
+    background: #f0f0f0;
+    border-bottom: 1px solid #ccc;
+}
+
+#container {
+    flex: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+}
+
+#editor {
+    flex: 1;
+    border: 1px solid #ccc;
+    font-family: monospace;
+    overflow: auto;
+    white-space: pre-wrap;
+    outline: none;
+    padding: 10px;
+    font-size: 14px;
+}
+
+.string {
+    color: green;
+}
+
+.number {
+    color: blue;
+}
+
+.boolean {
+    color: purple;
+}
+
+.null {
+    color: gray;
+}
+
+.key {
+    color: brown;
+}
+
+.error {
+    color: red;
+}
+
+#loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: sans-serif;
+    font-size: 16px;
+    background: white;
+    padding: 20px;
+    border: 1px solid #ccc;
+    z-index: 10;
+}
+
+footer {
+    padding: 10px;
+    border-top: 1px solid #ccc;
+    background: #f9f9f9;
+    text-align: right;
+}
+
+button {
+    padding: 6px 12px;
+    font-size: 14px;
+}
