@@ -7,6 +7,10 @@
 
 HTTP_SERVICE_DEFINE(http_service, "0.0.0.0", &http_service_port_, 1, 10, nullptr, nullptr);
 
+static const uint8_t sensors_config_editor_html[] = {
+    #include "sensors_config_editor.html.gz.inc"
+};
+
 namespace eerie_leap::domain::http_domain::services {
 
 using namespace eerie_leap::domain::http_domain::controllers;
@@ -37,5 +41,18 @@ void HttpServer::Start() {
 }
 
 HTTP_RESOURCE_DEFINE(sensors_config_resource, http_service, "/config/sensors", &SensorsHttpController::sensors_config_resource_detail);
+
+static struct http_resource_detail_static sensors_config_editor_html_resource_detail = {
+    .common = {
+        .bitmask_of_supported_http_methods = BIT(HTTP_GET),
+        .type = HTTP_RESOURCE_TYPE_STATIC,
+        .content_encoding = "gzip",
+        .content_type = "text/html; charset=utf-8",
+    },
+    .static_data = sensors_config_editor_html,
+    .static_data_len = sizeof(sensors_config_editor_html),
+};
+
+HTTP_RESOURCE_DEFINE(sensors_config_editor_html_resource, http_service, "/edit/sensors", &sensors_config_editor_html_resource_detail);
 
 } // namespace eerie_leap::domain::http_domain::services
