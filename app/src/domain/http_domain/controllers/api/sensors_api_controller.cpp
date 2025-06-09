@@ -102,10 +102,9 @@ void SensorsApiController::ParseSensorsConfigJson(uint8_t *buffer, size_t len)
 	const int expected_return_code = BIT_MASK(ARRAY_SIZE(sensors_descr));
 
 	ret = json_obj_parse((char*)buffer, len, sensors_descr, ARRAY_SIZE(sensors_descr), &data);
-	if (ret != expected_return_code) {
-		printk("Failed to fully parse JSON payload, ret=%d\n", ret);
-		return;
-	}
+	if (ret != expected_return_code)
+        throw std::runtime_error("Invalid JSON payload.");
+
     printk("JSON payload parsed successfully\n");
 
     std::vector<std::shared_ptr<Sensor>> sensors;
@@ -145,7 +144,7 @@ void SensorsApiController::ParseSensorsConfigJson(uint8_t *buffer, size_t len)
                 break;
 
             default:
-                throw std::runtime_error("Sensor uses unsupported interpolation method!");
+                throw std::runtime_error("Sensor uses unsupported interpolation method.");
                 break;
             }
         } else {
@@ -165,7 +164,7 @@ void SensorsApiController::ParseSensorsConfigJson(uint8_t *buffer, size_t len)
     if(sensors_configuration_controller_->Update(make_shared_ext<std::vector<std::shared_ptr<Sensor>>>(sensors)))
         printk("Sensors configuration updated successfully\n");
     else
-        printk("Failed to update sensors configuration\n");
+        throw std::runtime_error("Failed to update sensors configuration.");
 }
 
 int SensorsApiController::sensors_config_post_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data) {
@@ -184,10 +183,24 @@ int SensorsApiController::sensors_config_post_handler(http_client_ctx *client, e
 	memcpy(sensors_config_post_buffer_->data() + cursor, request_ctx->data, request_ctx->data_len);
 	cursor += request_ctx->data_len;
 
-	if (status == HTTP_SERVER_DATA_FINAL) {
+    static std::shared_ptr<std::string> error_msg;
 
+	if (status == HTTP_SERVER_DATA_FINAL) {
         printk("JSON payload received successfully, len=%zu\n", cursor);
-		ParseSensorsConfigJson(sensors_config_post_buffer_->data(), cursor);
+
+        try {
+            ParseSensorsConfigJson(sensors_config_post_buffer_->data(), cursor);
+        } catch (const std::exception &e) {
+            printk("Failed to parse JSON payload: %s\n", e.what());
+
+            error_msg = make_shared_ext<std::string>("Failed to parse JSON payload: " + std::string(e.what()));
+
+            response_ctx->status = HTTP_500_INTERNAL_SERVER_ERROR;
+            response_ctx->body = (uint8_t*)error_msg->c_str();
+            response_ctx->body_len = error_msg->size();
+            response_ctx->final_chunk = true;
+        }
+
 		cursor = 0;
 	}
 

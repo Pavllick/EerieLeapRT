@@ -24,6 +24,7 @@ main {
 
 #editor, #highlighting {
     padding: 10px;
+    outline: none !important;
     border: 1px solid #373b41;
     font: 14px monospace;
     width: 100%;
@@ -89,4 +90,89 @@ button {
     border: 1px solid #373b41;
     z-index: 10;
     color: #c5c8c6;
+}
+
+#message-box-container {
+    position: fixed;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 10px;
+    transition: all 0.4s ease;
+}
+
+#message-box-container.fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    transform: translateY(-20px);
+    z-index: 1000;
+    pointer-events: none;
+}
+
+#message-box-container.relative {
+    position: relative;
+    opacity: 1;
+    transform: none;
+    z-index: 1;
+}
+
+#message-box-container.fixed.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+#message-box {
+    top: 20px;
+    padding: 12px 18px;
+    border-radius: 5px;
+    z-index: 1000;
+    font-family: sans-serif;
+    font-size: 16px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+#message-box.success {
+    background-color: #28a745;
+    color: white;
+}
+#message-box.error {
+    background-color: #dc3545;
+    color: white;
+}
+
+#confirm-modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+#confirm-modal.hidden,
+#message-box.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: #1d1f21;
+    padding: 20px;
+    border: 1px solid #373b41;
+    border-radius: 8px;
+    text-align: center;
+    color: #c5c8c6;
+}
+
+.modal-content button {
+    min-width: 80px;
+    margin: 10px;
+    padding: 6px 12px;
+    font-size: 14px;
+    background-color: #373b41;
+    color: #c5c8c6;
+    border: 1px solid #c5c8c6;
+    border-radius: 3px;
+    cursor: pointer;
 }

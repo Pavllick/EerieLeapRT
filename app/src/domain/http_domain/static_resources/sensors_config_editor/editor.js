@@ -43,22 +43,65 @@ async function loadConfig() {
     editor.style.visibility = "visible";
 }
 
-async function saveConfig() {
+function saveConfig() {
+    // Show confirmation modal
+    document.getElementById("confirm-modal").classList.remove("hidden");
+}
+
+function showMessage(text, type) {
+    const container = document.getElementById("message-box-container");
+    const box = document.getElementById("message-box");
+
+    box.className = ""; // reset
+    box.classList.add(type === "success" ? "success" : "error");
+    box.textContent = text;
+
+    if (type === "success") {
+        container.className = "fixed visible";
+        setTimeout(() => {
+            container.classList.remove("visible");
+        }, 3000);
+    } else {
+        container.className = "fixed visible";
+        setTimeout(() => {
+            container.className = "relative";
+        }, 400);
+    }
+}
+
+async function confirmSave(doSave) {
+    const modal = document.getElementById("confirm-modal");
+    modal.classList.add("hidden");
+
+    if (!doSave) return;
+
     const raw = document.getElementById("editor").value;
     try {
         JSON.parse(raw);
     } catch (e) {
-        alert("Invalid JSON");
+        showMessage("Invalid JSON", "error");
         return;
     }
 
-    await fetch("/config/sensors", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: raw
-    });
+    try {
+        const result = await fetch("/config/sensors", {
+            method: "POST",
+            headers: {
+                'Accept': 'text/plain',
+                'Content-Type': 'application/json'
+            },
+            body: raw
+        });
 
-    alert("Saved!");
+        if (result.ok) {
+            showMessage("Saved!", "success");
+        } else {
+            const error_message = await result.text();
+            showMessage(error_message, "error");
+        }
+    } catch (err) {
+        showMessage("Network error", "error");
+    }
 }
 
 function adjustEditorHeight() {

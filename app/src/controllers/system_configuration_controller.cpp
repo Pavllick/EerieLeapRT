@@ -12,8 +12,8 @@ SystemConfigurationController::SystemConfigurationController(std::shared_ptr<Con
 
     if(Get(true) == nullptr)
         LOG_ERR("Failed to load System configuration.");
-
-    LOG_INF("System Configuration Controller initialized successfully.");
+    else
+        LOG_INF("System Configuration Controller initialized successfully.");
 }
 
 bool SystemConfigurationController::Update(std::shared_ptr<SystemConfiguration> system_configuration) {

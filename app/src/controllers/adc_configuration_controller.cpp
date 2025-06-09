@@ -16,8 +16,8 @@ AdcConfigurationController::AdcConfigurationController(std::shared_ptr<Configura
 
     if(Get(true) == nullptr)
         LOG_ERR("Failed to load ADC configuration.");
-
-    LOG_INF("ADC Configuration Controller initialized successfully.");
+    else
+        LOG_INF("ADC Configuration Controller initialized successfully.");
 }
 
 bool AdcConfigurationController::Update(std::shared_ptr<AdcConfiguration> adc_configuration) {

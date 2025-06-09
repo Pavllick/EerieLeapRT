@@ -24,7 +24,7 @@ namespace eerie_leap::domain::sensor_domain::models {
             if(SensorTypeNames[i] == name)
                 return static_cast<SensorType>(i);
 
-        throw std::runtime_error("Invalid sensor type name");
+        throw std::runtime_error("Invalid sensor type.");
     }
 
 } // namespace eerie_leap::domain::sensor_domain::models

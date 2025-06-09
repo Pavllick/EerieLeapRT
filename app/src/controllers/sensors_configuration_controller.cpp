@@ -25,8 +25,8 @@ SensorsConfigurationController::SensorsConfigurationController(
 
     if(Get(true) == nullptr)
         LOG_ERR("Failed to load sensors configuration.");
-
-    LOG_INF("Sensors Configuration Controller initialized successfully.");
+    else
+        LOG_INF("Sensors Configuration Controller initialized successfully.");
 }
 
 bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> sensors) {
@@ -97,9 +97,9 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
         resolver.AddSensor(sensor);
     }
 
-    sensors_config_ = sensors_config;
     auto ordered_sensors = resolver.GetProcessingOrder();
     ordered_sensors_ = make_shared_ext<std::vector<std::shared_ptr<Sensor>>>(ordered_sensors);
+    sensors_config_ = sensors_config;
 
     LOG_INF("Saving sensors configuration.");
     return sensors_configuration_service_->Save(sensors_config.get());

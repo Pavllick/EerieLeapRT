@@ -27,7 +27,7 @@ namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolator {
             if(InterpolationMethodNames[i] == name)
                 return static_cast<InterpolationMethod>(i);
 
-        throw std::runtime_error("Invalid interpolation method name");
+        throw std::runtime_error("Invalid interpolation method type.");
     }
 
 } // namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolator

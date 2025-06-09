@@ -9,6 +9,10 @@
 </head>
 
 <body>
+    <div id="message-box-container" class="fixed">
+        <div id="message-box"></div>
+    </div>
+
     <header>
         <h1>Sensors JSON Configuration Editor</h1>
     </header>
@@ -30,6 +34,14 @@
     <footer>
         <button onclick="saveConfig()">Save</button>
     </footer>
+
+    <div id="confirm-modal" class="hidden" onclick="confirmSave(false)">
+        <div class="modal-content">
+            <p>Are you sure you want to save the config?</p>
+            <button onclick="confirmSave(true)">Yes</button>
+            <button onclick="confirmSave(false)">No</button>
+        </div>
+    </div>
 
     <script>
         let dotCount = 0;
