@@ -7,10 +7,6 @@ namespace eerie_leap::domain::http_domain::controllers::view {
 class SensorsEditorController {
 public:
     static http_resource_detail_static sensors_config_editor_html_resource_detail;
-    static http_resource_detail_static sensors_config_editor_css_resource_detail;
-    static http_resource_detail_static sensors_config_editor_js_resource_detail;
-    static http_resource_detail_static sensors_config_editor_prism_css_resource_detail;
-    static http_resource_detail_static sensors_config_editor_prism_js_resource_detail;
 
     SensorsEditorController() = delete;
     ~SensorsEditorController() = delete;
