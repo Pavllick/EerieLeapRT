@@ -64,7 +64,7 @@ async function saveConfig() {
 function adjustEditorHeight() {
     const editor = document.getElementById('editor');
     const wrapper = document.getElementById('highlighting-wrapper');
-    editor.style.height = 'auto'; // Reset
+    editor.style.height = 'auto';
     const newHeight = editor.scrollHeight;
     editor.style.height = newHeight + 'px';
     wrapper.style.height = newHeight + 'px';
