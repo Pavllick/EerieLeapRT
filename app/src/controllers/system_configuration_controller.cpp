@@ -3,6 +3,19 @@
 
 namespace eerie_leap::controllers {
 
+LOG_MODULE_REGISTER(system_config_ctrl_logger);
+
+SystemConfigurationController::SystemConfigurationController(std::shared_ptr<ConfigurationService<SystemConfig>> system_configuration_service) :
+    system_configuration_service_(std::move(system_configuration_service)),
+    system_config_(nullptr),
+    system_configuration_(nullptr) {
+
+    if(Get(true) == nullptr)
+        LOG_ERR("Failed to load System configuration.");
+
+    LOG_INF("System Configuration Controller initialized successfully.");
+}
+
 bool SystemConfigurationController::Update(std::shared_ptr<SystemConfiguration> system_configuration) {
     SystemConfig system_config {
         .hw_version = system_configuration->hw_version,
@@ -18,8 +31,8 @@ bool SystemConfigurationController::Update(std::shared_ptr<SystemConfiguration> 
     return true;
 }
 
-std::shared_ptr<SystemConfiguration> SystemConfigurationController::Get() {
-    if (system_configuration_ != nullptr) {
+std::shared_ptr<SystemConfiguration> SystemConfigurationController::Get(bool force_load) {
+    if (system_configuration_ != nullptr && !force_load) {
         return system_configuration_;
     }
 

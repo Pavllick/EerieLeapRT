@@ -7,6 +7,19 @@ namespace eerie_leap::controllers {
 
 using namespace eerie_leap::utilities::memory;
 
+LOG_MODULE_REGISTER(adc_config_ctrl_logger);
+
+AdcConfigurationController::AdcConfigurationController(std::shared_ptr<ConfigurationService<AdcConfig>> adc_configuration_service) :
+    adc_configuration_service_(std::move(adc_configuration_service)),
+    adc_config_(nullptr),
+    adc_configuration_(nullptr) {
+
+    if(Get(true) == nullptr)
+        LOG_ERR("Failed to load ADC configuration.");
+
+    LOG_INF("ADC Configuration Controller initialized successfully.");
+}
+
 bool AdcConfigurationController::Update(std::shared_ptr<AdcConfiguration> adc_configuration) {
     AdcConfig adc_config {
         .name = CborHelpers::ToZcborString(&adc_configuration->name),
@@ -22,8 +35,8 @@ bool AdcConfigurationController::Update(std::shared_ptr<AdcConfiguration> adc_co
     return true;
 }
 
-std::shared_ptr<AdcConfiguration> AdcConfigurationController::Get() {
-    if (adc_configuration_ != nullptr) {
+std::shared_ptr<AdcConfiguration> AdcConfigurationController::Get(bool force_load) {
+    if (adc_configuration_ != nullptr && !force_load) {
         return adc_configuration_;
     }
 

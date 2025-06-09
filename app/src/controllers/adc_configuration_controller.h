@@ -19,13 +19,10 @@ private:
     std::shared_ptr<AdcConfiguration> adc_configuration_;
 
 public:
-    explicit AdcConfigurationController(std::shared_ptr<ConfigurationService<AdcConfig>> adc_configuration_service) :
-        adc_configuration_service_(std::move(adc_configuration_service)),
-        adc_config_(nullptr),
-        adc_configuration_(nullptr) {}
+    explicit AdcConfigurationController(std::shared_ptr<ConfigurationService<AdcConfig>> adc_configuration_service);
 
     bool Update(std::shared_ptr<AdcConfiguration> adc_configuration);
-    std::shared_ptr<AdcConfiguration> Get();
+    std::shared_ptr<AdcConfiguration> Get(bool force_load = false);
 };
 
 } // namespace eerie_leap::controllers

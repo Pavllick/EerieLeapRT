@@ -1,8 +1,8 @@
 #include <vector>
 #include <zephyr/logging/log.h>
 
-#include "measurement_service.h"
 #include "domain/adc_domain/hardware/adc_factory.hpp"
+#include "measurement_service.h"
 
 namespace eerie_leap::domain::sensor_domain::services {
 
@@ -34,8 +34,6 @@ void MeasurementService::EntryPoint() {
     processing_scheduler_service_ = std::make_shared<ProcessingSchedulerService>(time_service_, guid_generator_, adc_, sensors_configuration_controller_);
 
     processing_scheduler_service_->Start();
-
-    return;
 }
 
 } // namespace eerie_leap::domain::sensor_domain::services

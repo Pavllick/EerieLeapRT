@@ -1,126 +1,29 @@
 function escapeHTML(str) {
-    return str.replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 }
 
-function highlight(text) {
-    try {
-        const json = JSON.parse(text);
-        const pretty = JSON.stringify(json, null, 2);
-        return escapeHTML(pretty).replace(
-            /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(\.\d+)?([eE][+-]?\d+)?)/g,
-            match => {
-                let cls = "number";
-                if (/^"/.test(match)) {
-                    cls = /:$/.test(match) ? "key" : "string";
-                } else if (/true|false/.test(match)) {
-                    cls = "boolean";
-                } else if (/null/.test(match)) {
-                    cls = "null";
-                }
-                return `<span class="${cls}">${match}</span>`;
-            }
-        );
-    } catch {
-        return `<span class="error">${escapeHTML(text)}</span>`;
-    }
+function update(text) {
+    if (text.endsWith("\n")) text += " ";
+    const el = document.getElementById("highlighting-content");
+    el.innerHTML = escapeHTML(text);
+    Prism.highlightElement(el);
 }
 
-function getCaretCharacterOffsetWithin(element) {
-    const selection = window.getSelection();
-    let caretOffset = 0;
-    if (selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        const preCaretRange = range.cloneRange();
-        preCaretRange.selectNodeContents(element);
-        preCaretRange.setEnd(range.endContainer, range.endOffset);
-        caretOffset = preCaretRange.toString().length;
-    }
-    return caretOffset;
+function syncScroll(el) {
+    const h = document.getElementById("highlighting");
+    h.scrollTop = el.scrollTop;
+    h.scrollLeft = el.scrollLeft;
 }
 
-function setCaretPosition(element, offset) {
-    const range = document.createRange();
-    const sel = window.getSelection();
-    let current = 0;
-
-    function traverse(node) {
-        if (node.nodeType === Node.TEXT_NODE) {
-            const next = current + node.length;
-            if (current <= offset && offset <= next) {
-                range.setStart(node, offset - current);
-                range.collapse(true);
-                sel.removeAllRanges();
-                sel.addRange(range);
-                return true;
-            }
-            current = next;
-        } else {
-            for (const child of node.childNodes) {
-                if (traverse(child)) return true;
-            }
-        }
-        return false;
-    }
-
-    traverse(element);
-}
-
-const undoStack = [];
-const redoStack = [];
-const maxStackSize = 100;
-
-function pushUndoState(text) {
-    undoStack.push(text);
-    if (undoStack.length > maxStackSize) {
-        undoStack.shift();
-    }
-}
-
-function onEdit() {
-    const editor = document.getElementById("editor");
-    const raw = editor.innerText;
-    const caretOffset = getCaretCharacterOffsetWithin(editor);
-
-    pushUndoState(lastText); // Save previous state for undo
-    redoStack.length = 0; // Clear redo stack on new input
-
-    lastText = raw;
-    editor.innerHTML = highlight(raw);
-    setCaretPosition(editor, caretOffset);
-}
-
-document.addEventListener("keydown", (e) => {
-    if (e.ctrlKey && e.key === "z" && !e.shiftKey) {
+function checkTab(el, e) {
+    if (e.key === "Tab") {
         e.preventDefault();
-        undo();
-    } else if (e.ctrlKey && e.key === "Z" || (e.ctrlKey && e.shiftKey && e.key === "z")) {
-        e.preventDefault();
-        redo();
+        const [s, epos] = [el.selectionStart, el.selectionEnd];
+        el.value = el.value.slice(0, s) + "\t" + el.value.slice(epos);
+        el.selectionStart = el.selectionEnd = s + 1;
+        update(el.value);
+        adjustEditorHeight();
     }
-});
-
-function undo() {
-    if (undoStack.length === 0) return;
-    const editor = document.getElementById("editor");
-    const currentText = editor.innerText;
-    redoStack.push(currentText);
-    const previous = undoStack.pop();
-    lastText = previous;
-    editor.innerHTML = highlight(previous);
-    setCaretPosition(editor, previous.length);
-}
-
-function redo() {
-    if (redoStack.length === 0) return;
-    const editor = document.getElementById("editor");
-    const currentText = editor.innerText;
-    undoStack.push(currentText);
-    const next = redoStack.pop();
-    lastText = next;
-    editor.innerHTML = highlight(next);
-    setCaretPosition(editor, next.length);
 }
 
 async function loadConfig() {
@@ -132,15 +35,16 @@ async function loadConfig() {
     const res = await fetch('/config/sensors');
     const data = await res.json();
     const text = JSON.stringify(data, null, 2);
-    lastText = text;
-    editor.innerHTML = highlight(text);
+    editor.value = text;
+    update(text);
+    adjustEditorHeight();
 
     loader.style.display = "none";
     editor.style.visibility = "visible";
 }
 
 async function saveConfig() {
-    const raw = document.getElementById("editor").innerText;
+    const raw = document.getElementById("editor").value;
     try {
         JSON.parse(raw);
     } catch (e) {
@@ -157,13 +61,15 @@ async function saveConfig() {
     alert("Saved!");
 }
 
-// Loader dot animation
-let dotCount = 0;
-setInterval(() => {
-    const dots = document.getElementById("dots");
-    dotCount = (dotCount + 1) % 4;
-    dots.textContent = '.'.repeat(dotCount);
-}, 400);
+function adjustEditorHeight() {
+    const editor = document.getElementById('editor');
+    const wrapper = document.getElementById('highlighting-wrapper');
+    editor.style.height = 'auto'; // Reset
+    const newHeight = editor.scrollHeight;
+    editor.style.height = newHeight + 'px';
+    wrapper.style.height = newHeight + 'px';
+}
 
-let lastText = "";
+document.getElementById("editor").addEventListener("input", adjustEditorHeight);
+
 loadConfig();

@@ -19,13 +19,10 @@ private:
     std::shared_ptr<SystemConfiguration> system_configuration_;
 
 public:
-    explicit SystemConfigurationController(std::shared_ptr<ConfigurationService<SystemConfig>> system_configuration_service) :
-        system_configuration_service_(std::move(system_configuration_service)),
-        system_config_(nullptr),
-        system_configuration_(nullptr) {}
+    explicit SystemConfigurationController(std::shared_ptr<ConfigurationService<SystemConfig>> system_configuration_service);
 
     bool Update(std::shared_ptr<SystemConfiguration> system_configuration);
-    std::shared_ptr<SystemConfiguration> Get();
+    std::shared_ptr<SystemConfiguration> Get(bool force_load = false);
 };
 
 } // namespace eerie_leap::controllers

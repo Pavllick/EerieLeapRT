@@ -25,14 +25,10 @@ private:
     std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> ordered_sensors_;
 
 public:
-    explicit SensorsConfigurationController(std::shared_ptr<ConfigurationService<SensorsConfig>> sensors_configuration_service) :
-        sensors_configuration_service_(std::move(sensors_configuration_service)),
-        sensors_config_(make_shared_ext<SensorsConfig>()),
-        ordered_sensors_(make_shared_ext<std::vector<std::shared_ptr<Sensor>>>()) {}
+    SensorsConfigurationController(std::shared_ptr<MathParserService> math_parser_service, std::shared_ptr<ConfigurationService<SensorsConfig>> sensors_configuration_service);
 
-    void Initialize(std::shared_ptr<MathParserService> math_parser_service);
     bool Update(const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> sensors);
-    const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> Get();
+    const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> Get(bool force_load = false);
 };
 
 } // namespace eerie_leap::controllers

@@ -72,8 +72,8 @@ int main(void) {
 
     auto system_configuration_controller = std::make_shared<SystemConfigurationController>(system_config_service);
     auto adc_configuration_controller = std::make_shared<AdcConfigurationController>(adc_config_service);
-    auto sensors_configuration_controller = std::make_shared<SensorsConfigurationController>(sensors_config_service);
-    sensors_configuration_controller->Initialize(math_parser_service);
+
+    auto sensors_configuration_controller = std::make_shared<SensorsConfigurationController>(math_parser_service, sensors_config_service);
 
     SetupTestSensors(math_parser_service, sensors_configuration_controller);
 

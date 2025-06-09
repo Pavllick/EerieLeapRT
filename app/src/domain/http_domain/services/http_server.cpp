@@ -43,5 +43,8 @@ HTTP_RESOURCE_DEFINE(sensors_config_resource, http_service, "/config/sensors", &
 HTTP_RESOURCE_DEFINE(sensors_config_editor_html_resource, http_service, "/editor/sensors/index.html", &SensorsEditorController::sensors_config_editor_html_resource_detail);
 HTTP_RESOURCE_DEFINE(sensors_config_editor_css_resource, http_service, "/editor/sensors/style.css", &SensorsEditorController::sensors_config_editor_css_resource_detail);
 HTTP_RESOURCE_DEFINE(sensors_config_editor_js_resource, http_service, "/editor/sensors/editor.js", &SensorsEditorController::sensors_config_editor_js_resource_detail);
+HTTP_RESOURCE_DEFINE(sensors_config_editor_prism_css_resource, http_service, "/editor/sensors/prism.css", &SensorsEditorController::sensors_config_editor_prism_css_resource_detail);
+HTTP_RESOURCE_DEFINE(sensors_config_editor_prism_js_resource, http_service, "/editor/sensors/prism.js", &SensorsEditorController::sensors_config_editor_prism_js_resource_detail);
+
 
 } // namespace eerie_leap::domain::http_domain::services

@@ -14,10 +14,17 @@ using namespace eerie_leap::utilities::cbor;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 using namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolator;
 
-void SensorsConfigurationController::Initialize(std::shared_ptr<MathParserService> math_parser_service) {
-    LOG_INF("Sensors Configuration Controller initialization started.");
+SensorsConfigurationController::SensorsConfigurationController(
+    std::shared_ptr<MathParserService> math_parser_service,
+    std::shared_ptr<ConfigurationService<SensorsConfig>> sensors_configuration_service) :
 
-    math_parser_service_ = math_parser_service;
+    math_parser_service_(std::move(math_parser_service)),
+    sensors_configuration_service_(std::move(sensors_configuration_service)),
+    sensors_config_(make_shared_ext<SensorsConfig>()),
+    ordered_sensors_(make_shared_ext<std::vector<std::shared_ptr<Sensor>>>()) {
+
+    if(Get(true) == nullptr)
+        LOG_ERR("Failed to load sensors configuration.");
 
     LOG_INF("Sensors Configuration Controller initialized successfully.");
 }
@@ -98,8 +105,8 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
     return sensors_configuration_service_->Save(sensors_config.get());
 }
 
-const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfigurationController::Get() {
-    if(ordered_sensors_ != nullptr)
+const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfigurationController::Get(bool force_load) {
+    if(ordered_sensors_ != nullptr && !force_load)
         return ordered_sensors_;
 
     auto sensors_config = sensors_configuration_service_->Load();

@@ -108,10 +108,9 @@ ZTEST(sensors_configuration_controller, test_SensorsConfigurationController_Save
     fs_service->Format();
 
     auto sensors_configuration_service = std::make_shared<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
-    auto sensors_configuration_controller = std::make_shared<SensorsConfigurationController>(sensors_configuration_service);
 
     auto math_parser_service = std::make_shared<MathParserService>();
-    sensors_configuration_controller->Initialize(math_parser_service);
+    auto sensors_configuration_controller = std::make_shared<SensorsConfigurationController>(math_parser_service, sensors_configuration_service);
 
     auto sensors = SetupTestSensors(math_parser_service);
     sensors_configuration_controller->Update(std::make_shared<std::vector<std::shared_ptr<Sensor>>>(sensors));
@@ -153,17 +152,15 @@ ZTEST(sensors_configuration_controller, test_SensorsConfigurationController_Save
     fs_service->Format();
 
     auto sensors_configuration_service = std::make_shared<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
-    auto sensors_configuration_controller = std::make_shared<SensorsConfigurationController>(sensors_configuration_service);
 
     auto math_parser_service = std::make_shared<MathParserService>();
-    sensors_configuration_controller->Initialize(math_parser_service);
+    auto sensors_configuration_controller = std::make_shared<SensorsConfigurationController>(math_parser_service, sensors_configuration_service);
 
     auto sensors = SetupTestSensors(math_parser_service);
     sensors_configuration_controller->Update(std::make_shared<std::vector<std::shared_ptr<Sensor>>>(sensors));
 
     sensors_configuration_controller = nullptr;
-    sensors_configuration_controller = std::make_shared<SensorsConfigurationController>(sensors_configuration_service);
-    sensors_configuration_controller->Initialize(math_parser_service);
+    sensors_configuration_controller = std::make_shared<SensorsConfigurationController>(math_parser_service, sensors_configuration_service);
 
     auto saved_sensors = *sensors_configuration_controller->Get();
 

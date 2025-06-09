@@ -4,7 +4,10 @@ foreach(web_resource
     index.html
     sensors_config_editor/index.html
     sensors_config_editor/style.css
-    sensors_config_editor/editor.js)
+    sensors_config_editor/editor.js
+    sensors_config_editor/prism.css
+    sensors_config_editor/prism.js
+    )
 
     generate_inc_file_for_target(app static_resources/${web_resource} ${gen_dir}/${web_resource}.gz.inc --gzip)
 endforeach()
