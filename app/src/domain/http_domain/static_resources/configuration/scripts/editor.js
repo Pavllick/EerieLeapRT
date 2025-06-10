@@ -144,4 +144,12 @@ function menuUploadConfig() {
     };
 }
 
+document.getElementById('info-button').addEventListener('click', () => {
+    document.getElementById('info-modal').classList.remove('hidden');
+});
+
+document.getElementById('close-info').addEventListener('click', () => {
+    document.getElementById('info-modal').classList.add('hidden');
+});
+
 loadConfig();

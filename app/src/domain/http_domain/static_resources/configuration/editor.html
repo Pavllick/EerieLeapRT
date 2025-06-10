@@ -16,7 +16,10 @@
     <div id="page-layout">
         <header>
             <h1>Sensors JSON Configuration Editor</h1>
-            <button id="menu-button">Menu</button>
+            <div id="menu-buttons-container">
+                <button id="info-button">&#x24D8;</button>
+                <button id="menu-button">Menu</button>
+            </div>
         </header>
 
         <main id="main-content">
@@ -24,8 +27,7 @@
                 <span>Loading config<span id="dots">...</span></span>
             </div>
             <div id="highlighting-wrapper">
-                <textarea id="editor" spellcheck="false"
-                    oninput="update(this.value); syncScroll(this);"
+                <textarea id="editor" spellcheck="false" oninput="update(this.value); syncScroll(this);"
                     onscroll="syncScroll(this);" onkeydown="checkTab(this, event);"></textarea>
                 <pre id="highlighting" aria-hidden="true">
                     <code class="language-json" id="highlighting-content"></code>
@@ -51,6 +53,132 @@
             <p>Are you sure you want to save the configuration?</p>
             <button onclick="confirmSave(true)">Yes</button>
             <button onclick="confirmSave(false)">No</button>
+        </div>
+    </div>
+
+    <div id="info-modal" class="hidden">
+        <div class="info-content">
+            <button id="close-info">✖</button>
+            <div class="info-scroll">
+                <h2>Sensors Configuration Guide</h2>
+
+                <p><strong>Root structure:</strong></p>
+                <pre><code class="language-json">{ "sensors": [ /* Array of Sensor objects */ ] }</code></pre>
+
+                <h3>Sensor object</h3>
+                <ul>
+                    <li><code>id</code> (string): Unique identifier</li>
+                    <li><code>metadata</code> (object): Human-readable info</li>
+                    <li><code>configuration</code> (object): Sensor setup</li>
+                </ul>
+
+                <h4>metadata</h4>
+                <ul>
+                    <li><code>name</code> (string): Display name</li>
+                    <li><code>unit</code> (string): Unit symbol</li>
+                    <li><code>description</code> (string): Optional text</li>
+                </ul>
+
+                <h4>configuration</h4>
+                <ul>
+                    <li><code>type</code> (enum): "PHYSICAL_ANALOG" | "VIRTUAL_ANALOG"</li>
+                    <li><code>channel</code>: int (required, ignored if virtual)</li>
+                    <li><code>sampling_rate_ms</code>: int</li>
+                    <li><code>interpolation_method</code> (enum): "NONE" | "LINEAR" | "CUBIC_SPLINE"</li>
+                    <li><code>calibration_table</code>[]: Array of points</li>
+                    <li><code>expression</code>: String (required for virtual sensors, optional for physical)</li>
+                </ul>
+
+                <h4>calibration_table[]</h4>
+                <ul>
+                    <li><code>voltage</code> (number)</li>
+                    <li><code>value</code> (number)</li>
+                </ul>
+
+                <p><strong>Example:</strong></p>
+                <pre><code class="language-json">{
+    "sensors": [
+        {
+            "id": "sensor_2",
+            "metadata": {
+                "name": "Sensor 2",
+                "unit": "km/h",
+                "description": "New Test Sensor 2"
+            },
+            "configuration": {
+                "type": "PHYSICAL_ANALOG",
+                "channel": 1,
+                "sampling_rate_ms": 500,
+                "interpolation_method": "LINEAR",
+                "calibration_table": [
+                    {
+                        "voltage": 0,
+                        "value": 0
+                    },
+                    {
+                        "voltage": 1,
+                        "value": 29
+                    },
+                    {
+                        "voltage": 2,
+                        "value": 111
+                    },
+                    {
+                        "voltage": 2.5,
+                        "value": 162
+                    },
+                    {
+                        "voltage": 3.3,
+                        "value": 200
+                    }
+                ],
+                "expression": "x * 4 + 1.6"
+            }
+        },
+        {
+            "id": "sensor_1",
+            "metadata": {
+                "name": "Sensor 1",
+                "unit": "km/h",
+                "description": "Test Sensor 1"
+            },
+            "configuration": {
+                "type": "PHYSICAL_ANALOG",
+                "channel": 0,
+                "sampling_rate_ms": 1000,
+                "interpolation_method": "LINEAR",
+                "calibration_table": [
+                    {
+                        "voltage": 0,
+                        "value": 0
+                    },
+                    {
+                        "voltage": 3.3,
+                        "value": 100
+                    }
+                ],
+                "expression": "{x} + {sensor_2} + 1"
+            }
+        },
+        {
+            "id": "sensor_3",
+            "metadata": {
+                "name": "Sensor 3",
+                "unit": "km/h",
+                "description": "New Test Sensor 3"
+            },
+            "configuration": {
+                "type": "VIRTUAL_ANALOG",
+                "channel": -1,
+                "sampling_rate_ms": 2000,
+                "interpolation_method": "NONE",
+                "calibration_table": [],
+                "expression": "{sensor_1} * 12 + 8.34"
+            }
+        }
+    ]
+}</code></pre>
+            </div>
         </div>
     </div>
 

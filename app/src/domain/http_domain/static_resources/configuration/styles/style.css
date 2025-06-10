@@ -37,6 +37,10 @@ header {
     border-bottom: 1px solid #373b41;
 }
 
+#info-button {
+    padding: 6px 10px;
+}
+
 #overlay-menu {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -233,9 +237,110 @@ button {
     cursor: pointer;
 }
 
+#info-modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#info-modal.hidden {
+    display: none;
+}
+
+.info-content {
+    position: relative;
+    background: #1d1f21;
+    padding: 30px 20px 20px 20px;
+    border: 1px solid #373b41;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 700px;
+    max-height: 80vh;
+    overflow: hidden;
+    color: #c5c8c6;
+}
+
+.info-scroll {
+    overflow-y: auto;
+    max-height: calc(80vh - 50px);
+    padding-right: 10px;
+}
+
+#close-info {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #373b41;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+.info-scroll h2,
+.info-scroll h3,
+.info-scroll h4 {
+    margin: 20px 0 10px;
+    color: #ffffff;
+    border-bottom: 1px solid #444;
+    padding-bottom: 5px;
+}
+
+.info-scroll p {
+    margin: 10px 0;
+    line-height: 1.5;
+}
+
+.info-scroll ul {
+    margin: 10px 0 20px 20px;
+    padding-left: 20px;
+    list-style: disc;
+}
+
+.info-scroll li {
+    margin-bottom: 8px;
+}
+
+.info-scroll code {
+    background: #2a2c2f;
+    padding: 2px 4px;
+    border-radius: 4px;
+    color: #8abeb7;
+    font-family: monospace;
+    line-height: 1.25;
+}
+
+.info-scroll pre {
+    background: #2a2c2f;
+    padding: 10px;
+    border-radius: 6px;
+    overflow-x: auto;
+    color: #c5c8c6;
+    margin-bottom: 20px;
+}
+
+.info-scroll strong {
+    color: #f0c674;
+}
+
 @media (max-width: 1000px) {
     html, body, input, textarea, select {
         font-size: 30px;
+    }
+
+    #menu-buttons-container {
+        display: flex;
+        flex-direction: row;
+        gap: 40px;
+    }
+
+    #info-button {
+        padding: 6px 26px;
     }
 
     .menu-content-wrapper {
@@ -269,5 +374,21 @@ button {
 
     .modal-content p {
         padding-bottom: 50px;
+    }
+
+    #close-info {
+        padding: 18px 36px;
+    }
+
+    .info-content {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        font-size: 20px;
+    }
+
+    .info-scroll {
+        max-height: 100%;
     }
 }
