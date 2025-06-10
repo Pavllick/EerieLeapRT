@@ -1,26 +1,24 @@
-set(gen_dir ${ZEPHYR_BINARY_DIR}/include/generated/)
+set(gen_dir ${ZEPHYR_BINARY_DIR}/include/generated/static_resources/)
 
-set(editor_dir ${CMAKE_CURRENT_SOURCE_DIR}/static_resources/sensors_config_editor)
-set(bundled_file ${ZEPHYR_BINARY_DIR}/include/generated/static_resources/sensors_config_editor/bundle.html)
+set(http_configuration_dir ${CMAKE_CURRENT_SOURCE_DIR}/static_resources/configuration)
 
 add_custom_command(
-    OUTPUT ${bundled_file}
+    OUTPUT ${gen_dir}/configuration/editor_bundle.html
     COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/bundle_html.py
-        --html ${editor_dir}/index.html
-        --output ${bundled_file}
-        --base ${editor_dir}
+        --html ${http_configuration_dir}/editor.html
+        --output ${gen_dir}/configuration/editor_bundle.html
+        --base ${http_configuration_dir}
     DEPENDS
-        ${editor_dir}/index.html
-        ${editor_dir}/style.css
-        ${editor_dir}/editor.js
-        ${editor_dir}/prism.css
-        ${editor_dir}/prism.js
+        ${http_configuration_dir}/editor.html
+        ${http_configuration_dir}/styles/style.css
+        ${http_configuration_dir}/scripts/editor.js
+        ${http_configuration_dir}/styles/prism.css
+        ${http_configuration_dir}/scripts/prism.js
     COMMENT "Bundling sensors_config_editor resources into single HTML"
 )
-
 generate_inc_file_for_target(app
-    ${bundled_file}
-    ${gen_dir}/sensors_config_editor/bundle.html.gz.inc
+    ${gen_dir}/configuration/editor_bundle.html
+    ${gen_dir}/configuration/editor_bundle.html.gz.inc
     --gzip
 )
 

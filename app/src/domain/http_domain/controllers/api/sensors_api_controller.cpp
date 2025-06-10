@@ -191,9 +191,9 @@ int SensorsApiController::sensors_config_post_handler(http_client_ctx *client, e
         try {
             ParseSensorsConfigJson(sensors_config_post_buffer_->data(), cursor);
         } catch (const std::exception &e) {
-            printk("Failed to parse JSON payload: %s\n", e.what());
+            printk("Failed to parse JSON: %s\n", e.what());
 
-            error_msg = make_shared_ext<std::string>("Failed to parse JSON payload: " + std::string(e.what()));
+            error_msg = make_shared_ext<std::string>("Failed to parse JSON: " + std::string(e.what()));
 
             response_ctx->status = HTTP_500_INTERNAL_SERVER_ERROR;
             response_ctx->body = (uint8_t*)error_msg->c_str();

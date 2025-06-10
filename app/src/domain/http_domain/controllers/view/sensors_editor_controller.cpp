@@ -1,7 +1,7 @@
 #include "sensors_editor_controller.h"
 
 static const uint8_t sensors_config_editor_html[] = {
-    #include "sensors_config_editor/bundle.html.gz.inc"
+    #include "static_resources/configuration/editor_bundle.html.gz.inc"
 };
 
 namespace eerie_leap::domain::http_domain::controllers::view {

@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <title>JSON Config Editor</title>
-    <link rel="stylesheet" href="prism.css" />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="styles/prism.css" />
+    <link rel="stylesheet" href="styles/style.css" />
 </head>
 
 <body>
@@ -16,6 +16,7 @@
     <div id="page-layout">
         <header>
             <h1>Sensors JSON Configuration Editor</h1>
+            <button id="menu-button">Menu</button>
         </header>
 
         <main id="main-content">
@@ -31,15 +32,23 @@
                 </pre>
             </div>
         </main>
+    </div>
 
-        <footer>
-            <button onclick="saveConfig()">Save</button>
-        </footer>
+    <input type="file" id="file-input" accept=".json" style="display:none" />
+
+    <div id="overlay-menu" class="hidden">
+        <div class="menu-content-wrapper">
+            <div class="menu-content">
+                <button onclick="menuDownloadConfig()">Download Editor Contents</button>
+                <button onclick="menuUploadConfig()">Upload Configuration</button>
+                <button id="menu-save-config" onclick="menuSaveConfig()">Save Configuration</button>
+            </div>
+        </div>
     </div>
 
     <div id="confirm-modal" class="hidden" onclick="confirmSave(false)">
         <div class="modal-content">
-            <p>Are you sure you want to save the config?</p>
+            <p>Are you sure you want to save the configuration?</p>
             <button onclick="confirmSave(true)">Yes</button>
             <button onclick="confirmSave(false)">No</button>
         </div>
@@ -54,8 +63,8 @@
         }, 400);
     </script>
 
-    <script src="prism.js"></script>
-    <script src="editor.js"></script>
+    <script src="scripts/prism.js"></script>
+    <script src="scripts/editor.js"></script>
 </body>
 
 </html>

@@ -31,7 +31,7 @@ async function loadConfig() {
     loader.style.display = "block";
     editor.style.visibility = "hidden";
 
-    const res = await fetch('/config/sensors');
+    const res = await fetch('/api/sensors/config');
     const data = await res.json();
     const text = JSON.stringify(data, null, 2);
     editor.value = text;
@@ -41,16 +41,11 @@ async function loadConfig() {
     editor.style.visibility = "visible";
 }
 
-function saveConfig() {
-    // Show confirmation modal
-    document.getElementById("confirm-modal").classList.remove("hidden");
-}
-
 function showMessage(text, type) {
     const container = document.getElementById("message-box-container");
     const box = document.getElementById("message-box");
 
-    box.className = ""; // reset
+    box.className = "";
     box.classList.add(type === "success" ? "success" : "error");
     box.textContent = text;
 
@@ -76,7 +71,7 @@ async function confirmSave(doSave) {
     }
 
     try {
-        const result = await fetch("/config/sensors", {
+        const result = await fetch("/api/sensors/config", {
             method: "POST",
             headers: {
                 'Accept': 'text/plain',
@@ -94,6 +89,59 @@ async function confirmSave(doSave) {
     } catch (err) {
         showMessage("Network error", "error");
     }
+}
+
+const overlayMenu = document.getElementById("overlay-menu");
+const menuButton = document.getElementById("menu-button");
+
+menuButton.addEventListener("click", () => {
+    overlayMenu.classList.remove("hidden");
+});
+
+overlayMenu.addEventListener("click", (e) => {
+    if (e.target === overlayMenu)
+        overlayMenu.classList.add("hidden");
+});
+
+function menuSaveConfig() {
+    overlayMenu.classList.add("hidden");
+    document.getElementById("confirm-modal").classList.remove("hidden");
+}
+
+function menuDownloadConfig() {
+    overlayMenu.classList.add("hidden");
+
+    const raw = document.getElementById("editor").value;
+    const blob = new Blob([raw], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sensors_config_" + new Date(Date.now()).toISOString().replaceAll(":", "_").replaceAll(".", "_").replaceAll("-", "_") + ".json";
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function menuUploadConfig() {
+    overlayMenu.classList.add("hidden");
+
+    const input = document.getElementById("file-input");
+    input.value = "";
+    input.click();
+
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const text = await file.text();
+        try {
+            uploadedFileContent = JSON.parse(text);
+            const editor = document.getElementById("editor");
+            editor.value = JSON.stringify(uploadedFileContent, null, 2);
+            update(editor.value);
+        } catch (err) {
+            alert("Invalid JSON file.");
+        }
+    };
 }
 
 loadConfig();
