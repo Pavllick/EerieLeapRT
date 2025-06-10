@@ -8,6 +8,7 @@
 #include "utilities/time/boot_elapsed_time_service.h"
 #include "utilities/math_parser/math_parser_service.hpp"
 #include "domain/fs_domain/services/fs_service.h"
+#include "domain/adc_domain/hardware/adc_factory.hpp"
 #include "domain/sensor_domain/services/measurement_service.h"
 
 #include "configuration/system_config/system_config.h"
@@ -45,6 +46,7 @@ using namespace eerie_leap::utilities::math_parser;
 
 using namespace eerie_leap::controllers;
 
+using namespace eerie_leap::domain::adc_domain::hardware;
 using namespace eerie_leap::domain::sensor_domain::services;
 using namespace eerie_leap::domain::fs_domain::services;
 using namespace eerie_leap::configuration::services;
@@ -70,10 +72,16 @@ int main(void) {
     auto adc_config_service = std::make_shared<ConfigurationService<AdcConfig>>("adc_config", fs_service);
     auto sensors_config_service = std::make_shared<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
 
+    auto adc = AdcFactory::Create();
+    adc->UpdateConfiguration(AdcConfiguration{
+        .samples = 1
+    });
+    adc->Initialize();
+
     auto system_configuration_controller = std::make_shared<SystemConfigurationController>(system_config_service);
     auto adc_configuration_controller = std::make_shared<AdcConfigurationController>(adc_config_service);
 
-    auto sensors_configuration_controller = std::make_shared<SensorsConfigurationController>(math_parser_service, sensors_config_service);
+    auto sensors_configuration_controller = std::make_shared<SensorsConfigurationController>(math_parser_service, sensors_config_service, adc->GetChannelCount());
 
     SetupTestSensors(math_parser_service, sensors_configuration_controller);
 
@@ -86,7 +94,7 @@ int main(void) {
     // alignment or lifetime issues in Zephyr.
     alignas(ARCH_STACK_PTR_ALIGN) static uint8_t measurement_service_buffer[sizeof(MeasurementService)];
     auto* measurement_service =
-        new (measurement_service_buffer) MeasurementService(time_service, guid_generator, sensors_configuration_controller);
+        new (measurement_service_buffer) MeasurementService(time_service, guid_generator, adc, sensors_configuration_controller);
     measurement_service->Start();
 
     // NOTE: Don't use for WiFi supporting boards as WiFi is broken in Zephyr 4.1 and has memory allocation issues
@@ -193,7 +201,8 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
         std::make_shared<Sensor>(sensor_3)
     };
 
-    auto res = sensors_configuration_controller->Update(std::make_shared<std::vector<std::shared_ptr<Sensor>>>(sensors));
+    auto sensors_ptr = std::make_shared<std::vector<std::shared_ptr<Sensor>>>(sensors);
+    auto res = sensors_configuration_controller->Update(sensors_ptr);
     if(!res)
         throw std::runtime_error("Cannot save config");
 }

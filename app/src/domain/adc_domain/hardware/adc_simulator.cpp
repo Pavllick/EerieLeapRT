@@ -34,4 +34,8 @@ float AdcSimulator::ReadChannel(int channel) {
     return random_value;
 }
 
+int AdcSimulator::GetChannelCount() {
+    return 32;
+}
+
 }  // namespace eerie_leap::domain::adc_domain::hardware

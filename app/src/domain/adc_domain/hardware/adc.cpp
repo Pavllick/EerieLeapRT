@@ -102,4 +102,8 @@ uint16_t Adc::GetReding() {
 	return value / adc_config_->samples;
 }
 
+int Adc::GetChannelCount() {
+    return dt_adc_channel_count_;
+}
+
 }  // namespace eerie_leap::domain::adc_domain::hardware

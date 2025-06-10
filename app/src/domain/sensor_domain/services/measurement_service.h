@@ -54,9 +54,11 @@ public:
     MeasurementService(
         std::shared_ptr<ITimeService> time_service,
         std::shared_ptr<GuidGenerator> guid_generator,
+        std::shared_ptr<IAdc> adc,
         std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller)
         : time_service_(std::move(time_service)),
         guid_generator_(std::move(guid_generator)),
+        adc_(std::move(adc)),
         sensors_configuration_controller_(std::move(sensors_configuration_controller)) { }
 
     k_tid_t Start();

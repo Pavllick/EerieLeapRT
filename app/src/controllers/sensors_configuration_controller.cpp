@@ -16,12 +16,14 @@ using namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolat
 
 SensorsConfigurationController::SensorsConfigurationController(
     std::shared_ptr<MathParserService> math_parser_service,
-    std::shared_ptr<ConfigurationService<SensorsConfig>> sensors_configuration_service) :
+    std::shared_ptr<ConfigurationService<SensorsConfig>> sensors_configuration_service,
+    int adc_channel_count) :
 
     math_parser_service_(std::move(math_parser_service)),
     sensors_configuration_service_(std::move(sensors_configuration_service)),
     sensors_config_(make_shared_ext<SensorsConfig>()),
-    ordered_sensors_(make_shared_ext<std::vector<std::shared_ptr<Sensor>>>()) {
+    ordered_sensors_(make_shared_ext<std::vector<std::shared_ptr<Sensor>>>()),
+    adc_channel_count_(adc_channel_count) {
 
     if(Get(true) == nullptr)
         LOG_ERR("Failed to load sensors configuration.");
@@ -29,7 +31,7 @@ SensorsConfigurationController::SensorsConfigurationController(
         LOG_INF("Sensors Configuration Controller initialized successfully.");
 }
 
-bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> sensors) {
+bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>>& sensors) {
     auto sensors_config = make_shared_ext<SensorsConfig>();
     memset(sensors_config.get(), 0, sizeof(SensorsConfig));
 
@@ -45,6 +47,9 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
         sensor_config->configuration.type = static_cast<uint32_t>(sensor->configuration.type);
 
         if(sensor->configuration.channel.has_value()) {
+            if(sensor->configuration.channel.value() < 0 || sensor->configuration.channel.value() > 15)
+                throw std::runtime_error("Invalid channel value!");
+
             sensor_config->configuration.channel_present = true;
             sensor_config->configuration.channel = sensor->configuration.channel.value();
         } else {

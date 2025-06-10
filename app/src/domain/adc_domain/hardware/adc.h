@@ -47,6 +47,7 @@ public:
     int Initialize() override;
     void UpdateConfiguration(AdcConfiguration config) override;
     float ReadChannel(int channel) override;
+    int GetChannelCount() override;
 };
 
 }  // namespace eerie_leap::domain::adc_domain::hardware

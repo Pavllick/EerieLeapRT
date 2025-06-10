@@ -1,12 +1,9 @@
 #include <vector>
 #include <zephyr/logging/log.h>
 
-#include "domain/adc_domain/hardware/adc_factory.hpp"
 #include "measurement_service.h"
 
 namespace eerie_leap::domain::sensor_domain::services {
-
-using namespace eerie_leap::domain::adc_domain::hardware;
 
 LOG_MODULE_REGISTER(measurement_service_logger);
 
@@ -25,14 +22,7 @@ k_tid_t MeasurementService::Start() {
 void MeasurementService::EntryPoint() {
     LOG_INF("Measurement Service started");
 
-    adc_ = AdcFactory::Create();
-    adc_->UpdateConfiguration(AdcConfiguration{
-        .samples = 1
-    });
-    adc_->Initialize();
-
     processing_scheduler_service_ = std::make_shared<ProcessingSchedulerService>(time_service_, guid_generator_, adc_, sensors_configuration_controller_);
-
     processing_scheduler_service_->Start();
 }
 

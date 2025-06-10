@@ -57,7 +57,7 @@ int SensorsApiController::sensors_config_get_handler(http_client_ctx *client, en
                 },
                 .configuration = {
                     .type = GetSensorTypeName(sensor->configuration.type).c_str(),
-                    .channel = sensor->configuration.channel.value_or(0),
+                    .channel = (int32_t)sensor->configuration.channel.value_or(-1),
                     .sampling_rate_ms = sensor->configuration.sampling_rate_ms,
                     .interpolation_method = GetInterpolationMethodName(interpolation_method).c_str(),
                     .calibration_table_len = calibration_table.size(),
@@ -118,7 +118,9 @@ void SensorsApiController::ParseSensorsConfigJson(uint8_t *buffer, size_t len)
         sensor->metadata.description = data.sensors[i].metadata.description;
 
         sensor->configuration.type = GetSensorType(data.sensors[i].configuration.type);
-        sensor->configuration.channel = data.sensors[i].configuration.channel;
+        sensor->configuration.channel = std::nullopt;
+        if(sensor->configuration.type == SensorType::PHYSICAL_ANALOG)
+            sensor->configuration.channel = data.sensors[i].configuration.channel;
         sensor->configuration.sampling_rate_ms = data.sensors[i].configuration.sampling_rate_ms;
 
         auto interpolation_method = GetInterpolationMethod(data.sensors[i].configuration.interpolation_method);
@@ -161,7 +163,8 @@ void SensorsApiController::ParseSensorsConfigJson(uint8_t *buffer, size_t len)
         sensors.push_back(sensor);
     }
 
-    if(sensors_configuration_controller_->Update(make_shared_ext<std::vector<std::shared_ptr<Sensor>>>(sensors)))
+    auto sensors_ptr = make_shared_ext<std::vector<std::shared_ptr<Sensor>>>(sensors);
+    if(sensors_configuration_controller_->Update(sensors_ptr))
         printk("Sensors configuration updated successfully\n");
     else
         throw std::runtime_error("Failed to update sensors configuration.");

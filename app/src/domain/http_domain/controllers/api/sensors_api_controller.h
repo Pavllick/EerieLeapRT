@@ -24,7 +24,7 @@ struct SensorCalibrationDataMapJsonDto {
 
 struct SensorConfigurationJsonDto {
     const char* type;
-    uint32_t channel;
+    int32_t channel;
     uint32_t sampling_rate_ms;
     const char* interpolation_method;
     SensorCalibrationDataMapJsonDto calibration_table[50];
@@ -56,7 +56,7 @@ static json_obj_descr sensor_calibration_data_map_descr[] = {
 
 static json_obj_descr sensor_configuration_descr[] = {
     JSON_OBJ_DESCR_PRIM(SensorConfigurationJsonDto, type, JSON_TOK_STRING),
-    JSON_OBJ_DESCR_PRIM(SensorConfigurationJsonDto, channel, JSON_TOK_UINT),
+    JSON_OBJ_DESCR_PRIM(SensorConfigurationJsonDto, channel, JSON_TOK_INT),
     JSON_OBJ_DESCR_PRIM(SensorConfigurationJsonDto, sampling_rate_ms, JSON_TOK_UINT),
     JSON_OBJ_DESCR_PRIM(SensorConfigurationJsonDto, interpolation_method, JSON_TOK_STRING),
     JSON_OBJ_DESCR_OBJ_ARRAY(SensorConfigurationJsonDto, calibration_table, 50, calibration_table_len, sensor_calibration_data_map_descr, ARRAY_SIZE(sensor_calibration_data_map_descr)),
