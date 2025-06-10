@@ -22,7 +22,6 @@ function checkTab(el, e) {
         el.value = el.value.slice(0, s) + "\t" + el.value.slice(epos);
         el.selectionStart = el.selectionEnd = s + 1;
         update(el.value);
-        adjustEditorHeight();
     }
 }
 
@@ -37,7 +36,6 @@ async function loadConfig() {
     const text = JSON.stringify(data, null, 2);
     editor.value = text;
     update(text);
-    adjustEditorHeight();
 
     loader.style.display = "none";
     editor.style.visibility = "visible";
@@ -56,17 +54,11 @@ function showMessage(text, type) {
     box.classList.add(type === "success" ? "success" : "error");
     box.textContent = text;
 
-    if (type === "success") {
-        container.className = "fixed visible";
-        setTimeout(() => {
-            container.classList.remove("visible");
-        }, 3000);
-    } else {
-        container.className = "fixed visible";
-        setTimeout(() => {
-            container.className = "relative";
-        }, 400);
-    }
+    container.className = "visible";
+
+    setTimeout(() => {
+        container.classList.remove("visible");
+    }, 5000);
 }
 
 async function confirmSave(doSave) {
@@ -103,16 +95,5 @@ async function confirmSave(doSave) {
         showMessage("Network error", "error");
     }
 }
-
-function adjustEditorHeight() {
-    const editor = document.getElementById('editor');
-    const wrapper = document.getElementById('highlighting-wrapper');
-    editor.style.height = 'auto';
-    const newHeight = editor.scrollHeight;
-    editor.style.height = newHeight + 'px';
-    wrapper.style.height = newHeight + 'px';
-}
-
-document.getElementById("editor").addEventListener("input", adjustEditorHeight);
 
 loadConfig();

@@ -25,7 +25,7 @@ html = re.sub(
 
 # Inline JS <script>
 html = re.sub(
-    r'<script\s+src="([^"]+)"\s*/>',
+    r'<script\s+src="([^"]+)"></script>',
     lambda m: f"<script>\n{(base_dir / m.group(1)).read_text()}\n</script>",
     html
 )

@@ -9,31 +9,33 @@
 </head>
 
 <body>
-    <div id="message-box-container" class="fixed">
+    <div id="message-box-container">
         <div id="message-box"></div>
     </div>
 
-    <header>
-        <h1>Sensors JSON Configuration Editor</h1>
-    </header>
+    <div id="page-layout">
+        <header>
+            <h1>Sensors JSON Configuration Editor</h1>
+        </header>
 
-    <div id="container">
-        <div id="loader">
-            <span>Loading config<span id="dots">...</span></span>
-        </div>
-        <div id="highlighting-wrapper">
-            <textarea id="editor" spellcheck="false" oninput="update(this.value); syncScroll(this); adjustEditorHeight();" onscroll="syncScroll(this);" onkeydown="checkTab(this, event);"></textarea>
-            <pre id="highlighting" aria-hidden="true"><code class="language-json" id="highlighting-content"></code></pre>
-        </div>
+        <main id="main-content">
+            <div id="loader">
+                <span>Loading config<span id="dots">...</span></span>
+            </div>
+            <div id="highlighting-wrapper">
+                <textarea id="editor" spellcheck="false"
+                    oninput="update(this.value); syncScroll(this);"
+                    onscroll="syncScroll(this);" onkeydown="checkTab(this, event);"></textarea>
+                <pre id="highlighting" aria-hidden="true">
+                    <code class="language-json" id="highlighting-content"></code>
+                </pre>
+            </div>
+        </main>
+
+        <footer>
+            <button onclick="saveConfig()">Save</button>
+        </footer>
     </div>
-
-    <div id="helper-guide">
-        <p>Usage guide</p>
-    </div>
-
-    <footer>
-        <button onclick="saveConfig()">Save</button>
-    </footer>
 
     <div id="confirm-modal" class="hidden" onclick="confirmSave(false)">
         <div class="modal-content">
@@ -52,8 +54,8 @@
         }, 400);
     </script>
 
-    <script src="prism.js" />
-    <script src="editor.js" />
+    <script src="prism.js"></script>
+    <script src="editor.js"></script>
 </body>
 
 </html>
