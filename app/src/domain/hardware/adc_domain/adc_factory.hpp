@@ -11,10 +11,10 @@ namespace eerie_leap::domain::hardware::adc_domain {
 class AdcFactory {
 public:
     static std::shared_ptr<IAdc> Create() {
-#ifdef CONFIG_ADC
-        return std::make_shared<Adc>();
-#elif CONFIG_ADC_EMUL
+#ifdef CONFIG_ADC_EMUL
         return std::make_shared<AdcEmulator>();
+#elif CONFIG_ADC
+        return std::make_shared<Adc>();
 #else
         return std::make_shared<AdcSimulator>();
 #endif

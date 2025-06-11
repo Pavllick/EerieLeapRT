@@ -61,6 +61,9 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
         auto interpolation_method = sensor->configuration.voltage_interpolator != nullptr
             ? sensor->configuration.voltage_interpolator->GetInterpolationMethod()
             : InterpolationMethod::NONE;
+        if(sensor->configuration.type == SensorType::PHYSICAL_ANALOG && interpolation_method == InterpolationMethod::NONE)
+            throw std::runtime_error("Physical analog sensor must have interpolation method!");
+
         sensor_config->configuration.interpolation_method = static_cast<uint32_t>(interpolation_method);
         if(interpolation_method != InterpolationMethod::NONE) {
             sensor_config->configuration.calibration_table_present = true;
@@ -68,9 +71,11 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
             auto& calibration_table = *sensor->configuration.voltage_interpolator->GetCalibrationTable();
             sensor_config->configuration.calibration_table.float32float_count = calibration_table.size();
 
-            std::sort(
-                calibration_table.begin(),
-                calibration_table.end(),
+            if(calibration_table.size() < 2)
+                throw std::runtime_error("Calibration table must have at least 2 points!");
+
+            std::ranges::sort(
+                calibration_table,
                 [](const CalibrationData& a, const CalibrationData& b) {
                     return a.voltage < b.voltage;
                 });

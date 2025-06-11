@@ -19,7 +19,8 @@ void SensorProcessor::ProcessReading(std::shared_ptr<SensorReading> reading) {
 
             if(reading->sensor->configuration.expression_evaluator != nullptr) {
                 value = reading->sensor->configuration.expression_evaluator->Evaluate(
-                    readings_frame_->GetReadingsValues(),
+                    sensor_readings_frame_->GetReadingsValues(),
+                    indicator_readings_frame_->GetReadingsValues(),
                     value);
             }
 
@@ -29,13 +30,14 @@ void SensorProcessor::ProcessReading(std::shared_ptr<SensorReading> reading) {
             reading->value = value;
             reading->status = ReadingStatus::PROCESSED;
 
-            readings_frame_->AddOrUpdateReading(reading);
+            sensor_readings_frame_->AddOrUpdateReading(reading);
         } else if(reading->sensor->configuration.type == SensorType::VIRTUAL_ANALOG) {
             reading->value = reading->sensor->configuration.expression_evaluator->Evaluate(
-                readings_frame_->GetReadingsValues());
+                sensor_readings_frame_->GetReadingsValues(),
+                indicator_readings_frame_->GetReadingsValues());
             reading->status = ReadingStatus::PROCESSED;
 
-            readings_frame_->AddOrUpdateReading(reading);
+            sensor_readings_frame_->AddOrUpdateReading(reading);
         } else {
             throw std::runtime_error("Unsupported sensor type");
         }

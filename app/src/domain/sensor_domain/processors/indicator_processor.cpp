@@ -16,25 +16,27 @@ void IndicatorProcessor::ProcessReading(std::shared_ptr<IndicatorReading> readin
             bool raw_value = reading->value.value();
             bool value = raw_value;
 
-            // if(reading->sensor->configuration.expression_evaluator != nullptr) {
-            //     value = reading->sensor->configuration.expression_evaluator->Evaluate(
-            //         readings_frame_->GetReadingsValues(),
-            //         value);
-            // }
+            if(reading->sensor->configuration.expression_evaluator != nullptr) {
+                value = reading->sensor->configuration.expression_evaluator->Evaluate(
+                    sensor_readings_frame_->GetReadingsValues(),
+                    indicator_readings_frame_->GetReadingsValues(),
+                    value);
+            }
 
             reading->metadata.AddTag(ReadingMetadataTag::RAW_VALUE, std::to_string(raw_value));
 
             reading->value = value;
             reading->status = ReadingStatus::PROCESSED;
 
-            readings_frame_->AddOrUpdateReading(reading);
+            indicator_readings_frame_->AddOrUpdateReading(reading);
         } else if(reading->sensor->configuration.type == SensorType::VIRTUAL_INDICATOR) {
             reading->value = false;
-            // reading->value = reading->sensor->configuration.expression_evaluator->Evaluate(
-            //     readings_frame_->GetReadingsValues());
+            reading->value = reading->sensor->configuration.expression_evaluator->Evaluate(
+                sensor_readings_frame_->GetReadingsValues(),
+                indicator_readings_frame_->GetReadingsValues());
             reading->status = ReadingStatus::PROCESSED;
 
-            readings_frame_->AddOrUpdateReading(reading);
+            indicator_readings_frame_->AddOrUpdateReading(reading);
         } else {
             throw std::runtime_error("Unsupported sensor type");
         }

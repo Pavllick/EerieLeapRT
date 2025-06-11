@@ -214,11 +214,28 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
         }
     };
 
+    ExpressionEvaluator expression_evaluator_5(math_parser_service, "{sensor_1} < 400");
+
+    Sensor sensor_5 {
+        .id = "sensor_5",
+        .metadata = {
+            .name = "Sensor 5",
+            .unit = "",
+            .description = "Test Sensor 5"
+        },
+        .configuration = {
+            .type = SensorType::VIRTUAL_INDICATOR,
+            .sampling_rate_ms = 1000,
+            .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_5)
+        }
+    };
+
     std::vector<std::shared_ptr<Sensor>> sensors = {
         std::make_shared<Sensor>(sensor_1),
         std::make_shared<Sensor>(sensor_2),
         std::make_shared<Sensor>(sensor_3),
-        std::make_shared<Sensor>(sensor_4)
+        std::make_shared<Sensor>(sensor_4),
+        std::make_shared<Sensor>(sensor_5)
     };
 
     auto sensors_ptr = std::make_shared<std::vector<std::shared_ptr<Sensor>>>(sensors);

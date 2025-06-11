@@ -28,12 +28,13 @@ ProcessingSchedulerService::ProcessingSchedulerService(
     k_sem_init(&sensors_processing_semaphore_, 1, 1);
 
     sensor_readings_frame_ = std::make_shared<SensorReadingsFrame>();
-    sensor_reader_ = std::make_shared<SensorReader>(time_service_, guid_generator_, adc_, sensor_readings_frame_);
-    sensor_processor_ = std::make_shared<SensorProcessor>(sensor_readings_frame_);
-
     indicator_readings_frame_ = std::make_shared<IndicatorReadingsFrame>();
+
+    sensor_reader_ = std::make_shared<SensorReader>(time_service_, guid_generator_, adc_, sensor_readings_frame_);
+    sensor_processor_ = std::make_shared<SensorProcessor>(sensor_readings_frame_, indicator_readings_frame_);
+
     indicator_reader_ = std::make_shared<IndicatorReader>(time_service_, guid_generator_, gpio_, indicator_readings_frame_);
-    indicator_processor_ = std::make_shared<IndicatorProcessor>(indicator_readings_frame_);
+    indicator_processor_ = std::make_shared<IndicatorProcessor>(sensor_readings_frame_, indicator_readings_frame_);
 };
 
 void ProcessingSchedulerService::ProcessSensorWorkTask(k_work* work) {
