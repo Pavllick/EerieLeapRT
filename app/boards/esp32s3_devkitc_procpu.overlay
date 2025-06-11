@@ -1,3 +1,6 @@
+// ESP32-S3 Reference Manual:
+// https://www.espressif.com/sites/default/files/documentation/esp32-s3_technical_reference_manual_en.pdf
+
 / {
     aliases {
 		lfs1 = &lfs1;
@@ -42,6 +45,9 @@
 	size = <DT_SIZE_M(2)>;
 };
 
+// ADC gain set to ADC_GAIN_1_4 corresponds to 12dB attenuation with measurement range of 0-3.1V
+// according to Espressif documention:
+// https://docs.espressif.com/projects/esp-idf/en/v4.4/esp32s3/api-reference/peripherals/adc.html
 &adc0 {
 	status = "okay";
 	#address-cells = <1>;

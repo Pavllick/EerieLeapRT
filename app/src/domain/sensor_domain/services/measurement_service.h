@@ -36,7 +36,7 @@ private:
     static constexpr int k_stack_size_ = 32768;
     static constexpr int k_priority_ = K_PRIO_PREEMPT(2);
 
-    K_KERNEL_STACK_MEMBER(stack_area_, k_stack_size_);
+    static z_thread_stack_element stack_area_[k_stack_size_];
 
     k_tid_t thread_id_;
     k_thread thread_data_;
