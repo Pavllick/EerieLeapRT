@@ -4,12 +4,12 @@
 
 #include "configuration/adc_config/adc_config.h"
 #include "configuration/services/configuration_service.hpp"
-#include "domain/adc_domain/hardware/adc_configuration.h"
+#include "domain/hardware/adc_domain/adc_configuration.h"
 
 namespace eerie_leap::controllers {
 
 using namespace eerie_leap::configuration::services;
-using namespace eerie_leap::domain::adc_domain::hardware;
+using namespace eerie_leap::domain::hardware::adc_domain;
 
 class AdcConfigurationController {
 private:

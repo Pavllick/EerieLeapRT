@@ -6,7 +6,7 @@
 
 #include "adc.h"
 
-namespace eerie_leap::domain::adc_domain::hardware {
+namespace eerie_leap::domain::hardware::adc_domain {
 
 LOG_MODULE_REGISTER(adc_logger);
 
@@ -106,4 +106,4 @@ int Adc::GetChannelCount() {
     return dt_adc_channel_count_;
 }
 
-}  // namespace eerie_leap::domain::adc_domain::hardware
+}  // namespace eerie_leap::domain::hardware::adc_domain

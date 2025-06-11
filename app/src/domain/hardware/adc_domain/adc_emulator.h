@@ -2,7 +2,7 @@
 
 #include "adc.h"
 
-namespace eerie_leap::domain::adc_domain::hardware {
+namespace eerie_leap::domain::hardware::adc_domain {
 
 class AdcEmulator : public Adc {
 public:
@@ -11,4 +11,4 @@ public:
     int GetChannelCount() override;
 };
 
-}  // namespace eerie_leap::domain::adc_domain::hardware
+}  // namespace eerie_leap::domain::hardware::adc_domain

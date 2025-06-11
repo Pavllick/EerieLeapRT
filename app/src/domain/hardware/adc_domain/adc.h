@@ -10,7 +10,7 @@
 #include "i_adc.h"
 #include "adc_configuration.h"
 
-namespace eerie_leap::domain::adc_domain::hardware {
+namespace eerie_leap::domain::hardware::adc_domain {
 
 #define ADC_NODE DT_ALIAS(adc0)
 #define CHANNEL_VREF(node_id) DT_PROP_OR(node_id, zephyr_vref_mv, 0)
@@ -50,4 +50,4 @@ public:
     int GetChannelCount() override;
 };
 
-}  // namespace eerie_leap::domain::adc_domain::hardware
+}  // namespace eerie_leap::domain::hardware::adc_domain

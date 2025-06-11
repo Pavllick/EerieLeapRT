@@ -6,7 +6,7 @@
 #include "utilities/time/i_time_service.h"
 #include "utilities/guid/guid_generator.h"
 #include "controllers/sensors_configuration_controller.h"
-#include "domain/adc_domain/hardware/i_adc.h"
+#include "domain/hardware/adc_domain/i_adc.h"
 #include "domain/hardware/gpio_domain/i_gpio.h"
 #include "domain/sensor_domain/services/scheduler/processing_scheduler_serivce.h"
 
@@ -15,7 +15,7 @@ namespace eerie_leap::domain::sensor_domain::services {
 using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::controllers;
-using namespace eerie_leap::domain::adc_domain::hardware;
+using namespace eerie_leap::domain::hardware::adc_domain;
 using namespace eerie_leap::domain::hardware::gpio_domain;
 using namespace eerie_leap::domain::sensor_domain::services::scheduler;
 

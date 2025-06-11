@@ -2,7 +2,7 @@
 
 #include "adc_configuration.h"
 
-namespace eerie_leap::domain::adc_domain::hardware {
+namespace eerie_leap::domain::hardware::adc_domain {
 
 class IAdc {
 public:
@@ -12,4 +12,4 @@ public:
     virtual int GetChannelCount() = 0;
 };
 
-}  // namespace eerie_leap::domain::adc_domain::hardware
+}  // namespace eerie_leap::domain::hardware::adc_domain

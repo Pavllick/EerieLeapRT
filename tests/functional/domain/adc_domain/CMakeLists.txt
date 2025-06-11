@@ -13,7 +13,7 @@ set(APP_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../app/src)
 
 include_directories(${APP_SRC_DIR})
 
-set(APP_SRC_ADC_DOMAIN_DIR ${APP_SRC_DIR}/domain/adc_domain)
+set(APP_SRC_ADC_DOMAIN_DIR ${APP_SRC_DIR}/domain/hardware/adc_domain)
 file(GLOB_RECURSE APP_SRC_ADC_DOMAIN
   ${APP_SRC_ADC_DOMAIN_DIR}/*.c
   ${APP_SRC_ADC_DOMAIN_DIR}/*.cpp

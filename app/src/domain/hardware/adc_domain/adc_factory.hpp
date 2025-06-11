@@ -6,7 +6,7 @@
 #include "adc_emulator.h"
 #include "adc_simulator.h"
 
-namespace eerie_leap::domain::adc_domain::hardware {
+namespace eerie_leap::domain::hardware::adc_domain {
 
 class AdcFactory {
 public:
@@ -21,4 +21,4 @@ public:
     }
 };
 
-}  // namespace eerie_leap::domain::adc_domain::hardware
+}  // namespace eerie_leap::domain::hardware::adc_domain

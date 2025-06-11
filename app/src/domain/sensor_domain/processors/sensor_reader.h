@@ -4,7 +4,7 @@
 
 #include "utilities/time/i_time_service.h"
 #include "utilities/guid/guid_generator.h"
-#include "domain/adc_domain/hardware/i_adc.h"
+#include "domain/hardware/adc_domain/i_adc.h"
 #include "domain/sensor_domain/models/sensor.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 
@@ -12,7 +12,7 @@ namespace eerie_leap::domain::sensor_domain::processors {
 
 using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::utilities::guid;
-using namespace eerie_leap::domain::adc_domain::hardware;
+using namespace eerie_leap::domain::hardware::adc_domain;
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 

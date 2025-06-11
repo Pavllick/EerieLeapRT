@@ -8,7 +8,7 @@
 #include "utilities/time/boot_elapsed_time_service.h"
 #include "utilities/math_parser/math_parser_service.hpp"
 #include "domain/fs_domain/services/fs_service.h"
-#include "domain/adc_domain/hardware/adc_factory.hpp"
+#include "domain/hardware/adc_domain/adc_factory.hpp"
 #include "domain/hardware/gpio_domain/gpio_factory.hpp"
 #include "domain/sensor_domain/services/measurement_service.h"
 
@@ -47,7 +47,7 @@ using namespace eerie_leap::utilities::math_parser;
 
 using namespace eerie_leap::controllers;
 
-using namespace eerie_leap::domain::adc_domain::hardware;
+using namespace eerie_leap::domain::hardware::adc_domain;
 using namespace eerie_leap::domain::hardware::gpio_domain;
 using namespace eerie_leap::domain::sensor_domain::services;
 using namespace eerie_leap::domain::fs_domain::services;

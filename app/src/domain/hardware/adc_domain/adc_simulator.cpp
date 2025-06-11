@@ -4,7 +4,7 @@
 
 #include "adc_simulator.h"
 
-namespace eerie_leap::domain::adc_domain::hardware {
+namespace eerie_leap::domain::hardware::adc_domain {
 
 LOG_MODULE_REGISTER(adc_simulator_logger);
 
@@ -38,4 +38,4 @@ int AdcSimulator::GetChannelCount() {
     return 32;
 }
 
-}  // namespace eerie_leap::domain::adc_domain::hardware
+}  // namespace eerie_leap::domain::hardware::adc_domain

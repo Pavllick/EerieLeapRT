@@ -7,7 +7,7 @@
 #include "i_adc.h"
 #include "adc_configuration.h"
 
-namespace eerie_leap::domain::adc_domain::hardware {
+namespace eerie_leap::domain::hardware::adc_domain {
 
 class AdcSimulator : public IAdc {
 private:
@@ -23,4 +23,4 @@ public:
     int GetChannelCount() override;
 };
 
-}  // namespace eerie_leap::domain::adc_domain::hardware
+}  // namespace eerie_leap::domain::hardware::adc_domain
