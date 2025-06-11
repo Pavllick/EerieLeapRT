@@ -56,10 +56,10 @@ int SensorsApiController::sensors_config_get_handler(http_client_ctx *client, en
                     .description = sensor->metadata.description.c_str()
                 },
                 .configuration = {
-                    .type = GetSensorTypeName(sensor->configuration.type).c_str(),
+                    .type = GetSensorTypeName(sensor->configuration.type),
                     .channel = (int32_t)sensor->configuration.channel.value_or(-1),
                     .sampling_rate_ms = sensor->configuration.sampling_rate_ms,
-                    .interpolation_method = GetInterpolationMethodName(interpolation_method).c_str(),
+                    .interpolation_method = GetInterpolationMethodName(interpolation_method),
                     .calibration_table_len = calibration_table.size(),
                     .expression = sensor->configuration.expression_evaluator != nullptr
                         ? sensor->configuration.expression_evaluator->GetRawExpression()->c_str()

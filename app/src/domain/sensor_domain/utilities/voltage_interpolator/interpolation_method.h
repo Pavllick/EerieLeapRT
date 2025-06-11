@@ -1,33 +1,35 @@
 #pragma once
 
 #include <cstdint>
-#include <string>
+#include <array>
 #include <stdexcept>
 
 namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolator {
 
-    enum class InterpolationMethod : std::uint8_t {
-        NONE,
-        LINEAR,
-        CUBIC_SPLINE
-    };
+using namespace std::string_view_literals;
 
-    constexpr const std::string InterpolationMethodNames[] = {
-        "NONE",
-        "LINEAR",
-        "CUBIC_SPLINE"
-    };
+enum class InterpolationMethod : std::uint8_t {
+    NONE,
+    LINEAR,
+    CUBIC_SPLINE
+};
 
-    inline const std::string& GetInterpolationMethodName(InterpolationMethod method) {
-        return InterpolationMethodNames[static_cast<std::uint8_t>(method)];
-    }
+constexpr const std::array InterpolationMethodNames = {
+    "NONE"sv,
+    "LINEAR"sv,
+    "CUBIC_SPLINE"sv
+};
 
-    inline InterpolationMethod GetInterpolationMethod(const std::string& name) {
-        for(size_t i = 0; i < size(InterpolationMethodNames); ++i)
-            if(InterpolationMethodNames[i] == name)
-                return static_cast<InterpolationMethod>(i);
+inline const char* GetInterpolationMethodName(InterpolationMethod method) {
+    return InterpolationMethodNames[static_cast<std::uint8_t>(method)].data();
+}
 
-        throw std::runtime_error("Invalid interpolation method type.");
-    }
+inline InterpolationMethod GetInterpolationMethod(const std::string& name) {
+    for(size_t i = 0; i < size(InterpolationMethodNames); ++i)
+        if(InterpolationMethodNames[i] == name)
+            return static_cast<InterpolationMethod>(i);
+
+    throw std::runtime_error("Invalid interpolation method type.");
+}
 
 } // namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolator
