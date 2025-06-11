@@ -9,6 +9,7 @@
 #include "utilities/math_parser/math_parser_service.hpp"
 #include "domain/fs_domain/services/fs_service.h"
 #include "domain/adc_domain/hardware/adc_factory.hpp"
+#include "domain/hardware/gpio_domain/gpio_factory.hpp"
 #include "domain/sensor_domain/services/measurement_service.h"
 
 #include "configuration/system_config/system_config.h"
@@ -47,6 +48,7 @@ using namespace eerie_leap::utilities::math_parser;
 using namespace eerie_leap::controllers;
 
 using namespace eerie_leap::domain::adc_domain::hardware;
+using namespace eerie_leap::domain::hardware::gpio_domain;
 using namespace eerie_leap::domain::sensor_domain::services;
 using namespace eerie_leap::domain::fs_domain::services;
 using namespace eerie_leap::configuration::services;
@@ -78,6 +80,9 @@ int main(void) {
     });
     adc->Initialize();
 
+    auto gpio = GpioFactory::Create();
+    gpio->Initialize();
+
     auto system_configuration_controller = std::make_shared<SystemConfigurationController>(system_config_service);
     auto adc_configuration_controller = std::make_shared<AdcConfigurationController>(adc_config_service);
 
@@ -94,7 +99,7 @@ int main(void) {
     // alignment or lifetime issues in Zephyr.
     alignas(ARCH_STACK_PTR_ALIGN) static uint8_t measurement_service_buffer[sizeof(MeasurementService)];
     auto* measurement_service =
-        new (measurement_service_buffer) MeasurementService(time_service, guid_generator, adc, sensors_configuration_controller);
+        new (measurement_service_buffer) MeasurementService(time_service, guid_generator, adc, gpio, sensors_configuration_controller);
     measurement_service->Start();
 
     // NOTE: Don't use for WiFi supporting boards as WiFi is broken in Zephyr 4.1 and has memory allocation issues
@@ -195,10 +200,25 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
         }
     };
 
+    Sensor sensor_4 {
+        .id = "sensor_4",
+        .metadata = {
+            .name = "Sensor 4",
+            .unit = "",
+            .description = "Test Sensor 4"
+        },
+        .configuration = {
+            .type = SensorType::PHYSICAL_INDICATOR,
+            .channel = 1,
+            .sampling_rate_ms = 1000
+        }
+    };
+
     std::vector<std::shared_ptr<Sensor>> sensors = {
         std::make_shared<Sensor>(sensor_1),
         std::make_shared<Sensor>(sensor_2),
-        std::make_shared<Sensor>(sensor_3)
+        std::make_shared<Sensor>(sensor_3),
+        std::make_shared<Sensor>(sensor_4)
     };
 
     auto sensors_ptr = std::make_shared<std::vector<std::shared_ptr<Sensor>>>(sensors);

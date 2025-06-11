@@ -7,6 +7,7 @@
 #include "utilities/guid/guid_generator.h"
 #include "controllers/sensors_configuration_controller.h"
 #include "domain/adc_domain/hardware/i_adc.h"
+#include "domain/hardware/gpio_domain/i_gpio.h"
 #include "domain/sensor_domain/services/scheduler/processing_scheduler_serivce.h"
 
 namespace eerie_leap::domain::sensor_domain::services {
@@ -14,6 +15,8 @@ namespace eerie_leap::domain::sensor_domain::services {
 using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::controllers;
+using namespace eerie_leap::domain::adc_domain::hardware;
+using namespace eerie_leap::domain::hardware::gpio_domain;
 using namespace eerie_leap::domain::sensor_domain::services::scheduler;
 
 /// Service responsible for reading and processing sensor data in a dedicated thread.
@@ -45,6 +48,7 @@ private:
     std::shared_ptr<GuidGenerator> guid_generator_;
 
     std::shared_ptr<IAdc> adc_;
+    std::shared_ptr<IGpio> gpio_;
     std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller_;
     std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service_;
 
@@ -55,10 +59,12 @@ public:
         std::shared_ptr<ITimeService> time_service,
         std::shared_ptr<GuidGenerator> guid_generator,
         std::shared_ptr<IAdc> adc,
+        std::shared_ptr<IGpio> gpio,
         std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller)
         : time_service_(std::move(time_service)),
         guid_generator_(std::move(guid_generator)),
         adc_(std::move(adc)),
+        gpio_(std::move(gpio)),
         sensors_configuration_controller_(std::move(sensors_configuration_controller)) { }
 
     k_tid_t Start();

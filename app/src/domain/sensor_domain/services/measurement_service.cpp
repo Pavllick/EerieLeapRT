@@ -31,7 +31,7 @@ k_tid_t MeasurementService::Start() {
 void MeasurementService::EntryPoint() {
     LOG_INF("Measurement Service started");
 
-    processing_scheduler_service_ = make_shared_ext<ProcessingSchedulerService>(time_service_, guid_generator_, adc_, sensors_configuration_controller_);
+    processing_scheduler_service_ = make_shared_ext<ProcessingSchedulerService>(time_service_, guid_generator_, adc_, gpio_, sensors_configuration_controller_);
     processing_scheduler_service_->Start();
 }
 

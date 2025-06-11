@@ -10,12 +10,12 @@ using namespace eerie_leap::domain::sensor_domain::utilities;
 
 class SensorProcessor {
 private:
-    std::shared_ptr<SensorReadingsFrame> sensor_readings_frame_;
+    std::shared_ptr<SensorReadingsFrame> readings_frame_;
 
 public:
-    explicit SensorProcessor(std::shared_ptr<SensorReadingsFrame> sensor_readings_frame) :
-        sensor_readings_frame_(std::move(sensor_readings_frame)) {}
-    void ProcessSensorReading(std::shared_ptr<SensorReading> reading);
+    explicit SensorProcessor(std::shared_ptr<SensorReadingsFrame> readings_frame) :
+    readings_frame_(std::move(readings_frame)) {}
+    void ProcessReading(std::shared_ptr<SensorReading> reading);
 };
 
 } // namespace eerie_leap::domain::sensor_domain::processors

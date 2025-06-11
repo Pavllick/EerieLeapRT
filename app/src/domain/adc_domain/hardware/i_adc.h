@@ -1,8 +1,5 @@
 #pragma once
 
-#include <optional>
-#include <stdio.h>
-
 #include "adc_configuration.h"
 
 namespace eerie_leap::domain::adc_domain::hardware {

@@ -137,7 +137,7 @@ sensor_processor_HelperInstances sensor_processor_GetReadingInstances() {
     };
 }
 
-ZTEST(sensor_processor, test_ProcessSensorReading) {
+ZTEST(sensor_processor, test_ProcessReading) {
         auto helper = sensor_processor_GetReadingInstances();
 
         auto math_parser_service = helper.math_parser_service;
@@ -169,7 +169,7 @@ ZTEST(sensor_processor, test_ProcessSensorReading) {
 
         SensorProcessor sensor_processor(sensor_readings_frame);
         for(auto& sensor : sensors)
-            sensor_processor.ProcessSensorReading(sensor_readings_frame->GetReading(sensor->id));
+            sensor_processor.ProcessReading(sensor_readings_frame->GetReading(sensor->id));
 
         auto proc_reading_2 = sensor_readings_frame->GetReadings().at("sensor_2");
         zassert_equal(proc_reading_2->status, ReadingStatus::PROCESSED);

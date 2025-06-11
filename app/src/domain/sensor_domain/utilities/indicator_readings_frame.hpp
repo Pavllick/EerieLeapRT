@@ -5,21 +5,21 @@
 #include <stdexcept>
 #include <memory>
 
-#include "domain/sensor_domain/models/sensor_reading.h"
+#include "domain/sensor_domain/models/indicator_reading.h"
 
 namespace eerie_leap::domain::sensor_domain::utilities {
 
 using namespace eerie_leap::domain::sensor_domain::models;
 
-class SensorReadingsFrame {
+class IndicatorReadingsFrame {
 private:
-    std::unordered_map<std::string, std::shared_ptr<SensorReading>> readings_;
-    std::unordered_map<std::string, float*> readings_values_;
+    std::unordered_map<std::string, std::shared_ptr<IndicatorReading>> readings_;
+    std::unordered_map<std::string, bool*> readings_values_;
 
 public:
-    SensorReadingsFrame() = default;
+    IndicatorReadingsFrame() = default;
 
-    void AddOrUpdateReading(std::shared_ptr<SensorReading> reading) {
+    void AddOrUpdateReading(std::shared_ptr<IndicatorReading> reading) {
         std::string sensor_id = reading->sensor->id;
 
         readings_[sensor_id] = reading;
@@ -28,7 +28,7 @@ public:
             readings_values_[sensor_id] = &readings_[sensor_id]->value.value();
     }
 
-    std::shared_ptr<SensorReading> GetReading(const std::string& sensorId) const {
+    std::shared_ptr<IndicatorReading> GetReading(const std::string& sensorId) const {
         auto it = readings_.find(sensorId);
         if (it != readings_.end())
             return it->second;
@@ -36,11 +36,11 @@ public:
         throw std::runtime_error("Sensor ID not found");
     }
 
-    const std::unordered_map<std::string, std::shared_ptr<SensorReading>>& GetReadings() const {
+    const std::unordered_map<std::string, std::shared_ptr<IndicatorReading>>& GetReadings() const {
         return readings_;
     }
 
-    const std::unordered_map<std::string, float*>& GetReadingsValues() const {
+    const std::unordered_map<std::string, bool*>& GetReadingsValues() const {
         return readings_values_;
     }
 
