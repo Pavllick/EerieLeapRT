@@ -113,17 +113,20 @@ void SensorsApiController::ParseSensorsConfigJson(uint8_t *buffer, size_t len)
         auto sensor = make_shared_ext<Sensor>();
         sensor->id = data.sensors[i].id;
 
-        sensor->metadata.unit = data.sensors[i].metadata.unit;
         sensor->metadata.name = data.sensors[i].metadata.name;
-        sensor->metadata.description = data.sensors[i].metadata.description;
+        sensor->metadata.unit = data.sensors[i].metadata.unit == nullptr ? "" : data.sensors[i].metadata.unit;
+        sensor->metadata.description = data.sensors[i].metadata.description == nullptr ? "" : data.sensors[i].metadata.description;
 
         sensor->configuration.type = GetSensorType(data.sensors[i].configuration.type);
         sensor->configuration.channel = std::nullopt;
-        if(sensor->configuration.type == SensorType::PHYSICAL_ANALOG)
+        if(sensor->configuration.type == SensorType::PHYSICAL_ANALOG || sensor->configuration.type == SensorType::PHYSICAL_INDICATOR)
             sensor->configuration.channel = data.sensors[i].configuration.channel;
         sensor->configuration.sampling_rate_ms = data.sensors[i].configuration.sampling_rate_ms;
 
-        auto interpolation_method = GetInterpolationMethod(data.sensors[i].configuration.interpolation_method);
+        InterpolationMethod interpolation_method = InterpolationMethod::NONE;
+        if(sensor->configuration.type == SensorType::PHYSICAL_ANALOG)
+            interpolation_method = GetInterpolationMethod(data.sensors[i].configuration.interpolation_method);
+
         if(interpolation_method != InterpolationMethod::NONE && data.sensors[i].configuration.calibration_table_len > 0) {
             std::vector<CalibrationData> calibration_table;
             for(size_t j = 0; j < data.sensors[i].configuration.calibration_table_len; ++j) {
@@ -153,12 +156,13 @@ void SensorsApiController::ParseSensorsConfigJson(uint8_t *buffer, size_t len)
             sensor->configuration.voltage_interpolator = nullptr;
         }
 
-        if(strcmp(data.sensors[i].configuration.expression, "") != 0)
+        if(data.sensors[i].configuration.expression != nullptr && strcmp(data.sensors[i].configuration.expression, "") != 0) {
             sensor->configuration.expression_evaluator = make_shared_ext<ExpressionEvaluator>(
                 math_parser_service_,
                 std::string(data.sensors[i].configuration.expression));
-        else
+        } else {
             sensor->configuration.expression_evaluator = nullptr;
+        }
 
         sensors.push_back(sensor);
     }
