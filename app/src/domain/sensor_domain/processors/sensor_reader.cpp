@@ -17,6 +17,11 @@ void SensorReader::Read(std::shared_ptr<Sensor> sensor) {
         reading->status = ReadingStatus::RAW;
     } else if (sensor->configuration.type == SensorType::VIRTUAL_ANALOG) {
         reading->status = ReadingStatus::UNINITIALIZED;
+    } else if (sensor->configuration.type == SensorType::PHYSICAL_INDICATOR) {
+        reading->value = static_cast<float>(gpio_->ReadChannel(sensor->configuration.channel.value()));
+        reading->status = ReadingStatus::RAW;
+    } else if (sensor->configuration.type == SensorType::VIRTUAL_INDICATOR) {
+        reading->status = ReadingStatus::UNINITIALIZED;
     } else {
         throw std::runtime_error("Unsupported sensor type");
     }

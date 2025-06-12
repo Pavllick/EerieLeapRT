@@ -6,6 +6,8 @@
 #include "domain/hardware/adc_domain/adc_configuration.h"
 #include "domain/hardware/adc_domain/i_adc.h"
 #include "domain/hardware/adc_domain/adc_simulator.h"
+#include "domain/hardware/gpio_domain/i_gpio.h"
+#include "domain/hardware/gpio_domain/gpio_simulator.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 #include "domain/sensor_domain/processors/sensor_reader.h"
 
@@ -18,6 +20,7 @@ using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::utilities::math_parser;
 using namespace eerie_leap::domain::hardware::adc_domain;
+using namespace eerie_leap::domain::hardware::gpio_domain;
 using namespace eerie_leap::domain::sensor_domain::processors;
 
 using namespace eerie_leap::domain::sensor_domain::models;
@@ -119,9 +122,11 @@ sensors_reader_HelperInstances sensors_reader_GetReadingInstances() {
     adc->UpdateConfiguration(AdcConfiguration {
         .samples = 1
     });
+    auto gpio = std::make_shared<GpioSimulator>();
+    gpio->Initialize();
 
     auto sensor_readings_frame = std::make_shared<SensorReadingsFrame>();
-    auto sensor_reader = std::make_shared<SensorReader>(time_service, guid_generator, adc, sensor_readings_frame);
+    auto sensor_reader = std::make_shared<SensorReader>(time_service, guid_generator, adc, gpio, sensor_readings_frame);
 
     return sensors_reader_HelperInstances {
         .math_parser_service = math_parser_service,

@@ -13,12 +13,7 @@
 #include "domain/sensor_domain/processors/sensor_reader.h"
 #include "domain/sensor_domain/processors/sensor_processor.h"
 
-#include "domain/sensor_domain/utilities/indicator_readings_frame.hpp"
-#include "domain/sensor_domain/processors/indicator_reader.h"
-#include "domain/sensor_domain/processors/indicator_processor.h"
-
 #include "sensor_task.hpp"
-#include "indicator_task.hpp"
 
 namespace eerie_leap::domain::sensor_domain::services::scheduler {
 
@@ -47,14 +42,8 @@ private:
     std::shared_ptr<SensorReader> sensor_reader_;
     std::shared_ptr<SensorProcessor> sensor_processor_;
 
-    std::shared_ptr<IndicatorReadingsFrame> indicator_readings_frame_;
-    std::shared_ptr<IndicatorReader> indicator_reader_;
-    std::shared_ptr<IndicatorProcessor> indicator_processor_;
-
     std::shared_ptr<SensorTask> CreateSensorTask(std::shared_ptr<Sensor> sensor);
-    std::shared_ptr<IndicatorTask> CreateIndicatorTask(std::shared_ptr<Sensor> sensor);
     static void ProcessSensorWorkTask(k_work* work);
-    static void ProcessIndicatorWorkTask(k_work* work);
 
 public:
     ProcessingSchedulerService(
