@@ -96,10 +96,42 @@ std::vector<std::shared_ptr<Sensor>> sensors_reader_GetTestSensors(std::shared_p
         }
     };
 
+    Sensor sensor_4 {
+        .id = "sensor_4",
+        .metadata = {
+            .name = "Sensor 4",
+            .unit = "",
+            .description = "Test Sensor 4"
+        },
+        .configuration = {
+            .type = SensorType::PHYSICAL_INDICATOR,
+            .channel = 1,
+            .sampling_rate_ms = 1000
+        }
+    };
+
+    ExpressionEvaluator expression_evaluator_5(math_parser_service, "{sensor_1} < 400");
+
+    Sensor sensor_5 {
+        .id = "sensor_5",
+        .metadata = {
+            .name = "Sensor 5",
+            .unit = "",
+            .description = "Test Sensor 5"
+        },
+        .configuration = {
+            .type = SensorType::VIRTUAL_INDICATOR,
+            .sampling_rate_ms = 1000,
+            .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_5)
+        }
+    };
+
     std::vector<std::shared_ptr<Sensor>> sensors = {
         std::make_shared<Sensor>(sensor_1),
         std::make_shared<Sensor>(sensor_2),
-        std::make_shared<Sensor>(sensor_3)
+        std::make_shared<Sensor>(sensor_3),
+        std::make_shared<Sensor>(sensor_4),
+        std::make_shared<Sensor>(sensor_5)
     };
 
     return sensors;
@@ -136,39 +168,52 @@ sensors_reader_HelperInstances sensors_reader_GetReadingInstances() {
 }
 
 ZTEST(sensors_reader, test_Read) {
-        auto helper = sensors_reader_GetReadingInstances();
+    auto helper = sensors_reader_GetReadingInstances();
 
-        auto math_parser_service = helper.math_parser_service;
-        auto sensor_readings_frame = helper.sensor_readings_frame;
-        auto sensor_reader = helper.sensor_reader;
+    auto math_parser_service = helper.math_parser_service;
+    auto sensor_readings_frame = helper.sensor_readings_frame;
+    auto sensor_reader = helper.sensor_reader;
 
-        auto readings = sensor_readings_frame->GetReadings();
-        zassert_equal(readings.size(), 0);
+    auto readings = sensor_readings_frame->GetReadings();
+    zassert_equal(readings.size(), 0);
 
-        auto sensors = sensors_reader_GetTestSensors(math_parser_service);
-        for(auto& sensor : sensors)
-            sensor_reader->Read(sensor);
+    auto sensors = sensors_reader_GetTestSensors(math_parser_service);
+    for(auto& sensor : sensors)
+        sensor_reader->Read(sensor);
 
-        readings = sensor_readings_frame->GetReadings();
-        zassert_equal(readings.size(), 3);
+    readings = sensor_readings_frame->GetReadings();
+    zassert_equal(readings.size(), 5);
 
-        auto reading = sensor_readings_frame->GetReadings().at("sensor_2");
-        zassert_equal(reading->status, ReadingStatus::RAW);
-        zassert_true(reading->value.has_value());
-        zassert_true(reading->timestamp.has_value());
-        zassert_true(reading->id.AsUint64() > 0);
-        zassert_between_inclusive(reading->value.value(), 0, 3.3);
+    auto reading = sensor_readings_frame->GetReadings().at("sensor_2");
+    zassert_equal(reading->status, ReadingStatus::RAW);
+    zassert_true(reading->value.has_value());
+    zassert_true(reading->timestamp.has_value());
+    zassert_true(reading->id.AsUint64() > 0);
+    zassert_between_inclusive(reading->value.value(), 0, 3.3);
 
-        reading = sensor_readings_frame->GetReadings().at("sensor_1");
-        zassert_equal(reading->status, ReadingStatus::RAW);
-        zassert_true(reading->value.has_value());
-        zassert_true(reading->timestamp.has_value());
-        zassert_true(reading->id.AsUint64() > 0);
-        zassert_between_inclusive(reading->value.value(), 0, 3.3);
+    reading = sensor_readings_frame->GetReadings().at("sensor_1");
+    zassert_equal(reading->status, ReadingStatus::RAW);
+    zassert_true(reading->value.has_value());
+    zassert_true(reading->timestamp.has_value());
+    zassert_true(reading->id.AsUint64() > 0);
+    zassert_between_inclusive(reading->value.value(), 0, 3.3);
 
-        reading = sensor_readings_frame->GetReadings().at("sensor_3");
-        zassert_equal(reading->status, ReadingStatus::UNINITIALIZED);
-        zassert_true(reading->timestamp.has_value());
-        zassert_true(reading->id.AsUint64() > 0);
-        zassert_false(reading->value.has_value());
+    reading = sensor_readings_frame->GetReadings().at("sensor_3");
+    zassert_equal(reading->status, ReadingStatus::UNINITIALIZED);
+    zassert_true(reading->timestamp.has_value());
+    zassert_true(reading->id.AsUint64() > 0);
+    zassert_false(reading->value.has_value());
+
+    reading = sensor_readings_frame->GetReadings().at("sensor_4");
+    zassert_equal(reading->status, ReadingStatus::RAW);
+    zassert_true(reading->timestamp.has_value());
+    zassert_true(reading->id.AsUint64() > 0);
+    zassert_true(reading->value.has_value());
+    zassert_true(reading->value.value() == 1 || reading->value.value() == 0);
+
+    reading = sensor_readings_frame->GetReadings().at("sensor_5");
+    zassert_equal(reading->status, ReadingStatus::UNINITIALIZED);
+    zassert_true(reading->timestamp.has_value());
+    zassert_true(reading->id.AsUint64() > 0);
+    zassert_false(reading->value.has_value());
 }
