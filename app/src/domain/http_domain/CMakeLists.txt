@@ -22,6 +22,11 @@ add_custom_command(
     COMMAND html-minifier-terser
         --collapse-whitespace
         --remove-comments
+        --remove-attribute-quotes
+        --remove-redundant-attributes
+        --use-short-doctype
+        --sort-attributes
+        --sort-class-name
         --minify-js
         --minify-css
         --ignore-custom-fragments '<code class="language-json">[\\s\\S]*?<\\/code>'
