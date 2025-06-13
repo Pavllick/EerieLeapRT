@@ -15,7 +15,7 @@
 
 #include "sensor_task.hpp"
 
-namespace eerie_leap::domain::sensor_domain::services::scheduler {
+namespace eerie_leap::domain::sensor_domain::services {
 
 using namespace eerie_leap::controllers;
 
@@ -28,7 +28,6 @@ using namespace eerie_leap::domain::sensor_domain::utilities;
 
 class ProcessingSchedulerService {
 private:
-    k_sem sync_semaphore_;
     k_sem sensors_processing_semaphore_;
     static constexpr k_timeout_t PROCESSING_TIMEOUT = K_MSEC(200);
 
@@ -42,6 +41,8 @@ private:
     std::shared_ptr<SensorReader> sensor_reader_;
     std::shared_ptr<SensorProcessor> sensor_processor_;
 
+    std::vector<std::shared_ptr<SensorTask>> sensor_tasks_;
+
     std::shared_ptr<SensorTask> CreateSensorTask(std::shared_ptr<Sensor> sensor);
     static void ProcessSensorWorkTask(k_work* work);
 
@@ -54,6 +55,7 @@ public:
         std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller);
 
     void Start();
+    void Restart();
 };
 
-} // namespace eerie_leap::domain::sensor_domain::services::scheduler
+} // namespace eerie_leap::domain::sensor_domain::services

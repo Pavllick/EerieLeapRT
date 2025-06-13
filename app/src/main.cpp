@@ -3,6 +3,7 @@
 #include <zephyr/arch/cpu.h>
 #include <zephyr/logging/log.h>
 
+#include "utilities/memory/heap_allocator.hpp"
 #include "utilities/dev_tools/system_info.h"
 #include "utilities/guid/guid_generator.h"
 #include "utilities/time/boot_elapsed_time_service.h"
@@ -10,7 +11,7 @@
 #include "domain/fs_domain/services/fs_service.h"
 #include "domain/hardware/adc_domain/adc_factory.hpp"
 #include "domain/hardware/gpio_domain/gpio_factory.hpp"
-#include "domain/sensor_domain/services/measurement_service.h"
+#include "domain/sensor_domain/services/processing_scheduler_serivce.h"
 
 #include "configuration/system_config/system_config.h"
 #include "configuration/adc_config/adc_config.h"
@@ -40,6 +41,7 @@ using namespace eerie_leap::domain::sensor_domain::models;
 #include "domain/http_domain/services/http_server.h"
 #endif // CONFIG_NETWORKING
 
+using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::dev_tools;
 using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::utilities::guid;
@@ -62,17 +64,17 @@ constexpr uint32_t SLEEP_TIME_MS = 10000;
 void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller);
 
 int main(void) {
-    auto fs_service = std::make_shared<FsService>();
+    auto fs_service = make_shared_ext<FsService>();
 
-    auto time_service = std::make_shared<BootElapsedTimeService>();
+    auto time_service = make_shared_ext<BootElapsedTimeService>();
     time_service->Initialize();
 
-    auto guid_generator = std::make_shared<GuidGenerator>();
+    auto guid_generator = make_shared_ext<GuidGenerator>();
     auto math_parser_service = make_shared_ext<MathParserService>();
 
-    auto system_config_service = std::make_shared<ConfigurationService<SystemConfig>>("system_config", fs_service);
-    auto adc_config_service = std::make_shared<ConfigurationService<AdcConfig>>("adc_config", fs_service);
-    auto sensors_config_service = std::make_shared<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
+    auto system_config_service = make_shared_ext<ConfigurationService<SystemConfig>>("system_config", fs_service);
+    auto adc_config_service = make_shared_ext<ConfigurationService<AdcConfig>>("adc_config", fs_service);
+    auto sensors_config_service = make_shared_ext<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
 
     auto adc = AdcFactory::Create();
     adc->UpdateConfiguration(AdcConfiguration{
@@ -83,24 +85,15 @@ int main(void) {
     auto gpio = GpioFactory::Create();
     gpio->Initialize();
 
-    auto system_configuration_controller = std::make_shared<SystemConfigurationController>(system_config_service);
-    auto adc_configuration_controller = std::make_shared<AdcConfigurationController>(adc_config_service);
+    auto system_configuration_controller = make_shared_ext<SystemConfigurationController>(system_config_service);
+    auto adc_configuration_controller = make_shared_ext<AdcConfigurationController>(adc_config_service);
 
-    auto sensors_configuration_controller = std::make_shared<SensorsConfigurationController>(math_parser_service, sensors_config_service, adc->GetChannelCount());
+    auto sensors_configuration_controller = make_shared_ext<SensorsConfigurationController>(math_parser_service, sensors_config_service, adc->GetChannelCount());
 
     SetupTestSensors(math_parser_service, sensors_configuration_controller);
 
-    // Placement-new construction of MeasurementService in statically allocated,
-    // properly aligned memory. This ensures the internal Zephyr thread stack
-    // (defined via K_KERNEL_STACK_MEMBER) is in valid memory and survives for
-    // the lifetime of the thread.
-    //
-    // DO NOT allocate this on the heap or stack — it will crash due to stack
-    // alignment or lifetime issues in Zephyr.
-    alignas(ARCH_STACK_PTR_ALIGN) static uint8_t measurement_service_buffer[sizeof(MeasurementService)];
-    auto* measurement_service =
-        new (measurement_service_buffer) MeasurementService(time_service, guid_generator, adc, gpio, sensors_configuration_controller);
-    measurement_service->Start();
+    auto processing_scheduler_service = make_shared_ext<ProcessingSchedulerService>(time_service, guid_generator, adc, gpio, sensors_configuration_controller);
+    processing_scheduler_service->Start();
 
     // NOTE: Don't use for WiFi supporting boards as WiFi is broken in Zephyr 4.1 and has memory allocation issues
     // At least on ESP32S3, it does connect if Zephyr revision is set to "main", but heap allocations cannot be moved
@@ -114,12 +107,10 @@ int main(void) {
         math_parser_service,
         system_configuration_controller,
         adc_configuration_controller,
-        sensors_configuration_controller);
+        sensors_configuration_controller,
+        processing_scheduler_service);
     http_server.Start();
 #endif // CONFIG_NETWORKING
-
-    // auto files = fs_service->ListFiles("/");
-    // printf("Total memory: %d, Used memory: %d\n", fs_service->GetTotalSpace(), fs_service->GetUsedSpace());
 
     while (true) {
         SystemInfo::print_heap_info();
@@ -137,7 +128,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
         {0.0, 0.0},
         {3.3, 100.0}
     };
-    auto calibration_data_1_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_1);
+    auto calibration_data_1_ptr = make_shared_ext<std::vector<CalibrationData>>(calibration_data_1);
 
     ExpressionEvaluator expression_evaluator_1(math_parser_service, "{x} * 2 + {sensor_2} + 1");
 
@@ -152,8 +143,8 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
             .type = SensorType::PHYSICAL_ANALOG,
             .channel = 0,
             .sampling_rate_ms = 1000,
-            .voltage_interpolator = std::make_shared<LinearVoltageInterpolator>(calibration_data_1_ptr),
-            .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_1)
+            .voltage_interpolator = make_shared_ext<LinearVoltageInterpolator>(calibration_data_1_ptr),
+            .expression_evaluator = make_shared_ext<ExpressionEvaluator>(expression_evaluator_1)
         }
     };
 
@@ -164,7 +155,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
         {2.5, 162.0},
         {3.3, 200.0}
     };
-    auto calibration_data_2_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_2);
+    auto calibration_data_2_ptr = make_shared_ext<std::vector<CalibrationData>>(calibration_data_2);
 
     ExpressionEvaluator expression_evaluator_2(math_parser_service, "x * 4 + 1.6");
 
@@ -179,8 +170,8 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
             .type = SensorType::PHYSICAL_ANALOG,
             .channel = 1,
             .sampling_rate_ms = 500,
-            .voltage_interpolator = std::make_shared<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
-            .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_2)
+            .voltage_interpolator = make_shared_ext<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
+            .expression_evaluator = make_shared_ext<ExpressionEvaluator>(expression_evaluator_2)
         }
     };
 
@@ -196,7 +187,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
         .configuration = {
             .type = SensorType::VIRTUAL_ANALOG,
             .sampling_rate_ms = 2000,
-            .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_3)
+            .expression_evaluator = make_shared_ext<ExpressionEvaluator>(expression_evaluator_3)
         }
     };
 
@@ -226,7 +217,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
         .configuration = {
             .type = SensorType::VIRTUAL_INDICATOR,
             .sampling_rate_ms = 1000,
-            .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_5)
+            .expression_evaluator = make_shared_ext<ExpressionEvaluator>(expression_evaluator_5)
         }
     };
 
@@ -238,7 +229,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
         std::make_shared<Sensor>(sensor_5)
     };
 
-    auto sensors_ptr = std::make_shared<std::vector<std::shared_ptr<Sensor>>>(sensors);
+    auto sensors_ptr = make_shared_ext<std::vector<std::shared_ptr<Sensor>>>(sensors);
     auto res = sensors_configuration_controller->Update(sensors_ptr);
     if(!res)
         throw std::runtime_error("Cannot save config");

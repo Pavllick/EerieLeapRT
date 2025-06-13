@@ -8,7 +8,7 @@
 #include "domain/sensor_domain/processors/sensor_reader.h"
 #include "domain/sensor_domain/processors/sensor_processor.h"
 
-namespace eerie_leap::domain::sensor_domain::services::scheduler {
+namespace eerie_leap::domain::sensor_domain::services {
 
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::domain::sensor_domain::processors;
@@ -25,4 +25,4 @@ struct SensorTask {
     std::shared_ptr<SensorProcessor> processor;
 };
 
-} // namespace eerie_leap::domain::sensor_domain::services::scheduler
+} // namespace eerie_leap::domain::sensor_domain::services

@@ -21,13 +21,15 @@ HttpServer::HttpServer(
     std::shared_ptr<MathParserService> math_parser_service,
     std::shared_ptr<SystemConfigurationController> system_configuration_controller,
     std::shared_ptr<AdcConfigurationController> adc_configuration_controller,
-    std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller)
+    std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller,
+    std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service)
     : math_parser_service_(std::move(math_parser_service)),
     system_configuration_controller_(std::move(system_configuration_controller)),
     adc_configuration_controller_(std::move(adc_configuration_controller)),
-    sensors_configuration_controller_(sensors_configuration_controller) {
+    sensors_configuration_controller_(sensors_configuration_controller),
+    processing_scheduler_service_(processing_scheduler_service) {
 
-        sensors_http_controller_ = make_shared_ext<SensorsApiController>(math_parser_service, sensors_configuration_controller);
+        sensors_http_controller_ = make_shared_ext<SensorsApiController>(math_parser_service, sensors_configuration_controller, processing_scheduler_service);
     }
 
 void HttpServer::Start() {

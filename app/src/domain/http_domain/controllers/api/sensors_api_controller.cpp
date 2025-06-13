@@ -16,12 +16,18 @@ std::shared_ptr<ExtVector> SensorsApiController::sensors_config_get_buffer_;
 
 std::shared_ptr<MathParserService> SensorsApiController::math_parser_service_ = nullptr;
 std::shared_ptr<SensorsConfigurationController> SensorsApiController::sensors_configuration_controller_ = nullptr;
+std::shared_ptr<ProcessingSchedulerService> SensorsApiController::processing_scheduler_service_ = nullptr;
 
-SensorsApiController::SensorsApiController(std::shared_ptr<MathParserService> math_parser_service, std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller) {
+SensorsApiController::SensorsApiController(
+    std::shared_ptr<MathParserService> math_parser_service,
+    std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller,
+    std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service) {
+
     sensors_config_post_buffer_ = make_shared_ext<ExtVector>(sensors_config_post_buffer_size_);
 
     math_parser_service_ = std::move(math_parser_service);
     sensors_configuration_controller_ = std::move(sensors_configuration_controller);
+    processing_scheduler_service_ = std::move(processing_scheduler_service);
 }
 
 int SensorsApiController::sensors_config_get_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data) {
@@ -172,6 +178,8 @@ void SensorsApiController::ParseSensorsConfigJson(uint8_t *buffer, size_t len)
         printk("Sensors configuration updated successfully\n");
     else
         throw std::runtime_error("Failed to update sensors configuration.");
+
+    processing_scheduler_service_->Restart();
 }
 
 int SensorsApiController::sensors_config_post_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data) {

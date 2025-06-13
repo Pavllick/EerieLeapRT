@@ -107,12 +107,14 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
         resolver.AddSensor(sensor);
     }
 
-    auto ordered_sensors = resolver.GetProcessingOrder();
-    ordered_sensors_ = make_shared_ext<std::vector<std::shared_ptr<Sensor>>>(ordered_sensors);
-    sensors_config_ = sensors_config;
-
     LOG_INF("Saving sensors configuration.");
-    return sensors_configuration_service_->Save(sensors_config.get());
+    bool res = sensors_configuration_service_->Save(sensors_config.get());
+    if(!res)
+        return false;
+
+    Get(true);
+
+    return true;
 }
 
 const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfigurationController::Get(bool force_load) {

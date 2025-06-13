@@ -3,11 +3,13 @@
 #include <zephyr/sys/util.h>
 
 #include "utilities/time/time_helpers.hpp"
+#include "utilities/memory/heap_allocator.hpp"
 #include "zephyr/kernel.h"
 #include "processing_scheduler_serivce.h"
 
-namespace eerie_leap::domain::sensor_domain::services::scheduler {
+namespace eerie_leap::domain::sensor_domain::services {
 
+using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::domain::sensor_domain::models;
 
 LOG_MODULE_REGISTER(processing_scheduler_logger);
@@ -24,13 +26,7 @@ ProcessingSchedulerService::ProcessingSchedulerService(
     gpio_(std::move(gpio)),
     sensors_configuration_controller_(std::move(sensors_configuration_controller)) {
 
-    k_sem_init(&sync_semaphore_, 0, 1);
     k_sem_init(&sensors_processing_semaphore_, 1, 1);
-
-    sensor_readings_frame_ = std::make_shared<SensorReadingsFrame>();
-
-    sensor_reader_ = std::make_shared<SensorReader>(time_service_, guid_generator_, adc_, gpio_, sensor_readings_frame_);
-    sensor_processor_ = std::make_shared<SensorProcessor>(sensor_readings_frame_);
 };
 
 void ProcessingSchedulerService::ProcessSensorWorkTask(k_work* work) {
@@ -60,7 +56,7 @@ void ProcessingSchedulerService::ProcessSensorWorkTask(k_work* work) {
 }
 
 std::shared_ptr<SensorTask> ProcessingSchedulerService::CreateSensorTask(std::shared_ptr<Sensor> sensor) {
-    auto task = std::make_shared<SensorTask>();
+    auto task = make_shared_ext<SensorTask>();
     task->processing_semaphore = &sensors_processing_semaphore_;
     task->sampling_rate_ms = K_MSEC(sensor->configuration.sampling_rate_ms);
     task->sensor = sensor;
@@ -72,14 +68,17 @@ std::shared_ptr<SensorTask> ProcessingSchedulerService::CreateSensorTask(std::sh
 }
 
 void ProcessingSchedulerService::Start() {
+    sensor_readings_frame_ = make_shared_ext<SensorReadingsFrame>();
+
+    sensor_reader_ = make_shared_ext<SensorReader>(time_service_, guid_generator_, adc_, gpio_, sensor_readings_frame_);
+    sensor_processor_ = make_shared_ext<SensorProcessor>(sensor_readings_frame_);
+
     auto sensors = sensors_configuration_controller_->Get();
 
-    // Required to keep SensorTasks in scope until the end of the function
-    std::vector<std::shared_ptr<SensorTask>> sensor_tasks;
-
     for(const auto& sensor : *sensors) {
+        LOG_INF("Creating task for sensor: %s", sensor->id.c_str());
         auto task = CreateSensorTask(sensor);
-        sensor_tasks.push_back(task);
+        sensor_tasks_.push_back(task);
 
         k_work_delayable* work = &task->work;
         k_work_init_delayable(work, ProcessSensorWorkTask);
@@ -87,7 +86,29 @@ void ProcessingSchedulerService::Start() {
         k_work_schedule(work, K_NO_WAIT);
     }
 
-    (void)k_sem_take(&sync_semaphore_, K_FOREVER);
+    k_sleep(K_MSEC(1));
+
+    LOG_INF("Processing Scheduler Service started");
 }
 
-} // namespace eerie_leap::domain::sensor_domain::services::scheduler
+void ProcessingSchedulerService::Restart() {
+    struct k_work_sync sync;
+
+    while(sensor_tasks_.size() > 0) {
+        for(int i = 0; i < sensor_tasks_.size(); i++) {
+            LOG_INF("Canceling task for sensor: %s", sensor_tasks_[i]->sensor->id.c_str());
+            bool res = k_work_cancel_delayable_sync(&sensor_tasks_[i]->work, &sync);
+            if(!res) {
+                sensor_tasks_.erase(sensor_tasks_.begin() + i);
+                break;
+            }
+        }
+    }
+
+    LOG_INF("Processing Scheduler Service stopped");
+
+    sensor_tasks_.clear();
+    Start();
+}
+
+} // namespace eerie_leap::domain::sensor_domain::services
