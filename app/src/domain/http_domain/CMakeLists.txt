@@ -16,8 +16,22 @@ add_custom_command(
         ${http_configuration_dir}/scripts/prism.js
     COMMENT "Bundling sensors_config_editor resources into single HTML"
 )
+
+add_custom_command(
+    OUTPUT ${gen_dir}/configuration/editor_bundle.html.min
+    COMMAND html-minifier-terser
+        --collapse-whitespace
+        --remove-comments
+        --minify-js
+        --minify-css
+        --ignore-custom-fragments '<code class="language-json">[\\s\\S]*?<\\/code>'
+        -o ${gen_dir}/configuration/editor_bundle.html.min ${gen_dir}/configuration/editor_bundle.html
+    DEPENDS ${gen_dir}/configuration/editor_bundle.html
+    COMMENT "Minifying sensors_config_editor HTML"
+)
+
 generate_inc_file_for_target(app
-    ${gen_dir}/configuration/editor_bundle.html
+    ${gen_dir}/configuration/editor_bundle.html.min
     ${gen_dir}/configuration/editor_bundle.html.gz.inc
     --gzip
 )

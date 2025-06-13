@@ -114,13 +114,25 @@ west espressif monitor
 
 ## Development
 
-### CBOR Schemas
+### Required tools
+
+#### CBOR Schemas
 
 The project uses [zcbor](https://github.com/NordicSemiconductor/zcbor) to generate CBOR helpers from schemas. To install zcbor:
 
 ```shell
 pip install zcbor
 ```
+
+#### HTML Minifier
+
+The project uses [html-minifier-terser](https://github.com/terser/html-minifier-terser) to minify HTML files. To install html-minifier-terser:
+
+```shell
+npm install -g html-minifier-terser
+```
+
+### Generating CBOR helpers
 
 #### Example command to generate SystemConfig helpers:
 
