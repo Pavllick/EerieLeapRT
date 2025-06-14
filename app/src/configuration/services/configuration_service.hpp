@@ -7,7 +7,7 @@
 #include <span>
 #include <zephyr/logging/log.h>
 
-#include "utilities/memory/heap_allocator.hpp"
+#include "utilities/memory/heap_allocator.h"
 #include "configuration/cbor_traits/system_config_trait.h"
 #include "configuration/cbor_traits/adc_config_trait.h"
 #include "configuration/cbor_traits/sensors_config_trait.h"

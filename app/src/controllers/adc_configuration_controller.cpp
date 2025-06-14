@@ -1,4 +1,4 @@
-#include "utilities/memory/heap_allocator.hpp"
+#include "utilities/memory/heap_allocator.h"
 #include "utilities/cbor/cbor_helpers.hpp"
 #include <memory>
 #include "adc_configuration_controller.h"

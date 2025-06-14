@@ -1,4 +1,4 @@
-#include "utilities/memory/heap_allocator.hpp"
+#include "utilities/memory/heap_allocator.h"
 #include "system_configuration_controller.h"
 
 namespace eerie_leap::controllers {

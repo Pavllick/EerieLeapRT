@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include "utilities/memory/heap_allocator.hpp"
+#include "utilities/memory/heap_allocator.h"
 
 namespace eerie_leap::configuration::services {
 

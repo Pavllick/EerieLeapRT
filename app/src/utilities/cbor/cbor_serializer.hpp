@@ -11,7 +11,7 @@
 #include <zcbor_encode.h>
 #include <zcbor_decode.h>
 
-#include <utilities/memory/heap_allocator.hpp>
+#include <utilities/memory/heap_allocator.h>
 
 namespace eerie_leap::utilities::cbor {
 

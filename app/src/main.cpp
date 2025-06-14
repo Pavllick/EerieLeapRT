@@ -3,7 +3,7 @@
 #include <zephyr/arch/cpu.h>
 #include <zephyr/logging/log.h>
 
-#include "utilities/memory/heap_allocator.hpp"
+#include "utilities/memory/heap_allocator.h"
 #include "utilities/dev_tools/system_info.h"
 #include "utilities/guid/guid_generator.h"
 #include "utilities/time/boot_elapsed_time_service.h"

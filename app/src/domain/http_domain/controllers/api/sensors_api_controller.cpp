@@ -1,5 +1,5 @@
 #include "domain/sensor_domain/utilities/voltage_interpolator/interpolation_method.h"
-#include "utilities/memory/heap_allocator.hpp"
+#include "utilities/memory/heap_allocator.h"
 #include "domain/sensor_domain/models/sensor.h"
 #include "domain/sensor_domain/utilities/voltage_interpolator/interpolation_method.h"
 #include "domain/sensor_domain/utilities/voltage_interpolator/linear_voltage_interpolator.hpp"

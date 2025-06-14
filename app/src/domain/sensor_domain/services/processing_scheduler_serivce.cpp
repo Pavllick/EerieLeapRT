@@ -3,7 +3,7 @@
 #include <zephyr/sys/util.h>
 
 #include "utilities/time/time_helpers.hpp"
-#include "utilities/memory/heap_allocator.hpp"
+#include "utilities/memory/heap_allocator.h"
 #include "zephyr/kernel.h"
 #include "processing_scheduler_serivce.h"
 
