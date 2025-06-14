@@ -26,7 +26,7 @@
 	OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#if defined(MUPARSER_DLL) 
+#if defined(MUPARSER_DLL)
 
 #if defined(_WIN32)
 	#define WIN32_LEAN_AND_MEAN
@@ -49,7 +49,7 @@
 
 #if defined(_MSC_VER)
 	#pragma warning(push)
-	#pragma warning(disable : 26812) 
+	#pragma warning(disable : 26812)
 #endif
 
 #define MU_TRY  \
@@ -117,7 +117,7 @@ private:
 static muChar_t s_tmpOutBuf[2048];
 
 template <typename T>
-constexpr std::size_t count_of(const T& array) 
+constexpr std::size_t count_of(const T& array)
 {
 	return (sizeof(array) / sizeof(array[0]));
 }
@@ -234,7 +234,7 @@ API_EXPORT(muFloat_t*) mupEvalMulti(muParserHandle_t a_hParser, int* nNum)
 {
 	MU_TRY
 		if (nNum == nullptr)
-			throw std::runtime_error("Argument is null!"); 
+			throw std::runtime_error("Argument is null!");
 
 		muParser_t* const p(AsParser(a_hParser));
 		return p->Eval(*nNum);
