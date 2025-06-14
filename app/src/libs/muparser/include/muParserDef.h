@@ -29,7 +29,6 @@
 #ifndef MUP_DEF_H
 #define MUP_DEF_H
 
-#include <iostream>
 #include <string>
 #include <sstream>
 #include <map>
@@ -86,47 +85,39 @@
 
 #if defined(_MSC_VER)
 	#pragma warning(push)
-	#pragma warning(disable : 26812) 
+	#pragma warning(disable : 26812)
 #endif
 
 
 namespace mu
 {
-#if defined(_UNICODE)
+	class NullOstream {
+	public:
+		NullOstream() = default;
 
-	/** \brief Encapsulate wcout. */
-	inline std::wostream& console()
+		template<typename T>
+		NullOstream& operator<<(const T&) {
+			return *this;
+		}
+
+		// Support manipulators like std::endl (which are functions)
+		NullOstream& operator<<(std::ostream& (*)(std::ostream&)) {
+			return *this;
+		}
+	};
+
+	inline NullOstream& console()
 	{
-		return std::wcout;
+		static NullOstream instance;
+		return instance;
 	}
 
-	/** \brief Encapsulate cin. */
-	inline std::wistream& console_in()
+	inline NullOstream& console_in()
 	{
-		return std::wcin;
+		static NullOstream instance;
+		return instance;
 	}
 
-#else
-
-	/** \brief Encapsulate cout.
-
-	  Used for supporting UNICODE more easily.
-	*/
-	inline std::ostream& console()
-	{
-		return std::cout;
-	}
-
-	/** \brief Encapsulate cin.
-
-	  Used for supporting UNICODE more easily.
-	*/
-	inline std::istream& console_in()
-	{
-		return std::cin;
-	}
-
-#endif
 
 	/** \brief Bytecode values.
 
@@ -169,7 +160,7 @@ namespace mu
 		// operators and functions
 		cmFUNC = 26,		///< Code for a generic function item
 		cmFUNC_STR,			///< Code for a function with a string parameter
-		cmFUNC_BULK,		///< Special callbacks for Bulk mode with an additional parameter for the bulk index 
+		cmFUNC_BULK,		///< Special callbacks for Bulk mode with an additional parameter for the bulk index
 		cmSTRING,			///< Code for a string token
 		cmOPRT_BIN,			///< user defined binary operator
 		cmOPRT_POSTFIX,		///< code for postfix operators
@@ -252,12 +243,12 @@ namespace mu
 		ecINVALID_POSTFIX_IDENT = 21,	///< Invalid function, variable or constant name.
 
 		ecBUILTIN_OVERLOAD = 22, ///< Trying to overload builtin operator
-		ecINVALID_FUN_PTR = 23, ///< Invalid callback function pointer 
-		ecINVALID_VAR_PTR = 24, ///< Invalid variable pointer 
+		ecINVALID_FUN_PTR = 23, ///< Invalid callback function pointer
+		ecINVALID_VAR_PTR = 24, ///< Invalid variable pointer
 		ecEMPTY_EXPRESSION = 25, ///< The Expression is empty
 		ecNAME_CONFLICT = 26, ///< Name conflict
 		ecOPT_PRI = 27, ///< Invalid operator priority
-		// 
+		//
 		ecDOMAIN_ERROR = 28, ///< catch division by zero, sqrt(-1), log(0) (currently unused)
 		ecDIV_BY_ZERO = 29, ///< Division by zero (currently unused)
 		ecGENERIC = 30, ///< Generic error
@@ -280,7 +271,7 @@ namespace mu
 
 		ecBYTECODE_IMPORT_EXPORT_DISABLED = 40,	///< Bytecode cannot be exported.
 
-		// The last two are special entries 
+		// The last two are special entries
 		ecCOUNT,                      ///< This is no error code, It just stores just the total number of error codes
 		ecUNDEFINED = -1  ///< Undefined message, placeholder to detect unassigned error messages
 	};
@@ -517,4 +508,3 @@ namespace mu
 #endif
 
 #endif
-

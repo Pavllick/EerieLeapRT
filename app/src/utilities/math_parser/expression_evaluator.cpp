@@ -1,6 +1,6 @@
 #include <stdexcept>
-#include <span>
-#include <regex>
+#include <string>
+#include <algorithm>
 #include <zephyr/logging/log.h>
 
 #include "expression_evaluator.h"
@@ -12,12 +12,6 @@ LOG_MODULE_REGISTER(expression_evaluator_logger);
 K_MUTEX_DEFINE(expression_eval_mutex_);
 
 using namespace mu;
-
-static const std::regex& sensorIdRegex() {
-    static const std::regex regex_instance(R"(\{([a-z_][a-z0-9_]*)\})");
-
-    return regex_instance;
-}
 
 ExpressionEvaluator::ExpressionEvaluator(std::shared_ptr<MathParserService> math_parser_service, const std::string& expression_raw)
     : math_parser_service_(std::move(math_parser_service)), expression_raw_(expression_raw) {
@@ -43,22 +37,66 @@ float ExpressionEvaluator::Evaluate(const std::unordered_map<std::string, float*
     return res;
 }
 
-std::unordered_set<std::string> ExpressionEvaluator::ExtractVariables() const {
-    std::unordered_set<std::string> expression_variables;
+std::string ExpressionEvaluator::SanitizeExpression(const std::string& expression) const {
+    std::string result;
+    result.reserve(expression.size());
 
-    auto begin = std::sregex_iterator(expression_raw_.begin(), expression_raw_.end(), sensorIdRegex());
-    auto end = std::sregex_iterator();
-
-    for(auto it = begin; it != end; ++it) {
-        if((*it)[1].compare("x") != 0)
-            expression_variables.insert((*it)[1].str());
+    for(char c : expression) {
+        if(c != ' ')
+            result += c;
     }
 
-    return expression_variables;
+    return result;
 }
 
 std::string ExpressionEvaluator::UnwrapVariables() const {
-    return std::regex_replace(expression_raw_, sensorIdRegex(), "$1");
+    std::string result;
+    result.reserve(expression_raw_.size());
+
+    for(char c : expression_raw_) {
+        if(c != '{' && c != '}' && c != ' ')
+            result += c;
+    }
+
+    return result;
+}
+
+bool ExpressionEvaluator::isValidVariableName(const std::string& str) const {
+    return std::ranges::all_of(str, [](char c) {
+        return std::isalnum(c) || c == '_';
+    });
+}
+
+std::unordered_set<std::string> ExpressionEvaluator::ExtractVariables() const {
+    std::string sanitized_expression = SanitizeExpression(expression_raw_);
+    std::unordered_set<std::string> vars;
+
+    std::size_t close_brace_i = 0;
+
+    while(true) {
+        std::size_t open = sanitized_expression.find('{', close_brace_i);
+        std::size_t close = sanitized_expression.find('}', close_brace_i);
+
+        if(open == std::string::npos && close == std::string::npos)
+            break;
+        else if(close == std::string::npos)
+            throw std::runtime_error("Missing closing brace");
+        else if(open == std::string::npos)
+            throw std::runtime_error("Missing opening brace");
+
+        close_brace_i = close + 1;
+
+        std::string var = sanitized_expression.substr(open + 1, close - open - 1);
+        if(var.empty() || var == "x")
+            continue;
+
+        if(!isValidVariableName(var))
+            throw std::runtime_error("Invalid variable name");
+
+        vars.insert(var);
+    }
+
+    return vars;
 }
 
 } // namespace eerie_leap::utilities::math_parser

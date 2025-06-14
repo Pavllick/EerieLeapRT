@@ -32,7 +32,6 @@
 //--- Standard includes ------------------------------------------------------------------------
 #include <cmath>
 #include <string>
-#include <iostream>
 #include <map>
 #include <memory>
 #include <locale>
@@ -239,7 +238,7 @@ namespace mu
 				// fix for issue 4: https://code.google.com/p/muparser/issues/detail?id=4
 				// courtesy of Jens Bartsch
 				// original code:
-				//        return std::string(1, (char)m_nGroup); 
+				//        return std::string(1, (char)m_nGroup);
 				// new code:
 				return std::string(1, (char)(m_cThousandsSep > 0 ? m_nGroup : CHAR_MAX));
 			}

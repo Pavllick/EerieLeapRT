@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <string>
-#include <vector>
 #include <optional>
 #include <unordered_set>
 #include <unordered_map>
@@ -19,7 +18,9 @@ private:
     std::string expression_raw_;
     std::string expression_;
 
+    std::string SanitizeExpression(const std::string& expression) const;
     std::string UnwrapVariables() const;
+    bool isValidVariableName(const std::string& str) const;
 
 public:
     ExpressionEvaluator(std::shared_ptr<MathParserService> math_parser_service, const std::string& expression);

@@ -30,7 +30,6 @@
 
 #include <cstdio>
 #include <cmath>
-#include <iostream>
 #include <limits>
 
 using namespace std;
@@ -110,7 +109,7 @@ namespace mu
 			}
 			catch (...)
 			{
-				iStat += 1;  // this is not supposed to happen 
+				iStat += 1;  // this is not supposed to happen
 			}
 
 			try
@@ -176,7 +175,7 @@ namespace mu
 			}
 			catch (...)
 			{
-				iStat += 1;  // this is not supposed to happen 
+				iStat += 1;  // this is not supposed to happen
 			}
 
 			if (iStat == 0)
@@ -400,7 +399,7 @@ namespace mu
 
 			// incorrect: '^' is yor here, not power
 			//    iStat += EqnTestInt("-(1+2)^2", -9, true);
-			//    iStat += EqnTestInt("-1^3", -1, true);          
+			//    iStat += EqnTestInt("-1^3", -1, true);
 
 				  // Test precedence
 				  // a=1, b=2, c=3
@@ -447,7 +446,7 @@ namespace mu
 			{												\
 				iErr = (!FAIL) ? 0 : 1;						\
 			}												\
-			iStat += iErr;      
+			iStat += iErr;
 
 			// constant names
 			PARSER_THROWCHECK(Const, false, _T("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"), 1)
@@ -561,7 +560,7 @@ namespace mu
 			iStat += EqnTest(_T("sqrt(a+(3))"), 2, true);// Multiple brackets
 			iStat += EqnTest(_T("sqrt((3)+a)"), 2, true);// Multiple brackets
 			iStat += EqnTest(_T("order(1,2)"), 1, true); // May not cause name collision with operator "or"
-			iStat += EqnTest(_T("(2+"), 0, false);       // missing closing bracket 
+			iStat += EqnTest(_T("(2+"), 0, false);       // missing closing bracket
 			iStat += EqnTest(_T("2++4"), 0, false);      // unexpected operator
 			iStat += EqnTest(_T("2+-4"), 0, false);      // unexpected operator
 			iStat += EqnTest(_T("(2+)"), 0, false);      // unexpected closing bracket
@@ -647,7 +646,7 @@ namespace mu
 				if (iCount != 4)
 					throw false;
 
-				// the next check will fail if the parser 
+				// the next check will fail if the parser
 				// erroneously creates new variables internally
 				if (p.GetVar().size() != 5)
 					throw false;
@@ -666,7 +665,7 @@ namespace mu
 				if (iCount != 3)
 					throw false;
 
-				// the next check will fail if the parser 
+				// the next check will fail if the parser
 				// erroneously creates new variables internally
 				if (p.GetVar().size() != 5)
 					throw false;
@@ -709,7 +708,7 @@ namespace mu
 			// from oss-fzz.com: UNKNOWN READ; https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=23330#c1
 			iStat += ThrowTest(_T("6, +, +, +, +, +, +, +, +, +, +, +, +, +, +, 1, +, +, +, +, +, +, +, +, +, +, +, +, +, +, +, +, +, +, +, +, +, +, +, +, +, +, +, +, +, +, +, +"), ecUNEXPECTED_ARG_SEP, true);
 
-			// misplaced string argument			
+			// misplaced string argument
 			iStat += ThrowTest(_T(R"(sin(0?4:("")))"), ecUNEXPECTED_STR);
 			iStat += ThrowTest(_T(R"(avg(0?4:(""),1))"), ecUNEXPECTED_STR);
 
@@ -907,8 +906,8 @@ namespace mu
 			iStat += EqnTest(_T("-f1of1(-1000){m}"), 1, true);
 			iStat += EqnTest(_T("f4of4(0,0,0,1000){m}"), 1, true);
 			iStat += EqnTest(_T("2+(a*1000){m}"), 3, true);
-			
-			// I have added a space between the number and the operator so that 
+
+			// I have added a space between the number and the operator so that
 			// systems using libc++ can pass the test (see #123)
 			iStat += EqnTest(_T("1 n"), 1e-9, true);
 
@@ -960,7 +959,7 @@ namespace mu
 			iStat += EqnTest(_T("2*b*5 + 4*b"), 28, true);
 			iStat += EqnTest(_T("2*a/3"), 2.0 / 3.0, true);
 
-			// Addition auf cmVARMUL 
+			// Addition auf cmVARMUL
 			iStat += EqnTest(_T("3+b"), b + 3, true);
 			iStat += EqnTest(_T("b+3"), b + 3, true);
 			iStat += EqnTest(_T("b*3+2"), b * 3 + 2, true);
@@ -1223,7 +1222,7 @@ namespace mu
 			// <ibg 20090529>
 			// this is now legal, for reference see:
 			// https://sourceforge.net/forum/message.php?msg_id=7411373
-			//      iStat += ThrowTest( _T("sin=9"), ecUNEXPECTED_OPERATOR);    
+			//      iStat += ThrowTest( _T("sin=9"), ecUNEXPECTED_OPERATOR);
 			// </ibg>
 
 			iStat += ThrowTest(_T("(8)=5"), ecUNEXPECTED_OPERATOR);
@@ -1551,7 +1550,7 @@ namespace mu
 				p1->DefineFunUserData(_T("sumud_100"), SumUd, reinterpret_cast<void*>(100));
 
 				// infix / postfix operator
-				// Note: Identifiers used here do not have any meaning 
+				// Note: Identifiers used here do not have any meaning
 				//       they are mere placeholders to test certain features.
 				p1->DefineInfixOprt(_T("$"), sign, prPOW + 1);  // sign with high priority
 				p1->DefineInfixOprt(_T("~"), plus2);          // high priority

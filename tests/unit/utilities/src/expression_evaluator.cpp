@@ -84,8 +84,8 @@ ZTEST(expression_evaluator, test_GetExpression_returns_sanitized_expression) {
     ExpressionEvaluator expression_evaluator1(math_parser_service, "(x + {y}) * 4");
     ExpressionEvaluator expression_evaluator2(math_parser_service, "({x} - 8 * {var_d}) / {f}");
 
-    zassert_equal(*expression_evaluator1.GetExpression(), "(x + y) * 4");
-    zassert_equal(*expression_evaluator2.GetExpression(), "(x - 8 * var_d) / f");
+    zassert_equal(*expression_evaluator1.GetExpression(), "(x+y)*4");
+    zassert_equal(*expression_evaluator2.GetExpression(), "(x-8*var_d)/f");
 }
 
 ZTEST(expression_evaluator, test_GetRawExpression_returns_original_expression) {
