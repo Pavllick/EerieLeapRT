@@ -152,8 +152,6 @@ bool WifiApService::AccessPointInitialize() {
 
 bool WifiApService::Initialize() {
 #ifdef CONFIG_WIFI
-    k_sleep(K_SECONDS(2));
-
     net_mgmt_init_event_callback(&callback_, EventHandler, NET_EVENT_WIFI_MASK);
     net_mgmt_add_event_callback(&callback_);
 
