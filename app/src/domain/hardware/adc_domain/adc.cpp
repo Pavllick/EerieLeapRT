@@ -20,15 +20,15 @@ int Adc::Initialize() {
 		return -1;
 	}
 
-    if(dt_adc_channel_count_ == 0) {
+    if(channel_configs_.size() == 0) {
         LOG_ERR("No ADC channels configured in device tree");
         return -1;
     }
 
-    LOG_INF("ADC initialized with %d channels", dt_adc_channel_count_);
+    LOG_INF("ADC initialized with %d channels", channel_configs_.size());
 
 	/* Configure channels. */
-	for(size_t i = 0U; i < dt_adc_channel_count_; i++) {
+	for(size_t i = 0U; i < channel_configs_.size(); i++) {
 		int err = adc_channel_setup(adc_device_, &channel_configs_[i]);
 		if(err < 0) {
 			LOG_ERR("Could not setup channel #%d (%d)\n", i, err);
@@ -58,13 +58,14 @@ void Adc::UpdateConfiguration(AdcConfiguration config) {
 		.extra_samplings = static_cast<uint16_t>(adc_config_->samples - 1),
 	};
 
-	for(size_t i = 0U; i < dt_adc_channel_count_; i++) {
-		sequences_[i] = {
+	sequences_.clear();
+	for(size_t i = 0U; i < channel_configs_.size(); i++) {
+		sequences_.push_back({
 			.options     = &sequence_options_,
 			.buffer      = samples_buffer_.get(),
 			.buffer_size = sizeof(uint16_t) * adc_config_->samples,
 			.resolution  = resolutions_[i],
-		};
+		});
 	}
 
     LOG_INF("Adc configuration updated.");
@@ -74,7 +75,7 @@ float Adc::ReadChannel(int channel) {
     if(!adc_config_)
         throw std::runtime_error("ADC config is not set!");
 
-    if(available_channels_.find(channel) == available_channels_.end())
+    if(channel < 0 || channel > GetChannelCount())
         throw std::invalid_argument("ADC channel is not available.");
 
 	sequences_[channel].channels = BIT(channel_configs_[channel].channel_id);
@@ -102,8 +103,8 @@ uint16_t Adc::GetReding() {
 	return value / adc_config_->samples;
 }
 
-int Adc::GetChannelCount() {
-    return dt_adc_channel_count_;
+inline int Adc::GetChannelCount() {
+    return channel_configs_.size();
 }
 
 }  // namespace eerie_leap::domain::hardware::adc_domain
