@@ -24,3 +24,4 @@ manifest:
           - zcbor           # CBOR light JSON like data format
           - littlefs        # littleFS lightweight filesystem
           - mbedtls         # esp32 WiFi
+          - picolibc        # picolibc
