@@ -11,13 +11,9 @@
 
 #include "i_adc.h"
 #include "adc_configuration.h"
+#include "adc_dt_info.h"
 
 namespace eerie_leap::domain::hardware::adc_domain {
-
-#define ADC_NODE DT_ALIAS(adc0)
-
-#define CHANNEL_VREF(node_id) DT_PROP_OR(node_id, zephyr_vref_mv, 0)
-#define CHANNEL_RESOLUTION(node_id) DT_PROP_OR(node_id, zephyr_resolution, 0)
 
 class Adc : public IAdc {
 private:
@@ -27,7 +23,7 @@ private:
 
 protected:
     std::optional<AdcConfiguration> adc_config_;
-    const struct device* adc_device_;
+    const device* adc_device_;
     std::vector<adc_sequence> sequences_;
     adc_sequence_options sequence_options_;
     std::unique_ptr<uint16_t[]> samples_buffer_;
@@ -35,10 +31,11 @@ protected:
     uint16_t GetReding();
 
 public:
-    Adc() {
-        channel_configs_ = {DT_FOREACH_CHILD_SEP(ADC_NODE, ADC_CHANNEL_CFG_DT, (,))};
-        references_mv_ = {DT_FOREACH_CHILD_SEP(ADC_NODE, CHANNEL_VREF, (,))};
-        resolutions_ = {DT_FOREACH_CHILD_SEP(ADC_NODE, CHANNEL_RESOLUTION, (,))};
+    Adc(AdcDTInfo adc_dt_info) {
+        adc_device_ = adc_dt_info.adc_device;
+        channel_configs_ = adc_dt_info.channel_configs;
+        references_mv_ = adc_dt_info.references_mv;
+        resolutions_ = adc_dt_info.resolutions;
     }
 
     int Initialize() override;

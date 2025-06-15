@@ -9,7 +9,7 @@ namespace eerie_leap::domain::hardware::adc_domain {
 LOG_MODULE_REGISTER(adc_emulator_logger);
 
 int AdcEmulator::Initialize() {
-    int res = Adc::Initialize();
+    int res = AdcManager::Initialize();
 
     LOG_INF("Adc Emulator initialized successfully.");
 
@@ -17,10 +17,7 @@ int AdcEmulator::Initialize() {
 }
 
 float AdcEmulator::ReadChannel(int channel) {
-    if(!adc_config_)
-        throw std::runtime_error("ADC config is not set!");
-
-    if(available_channels_.find(channel) == available_channels_.end())
+    if(channel < 0 || channel > GetChannelCount())
         throw std::invalid_argument("ADC channel is not available.");
 
 #ifdef CONFIG_ADC_EMUL
@@ -33,7 +30,7 @@ float AdcEmulator::ReadChannel(int channel) {
     }
 #endif
 
-    return Adc::ReadChannel(channel);
+    return AdcManager::ReadChannel(channel);
 }
 
 int AdcEmulator::GetChannelCount() {

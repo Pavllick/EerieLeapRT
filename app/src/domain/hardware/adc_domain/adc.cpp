@@ -13,8 +13,6 @@ LOG_MODULE_REGISTER(adc_logger);
 int Adc::Initialize() {
     LOG_INF("Adc initialization started.");
 
-	adc_device_ = DEVICE_DT_GET(ADC_NODE);
-
 	if(!device_is_ready(adc_device_)) {
 		LOG_ERR("ADC device not ready");
 		return -1;

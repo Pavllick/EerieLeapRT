@@ -1,10 +1,10 @@
 #pragma once
 
-#include "adc.h"
+#include "adc_manager.h"
 
 namespace eerie_leap::domain::hardware::adc_domain {
 
-class AdcEmulator : public Adc {
+class AdcEmulator : public AdcManager {
 public:
     int Initialize() override;
     float ReadChannel(int channel) override;
