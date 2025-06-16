@@ -1,6 +1,7 @@
 / {
 	aliases {
 		lfs1 = &lfs1;
+		gpioc = &gpioc;
 		adc0 = &adc_emul;
 	};
 
@@ -19,9 +20,48 @@
 		};
 	};
 
+	gpioc: gpioc {
+		compatible = "gpio-keys";
+
+		di_0: di_0 {
+			gpios = < &gpio0 9 (GPIO_PULL_UP | GPIO_ACTIVE_LOW) >;
+		};
+
+		di_1: di_1 {
+			gpios = < &gpio0 10 (GPIO_PULL_UP | GPIO_ACTIVE_LOW) >;
+		};
+
+		di_2: di_2 {
+			gpios = < &gpio0 11 (GPIO_PULL_UP | GPIO_ACTIVE_LOW) >;
+		};
+
+		di_3: di_3 {
+			gpios = < &gpio0 12 (GPIO_PULL_UP | GPIO_ACTIVE_LOW) >;
+		};
+
+		di_4: di_4 {
+			gpios = < &gpio0 13 (GPIO_PULL_UP | GPIO_ACTIVE_LOW) >;
+		};
+
+		di_5: di_5 {
+			gpios = < &gpio0 14 (GPIO_PULL_UP | GPIO_ACTIVE_LOW) >;
+		};
+	};
+
+	gpio0: gpio_emul {
+		status = "okay";
+		compatible = "zephyr,gpio-emul";
+		rising-edge;
+		falling-edge;
+		high-level;
+		low-level;
+		gpio-controller;
+		#gpio-cells = <2>;
+	};
+
 	adc_emul: adc {
 		compatible = "zephyr,adc-emul";
-		nchannels = <4>;
+		nchannels = <16>;
 		ref-internal-mv = <3300>;
 		ref-external1-mv = <5000>;
 		#io-channel-cells = <1>;
@@ -82,6 +122,42 @@
 
 	channel@3 {
 		reg = <3>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,vref-mv = <3300>;
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
+
+	channel@4 {
+		reg = <4>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,vref-mv = <3300>;
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
+
+	channel@5 {
+		reg = <5>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,vref-mv = <3300>;
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
+
+	channel@6 {
+		reg = <6>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,vref-mv = <3300>;
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
+
+	channel@7 {
+		reg = <7>;
 		zephyr,gain = "ADC_GAIN_1";
 		zephyr,reference = "ADC_REF_INTERNAL";
 		zephyr,vref-mv = <3300>;

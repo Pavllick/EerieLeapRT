@@ -11,6 +11,8 @@ LOG_MODULE_REGISTER(adc_emulator_logger);
 int AdcEmulator::Initialize() {
     int res = AdcManager::Initialize();
 
+    adc_device_ = DEVICE_DT_GET(ADC0_NODE);
+
     LOG_INF("Adc Emulator initialized successfully.");
 
     return res;

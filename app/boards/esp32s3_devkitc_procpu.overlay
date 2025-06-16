@@ -4,7 +4,9 @@
 / {
     aliases {
 		lfs1 = &lfs1;
+		gpioc = &gpioc;
         adc0 = &adc0;
+		adc1 = &adc1;
 	};
 
     fstab {
@@ -26,6 +28,34 @@
         compatible = "espressif,esp32-wifi";
         status = "okay";
     };
+
+	gpioc: gpioc {
+		compatible = "gpio-keys";
+
+		di_0: di_0 {
+			gpios = < &gpio0 9 GPIO_PULL_UP >;
+		};
+
+		di_1: di_1 {
+			gpios = < &gpio0 10 GPIO_PULL_UP >;
+		};
+
+		di_2: di_2 {
+			gpios = < &gpio0 11 GPIO_PULL_UP >;
+		};
+
+		di_3: di_3 {
+			gpios = < &gpio0 12 GPIO_PULL_UP >;
+		};
+
+		di_4: di_4 {
+			gpios = < &gpio0 13 GPIO_PULL_UP >;
+		};
+
+		di_5: di_5 {
+			gpios = < &gpio0 14 GPIO_PULL_UP >;
+		};
+	};
 };
 
 &flash0 {
@@ -53,16 +83,16 @@
 	#address-cells = <1>;
 	#size-cells = <0>;
 
-	channel@0 {
-		reg = <0>;
+	channel@4 {
+		reg = <4>;
 		zephyr,gain = "ADC_GAIN_1_4";
 		zephyr,reference = "ADC_REF_INTERNAL";
 		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
 		zephyr,resolution = <12>;
 	};
 
-    channel@1 {
-		reg = <1>;
+    channel@3 {
+		reg = <3>;
 		zephyr,gain = "ADC_GAIN_1_4";
 		zephyr,reference = "ADC_REF_INTERNAL";
 		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
@@ -77,8 +107,46 @@
 		zephyr,resolution = <12>;
 	};
 
-    channel@3 {
+    channel@5 {
+		reg = <5>;
+		zephyr,gain = "ADC_GAIN_1_4";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
+};
+
+&adc1 {
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	channel@3 {
 		reg = <3>;
+		zephyr,gain = "ADC_GAIN_1_4";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
+
+    channel@4 {
+		reg = <4>;
+		zephyr,gain = "ADC_GAIN_1_4";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
+
+    channel@5 {
+		reg = <5>;
+		zephyr,gain = "ADC_GAIN_1_4";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
+
+    channel@6 {
+		reg = <6>;
 		zephyr,gain = "ADC_GAIN_1_4";
 		zephyr,reference = "ADC_REF_INTERNAL";
 		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;

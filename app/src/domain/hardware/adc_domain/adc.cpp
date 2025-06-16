@@ -38,7 +38,7 @@ int Adc::Initialize() {
 
         available_channels_.insert(channel_configs_[i].channel_id);
 
-		LOG_INF("Channel %d configured", channel_configs_[i].channel_id);
+		LOG_INF("ADC Channel %d configured", channel_configs_[i].channel_id);
 	}
 
     LOG_INF("Adc initialized successfully.");
