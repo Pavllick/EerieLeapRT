@@ -1,0 +1,49 @@
+tests:
+  utilities.logger.functional:
+    tags: utilities logger functional
+    platform_allow: native_sim
+    harness: console
+    harness_config:
+      type: multi_line
+      ordered: true
+      regex:
+        - "MARKER_FORMAT_DEBUG_START"
+        - ".*<dbg> logger: \\[FormatTest\\] Format: This is a debug message with number 123."
+        - "MARKER_FORMAT_DEBUG_END"
+        - "MARKER_FORMAT_INFO_START"
+        - ".*<inf> logger: \\[FormatTest\\] Format: This is an info message with string 'hello'."
+        - "MARKER_FORMAT_INFO_END"
+        - "MARKER_FORMAT_WARNING_START"
+        - ".*<wrn> logger: \\[FormatTest\\] Format: This is a warning message."
+        - "MARKER_FORMAT_WARNING_END"
+        - "MARKER_FORMAT_ERROR_START"
+        - ".*<err> logger: \\[FormatTest\\] Format: This is an error message with float 3.14."
+        - "MARKER_FORMAT_ERROR_END"
+
+        - "MARKER_FILTER_DEBUG_START"
+        - "MARKER_FILTER_DEBUG_END"
+
+        - "MARKER_FILTER_INFO_START"
+        - ".*<inf> logger: \\[FilterTest\\] Filter: This INFO message SHOULD be visible."
+        - "MARKER_FILTER_INFO_END"
+        - "MARKER_FILTER_WARNING_START"
+        - ".*<wrn> logger: \\[FilterTest\\] Filter: This WARNING message SHOULD be visible."
+        - "MARKER_FILTER_WARNING_END"
+        - "MARKER_FILTER_ERROR_START"
+        - ".*<err> logger: \\[FilterTest\\] Filter: This ERROR message SHOULD be visible."
+        - "MARKER_FILTER_ERROR_END"
+
+        - "MARKER_DEFAULT_DEBUG_START"
+        - "MARKER_DEFAULT_DEBUG_END"
+
+        - "MARKER_DEFAULT_INFO_START"
+        - ".*<inf> logger: \\[DefaultOutputTest\\] DefaultOutput: Info message \\(should appear\\)."
+        - "MARKER_DEFAULT_INFO_END"
+        - "MARKER_DEFAULT_WARNING_START"
+        - ".*<wrn> logger: \\[DefaultOutputTest\\] DefaultOutput: Warning message \\(should appear\\)."
+        - "MARKER_DEFAULT_WARNING_END"
+        - "MARKER_DEFAULT_ERROR_START"
+        - ".*<err> logger: \\[DefaultOutputTest\\] DefaultOutput: Error message \\(should appear\\)."
+        - "MARKER_DEFAULT_ERROR_END"
+
+        - "===== AppLogger Test Suite Complete ====="

@@ -1,0 +1,20 @@
+# Kconfig for Application Utilities
+
+menuconfig APP_UTILITIES_KCONFIG
+    bool "Application Utilities Configuration"
+    default y
+
+if APP_UTILITIES_KCONFIG
+
+config APP_LOGGER_LOG_LEVEL
+    int "Log level for the shared Logger" # Changed AppLogger to Logger
+    default 4  # LOG_LEVEL_DBG
+    help
+      Sets the default compile-time log level for the shared 'logger' module
+      used by the Logger class. # Changed AppLogger to Logger
+      0=None, 1=Error, 2=Warning, 3=Info, 4=Debug.
+      This also serves as the default runtime level, which can be
+      further restricted by individual logger backends if runtime
+      filtering is enabled.
+
+endif # APP_UTILITIES_KCONFIG
