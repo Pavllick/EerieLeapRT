@@ -4,7 +4,7 @@
 #include "utilities/cbor/cbor_helpers.hpp"
 #include "configuration/system_config/system_config.h"
 #include "configuration/sensor_config/sensor_config.h"
-#include "configuration/services/configuration_service.hpp"
+#include "configuration/services/configuration_service.h"
 #include "domain/fs_domain/services/i_fs_service.h"
 #include "domain/fs_domain/services/fs_service.h"
 

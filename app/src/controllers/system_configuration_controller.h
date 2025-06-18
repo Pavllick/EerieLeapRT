@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "configuration/system_config/system_config.h"
-#include "configuration/services/configuration_service.hpp"
+#include "configuration/services/configuration_service.h"
 #include "domain/system_domain/system_configuration.h"
 
 namespace eerie_leap::controllers {

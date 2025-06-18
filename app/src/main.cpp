@@ -16,7 +16,7 @@
 #include "configuration/system_config/system_config.h"
 #include "configuration/adc_config/adc_config.h"
 #include "configuration/sensor_config/sensor_config.h"
-#include "configuration/services/configuration_service.hpp"
+#include "configuration/services/configuration_service.h"
 #include "controllers/sensors_configuration_controller.h"
 #include "controllers/adc_configuration_controller.h"
 #include "controllers/system_configuration_controller.h"
@@ -58,6 +58,8 @@ using namespace eerie_leap::configuration::services;
 #if defined(CONFIG_WIFI) || defined(CONFIG_NETWORKING)
 using namespace eerie_leap::domain::http_domain::services;
 #endif // CONFIG_WIFI || CONFIG_NETWORKING
+
+LOG_MODULE_REGISTER(main_logger);
 
 constexpr uint32_t SLEEP_TIME_MS = 10000;
 

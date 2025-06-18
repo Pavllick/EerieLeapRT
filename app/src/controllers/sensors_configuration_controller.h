@@ -6,7 +6,7 @@
 #include "utilities/math_parser/math_parser_service.hpp"
 #include <utilities/memory/heap_allocator.h>
 #include "configuration/sensor_config/sensor_config.h"
-#include "configuration/services/configuration_service.hpp"
+#include "configuration/services/configuration_service.h"
 #include "domain/sensor_domain/models/sensor.h"
 
 namespace eerie_leap::controllers {

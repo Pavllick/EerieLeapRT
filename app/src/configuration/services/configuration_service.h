@@ -17,8 +17,6 @@
 
 namespace eerie_leap::configuration::services {
 
-// TODO: Figure out logging without LOG_MODULE_REGISTER and LOG_INSTANCE_PTR_DECLARE
-
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::configuration::traits;
 using namespace eerie_leap::domain::fs_domain::services;
@@ -47,10 +45,12 @@ public:
     }
 
     bool Save(T* configuration) {
+        LOG_MODULE_DECLARE(configuration_service_logger);
+
         auto config_bytes = cbor_serializer_->Serialize(*configuration);
 
         if (!config_bytes) {
-            // LOG_ERR("Failed to serialize configuration!");
+            LOG_ERR("Failed to serialize configuration %s!", configuration_file_path_.c_str());
             return false;
         }
 
@@ -58,8 +58,10 @@ public:
     }
 
     std::optional<LoadedConfig<T>> Load() {
+        LOG_MODULE_DECLARE(configuration_service_logger);
+
         if (!fs_service_->Exists(configuration_file_path_)) {
-            // LOG_ERR("Configuration file does not exist!");
+            LOG_ERR("Configuration file %s does not exist!", configuration_file_path_.c_str());
             return std::nullopt;
         }
 
@@ -67,7 +69,7 @@ public:
         size_t out_len = 0;
 
         if (!fs_service_->ReadFile(configuration_file_path_, buffer->data(), load_buffer_size_, out_len)) {
-            // LOG_ERR("Failed to read configuration file!");
+            LOG_ERR("Failed to read configuration file %s!", configuration_file_path_.c_str());
             return std::nullopt;
         }
 
@@ -77,7 +79,7 @@ public:
         buffer->resize(out_len);
 
         if (!configuration.has_value()) {
-            // LOG_ERR("Failed to deserialize configuration!");
+            LOG_ERR("Failed to deserialize configuration %s!", configuration_file_path_.c_str());
             return std::nullopt;
         }
 
@@ -87,6 +89,8 @@ public:
             .config_raw = buffer,
             .config = config
         };
+
+        LOG_INF("%s configuration loaded successfully.", configuration_file_path_.c_str());
 
         return loaded_config;
     }

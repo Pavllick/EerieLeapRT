@@ -3,7 +3,7 @@
 #include <zephyr/ztest.h>
 
 #include "configuration/adc_config/adc_config.h"
-#include "configuration/services/configuration_service.hpp"
+#include "configuration/services/configuration_service.h"
 #include "controllers/adc_configuration_controller.h"
 #include "domain/fs_domain/services/fs_service.h"
 #include "controllers/adc_configuration_controller.h"

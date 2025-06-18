@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "configuration/adc_config/adc_config.h"
-#include "configuration/services/configuration_service.hpp"
+#include "configuration/services/configuration_service.h"
 #include "domain/hardware/adc_domain/adc_configuration.h"
 
 namespace eerie_leap::controllers {

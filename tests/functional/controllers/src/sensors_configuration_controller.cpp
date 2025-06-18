@@ -8,7 +8,7 @@
 #include "utilities/math_parser/math_parser_service.hpp"
 #include "configuration/system_config/system_config.h"
 #include "configuration/sensor_config/sensor_config.h"
-#include "configuration/services/configuration_service.hpp"
+#include "configuration/services/configuration_service.h"
 #include "controllers/sensors_configuration_controller.h"
 #include "domain/fs_domain/services/i_fs_service.h"
 #include "domain/fs_domain/services/fs_service.h"

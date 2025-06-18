@@ -35,10 +35,10 @@ set(APP_SRC_DOMAIN_DIR ${APP_SRC_DIR}/domain)
 file(GLOB_RECURSE APP_SRC_DOMAIN
   ${APP_SRC_DOMAIN_DIR}/hardware/adc_domain/*.c
   ${APP_SRC_DOMAIN_DIR}/hardware/adc_domain/*.cpp
-  ${APP_SRC_DOMAIN_DIR}/fs_domain/*.c
-  ${APP_SRC_DOMAIN_DIR}/fs_domain/*.cpp
   ${APP_SRC_DOMAIN_DIR}/hardware/gpio_domain/*.c
   ${APP_SRC_DOMAIN_DIR}/hardware/gpio_domain/*.cpp
+  ${APP_SRC_DOMAIN_DIR}/fs_domain/*.c
+  ${APP_SRC_DOMAIN_DIR}/fs_domain/*.cpp
   ${APP_SRC_DOMAIN_DIR}/sensor_domain/*.c
   ${APP_SRC_DOMAIN_DIR}/sensor_domain/*.cpp
   ${APP_SRC_DOMAIN_DIR}/system_domain/*.c
