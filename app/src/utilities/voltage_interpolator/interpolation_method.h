@@ -4,7 +4,9 @@
 #include <array>
 #include <stdexcept>
 
-namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolator {
+#include "interpolation_method.h"
+
+namespace eerie_leap::utilities::voltage_interpolator {
 
 using namespace std::string_view_literals;
 
@@ -32,4 +34,4 @@ inline InterpolationMethod GetInterpolationMethod(const std::string& name) {
     throw std::runtime_error("Invalid interpolation method type.");
 }
 
-} // namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolator
+} // namespace eerie_leap::utilities::voltage_interpolator

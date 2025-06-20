@@ -1,19 +1,16 @@
 #pragma once
 
 #include <memory>
-#include <vector>
 #include <optional>
-#include <string>
 
-#include "calibration_data.h"
-#include "sensor_type.h"
 #include "utilities/math_parser/expression_evaluator.h"
-#include "domain/sensor_domain/utilities/voltage_interpolator/i_voltage_interpolator.h"
+#include "utilities/voltage_interpolator/i_voltage_interpolator.h"
+#include "sensor_type.h"
 
 namespace eerie_leap::domain::sensor_domain::models {
 
 using namespace eerie_leap::utilities::math_parser;
-using namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolator;
+using namespace eerie_leap::utilities::voltage_interpolator;
 
 struct SensorConfiguration {
     SensorType type;

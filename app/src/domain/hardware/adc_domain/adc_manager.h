@@ -11,10 +11,12 @@
 
 #include "i_adc.h"
 #include "adc.h"
-#include "adc_configuration.h"
+#include "domain/hardware/adc_domain/models/adc_configuration.h"
 #include "adc_dt_info.h"
 
 namespace eerie_leap::domain::hardware::adc_domain {
+
+using namespace eerie_leap::domain::hardware::adc_domain::models;
 
 #define ADC_NODE(idx) DT_ALIAS(adc ## idx)
 

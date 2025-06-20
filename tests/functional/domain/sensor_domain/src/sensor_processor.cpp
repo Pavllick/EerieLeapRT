@@ -3,7 +3,7 @@
 #include "utilities/guid/guid_generator.h"
 #include "utilities/time/boot_elapsed_time_service.h"
 #include "utilities/math_parser/math_parser_service.hpp"
-#include "domain/hardware/adc_domain/adc_configuration.h"
+#include "domain/hardware/adc_domain/models/adc_configuration.h"
 #include "domain/hardware/adc_domain/i_adc.h"
 #include "domain/hardware/adc_domain/adc_simulator.h"
 #include "domain/hardware/gpio_domain/i_gpio.h"
@@ -15,19 +15,20 @@
 
 #include "domain/sensor_domain/models/sensor.h"
 #include "domain/sensor_domain/models/reading_status.h"
-#include "domain/sensor_domain/utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
-#include "domain/sensor_domain/utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
+#include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
+#include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
 
 using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::utilities::math_parser;
 using namespace eerie_leap::domain::hardware::adc_domain;
+using namespace eerie_leap::domain::hardware::adc_domain::models;
 using namespace eerie_leap::domain::hardware::gpio_domain;
 using namespace eerie_leap::domain::sensor_domain::processors;
 
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::domain::sensor_domain::utilities;
-using namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolator;
+using namespace eerie_leap::utilities::voltage_interpolator;
 
 ZTEST_SUITE(sensor_processor, NULL, NULL, NULL, NULL, NULL);
 

@@ -3,8 +3,8 @@
 #include "sensors_configuration_controller.h"
 #include "utilities/cbor/cbor_helpers.hpp"
 #include "domain/sensor_domain/utilities/sensors_order_resolver.h"
-#include "domain/sensor_domain/utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
-#include "domain/sensor_domain/utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
+#include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
+#include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
 
 namespace eerie_leap::controllers {
 
@@ -12,7 +12,7 @@ LOG_MODULE_REGISTER(sensors_config_ctrl_logger);
 
 using namespace eerie_leap::utilities::cbor;
 using namespace eerie_leap::domain::sensor_domain::utilities;
-using namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolator;
+using namespace eerie_leap::utilities::voltage_interpolator;
 
 SensorsConfigurationController::SensorsConfigurationController(
     std::shared_ptr<MathParserService> math_parser_service,

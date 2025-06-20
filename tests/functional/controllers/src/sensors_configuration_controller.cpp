@@ -12,14 +12,16 @@
 #include "controllers/sensors_configuration_controller.h"
 #include "domain/fs_domain/services/i_fs_service.h"
 #include "domain/fs_domain/services/fs_service.h"
-#include "domain/sensor_domain/utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
-#include "domain/sensor_domain/utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
+#include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
+#include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
 
 using namespace eerie_leap::utilities::cbor;
 using namespace eerie_leap::utilities::math_parser;
 using namespace eerie_leap::configuration::services;
 using namespace eerie_leap::domain::fs_domain::services;
 using namespace eerie_leap::controllers;
+using namespace eerie_leap::domain::sensor_domain::models;
+using namespace eerie_leap::utilities::voltage_interpolator;
 
 ZTEST_SUITE(sensors_configuration_controller, NULL, NULL, NULL, NULL, NULL);
 

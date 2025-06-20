@@ -1,11 +1,9 @@
 #include <zephyr/ztest.h>
 
-#include "domain/sensor_domain/models/sensor.h"
-#include "domain/sensor_domain/utilities/voltage_interpolator/interpolation_method.h"
-#include "domain/sensor_domain/utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
+#include "utilities/voltage_interpolator/interpolation_method.h"
+#include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 
-using namespace eerie_leap::domain::sensor_domain::models;
-using namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolator;
+using namespace eerie_leap::utilities::voltage_interpolator;
 
 ZTEST_SUITE(linear_voltage_interpolator, NULL, NULL, NULL, NULL, NULL);
 

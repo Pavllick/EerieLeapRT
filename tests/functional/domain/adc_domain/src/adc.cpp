@@ -4,11 +4,12 @@
 
 #include <stdio.h>
 
-#include "domain/hardware/adc_domain/adc_configuration.h"
+#include "domain/hardware/adc_domain/models/adc_configuration.h"
 #include "domain/hardware/adc_domain/adc_simulator.h"
 #include "domain/hardware/adc_domain/adc_emulator.h"
 
 using namespace eerie_leap::domain::hardware::adc_domain;
+using namespace eerie_leap::domain::hardware::adc_domain::models;
 
 ZTEST_SUITE(adc, NULL, NULL, NULL, NULL, NULL);
 

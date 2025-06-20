@@ -1,15 +1,15 @@
-#include "domain/sensor_domain/utilities/voltage_interpolator/interpolation_method.h"
+#include "utilities/voltage_interpolator/interpolation_method.h"
 #include "utilities/memory/heap_allocator.h"
 #include "domain/sensor_domain/models/sensor.h"
-#include "domain/sensor_domain/utilities/voltage_interpolator/interpolation_method.h"
-#include "domain/sensor_domain/utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
-#include "domain/sensor_domain/utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
+#include "utilities/voltage_interpolator/interpolation_method.h"
+#include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
+#include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
 #include "sensors_api_controller.h"
 
 namespace eerie_leap::domain::http_domain::controllers::api {
 
 using namespace eerie_leap::utilities::memory;
-using namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolator;
+using namespace eerie_leap::utilities::voltage_interpolator;
 
 std::shared_ptr<ExtVector> SensorsApiController::sensors_config_post_buffer_;
 std::shared_ptr<ExtVector> SensorsApiController::sensors_config_get_buffer_;

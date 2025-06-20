@@ -24,12 +24,12 @@
 // Test sensors includes
 #include "utilities/math_parser/expression_evaluator.h"
 #include "domain/sensor_domain/models/sensor.h"
-#include "domain/sensor_domain/models/calibration_data.h"
 
-#include "domain/sensor_domain/utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
-#include "domain/sensor_domain/utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
+#include "utilities/voltage_interpolator/calibration_data.h"
+#include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
+#include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
 
-using namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolator;
+using namespace eerie_leap::utilities::voltage_interpolator;
 using namespace eerie_leap::domain::sensor_domain::models;
 // End test sensors
 

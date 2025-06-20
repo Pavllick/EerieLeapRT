@@ -5,11 +5,10 @@
 #include <algorithm>
 
 #include "i_voltage_interpolator.h"
-#include "domain/sensor_domain/models/calibration_data.h"
+#include "calibration_data.h"
+#include "interpolation_method.h"
 
-namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolator {
-
-using namespace eerie_leap::domain::sensor_domain::models;
+namespace eerie_leap::utilities::voltage_interpolator {
 
 class CubicSplineVoltageInterpolator : public IVoltageInterpolator {
 private:
@@ -94,4 +93,4 @@ public:
     }
 };
 
-} // namespace eerie_leap::domain::sensor_domain::utilities::voltage_interpolator
+} // namespace eerie_leap::utilities::voltage_interpolator
