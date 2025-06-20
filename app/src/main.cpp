@@ -80,7 +80,7 @@ int main(void) {
 
     auto adc = AdcFactory::Create();
     adc->UpdateConfiguration(AdcConfiguration{
-        .samples = 1
+        .samples = 40
     });
     adc->Initialize();
 

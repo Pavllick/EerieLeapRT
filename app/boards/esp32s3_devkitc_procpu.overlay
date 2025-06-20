@@ -83,8 +83,8 @@
 	#address-cells = <1>;
 	#size-cells = <0>;
 
-	channel@4 {
-		reg = <4>;
+	channel@2 {
+		reg = <2>;
 		zephyr,gain = "ADC_GAIN_1_4";
 		zephyr,reference = "ADC_REF_INTERNAL";
 		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
@@ -99,8 +99,8 @@
 		zephyr,resolution = <12>;
 	};
 
-    channel@2 {
-		reg = <2>;
+    channel@4 {
+		reg = <4>;
 		zephyr,gain = "ADC_GAIN_1_4";
 		zephyr,reference = "ADC_REF_INTERNAL";
 		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;

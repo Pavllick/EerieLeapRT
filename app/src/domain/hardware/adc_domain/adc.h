@@ -26,9 +26,8 @@ protected:
     const device* adc_device_;
     std::vector<adc_sequence> sequences_;
     adc_sequence_options sequence_options_;
-    std::unique_ptr<uint16_t[]> samples_buffer_;
+    uint32_t samples_buffer_ = 0;
     std::unordered_set<uint8_t> available_channels_;
-    uint16_t GetReding();
 
 public:
     Adc(AdcDTInfo adc_dt_info) {

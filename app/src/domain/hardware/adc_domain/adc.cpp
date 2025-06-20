@@ -49,19 +49,21 @@ int Adc::Initialize() {
 void Adc::UpdateConfiguration(AdcConfiguration config) {
     adc_config_ = config;
 
-	samples_buffer_ = std::make_unique<uint16_t[]>(adc_config_->samples);
+	// NOTE: ESP32-S3's ADC doens't support sampling,
+	// I'm not sure how commonly it is supported by other ADCs
+	// thus currently sampling is done manually
 
 	sequence_options_ = {
 		.interval_us = 0,
-		.extra_samplings = static_cast<uint16_t>(adc_config_->samples - 1),
+		.extra_samplings = 0
 	};
 
 	sequences_.clear();
 	for(size_t i = 0U; i < channel_configs_.size(); i++) {
 		sequences_.push_back({
 			.options     = &sequence_options_,
-			.buffer      = samples_buffer_.get(),
-			.buffer_size = sizeof(uint16_t) * adc_config_->samples,
+			.buffer      = &samples_buffer_,
+			.buffer_size = sizeof(samples_buffer_),
 			.resolution  = resolutions_[i],
 		});
 	}
@@ -70,7 +72,7 @@ void Adc::UpdateConfiguration(AdcConfiguration config) {
 }
 
 float Adc::ReadChannel(int channel) {
-    if(!adc_config_)
+	if(!adc_config_)
         throw std::runtime_error("ADC config is not set!");
 
     if(channel < 0 || channel > GetChannelCount())
@@ -78,13 +80,20 @@ float Adc::ReadChannel(int channel) {
 
 	sequences_[channel].channels = BIT(channel_configs_[channel].channel_id);
 
-    int err = adc_read(adc_device_, &sequences_[channel]);
+	uint64_t accumulator = 0;
+	int err = 0;
+
+    for(int i = 0; i < adc_config_->samples; i++) {
+		err += adc_read(adc_device_, &sequences_[channel]);
+		accumulator += samples_buffer_;
+	}
+
     if(err < 0) {
         LOG_ERR("Can not read channel: %d, error: (%d)\n", channel, err);
 		return 0;
     }
 
-	int32_t val_mv = GetReding();
+	int32_t val_mv = static_cast<int32_t>(accumulator / adc_config_->samples);
 	err = adc_raw_to_millivolts(references_mv_[channel], channel_configs_[channel].gain, sequences_[channel].resolution, &val_mv);
 
 	if((err < 0) || references_mv_[channel] == 0) {
@@ -93,12 +102,6 @@ float Adc::ReadChannel(int channel) {
 	}
 
     return (float)val_mv / 1000.0f;
-}
-
-uint16_t Adc::GetReding() {
-	uint16_t value = std::accumulate(samples_buffer_.get(), samples_buffer_.get() + adc_config_->samples, 0, std::plus<int>());
-
-	return value / adc_config_->samples;
 }
 
 inline int Adc::GetChannelCount() {
