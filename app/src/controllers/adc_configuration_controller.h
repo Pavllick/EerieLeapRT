@@ -13,18 +13,18 @@ using namespace eerie_leap::configuration::services;
 using namespace eerie_leap::domain::hardware::adc_domain;
 using namespace eerie_leap::domain::hardware::adc_domain::models;
 
-class AdcsConfigurationController {
+class AdcConfigurationController {
 private:
-    std::shared_ptr<ConfigurationService<AdcsConfig>> adcs_configuration_service_;
+    std::shared_ptr<ConfigurationService<AdcConfig>> adc_configuration_service_;
     std::shared_ptr<IAdcManager> adc_manager_;
-    std::shared_ptr<ExtVector> adcs_config_raw_;
-    std::shared_ptr<AdcsConfig> adcs_config_;
-    std::shared_ptr<std::vector<std::shared_ptr<AdcConfiguration>>> adcs_configuration_;
+    std::shared_ptr<ExtVector> adc_config_raw_;
+    std::shared_ptr<AdcConfig> adc_config_;
+    std::shared_ptr<AdcConfiguration> adc_configuration_;
 
 public:
-    AdcsConfigurationController(std::shared_ptr<ConfigurationService<AdcsConfig>> adcs_configuration_service, std::shared_ptr<IAdcManager> adc_manager);
+    AdcConfigurationController(std::shared_ptr<ConfigurationService<AdcConfig>> adc_configuration_service, std::shared_ptr<IAdcManager> adc_manager);
 
-    bool Update(const std::shared_ptr<std::vector<std::shared_ptr<AdcConfiguration>>>& adcs_configuration);
+    bool Update(const std::shared_ptr<AdcConfiguration>& adc_configuration);
     std::shared_ptr<IAdcManager> Get(bool force_load = false);
 };
 

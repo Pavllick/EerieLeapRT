@@ -9,7 +9,7 @@
 
 #include "utilities/memory/heap_allocator.h"
 #include "configuration/cbor_traits/system_config_trait.h"
-#include "configuration/cbor_traits/adcs_config_trait.h"
+#include "configuration/cbor_traits/adc_config_trait.h"
 #include "configuration/cbor_traits/sensors_config_trait.h"
 #include "domain/fs_domain/services/i_fs_service.h"
 #include "utilities/cbor/cbor_serializer.hpp"

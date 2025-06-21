@@ -22,9 +22,9 @@ extern "C" {
 #endif
 
 
-int cbor_encode_AdcsConfig(
+int cbor_encode_AdcConfig(
 		uint8_t *payload, size_t payload_len,
-		const struct AdcsConfig *input,
+		const struct AdcConfig *input,
 		size_t *payload_len_out);
 
 

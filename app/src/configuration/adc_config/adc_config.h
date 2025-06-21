@@ -10,7 +10,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include <zcbor_common.h>
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,17 +35,16 @@ struct AdcCalibrationDataMap {
 	size_t float32float_count;
 };
 
-struct AdcConfig {
-	struct zcbor_string name;
-	uint32_t samples;
+struct AdcChannelConfig {
 	uint32_t interpolation_method;
 	struct AdcCalibrationDataMap calibration_table;
 	bool calibration_table_present;
 };
 
-struct AdcsConfig {
-	struct AdcConfig AdcConfig_m[24];
-	size_t AdcConfig_m_count;
+struct AdcConfig {
+	uint32_t samples;
+	struct AdcChannelConfig AdcChannelConfig_m[24];
+	size_t AdcChannelConfig_m_count;
 };
 
 #ifdef __cplusplus

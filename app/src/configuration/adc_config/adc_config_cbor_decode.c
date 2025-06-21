@@ -27,8 +27,8 @@
 
 static bool decode_repeated_AdcCalibrationDataMap_float32float(zcbor_state_t *state, struct AdcCalibrationDataMap_float32float *result);
 static bool decode_AdcCalibrationDataMap(zcbor_state_t *state, struct AdcCalibrationDataMap *result);
+static bool decode_AdcChannelConfig(zcbor_state_t *state, struct AdcChannelConfig *result);
 static bool decode_AdcConfig(zcbor_state_t *state, struct AdcConfig *result);
-static bool decode_AdcsConfig(zcbor_state_t *state, struct AdcsConfig *result);
 
 
 static bool decode_repeated_AdcCalibrationDataMap_float32float(
@@ -61,32 +61,31 @@ static bool decode_AdcCalibrationDataMap(
 	return res;
 }
 
-static bool decode_AdcConfig(
-		zcbor_state_t *state, struct AdcConfig *result)
+static bool decode_AdcChannelConfig(
+		zcbor_state_t *state, struct AdcChannelConfig *result)
 {
 	zcbor_log("%s\r\n", __func__);
 
-	bool res = (((zcbor_list_start_decode(state) && ((((zcbor_tstr_decode(state, (&(*result).name))))
-	&& ((zcbor_uint32_decode(state, (&(*result).samples))))
-	&& ((zcbor_uint32_decode(state, (&(*result).interpolation_method))))
+	bool res = (((zcbor_list_start_decode(state) && ((((zcbor_uint32_decode(state, (&(*result).interpolation_method))))
 	&& ((*result).calibration_table_present = ((decode_AdcCalibrationDataMap(state, (&(*result).calibration_table)))), 1)) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
 
 	log_result(state, res, __func__);
 	return res;
 }
 
-static bool decode_AdcsConfig(
-		zcbor_state_t *state, struct AdcsConfig *result)
+static bool decode_AdcConfig(
+		zcbor_state_t *state, struct AdcConfig *result)
 {
 	zcbor_log("%s\r\n", __func__);
 
-	bool res = (((zcbor_list_start_decode(state) && ((((zcbor_list_start_decode(state) && ((zcbor_multi_decode(0, 24, &(*result).AdcConfig_m_count, (zcbor_decoder_t *)decode_AdcConfig, state, (*&(*result).AdcConfig_m), sizeof(struct AdcConfig))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state)))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
+	bool res = (((zcbor_list_start_decode(state) && ((((zcbor_uint32_decode(state, (&(*result).samples))))
+	&& ((zcbor_list_start_decode(state) && ((zcbor_multi_decode(0, 24, &(*result).AdcChannelConfig_m_count, (zcbor_decoder_t *)decode_AdcChannelConfig, state, (*&(*result).AdcChannelConfig_m), sizeof(struct AdcChannelConfig))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state)))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
 
 	if (false) {
 		/* For testing that the types of the arguments are correct.
 		 * A compiler error here means a bug in zcbor.
 		 */
-		decode_AdcConfig(state, (*&(*result).AdcConfig_m));
+		decode_AdcChannelConfig(state, (*&(*result).AdcChannelConfig_m));
 	}
 
 	log_result(state, res, __func__);
@@ -95,13 +94,13 @@ static bool decode_AdcsConfig(
 
 
 
-int cbor_decode_AdcsConfig(
+int cbor_decode_AdcConfig(
 		const uint8_t *payload, size_t payload_len,
-		struct AdcsConfig *result,
+		struct AdcConfig *result,
 		size_t *payload_len_out)
 {
 	zcbor_state_t states[6];
 
 	return zcbor_entry_function(payload, payload_len, (void *)result, payload_len_out, states,
-		(zcbor_decoder_t *)decode_AdcsConfig, sizeof(states) / sizeof(zcbor_state_t), 1);
+		(zcbor_decoder_t *)decode_AdcConfig, sizeof(states) / sizeof(zcbor_state_t), 1);
 }

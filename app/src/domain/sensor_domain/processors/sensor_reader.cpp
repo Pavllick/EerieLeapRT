@@ -11,20 +11,20 @@ using namespace eerie_leap::domain::sensor_domain::models;
 SensorReader::SensorReader(
     std::shared_ptr<ITimeService> time_service,
     std::shared_ptr<GuidGenerator> guid_generator,
-    std::shared_ptr<AdcsConfigurationController> adcs_configuration_controller,
+    std::shared_ptr<AdcConfigurationController> adc_configuration_controller,
     std::shared_ptr<IGpio> gpio,
     std::shared_ptr<SensorReadingsFrame> readings_frame,
     std::shared_ptr<Sensor> sensor)
         : time_service_(std::move(time_service)),
         guid_generator_(std::move(guid_generator)),
-        adcs_configuration_controller_(std::move(adcs_configuration_controller)),
+        adc_configuration_controller_(std::move(adc_configuration_controller)),
         gpio_(std::move(gpio)),
         readings_frame_(std::move(readings_frame)),
         sensor_(std::move(sensor)) {
 
             if(sensor_->configuration.type == SensorType::PHYSICAL_ANALOG) {
-                adc_manager_ = adcs_configuration_controller_->Get();
-                adc_configuration_ = adc_manager_->GetAdcForChannel(sensor_->configuration.channel.value())->GetConfiguration();
+                adc_manager_ = adc_configuration_controller_->Get();
+                adc_channel_configuration_ = adc_manager_->GetChannelConfiguration(sensor_->configuration.channel.value());
             }
         }
 
@@ -34,7 +34,7 @@ void SensorReader::Read() {
 
     if (sensor_->configuration.type == SensorType::PHYSICAL_ANALOG) {
         float voltage = adc_manager_->ReadChannel(sensor_->configuration.channel.value());
-        float voltage_calibrated = adc_configuration_->voltage_interpolator->Interpolate(voltage);
+        float voltage_calibrated = adc_channel_configuration_->voltage_interpolator->Interpolate(voltage);
 
         reading->value = voltage_calibrated;
         reading->status = ReadingStatus::RAW;

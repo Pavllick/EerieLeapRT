@@ -6,7 +6,7 @@
 #include "utilities/time/i_time_service.h"
 #include "utilities/guid/guid_generator.h"
 #include "controllers/sensors_configuration_controller.h"
-#include "controllers/adcs_configuration_controller.h"
+#include "controllers/adc_configuration_controller.h"
 #include "domain/hardware/gpio_domain/i_gpio.h"
 
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
@@ -35,7 +35,7 @@ private:
     std::shared_ptr<GuidGenerator> guid_generator_;
     std::shared_ptr<IAdcManager> adc_manager_;
     std::shared_ptr<IGpio> gpio_;
-    std::shared_ptr<AdcsConfigurationController> adcs_configuration_controller_;
+    std::shared_ptr<AdcConfigurationController> adc_configuration_controller_;
     std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller_;
 
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame_;
@@ -52,7 +52,7 @@ public:
         std::shared_ptr<GuidGenerator> guid_generator,
         std::shared_ptr<IAdcManager> adc_manager,
         std::shared_ptr<IGpio> gpio,
-        std::shared_ptr<AdcsConfigurationController> adcs_configuration_controller,
+        std::shared_ptr<AdcConfigurationController> adc_configuration_controller,
         std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller);
 
     void Start();

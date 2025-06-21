@@ -8,9 +8,9 @@
 namespace eerie_leap::configuration::traits {
 
 template <>
-struct CborTrait<AdcsConfig> {
-    static constexpr auto Encode = cbor_encode_AdcsConfig;
-    static constexpr auto Decode = cbor_decode_AdcsConfig;
+struct CborTrait<AdcConfig> {
+    static constexpr auto Encode = cbor_encode_AdcConfig;
+    static constexpr auto Decode = cbor_decode_AdcConfig;
 };
 
 } // namespace eerie_leap::configuration::traits

@@ -18,7 +18,7 @@
 #include "configuration/sensor_config/sensor_config.h"
 #include "configuration/services/configuration_service.h"
 #include "controllers/sensors_configuration_controller.h"
-#include "controllers/adcs_configuration_controller.h"
+#include "controllers/adc_configuration_controller.h"
 #include "controllers/system_configuration_controller.h"
 
 // Test sensors includes
@@ -75,7 +75,7 @@ int main(void) {
     auto math_parser_service = make_shared_ext<MathParserService>();
 
     auto system_config_service = make_shared_ext<ConfigurationService<SystemConfig>>("system_config", fs_service);
-    auto adcs_config_service = make_shared_ext<ConfigurationService<AdcsConfig>>("adcs_config", fs_service);
+    auto adc_config_service = make_shared_ext<ConfigurationService<AdcConfig>>("adc_config", fs_service);
     auto sensors_config_service = make_shared_ext<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
 
     auto adc = AdcFactory::Create();
@@ -88,19 +88,25 @@ int main(void) {
     auto adc_calibration_data_ptr = make_shared_ext<std::vector<CalibrationData>>(adc_calibration_data);
     auto adc_voltage_interpolator = make_shared_ext<LinearVoltageInterpolator>(adc_calibration_data_ptr);
 
-    auto adcs_configuration = make_shared_ext<std::vector<std::shared_ptr<AdcConfiguration>>>();
-    adcs_configuration->push_back(std::make_shared<AdcConfiguration>(AdcConfiguration {
-        .samples = 40,
-        .voltage_interpolator = adc_voltage_interpolator
-    }));
-    adcs_configuration->push_back(std::make_shared<AdcConfiguration>(AdcConfiguration {
-        .samples = 40,
-        .voltage_interpolator = adc_voltage_interpolator
-    }));
+    std::vector<std::shared_ptr<AdcChannelConfiguration>> channel_configurations = {
+        std::make_shared<AdcChannelConfiguration>(adc_voltage_interpolator),
+        std::make_shared<AdcChannelConfiguration>(adc_voltage_interpolator),
+        std::make_shared<AdcChannelConfiguration>(adc_voltage_interpolator),
+        std::make_shared<AdcChannelConfiguration>(adc_voltage_interpolator),
+        std::make_shared<AdcChannelConfiguration>(adc_voltage_interpolator),
+        std::make_shared<AdcChannelConfiguration>(adc_voltage_interpolator),
+        std::make_shared<AdcChannelConfiguration>(adc_voltage_interpolator),
+        std::make_shared<AdcChannelConfiguration>(adc_voltage_interpolator),
+    };
 
-    auto adcs_configuration_controller = make_shared_ext<AdcsConfigurationController>(adcs_config_service, adc);
+    auto adc_configuration = make_shared_ext<AdcConfiguration>();
+    adc_configuration->samples = 40;
+    adc_configuration->channel_configurations =
+        std::make_shared<std::vector<std::shared_ptr<AdcChannelConfiguration>>>(channel_configurations);
 
-    if(!adcs_configuration_controller->Update(adcs_configuration))
+    auto adc_configuration_controller = make_shared_ext<AdcConfigurationController>(adc_config_service, adc);
+
+    if(!adc_configuration_controller->Update(adc_configuration))
         throw std::runtime_error("Cannot save ADCs config");
 
     auto gpio = GpioFactory::Create();
@@ -116,7 +122,7 @@ int main(void) {
         guid_generator,
         adc,
         gpio,
-        adcs_configuration_controller,
+        adc_configuration_controller,
         sensors_configuration_controller);
     processing_scheduler_service->Start();
 
@@ -131,7 +137,7 @@ int main(void) {
     HttpServer http_server(
         math_parser_service,
         system_configuration_controller,
-        adcs_configuration_controller,
+        adc_configuration_controller,
         sensors_configuration_controller,
         processing_scheduler_service);
     http_server.Start();

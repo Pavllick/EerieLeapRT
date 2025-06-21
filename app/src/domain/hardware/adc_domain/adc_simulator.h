@@ -1,8 +1,12 @@
 #pragma once
 
+#include <memory>
+#include <vector>
+
 #include <zephyr/drivers/adc/adc_emul.h>
 #include <zephyr/random/random.h>
 
+#include "i_adc.h"
 #include "i_adc_manager.h"
 #include "domain/hardware/adc_domain/models/adc_configuration.h"
 
@@ -12,25 +16,27 @@ using namespace eerie_leap::domain::hardware::adc_domain::models;
 
 class AdcSimulator : public IAdc {
 private:
-    std::shared_ptr<AdcConfiguration> adc_configuration_;
+    uint16_t samples_ = 0;
+    std::shared_ptr<AdcChannelConfiguration> adc_channel_configuration_ = nullptr;
 
 public:
     AdcSimulator() = default;
     ~AdcSimulator() = default;
 
     int Initialize() override;
-    void UpdateConfiguration(std::shared_ptr<AdcConfiguration> adc_configuration) override;
-    std::shared_ptr<AdcConfiguration> GetConfiguration() override;
+    void UpdateConfiguration(uint16_t samples) override;
     float ReadChannel(int channel) override;
     int GetChannelCount() override;
 };
 
 class AdcSimulatorManager : public IAdcManager {
     private:
+        std::shared_ptr<std::vector<std::shared_ptr<AdcChannelConfiguration>>> adc_channel_configuration_;
         std::shared_ptr<IAdc> adc_;
 
     public:
         AdcSimulatorManager() {
+            adc_channel_configuration_ = nullptr;
             adc_ = std::make_shared<AdcSimulator>();
         }
 
@@ -38,12 +44,12 @@ class AdcSimulatorManager : public IAdcManager {
             return adc_->Initialize();
         }
 
-        void UpdateConfigurations(std::shared_ptr<std::vector<std::shared_ptr<AdcConfiguration>>>& adc_configurations) override {
-            adc_->UpdateConfiguration(adc_configurations->at(0));
+        void UpdateConfiguration(std::shared_ptr<AdcConfiguration>& adc_configuration) override {
+            adc_->UpdateConfiguration(adc_configuration->samples);
         }
 
-        std::shared_ptr<IAdc> GetAdcForChannel(int channel) override {
-            return adc_;
+        std::shared_ptr<AdcChannelConfiguration> GetChannelConfiguration(int channel) override {
+            return adc_channel_configuration_->at(channel);
         }
 
         float ReadChannel(int channel) override {

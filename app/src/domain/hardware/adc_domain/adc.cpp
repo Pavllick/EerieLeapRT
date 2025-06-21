@@ -46,8 +46,8 @@ int Adc::Initialize() {
     return 0;
 }
 
-void Adc::UpdateConfiguration(std::shared_ptr<AdcConfiguration> adc_configuration) {
-    adc_configuration_ = adc_configuration;
+void Adc::UpdateConfiguration(uint16_t samples) {
+    samples_ = samples;
 
 	// NOTE: ESP32-S3's ADC doens't support sampling,
 	// I'm not sure how commonly it is supported by other ADCs
@@ -71,15 +71,8 @@ void Adc::UpdateConfiguration(std::shared_ptr<AdcConfiguration> adc_configuratio
     LOG_INF("Adc configuration updated.");
 }
 
-std::shared_ptr<AdcConfiguration> Adc::GetConfiguration() {
-    return adc_configuration_;
-}
-
 float Adc::ReadChannel(int channel) {
-	if(adc_configuration_ == nullptr)
-        throw std::runtime_error("ADC config is not set!");
-
-    if(channel < 0 || channel > GetChannelCount())
+	if(channel < 0 || channel > GetChannelCount())
         throw std::invalid_argument("ADC channel is not available.");
 
 	sequences_[channel].channels = BIT(channel_configs_[channel].channel_id);
@@ -87,7 +80,7 @@ float Adc::ReadChannel(int channel) {
 	uint64_t accumulator = 0;
 	int err = 0;
 
-    for(int i = 0; i < adc_configuration_->samples; i++) {
+    for(int i = 0; i < samples_; i++) {
 		err += adc_read(adc_device_, &sequences_[channel]);
 		accumulator += samples_buffer_;
 	}
@@ -97,7 +90,7 @@ float Adc::ReadChannel(int channel) {
 		return 0;
     }
 
-	int32_t val_mv = static_cast<int32_t>(accumulator / adc_configuration_->samples);
+	int32_t val_mv = static_cast<int32_t>(accumulator / samples_);
 	err = adc_raw_to_millivolts(references_mv_[channel], channel_configs_[channel].gain, sequences_[channel].resolution, &val_mv);
 
 	if((err < 0) || references_mv_[channel] == 0) {

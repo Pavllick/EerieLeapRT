@@ -24,7 +24,7 @@ private:
     std::vector<AdcDTInfo> adc_infos_;
     std::vector<std::shared_ptr<IAdc>> adcs_;
 
-    std::vector<int> adc_channel_map_;
+    std::shared_ptr<AdcConfiguration> adc_configuration_;
 
 public:
     AdcManager() {
@@ -74,30 +74,29 @@ public:
     }
 
     int Initialize() override {
-        for(int i = 0; i < adcs_.size(); i++) {
+        for(int i = 0; i < adcs_.size(); i++)
             adcs_[i]->Initialize();
-
-            for(int j = 0; j < adcs_[i]->GetChannelCount(); j++)
-                adc_channel_map_.push_back(i);
-        }
 
         return 0;
     }
 
-    void UpdateConfigurations(std::shared_ptr<std::vector<std::shared_ptr<AdcConfiguration>>>& adc_configurations) override {
-        if(adc_configurations->size() != adcs_.size())
-            throw std::runtime_error("ADC configuration size does not match ADC count");
+    void UpdateConfiguration(std::shared_ptr<AdcConfiguration>& adc_configuration) override {
+        adc_configuration_ = adc_configuration;
 
-        for(int i = 0; i < adcs_.size(); i++)
-            adcs_[i]->UpdateConfiguration(adc_configurations->at(i));
+        for(auto& adc : adcs_)
+            adc->UpdateConfiguration(adc_configuration->samples);
     }
 
-    std::shared_ptr<IAdc> GetAdcForChannel(int channel) override {
-        if(channel < 0 || channel >= adc_channel_map_.size())
-            throw std::invalid_argument("ADC channel out of range!");
+    std::shared_ptr<AdcChannelConfiguration> GetChannelConfiguration(int channel) override {
+        if(adc_configuration_ == nullptr
+            || adc_configuration_->channel_configurations == nullptr
+            || channel < 0
+            || channel >= adc_configuration_->channel_configurations->size()) {
 
-        int adc_index = adc_channel_map_[channel];
-        return adcs_[adc_index];
+            throw std::invalid_argument("ADC channel out of range!");
+        }
+
+        return adc_configuration_->channel_configurations->at(channel);
     }
 
     float ReadChannel(int channel) override {

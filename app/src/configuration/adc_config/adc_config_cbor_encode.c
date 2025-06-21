@@ -27,8 +27,8 @@
 
 static bool encode_repeated_AdcCalibrationDataMap_float32float(zcbor_state_t *state, const struct AdcCalibrationDataMap_float32float *input);
 static bool encode_AdcCalibrationDataMap(zcbor_state_t *state, const struct AdcCalibrationDataMap *input);
+static bool encode_AdcChannelConfig(zcbor_state_t *state, const struct AdcChannelConfig *input);
 static bool encode_AdcConfig(zcbor_state_t *state, const struct AdcConfig *input);
-static bool encode_AdcsConfig(zcbor_state_t *state, const struct AdcsConfig *input);
 
 
 static bool encode_repeated_AdcCalibrationDataMap_float32float(
@@ -54,26 +54,25 @@ static bool encode_AdcCalibrationDataMap(
 	return res;
 }
 
+static bool encode_AdcChannelConfig(
+		zcbor_state_t *state, const struct AdcChannelConfig *input)
+{
+	zcbor_log("%s\r\n", __func__);
+
+	bool res = (((zcbor_list_start_encode(state, 2) && ((((zcbor_uint32_encode(state, (&(*input).interpolation_method))))
+	&& (!(*input).calibration_table_present || encode_AdcCalibrationDataMap(state, (&(*input).calibration_table)))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 2))));
+
+	log_result(state, res, __func__);
+	return res;
+}
+
 static bool encode_AdcConfig(
 		zcbor_state_t *state, const struct AdcConfig *input)
 {
 	zcbor_log("%s\r\n", __func__);
 
-	bool res = (((zcbor_list_start_encode(state, 4) && ((((zcbor_tstr_encode(state, (&(*input).name))))
-	&& ((zcbor_uint32_encode(state, (&(*input).samples))))
-	&& ((zcbor_uint32_encode(state, (&(*input).interpolation_method))))
-	&& (!(*input).calibration_table_present || encode_AdcCalibrationDataMap(state, (&(*input).calibration_table)))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 4))));
-
-	log_result(state, res, __func__);
-	return res;
-}
-
-static bool encode_AdcsConfig(
-		zcbor_state_t *state, const struct AdcsConfig *input)
-{
-	zcbor_log("%s\r\n", __func__);
-
-	bool res = (((zcbor_list_start_encode(state, 1) && ((((zcbor_list_start_encode(state, 24) && ((zcbor_multi_encode_minmax(0, 24, &(*input).AdcConfig_m_count, (zcbor_encoder_t *)encode_AdcConfig, state, (*&(*input).AdcConfig_m), sizeof(struct AdcConfig))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 24)))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 1))));
+	bool res = (((zcbor_list_start_encode(state, 2) && ((((zcbor_uint32_encode(state, (&(*input).samples))))
+	&& ((zcbor_list_start_encode(state, 24) && ((zcbor_multi_encode_minmax(0, 24, &(*input).AdcChannelConfig_m_count, (zcbor_encoder_t *)encode_AdcChannelConfig, state, (*&(*input).AdcChannelConfig_m), sizeof(struct AdcChannelConfig))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 24)))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 2))));
 
 	log_result(state, res, __func__);
 	return res;
@@ -81,13 +80,13 @@ static bool encode_AdcsConfig(
 
 
 
-int cbor_encode_AdcsConfig(
+int cbor_encode_AdcConfig(
 		uint8_t *payload, size_t payload_len,
-		const struct AdcsConfig *input,
+		const struct AdcConfig *input,
 		size_t *payload_len_out)
 {
 	zcbor_state_t states[6];
 
 	return zcbor_entry_function(payload, payload_len, (void *)input, payload_len_out, states,
-		(zcbor_decoder_t *)encode_AdcsConfig, sizeof(states) / sizeof(zcbor_state_t), 1);
+		(zcbor_decoder_t *)encode_AdcConfig, sizeof(states) / sizeof(zcbor_state_t), 1);
 }
