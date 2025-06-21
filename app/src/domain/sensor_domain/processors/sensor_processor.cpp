@@ -20,7 +20,7 @@ void SensorProcessor::ProcessReading(std::shared_ptr<SensorReading> reading) {
     try {
         if(reading->sensor->configuration.type == SensorType::PHYSICAL_ANALOG) {
             float voltage = reading->value.value();
-            float raw_value = reading->sensor->configuration.voltage_interpolator->Interpolate(voltage);
+            float raw_value = reading->sensor->configuration.voltage_interpolator->Interpolate(voltage, true);
             float value = raw_value;
 
             if(reading->sensor->configuration.expression_evaluator != nullptr) {

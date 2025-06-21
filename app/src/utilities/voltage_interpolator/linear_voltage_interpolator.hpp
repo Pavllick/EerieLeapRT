@@ -19,18 +19,19 @@ public:
     explicit LinearVoltageInterpolator(const std::shared_ptr<std::vector<CalibrationData>>& calibration_table)
         : calibration_table_(std::move(calibration_table)) {
 
-            if(!calibration_table_ || calibration_table_->size() < 2)
-                throw std::invalid_argument("Calibration data is missing or invalid!");
-        }
+        if(!calibration_table_ || calibration_table_->size() < 2)
+            throw std::invalid_argument("Calibration data is missing or invalid!");
+    }
 
-    float Interpolate(float voltage) const override {
+    float Interpolate(float voltage, bool clamp_to_ends = false) const override {
         const auto& table = *calibration_table_;
 
-        // Edge cases: clamp to ends
-        if(voltage <= table.front().voltage)
-            return table.front().value;
-        if(voltage >= table.back().voltage)
-            return table.back().value;
+        if(clamp_to_ends) {
+            if(voltage <= table.front().voltage)
+                return table.front().value;
+            if(voltage >= table.back().voltage)
+                return table.back().value;
+        }
 
         // Binary search for the correct interval
         auto upper = std::lower_bound(

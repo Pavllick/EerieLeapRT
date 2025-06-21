@@ -67,13 +67,15 @@ public:
         }
     }
 
-    float Interpolate(float voltage) const override {
+    float Interpolate(float voltage, bool clamp_to_ends = false) const override {
         const auto& table = *calibration_table_;
 
-        if(voltage <= table.front().voltage)
-            return table.front().value;
-        if(voltage >= table.back().voltage)
-            return table.back().value;
+        if(clamp_to_ends) {
+            if(voltage <= table.front().voltage)
+                return table.front().value;
+            if(voltage >= table.back().voltage)
+                return table.back().value;
+        }
 
         auto it = std::upper_bound(table.begin(), table.end(), voltage,
             [](float val, const CalibrationData& d) { return val < d.voltage; });
