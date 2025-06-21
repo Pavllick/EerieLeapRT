@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include <zephyr/logging/log.h>
 #include <zephyr/drivers/adc/adc_emul.h>
 #include <zephyr/random/random.h>
@@ -19,9 +20,6 @@ int AdcEmulator::Initialize() {
 }
 
 float AdcEmulator::ReadChannel(int channel) {
-    if(channel < 0 || channel > GetChannelCount())
-        throw std::invalid_argument("ADC channel is not available.");
-
 #ifdef CONFIG_ADC_EMUL
     uint32_t raw = sys_rand32_get();
     uint16_t input_mv = static_cast<uint16_t>((static_cast<uint64_t>(raw) * 3301) >> 32);
@@ -32,7 +30,21 @@ float AdcEmulator::ReadChannel(int channel) {
     }
 #endif
 
-    return AdcManager::ReadChannel(channel);
+    int channel_index = channel;
+    for(auto& adc : adcs_) {
+        if(channel_index < adc->GetChannelCount())
+            return adc->ReadChannel(channel_index);
+        channel_index += adc->GetChannelCount();
+    }
+
+    throw std::invalid_argument("ADC channel out of range!");
+}
+
+std::function<float ()> AdcEmulator::GetChannelReader(int channel) {
+    if(channel < 0 || channel > GetChannelCount())
+        throw std::invalid_argument("ADC channel is not available.");
+
+    return [this, channel]() { return ReadChannel(channel); };
 }
 
 int AdcEmulator::GetChannelCount() {

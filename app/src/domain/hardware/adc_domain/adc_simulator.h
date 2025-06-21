@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -52,8 +53,8 @@ class AdcSimulatorManager : public IAdcManager {
             return adc_channel_configuration_->at(channel);
         }
 
-        float ReadChannel(int channel) override {
-            return adc_->ReadChannel(channel);
+        std::function<float ()> GetChannelReader(int channel) override {
+            return [this, channel]() { return adc_->ReadChannel(channel); };
         }
 
         int GetAdcCount() override {

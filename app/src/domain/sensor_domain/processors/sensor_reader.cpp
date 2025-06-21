@@ -25,6 +25,7 @@ SensorReader::SensorReader(
             if(sensor_->configuration.type == SensorType::PHYSICAL_ANALOG) {
                 adc_manager_ = adc_configuration_controller_->Get();
                 adc_channel_configuration_ = adc_manager_->GetChannelConfiguration(sensor_->configuration.channel.value());
+                AdcChannelReader = adc_manager_->GetChannelReader(sensor_->configuration.channel.value());
             }
         }
 
@@ -33,7 +34,7 @@ void SensorReader::Read() {
     reading->timestamp = time_service_->GetCurrentTime();
 
     if (sensor_->configuration.type == SensorType::PHYSICAL_ANALOG) {
-        float voltage = adc_manager_->ReadChannel(sensor_->configuration.channel.value());
+        float voltage = AdcChannelReader();
         float voltage_calibrated = adc_channel_configuration_->voltage_interpolator->Interpolate(voltage);
 
         reading->value = voltage_calibrated;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <memory>
 
 #include "utilities/time/i_time_service.h"
@@ -32,6 +33,7 @@ private:
 
     std::shared_ptr<IAdcManager> adc_manager_;
     std::shared_ptr<AdcChannelConfiguration> adc_channel_configuration_;
+    std::function<float ()> AdcChannelReader;
 
 public:
     SensorReader(

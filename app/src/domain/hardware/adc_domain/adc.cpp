@@ -36,6 +36,11 @@ int Adc::Initialize() {
         if(channel_configs_[i].reference == ADC_REF_INTERNAL)
 		    references_mv_[i] = adc_ref_internal(adc_device_);
 
+        if(references_mv_[i] == 0) {
+            LOG_ERR("ADC reference for channel %d is not available", i);
+            return -1;
+        }
+
         available_channels_.insert(channel_configs_[i].channel_id);
 
 		LOG_INF("ADC Channel %d configured", channel_configs_[i].channel_id);
@@ -72,9 +77,6 @@ void Adc::UpdateConfiguration(uint16_t samples) {
 }
 
 float Adc::ReadChannel(int channel) {
-	if(channel < 0 || channel > GetChannelCount())
-        throw std::invalid_argument("ADC channel is not available.");
-
 	sequences_[channel].channels = BIT(channel_configs_[channel].channel_id);
 
 	uint64_t accumulator = 0;
@@ -90,10 +92,10 @@ float Adc::ReadChannel(int channel) {
 		return 0;
     }
 
-	int32_t val_mv = static_cast<int32_t>(accumulator / samples_);
+	auto val_mv = static_cast<int32_t>(accumulator / samples_);
 	err = adc_raw_to_millivolts(references_mv_[channel], channel_configs_[channel].gain, sequences_[channel].resolution, &val_mv);
 
-	if((err < 0) || references_mv_[channel] == 0) {
+	if(err < 0) {
 		LOG_ERR("ADC conversion for channel %d to mV failed (%d)\n", channel, err);
 		return 0;
 	}

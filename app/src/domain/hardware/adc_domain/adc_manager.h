@@ -1,8 +1,8 @@
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <vector>
-#include <unordered_map>
 #include <zephyr/drivers/adc.h>
 
 #include "i_adc_manager.h"
@@ -22,9 +22,11 @@ using namespace eerie_leap::domain::hardware::adc_domain::models;
 class AdcManager : public IAdcManager {
 private:
     std::vector<AdcDTInfo> adc_infos_;
-    std::vector<std::shared_ptr<IAdc>> adcs_;
 
     std::shared_ptr<AdcConfiguration> adc_configuration_;
+
+protected:
+    std::vector<std::shared_ptr<IAdc>> adcs_;
 
 public:
     AdcManager() {
@@ -99,15 +101,20 @@ public:
         return adc_configuration_->channel_configurations->at(channel);
     }
 
-    float ReadChannel(int channel) override {
+    IAdc* GetAdcForChannel(int channel) {
         int channel_index = channel;
         for(auto& adc : adcs_) {
             if(channel_index < adc->GetChannelCount())
-                return adc->ReadChannel(channel_index);
-            channel_index -= adc->GetChannelCount();
+                return adc.get();
+            channel_index += adc->GetChannelCount();
         }
 
         throw std::invalid_argument("ADC channel out of range!");
+    }
+
+    std::function<float ()> GetChannelReader(int channel) override {
+        IAdc* adc = GetAdcForChannel(channel);
+        return [adc, channel]() { return adc->ReadChannel(channel); };
     }
 
     int GetAdcCount() override {
