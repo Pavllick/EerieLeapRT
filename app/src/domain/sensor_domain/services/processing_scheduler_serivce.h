@@ -6,7 +6,7 @@
 #include "utilities/time/i_time_service.h"
 #include "utilities/guid/guid_generator.h"
 #include "controllers/sensors_configuration_controller.h"
-#include "domain/hardware/adc_domain/i_adc.h"
+#include "controllers/adcs_configuration_controller.h"
 #include "domain/hardware/gpio_domain/i_gpio.h"
 
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
@@ -33,12 +33,12 @@ private:
 
     std::shared_ptr<ITimeService> time_service_;
     std::shared_ptr<GuidGenerator> guid_generator_;
-    std::shared_ptr<IAdc> adc_;
+    std::shared_ptr<IAdcManager> adc_manager_;
     std::shared_ptr<IGpio> gpio_;
+    std::shared_ptr<AdcsConfigurationController> adcs_configuration_controller_;
     std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller_;
 
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame_;
-    std::shared_ptr<SensorReader> sensor_reader_;
     std::shared_ptr<SensorProcessor> sensor_processor_;
 
     std::vector<std::shared_ptr<SensorTask>> sensor_tasks_;
@@ -50,8 +50,9 @@ public:
     ProcessingSchedulerService(
         std::shared_ptr<ITimeService> time_service,
         std::shared_ptr<GuidGenerator> guid_generator,
-        std::shared_ptr<IAdc> adc,
+        std::shared_ptr<IAdcManager> adc_manager,
         std::shared_ptr<IGpio> gpio,
+        std::shared_ptr<AdcsConfigurationController> adcs_configuration_controller,
         std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller);
 
     void Start();

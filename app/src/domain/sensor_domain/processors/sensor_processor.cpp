@@ -1,16 +1,20 @@
 #include <stdexcept>
 
+#include "utilities/memory/heap_allocator.h"
 #include "domain/sensor_domain/models/reading_status.h"
 #include "domain/sensor_domain/models/reading_metadata_tag.h"
-#include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "sensor_processor.h"
 
 namespace eerie_leap::domain::sensor_domain::processors {
 
 using namespace eerie_leap::utilities;
+using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 using namespace eerie_leap::utilities::voltage_interpolator;
+
+SensorProcessor::SensorProcessor(std::shared_ptr<SensorReadingsFrame> readings_frame) :
+    readings_frame_(std::move(readings_frame)) {}
 
 void SensorProcessor::ProcessReading(std::shared_ptr<SensorReading> reading) {
     try {

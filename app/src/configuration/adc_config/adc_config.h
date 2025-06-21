@@ -25,9 +25,27 @@ extern "C" {
  */
 #define DEFAULT_MAX_QTY 24
 
+struct AdcCalibrationDataMap_float32float {
+	float float32float_key;
+	float float32float;
+};
+
+struct AdcCalibrationDataMap {
+	struct AdcCalibrationDataMap_float32float float32float[50];
+	size_t float32float_count;
+};
+
 struct AdcConfig {
 	struct zcbor_string name;
 	uint32_t samples;
+	uint32_t interpolation_method;
+	struct AdcCalibrationDataMap calibration_table;
+	bool calibration_table_present;
+};
+
+struct AdcsConfig {
+	struct AdcConfig AdcConfig_m[24];
+	size_t AdcConfig_m_count;
 };
 
 #ifdef __cplusplus

@@ -2,10 +2,8 @@
 
 #include <memory>
 #include <cstdint>
-#include <iterator>
 #include <vector>
 #include <optional>
-#include <array>
 #include <unordered_set>
 #include <zephyr/drivers/adc.h>
 
@@ -24,7 +22,7 @@ private:
     std::vector<uint8_t> resolutions_;
 
 protected:
-    std::optional<AdcConfiguration> adc_config_;
+    std::shared_ptr<AdcConfiguration> adc_configuration_ = nullptr;
     const device* adc_device_;
     std::vector<adc_sequence> sequences_;
     adc_sequence_options sequence_options_;
@@ -40,7 +38,8 @@ public:
     }
 
     int Initialize() override;
-    void UpdateConfiguration(AdcConfiguration config) override;
+    void UpdateConfiguration(std::shared_ptr<AdcConfiguration> adc_configuration) override;
+    std::shared_ptr<AdcConfiguration> GetConfiguration() override;
     float ReadChannel(int channel) override;
     inline int GetChannelCount() override;
 };

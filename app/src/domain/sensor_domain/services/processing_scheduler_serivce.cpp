@@ -17,13 +17,15 @@ LOG_MODULE_REGISTER(processing_scheduler_logger);
 ProcessingSchedulerService::ProcessingSchedulerService(
     std::shared_ptr<ITimeService> time_service,
     std::shared_ptr<GuidGenerator> guid_generator,
-    std::shared_ptr<IAdc> adc,
+    std::shared_ptr<IAdcManager> adc_manager,
     std::shared_ptr<IGpio> gpio,
+    std::shared_ptr<AdcsConfigurationController> adcs_configuration_controller,
     std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller)
     : time_service_(std::move(time_service)),
     guid_generator_(std::move(guid_generator)),
-    adc_(std::move(adc)),
+    adc_manager_(std::move(adc_manager)),
     gpio_(std::move(gpio)),
+    adcs_configuration_controller_(std::move(adcs_configuration_controller)),
     sensors_configuration_controller_(std::move(sensors_configuration_controller)) {
 
     k_sem_init(&sensors_processing_semaphore_, 1, 1);
@@ -34,7 +36,7 @@ void ProcessingSchedulerService::ProcessSensorWorkTask(k_work* work) {
 
     if(k_sem_take(task->processing_semaphore, PROCESSING_TIMEOUT) == 0) {
         try {
-            task->reader->Read(task->sensor);
+            task->reader->Read();
             task->processor->ProcessReading(task->readings_frame->GetReading(task->sensor->id));
 
             auto reading = task->readings_frame->GetReading(task->sensor->id);
@@ -61,7 +63,16 @@ std::shared_ptr<SensorTask> ProcessingSchedulerService::CreateSensorTask(std::sh
     task->sampling_rate_ms = K_MSEC(sensor->configuration.sampling_rate_ms);
     task->sensor = sensor;
     task->readings_frame = sensor_readings_frame_;
-    task->reader = sensor_reader_;
+
+    auto sensor_reader = make_shared_ext<SensorReader>(
+        time_service_,
+        guid_generator_,
+        adcs_configuration_controller_,
+        gpio_,
+        sensor_readings_frame_,
+        sensor);
+    task->reader = sensor_reader;
+
     task->processor = sensor_processor_;
 
     return task;
@@ -70,7 +81,6 @@ std::shared_ptr<SensorTask> ProcessingSchedulerService::CreateSensorTask(std::sh
 void ProcessingSchedulerService::Start() {
     sensor_readings_frame_ = make_shared_ext<SensorReadingsFrame>();
 
-    sensor_reader_ = make_shared_ext<SensorReader>(time_service_, guid_generator_, adc_, gpio_, sensor_readings_frame_);
     sensor_processor_ = make_shared_ext<SensorProcessor>(sensor_readings_frame_);
 
     auto sensors = sensors_configuration_controller_->Get();

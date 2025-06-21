@@ -13,8 +13,8 @@ private:
     std::shared_ptr<SensorReadingsFrame> readings_frame_;
 
 public:
-    explicit SensorProcessor(std::shared_ptr<SensorReadingsFrame> readings_frame) :
-        readings_frame_(std::move(readings_frame)) {}
+    explicit SensorProcessor(std::shared_ptr<SensorReadingsFrame> readings_frame);
+
     void ProcessReading(std::shared_ptr<SensorReading> reading);
 };
 

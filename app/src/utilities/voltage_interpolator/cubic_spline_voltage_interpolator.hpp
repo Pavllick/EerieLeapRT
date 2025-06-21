@@ -18,7 +18,7 @@ private:
     std::vector<float> a_, b_, c_, d_;
 
 public:
-    CubicSplineVoltageInterpolator(const std::shared_ptr<std::vector<CalibrationData>>& calibration_table)
+    explicit CubicSplineVoltageInterpolator(const std::shared_ptr<std::vector<CalibrationData>>& calibration_table)
         : calibration_table_(std::move(calibration_table)) {
 
         if(!calibration_table_ || calibration_table_->size() < 2)

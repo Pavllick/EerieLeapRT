@@ -16,7 +16,7 @@ private:
     std::shared_ptr<std::vector<CalibrationData>> calibration_table_;
 
 public:
-    LinearVoltageInterpolator(const std::shared_ptr<std::vector<CalibrationData>>& calibration_table)
+    explicit LinearVoltageInterpolator(const std::shared_ptr<std::vector<CalibrationData>>& calibration_table)
         : calibration_table_(std::move(calibration_table)) {
 
             if(!calibration_table_ || calibration_table_->size() < 2)

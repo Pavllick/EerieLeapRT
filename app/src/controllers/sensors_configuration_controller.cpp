@@ -47,7 +47,7 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
         sensor_config->configuration.type = static_cast<uint32_t>(sensor->configuration.type);
 
         if(sensor->configuration.channel.has_value()) {
-            if(sensor->configuration.channel.value() < 0 || sensor->configuration.channel.value() > 15)
+            if(sensor->configuration.channel.value() < 0 || sensor->configuration.channel.value() > adc_channel_count_)
                 throw std::runtime_error("Invalid channel value!");
 
             sensor_config->configuration.channel_present = true;
@@ -101,7 +101,7 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
 
         sensor_config->metadata.description = CborHelpers::ToZcborString(&sensor->metadata.description);
 
-        sensors_config->SensorConfig_m[i] = *sensor_config.get();
+        sensors_config->SensorConfig_m[i] = *sensor_config;
         sensors_config->SensorConfig_m_count++;
 
         resolver.AddSensor(sensor);

@@ -8,19 +8,42 @@ namespace eerie_leap::domain::sensor_domain::processors {
 
 using namespace eerie_leap::domain::sensor_domain::models;
 
-void SensorReader::Read(std::shared_ptr<Sensor> sensor) {
-    auto reading = std::make_shared<SensorReading>(guid_generator_->Generate(), sensor);
+SensorReader::SensorReader(
+    std::shared_ptr<ITimeService> time_service,
+    std::shared_ptr<GuidGenerator> guid_generator,
+    std::shared_ptr<AdcsConfigurationController> adcs_configuration_controller,
+    std::shared_ptr<IGpio> gpio,
+    std::shared_ptr<SensorReadingsFrame> readings_frame,
+    std::shared_ptr<Sensor> sensor)
+        : time_service_(std::move(time_service)),
+        guid_generator_(std::move(guid_generator)),
+        adcs_configuration_controller_(std::move(adcs_configuration_controller)),
+        gpio_(std::move(gpio)),
+        readings_frame_(std::move(readings_frame)),
+        sensor_(std::move(sensor)) {
+
+            if(sensor_->configuration.type == SensorType::PHYSICAL_ANALOG) {
+                adc_manager_ = adcs_configuration_controller_->Get();
+                adc_configuration_ = adc_manager_->GetAdcForChannel(sensor_->configuration.channel.value())->GetConfiguration();
+            }
+        }
+
+void SensorReader::Read() {
+    auto reading = std::make_shared<SensorReading>(guid_generator_->Generate(), sensor_);
     reading->timestamp = time_service_->GetCurrentTime();
 
-    if (sensor->configuration.type == SensorType::PHYSICAL_ANALOG) {
-        reading->value = adc_->ReadChannel(sensor->configuration.channel.value());
+    if (sensor_->configuration.type == SensorType::PHYSICAL_ANALOG) {
+        float voltage = adc_manager_->ReadChannel(sensor_->configuration.channel.value());
+        float voltage_calibrated = adc_configuration_->voltage_interpolator->Interpolate(voltage);
+
+        reading->value = voltage_calibrated;
         reading->status = ReadingStatus::RAW;
-    } else if (sensor->configuration.type == SensorType::VIRTUAL_ANALOG) {
+    } else if (sensor_->configuration.type == SensorType::VIRTUAL_ANALOG) {
         reading->status = ReadingStatus::UNINITIALIZED;
-    } else if (sensor->configuration.type == SensorType::PHYSICAL_INDICATOR) {
-        reading->value = static_cast<float>(gpio_->ReadChannel(sensor->configuration.channel.value()));
+    } else if (sensor_->configuration.type == SensorType::PHYSICAL_INDICATOR) {
+        reading->value = static_cast<float>(gpio_->ReadChannel(sensor_->configuration.channel.value()));
         reading->status = ReadingStatus::RAW;
-    } else if (sensor->configuration.type == SensorType::VIRTUAL_INDICATOR) {
+    } else if (sensor_->configuration.type == SensorType::VIRTUAL_INDICATOR) {
         reading->status = ReadingStatus::UNINITIALIZED;
     } else {
         throw std::runtime_error("Unsupported sensor type");

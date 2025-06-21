@@ -18,7 +18,7 @@
 #include "configuration/sensor_config/sensor_config.h"
 #include "configuration/services/configuration_service.h"
 #include "controllers/sensors_configuration_controller.h"
-#include "controllers/adc_configuration_controller.h"
+#include "controllers/adcs_configuration_controller.h"
 #include "controllers/system_configuration_controller.h"
 
 // Test sensors includes
@@ -75,26 +75,49 @@ int main(void) {
     auto math_parser_service = make_shared_ext<MathParserService>();
 
     auto system_config_service = make_shared_ext<ConfigurationService<SystemConfig>>("system_config", fs_service);
-    auto adc_config_service = make_shared_ext<ConfigurationService<AdcConfig>>("adc_config", fs_service);
+    auto adcs_config_service = make_shared_ext<ConfigurationService<AdcsConfig>>("adcs_config", fs_service);
     auto sensors_config_service = make_shared_ext<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
 
     auto adc = AdcFactory::Create();
-    adc->UpdateConfiguration(AdcConfiguration{
-        .samples = 40
-    });
     adc->Initialize();
+
+    std::vector<CalibrationData> adc_calibration_data {
+        {0.0, 0.0},
+        {3.1, 5.0}
+    };
+    auto adc_calibration_data_ptr = make_shared_ext<std::vector<CalibrationData>>(adc_calibration_data);
+    auto adc_voltage_interpolator = make_shared_ext<LinearVoltageInterpolator>(adc_calibration_data_ptr);
+
+    auto adcs_configuration = make_shared_ext<std::vector<std::shared_ptr<AdcConfiguration>>>();
+    adcs_configuration->push_back(std::make_shared<AdcConfiguration>(AdcConfiguration {
+        .samples = 40,
+        .voltage_interpolator = adc_voltage_interpolator
+    }));
+    adcs_configuration->push_back(std::make_shared<AdcConfiguration>(AdcConfiguration {
+        .samples = 40,
+        .voltage_interpolator = adc_voltage_interpolator
+    }));
+
+    auto adcs_configuration_controller = make_shared_ext<AdcsConfigurationController>(adcs_config_service, adc);
+
+    if(!adcs_configuration_controller->Update(adcs_configuration))
+        throw std::runtime_error("Cannot save ADCs config");
 
     auto gpio = GpioFactory::Create();
     gpio->Initialize();
 
     auto system_configuration_controller = make_shared_ext<SystemConfigurationController>(system_config_service);
-    auto adc_configuration_controller = make_shared_ext<AdcConfigurationController>(adc_config_service);
-
     auto sensors_configuration_controller = make_shared_ext<SensorsConfigurationController>(math_parser_service, sensors_config_service, adc->GetChannelCount());
 
     SetupTestSensors(math_parser_service, sensors_configuration_controller);
 
-    auto processing_scheduler_service = make_shared_ext<ProcessingSchedulerService>(time_service, guid_generator, adc, gpio, sensors_configuration_controller);
+    auto processing_scheduler_service = make_shared_ext<ProcessingSchedulerService>(
+        time_service,
+        guid_generator,
+        adc,
+        gpio,
+        adcs_configuration_controller,
+        sensors_configuration_controller);
     processing_scheduler_service->Start();
 
     // NOTE: Don't use for WiFi supporting boards as WiFi is broken in Zephyr 4.1 and has memory allocation issues
@@ -108,7 +131,7 @@ int main(void) {
     HttpServer http_server(
         math_parser_service,
         system_configuration_controller,
-        adc_configuration_controller,
+        adcs_configuration_controller,
         sensors_configuration_controller,
         processing_scheduler_service);
     http_server.Start();
