@@ -1,12 +1,18 @@
 #include <stdexcept>
+#include <memory>
+#include <vector>
 
-#include "sensor_reader.h"
+#include "utilities/memory/heap_allocator.h"
+#include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
+#include "domain/hardware/adc_domain/utilities/adc_calibrator.h"
 #include "domain/sensor_domain/models/sensor_reading.h"
 #include "domain/sensor_domain/models/reading_status.h"
+#include "sensor_reader.h"
 
 namespace eerie_leap::domain::sensor_domain::processors {
 
 using namespace eerie_leap::domain::sensor_domain::models;
+using namespace eerie_leap::domain::hardware::adc_domain::utilities;
 
 SensorReader::SensorReader(
     std::shared_ptr<ITimeService> time_service,
@@ -15,27 +21,36 @@ SensorReader::SensorReader(
     std::shared_ptr<IGpio> gpio,
     std::shared_ptr<SensorReadingsFrame> readings_frame,
     std::shared_ptr<Sensor> sensor)
-        : time_service_(std::move(time_service)),
-        guid_generator_(std::move(guid_generator)),
-        adc_configuration_controller_(std::move(adc_configuration_controller)),
-        gpio_(std::move(gpio)),
-        readings_frame_(std::move(readings_frame)),
-        sensor_(std::move(sensor)) {
+    : time_service_(std::move(time_service)),
+    guid_generator_(std::move(guid_generator)),
+    adc_configuration_controller_(std::move(adc_configuration_controller)),
+    gpio_(std::move(gpio)),
+    readings_frame_(std::move(readings_frame)),
+    sensor_(std::move(sensor)) {
 
-            if(sensor_->configuration.type == SensorType::PHYSICAL_ANALOG) {
-                adc_manager_ = adc_configuration_controller_->Get();
-                adc_channel_configuration_ = adc_manager_->GetChannelConfiguration(sensor_->configuration.channel.value());
-                AdcChannelReader = adc_manager_->GetChannelReader(sensor_->configuration.channel.value());
-            }
-        }
+    if(sensor_->configuration.type == SensorType::PHYSICAL_ANALOG) {
+        adc_manager_ = adc_configuration_controller_->Get();
+        adc_channel_configuration_ = adc_manager_->GetChannelConfiguration(sensor_->configuration.channel.value());
+        AdcChannelReader = adc_manager_->GetChannelReader(sensor_->configuration.channel.value());
+    }
+}
 
-void SensorReader::Read() {
+void SensorReader::Read(bool is_calibration_mode) {
     auto reading = std::make_shared<SensorReading>(guid_generator_->Generate(), sensor_);
     reading->timestamp = time_service_->GetCurrentTime();
 
-    if (sensor_->configuration.type == SensorType::PHYSICAL_ANALOG) {
+    if(is_calibration_mode) {
+        if(sensor_->configuration.type != SensorType::PHYSICAL_ANALOG)
+            throw std::runtime_error("Unsupported sensor type for calibration mode");
+
         float voltage = AdcChannelReader();
-        float voltage_calibrated = adc_channel_configuration_->voltage_interpolator->Interpolate(voltage);
+        float voltage_interpolated = AdcCalibrator::InterpolateToInputRange(voltage);
+
+        reading->value = voltage_interpolated;
+        reading->status = ReadingStatus::CALIBRATION;
+    } else if (sensor_->configuration.type == SensorType::PHYSICAL_ANALOG) {
+        float voltage = AdcChannelReader();
+        float voltage_calibrated = adc_channel_configuration_->calibrator->InterpolateToCalibratedRange(voltage);
 
         reading->value = voltage_calibrated;
         reading->status = ReadingStatus::RAW;

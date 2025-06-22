@@ -8,7 +8,8 @@ namespace eerie_leap::domain::sensor_domain::models {
         UNINITIALIZED,
         RAW,
         PROCESSED,
-        ERROR
+        CALIBRATION,
+        ERROR,
     };
 
 }

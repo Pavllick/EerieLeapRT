@@ -37,15 +37,15 @@ bool AdcConfigurationController::Update(const std::shared_ptr<AdcConfiguration>&
         auto adc_channel_config = make_shared_ext<AdcChannelConfig>();
         memset(adc_channel_config.get(), 0, sizeof(AdcChannelConfig));
 
-        auto interpolation_method = adc_configuration->channel_configurations->at(i)->voltage_interpolator != nullptr
-            ? adc_configuration->channel_configurations->at(i)->voltage_interpolator->GetInterpolationMethod()
+        auto interpolation_method = adc_configuration->channel_configurations->at(i)->calibrator != nullptr
+            ? adc_configuration->channel_configurations->at(i)->calibrator->GetInterpolationMethod()
             : InterpolationMethod::NONE;
 
         adc_channel_config->interpolation_method = static_cast<uint32_t>(interpolation_method);
         if(interpolation_method != InterpolationMethod::NONE) {
             adc_channel_config->calibration_table_present = true;
 
-            auto& calibration_table = *adc_configuration->channel_configurations->at(i)->voltage_interpolator->GetCalibrationTable();
+            auto& calibration_table = *adc_configuration->channel_configurations->at(i)->calibrator->GetCalibrationTable();
             adc_channel_config->calibration_table.float32float_count = calibration_table.size();
 
             if(calibration_table.size() < 2)
@@ -63,7 +63,7 @@ bool AdcConfigurationController::Update(const std::shared_ptr<AdcConfiguration>&
                 adc_channel_config->calibration_table.float32float[j].float32float = calibration_data.value;
             }
         } else {
-            adc_channel_config->calibration_table_present = false;
+            throw std::runtime_error("ADC channel configuration is invalid. Calibration table is missing.");
         }
 
         adc_config->AdcChannelConfig_m[i] = *adc_channel_config;
@@ -112,22 +112,9 @@ std::shared_ptr<IAdcManager> AdcConfigurationController::Get(bool force_load) {
                 }
 
                 auto calibration_table_ptr = make_shared_ext<std::vector<CalibrationData>>(calibration_table);
-
-                switch (interpolation_method) {
-                case InterpolationMethod::LINEAR:
-                    adc_channel_configuration->voltage_interpolator = make_shared_ext<LinearVoltageInterpolator>(calibration_table_ptr);
-                    break;
-
-                case InterpolationMethod::CUBIC_SPLINE:
-                    adc_channel_configuration->voltage_interpolator = make_shared_ext<CubicSplineVoltageInterpolator>(calibration_table_ptr);
-                    break;
-
-                default:
-                    throw std::runtime_error("Sensor uses unsupported interpolation method!");
-                    break;
-                }
+                adc_channel_configuration->calibrator = make_shared_ext<AdcCalibrator>(interpolation_method, calibration_table_ptr);
             } else {
-                adc_channel_configuration->voltage_interpolator = nullptr;
+                throw std::runtime_error("ADC channel configuration is invalid. Calibration table is missing.");
             }
 
         adc_configuration->channel_configurations->push_back(adc_channel_configuration);

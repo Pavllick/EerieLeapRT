@@ -1,3 +1,4 @@
+#include <memory>
 #include <stdexcept>
 
 #include "utilities/memory/heap_allocator.h"

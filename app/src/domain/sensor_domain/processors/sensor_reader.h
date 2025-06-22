@@ -44,7 +44,7 @@ public:
         std::shared_ptr<SensorReadingsFrame> readings_frame,
         std::shared_ptr<Sensor> sensor);
 
-    void Read();
+    void Read(bool is_calibration_mode = false);
 };
 
 } // namespace eerie_leap::domain::sensor_domain::processors

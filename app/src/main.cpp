@@ -81,22 +81,27 @@ int main(void) {
     auto adc = AdcFactory::Create();
     adc->Initialize();
 
-    std::vector<CalibrationData> adc_calibration_data {
-        {0.0, 0.0},
-        {3.1, 5.0}
+    std::vector<CalibrationData> adc_calibration_data_samples {
+        {0.501, 0.469},
+        {1.0, 0.968},
+        {2.0, 1.970},
+        {3.002, 2.98},
+        {4.003, 4.01},
+        {5.0, 5.0}
     };
-    auto adc_calibration_data_ptr = make_shared_ext<std::vector<CalibrationData>>(adc_calibration_data);
-    auto adc_voltage_interpolator = make_shared_ext<LinearVoltageInterpolator>(adc_calibration_data_ptr);
+
+    auto adc_calibration_data_samples_ptr = make_shared_ext<std::vector<CalibrationData>>(adc_calibration_data_samples);
+    auto adc_calibrator = make_shared_ext<AdcCalibrator>(InterpolationMethod::LINEAR, adc_calibration_data_samples_ptr);
 
     std::vector<std::shared_ptr<AdcChannelConfiguration>> channel_configurations = {
-        std::make_shared<AdcChannelConfiguration>(adc_voltage_interpolator),
-        std::make_shared<AdcChannelConfiguration>(adc_voltage_interpolator),
-        std::make_shared<AdcChannelConfiguration>(adc_voltage_interpolator),
-        std::make_shared<AdcChannelConfiguration>(adc_voltage_interpolator),
-        std::make_shared<AdcChannelConfiguration>(adc_voltage_interpolator),
-        std::make_shared<AdcChannelConfiguration>(adc_voltage_interpolator),
-        std::make_shared<AdcChannelConfiguration>(adc_voltage_interpolator),
-        std::make_shared<AdcChannelConfiguration>(adc_voltage_interpolator),
+        std::make_shared<AdcChannelConfiguration>(adc_calibrator),
+        std::make_shared<AdcChannelConfiguration>(adc_calibrator),
+        std::make_shared<AdcChannelConfiguration>(adc_calibrator),
+        std::make_shared<AdcChannelConfiguration>(adc_calibrator),
+        std::make_shared<AdcChannelConfiguration>(adc_calibrator),
+        std::make_shared<AdcChannelConfiguration>(adc_calibrator),
+        std::make_shared<AdcChannelConfiguration>(adc_calibrator),
+        std::make_shared<AdcChannelConfiguration>(adc_calibrator),
     };
 
     auto adc_configuration = make_shared_ext<AdcConfiguration>();
