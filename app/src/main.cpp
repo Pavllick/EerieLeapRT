@@ -12,6 +12,7 @@
 #include "domain/hardware/adc_domain/adc_factory.hpp"
 #include "domain/hardware/gpio_domain/gpio_factory.hpp"
 #include "domain/sensor_domain/services/processing_scheduler_serivce.h"
+#include "domain/sensor_domain/services/calibration_service.h"
 
 #include "configuration/system_config/system_config.h"
 #include "configuration/adc_config/adc_config.h"
@@ -130,6 +131,13 @@ int main(void) {
         adc_configuration_controller,
         sensors_configuration_controller);
     processing_scheduler_service->Start();
+
+    auto calibration_service = make_shared_ext<CalibrationService>(
+        time_service,
+        guid_generator,
+        adc,
+        adc_configuration_controller,
+        processing_scheduler_service);
 
     // NOTE: Don't use for WiFi supporting boards as WiFi is broken in Zephyr 4.1 and has memory allocation issues
     // At least on ESP32S3, it does connect if Zephyr revision is set to "main", but heap allocations cannot be moved
