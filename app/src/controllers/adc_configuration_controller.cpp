@@ -1,8 +1,10 @@
 #include <ranges>
 #include <memory>
+#include <vector>
 
 #include "utilities/memory/heap_allocator.h"
 #include "utilities/cbor/cbor_helpers.hpp"
+#include "utilities/voltage_interpolator/calibration_data.h"
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
@@ -25,10 +27,15 @@ AdcConfigurationController::AdcConfigurationController(std::shared_ptr<Configura
 
     adc_manager_->Initialize();
 
-    if(Get(true) == nullptr)
+    if(Get(true) == nullptr) {
         LOG_ERR("Failed to load ADC configuration.");
-    else
+
+        SetDefaultConfiguration();
+
+        LOG_INF("Default ADC configuration loaded successfully.");
+    } else {
         LOG_INF("ADC Configuration Controller initialized successfully.");
+    }
 }
 
 bool AdcConfigurationController::Update(const std::shared_ptr<AdcConfiguration>& adc_configuration) {
@@ -53,7 +60,7 @@ bool AdcConfigurationController::Update(const std::shared_ptr<AdcConfiguration>&
             adc_channel_config->calibration_table.float32float_count = calibration_table.size();
 
             if(calibration_table.size() < 2)
-                throw std::runtime_error("Calibration table must have at least 2 points!");
+                throw std::runtime_error("Calibration table must have at least 2 points.");
 
             std::ranges::sort(
                 calibration_table,
@@ -128,6 +135,33 @@ std::shared_ptr<IAdcManager> AdcConfigurationController::Get(bool force_load) {
     adc_manager_->UpdateConfiguration(adc_configuration_);
 
     return adc_manager_;
+}
+
+void AdcConfigurationController::SetDefaultConfiguration() {
+    std::vector<CalibrationData> adc_calibration_data_samples {
+        {0.501, 0.469},
+        {1.0, 0.968},
+        {2.0, 1.970},
+        {3.002, 2.98},
+        {4.003, 4.01},
+        {5.0, 5.0}
+    };
+
+    auto adc_calibration_data_samples_ptr = make_shared_ext<std::vector<CalibrationData>>(adc_calibration_data_samples);
+    auto adc_calibrator = make_shared_ext<AdcCalibrator>(InterpolationMethod::LINEAR, adc_calibration_data_samples_ptr);
+
+    std::vector<std::shared_ptr<AdcChannelConfiguration>> channel_configurations;
+    channel_configurations.reserve(adc_manager_->GetChannelCount());
+    for(size_t i = 0; i < adc_manager_->GetChannelCount(); ++i)
+        channel_configurations.push_back(make_shared_ext<AdcChannelConfiguration>(adc_calibrator));
+
+    auto adc_configuration = make_shared_ext<AdcConfiguration>();
+    adc_configuration->samples = 40;
+    adc_configuration->channel_configurations =
+        make_shared_ext<std::vector<std::shared_ptr<AdcChannelConfiguration>>>(channel_configurations);
+
+    if(!Update(adc_configuration))
+        throw std::runtime_error("Cannot save ADCs config");
 }
 
 } // namespace eerie_leap::controllers

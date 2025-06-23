@@ -97,7 +97,7 @@ public:
             || channel < 0
             || channel >= adc_configuration_->channel_configurations->size()) {
 
-            throw std::invalid_argument("ADC channel out of range!");
+            throw std::invalid_argument("ADC channel out of range.");
         }
 
         return adc_configuration_->channel_configurations->at(channel);
@@ -111,7 +111,7 @@ public:
             channel_index -= adc->GetChannelCount();
         }
 
-        throw std::invalid_argument("ADC channel out of range!");
+        throw std::invalid_argument("ADC channel out of range.");
     }
 
     std::function<float ()> GetChannelReader(int channel) override {

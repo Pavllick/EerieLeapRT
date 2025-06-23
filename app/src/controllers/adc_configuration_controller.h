@@ -21,6 +21,8 @@ private:
     std::shared_ptr<AdcConfig> adc_config_;
     std::shared_ptr<AdcConfiguration> adc_configuration_;
 
+    void SetDefaultConfiguration();
+
 public:
     AdcConfigurationController(std::shared_ptr<ConfigurationService<AdcConfig>> adc_configuration_service);
 

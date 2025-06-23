@@ -48,7 +48,7 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
 
         if(sensor->configuration.channel.has_value()) {
             if(sensor->configuration.channel.value() < 0 || sensor->configuration.channel.value() > adc_channel_count_)
-                throw std::runtime_error("Invalid channel value!");
+                throw std::runtime_error("Invalid channel value.");
 
             sensor_config->configuration.channel_present = true;
             sensor_config->configuration.channel = sensor->configuration.channel.value();
@@ -62,7 +62,7 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
             ? sensor->configuration.voltage_interpolator->GetInterpolationMethod()
             : InterpolationMethod::NONE;
         if(sensor->configuration.type == SensorType::PHYSICAL_ANALOG && interpolation_method == InterpolationMethod::NONE)
-            throw std::runtime_error("Physical analog sensor must have interpolation method!");
+            throw std::runtime_error("Physical analog sensor must have interpolation method.");
 
         sensor_config->configuration.interpolation_method = static_cast<uint32_t>(interpolation_method);
         if(interpolation_method != InterpolationMethod::NONE) {
@@ -72,7 +72,7 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
             sensor_config->configuration.calibration_table.float32float_count = calibration_table.size();
 
             if(calibration_table.size() < 2)
-                throw std::runtime_error("Calibration table must have at least 2 points!");
+                throw std::runtime_error("Calibration table must have at least 2 points.");
 
             std::ranges::sort(
                 calibration_table,
@@ -166,7 +166,7 @@ const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfiguration
                 break;
 
             default:
-                throw std::runtime_error("Sensor uses unsupported interpolation method!");
+                throw std::runtime_error("Sensor uses unsupported interpolation method.");
                 break;
             }
         } else {

@@ -110,7 +110,7 @@ int main(void) {
     auto adc_configuration_controller = make_shared_ext<AdcConfigurationController>(adc_config_service);
 
     // TODO: For test purposes only
-    SetupAdcConfiguration(adc_configuration_controller);
+    // SetupAdcConfiguration(adc_configuration_controller);
 
     auto gpio = GpioFactory::Create();
     gpio->Initialize();

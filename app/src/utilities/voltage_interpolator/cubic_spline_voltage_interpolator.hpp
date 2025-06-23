@@ -22,7 +22,7 @@ public:
         : calibration_table_(std::move(calibration_table)) {
 
         if(!calibration_table_ || calibration_table_->size() < 2)
-            throw std::invalid_argument("Calibration data is missing or invalid!");
+            throw std::invalid_argument("Calibration data is missing or invalid.");
 
         const auto& table = *calibration_table_;
 

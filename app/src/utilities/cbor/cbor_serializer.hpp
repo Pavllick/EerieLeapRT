@@ -48,7 +48,7 @@ public:
 
         size_t obj_size = 0;
         if(encodeFn_(buffer->data(), buffer->size(), &obj, &obj_size)) {
-            // LOG_ERR("Failed to encode object!");
+            // LOG_ERR("Failed to encode object.");
             return nullptr;
         }
 
@@ -64,7 +64,7 @@ public:
     std::optional<T> Deserialize(std::span<const uint8_t> input) {
         T obj;
         if(decodeFn_(input.data(), input.size(), &obj, nullptr)) {
-            // LOG_ERR("Failed to decode object!");
+            // LOG_ERR("Failed to decode object.");
             return std::nullopt;
         }
 

@@ -42,7 +42,7 @@ AdcCalibrator::AdcCalibrator(
         break;
 
     default:
-        throw std::runtime_error("Interpolation method is not supported!");
+        throw std::runtime_error("Interpolation method is not supported.");
     }
 }
 
