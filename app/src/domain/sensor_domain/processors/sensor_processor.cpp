@@ -3,7 +3,6 @@
 
 #include "utilities/memory/heap_allocator.h"
 #include "domain/sensor_domain/models/reading_status.h"
-#include "domain/sensor_domain/models/reading_metadata_tag.h"
 #include "sensor_processor.h"
 
 namespace eerie_leap::domain::sensor_domain::processors {
@@ -30,9 +29,6 @@ void SensorProcessor::ProcessReading(std::shared_ptr<SensorReading> reading) {
                     value);
             }
 
-            reading->metadata.AddTag(ReadingMetadataTag::VOLTAGE, std::to_string(voltage));
-            reading->metadata.AddTag(ReadingMetadataTag::RAW_VALUE, std::to_string(raw_value));
-
             reading->value = value;
             reading->status = ReadingStatus::PROCESSED;
 
@@ -52,8 +48,6 @@ void SensorProcessor::ProcessReading(std::shared_ptr<SensorReading> reading) {
                     readings_frame_->GetReadingsValues(),
                     value);
             }
-
-            reading->metadata.AddTag(ReadingMetadataTag::RAW_VALUE, std::to_string(raw_value));
 
             reading->value = value;
             reading->status = ReadingStatus::PROCESSED;

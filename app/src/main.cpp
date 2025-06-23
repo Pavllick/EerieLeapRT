@@ -3,6 +3,7 @@
 #include <zephyr/arch/cpu.h>
 #include <zephyr/logging/log.h>
 
+#include "domain/sensor_domain/models/sensor_type.h"
 #include "utilities/memory/heap_allocator.h"
 #include "utilities/dev_tools/system_info.h"
 #include "utilities/guid/guid_generator.h"
@@ -65,6 +66,16 @@ constexpr uint32_t SLEEP_TIME_MS = 10000;
 
 void SetupAdcConfiguration(std::shared_ptr<AdcConfigurationController> adc_configuration_controller);
 void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller);
+
+// NOTE: ADC reading timing for ESP32S3:
+// Each sample adds up to about 25us to the reading time
+
+// NOTE: Sensor reading timing for ESP32S3:
+// ADC reading with 40 samples and no expression evaluation takes around 1200us
+// ADC reading with 40 samples and expression evaluation takes minimum of 3300us
+// GPIO reading with no expression evaluation takes around 130us
+// GPIO reading with expression evaluation takes minimum of 1900us
+// Formula evaluation takes minimum of 1800us, applicable to virtual sensors
 
 int main(void) {
     // NOTE: Don't use for WiFi supporting boards as WiFi is broken in Zephyr 4.1 and has memory allocation issues

@@ -6,7 +6,6 @@
 #include <chrono>
 
 #include "sensor.h"
-#include "reading_metadata.h"
 #include "reading_status.h"
 #include "utilities/guid/guid.hpp"
 
@@ -20,7 +19,6 @@ struct SensorReading {
     const std::shared_ptr<Sensor> sensor;
     std::optional<float> value;
     std::optional<system_clock::time_point> timestamp;
-    ReadingMetadata metadata;
     ReadingStatus status = ReadingStatus::UNINITIALIZED;
     std::optional<std::string> error_message;
 
