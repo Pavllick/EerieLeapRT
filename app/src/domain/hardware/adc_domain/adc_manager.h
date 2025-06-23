@@ -103,20 +103,23 @@ public:
         return adc_configuration_->channel_configurations->at(channel);
     }
 
-    IAdc* GetAdcForChannel(int channel) {
+    std::pair<IAdc*, int> GetAdcForChannel(int channel) {
         int channel_index = channel;
         for(auto& adc : adcs_) {
             if(channel_index < adc->GetChannelCount())
-                return adc.get();
-            channel_index += adc->GetChannelCount();
+                return std::make_pair(adc.get(), channel_index);
+            channel_index -= adc->GetChannelCount();
         }
 
         throw std::invalid_argument("ADC channel out of range!");
     }
 
     std::function<float ()> GetChannelReader(int channel) override {
-        IAdc* adc = GetAdcForChannel(channel);
-        return [adc, channel]() { return adc->ReadChannel(channel); };
+        IAdc* adc;
+        int channel_index;
+        std::tie(adc, channel_index) = GetAdcForChannel(channel);
+
+        return [adc, channel_index]() { return adc->ReadChannel(channel_index); };
     }
 
     int GetAdcCount() override {

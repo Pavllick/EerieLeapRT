@@ -231,7 +231,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
         },
         .configuration = {
             .type = SensorType::PHYSICAL_ANALOG,
-            .channel = 2,
+            .channel = 6,
             .sampling_rate_ms = 500,
             .voltage_interpolator = make_shared_ext<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
             .expression_evaluator = make_shared_ext<ExpressionEvaluator>(expression_evaluator_2)
