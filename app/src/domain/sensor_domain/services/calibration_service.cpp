@@ -21,12 +21,10 @@ LOG_MODULE_REGISTER(calibration_logger);
 CalibrationService::CalibrationService(
     std::shared_ptr<ITimeService> time_service,
     std::shared_ptr<GuidGenerator> guid_generator,
-    std::shared_ptr<IAdcManager> adc_manager,
     std::shared_ptr<AdcConfigurationController> adc_configuration_controller,
     std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service)
     : time_service_(std::move(time_service)),
     guid_generator_(std::move(guid_generator)),
-    adc_manager_(std::move(adc_manager)),
     adc_configuration_controller_(std::move(adc_configuration_controller)),
     processing_scheduler_service_(std::move(processing_scheduler_service)) {
 

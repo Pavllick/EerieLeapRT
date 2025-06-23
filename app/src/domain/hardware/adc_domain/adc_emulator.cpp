@@ -47,8 +47,4 @@ std::function<float ()> AdcEmulator::GetChannelReader(int channel) {
     return [this, channel]() { return ReadChannel(channel); };
 }
 
-int AdcEmulator::GetChannelCount() {
-    return 16;
-}
-
 }  // namespace eerie_leap::domain::hardware::adc_domain

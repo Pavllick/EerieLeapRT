@@ -33,7 +33,6 @@ private:
 
     std::shared_ptr<ITimeService> time_service_;
     std::shared_ptr<GuidGenerator> guid_generator_;
-    std::shared_ptr<IAdcManager> adc_manager_;
     std::shared_ptr<IGpio> gpio_;
     std::shared_ptr<AdcConfigurationController> adc_configuration_controller_;
     std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller_;
@@ -51,7 +50,6 @@ public:
     ProcessingSchedulerService(
         std::shared_ptr<ITimeService> time_service,
         std::shared_ptr<GuidGenerator> guid_generator,
-        std::shared_ptr<IAdcManager> adc_manager,
         std::shared_ptr<IGpio> gpio,
         std::shared_ptr<AdcConfigurationController> adc_configuration_controller,
         std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller);

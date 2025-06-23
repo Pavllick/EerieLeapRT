@@ -5,13 +5,15 @@
 #include <vector>
 #include <zephyr/drivers/adc.h>
 
+#include "utilities/memory/heap_allocator.h"
+#include "domain/hardware/adc_domain/models/adc_configuration.h"
 #include "i_adc_manager.h"
 #include "adc.h"
-#include "domain/hardware/adc_domain/models/adc_configuration.h"
 #include "adc_dt_info.h"
 
 namespace eerie_leap::domain::hardware::adc_domain {
 
+using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::domain::hardware::adc_domain::models;
 
 #define ADC_NODE(idx) DT_ALIAS(adc ## idx)
@@ -71,7 +73,7 @@ public:
     #endif
 
         for(auto& adc_info : adc_infos_) {
-            adcs_.push_back(std::make_shared<Adc>(adc_info));
+            adcs_.push_back(make_shared_ext<Adc>(adc_info));
         }
     }
 

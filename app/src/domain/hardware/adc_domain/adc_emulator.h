@@ -14,7 +14,6 @@ private:
 
 public:
     int Initialize() override;
-    int GetChannelCount() override;
     std::function<float ()> GetChannelReader(int channel) override;
 };
 

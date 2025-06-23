@@ -16,13 +16,11 @@ LOG_MODULE_REGISTER(processing_scheduler_logger);
 ProcessingSchedulerService::ProcessingSchedulerService(
     std::shared_ptr<ITimeService> time_service,
     std::shared_ptr<GuidGenerator> guid_generator,
-    std::shared_ptr<IAdcManager> adc_manager,
     std::shared_ptr<IGpio> gpio,
     std::shared_ptr<AdcConfigurationController> adc_configuration_controller,
     std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller)
     : time_service_(std::move(time_service)),
     guid_generator_(std::move(guid_generator)),
-    adc_manager_(std::move(adc_manager)),
     gpio_(std::move(gpio)),
     adc_configuration_controller_(std::move(adc_configuration_controller)),
     sensors_configuration_controller_(std::move(sensors_configuration_controller)) {

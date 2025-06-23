@@ -6,20 +6,24 @@
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
+#include "domain/hardware/adc_domain/adc_factory.hpp"
 #include "adc_configuration_controller.h"
 
 namespace eerie_leap::controllers {
 
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::voltage_interpolator;
+using namespace eerie_leap::domain::hardware::adc_domain;
 
 LOG_MODULE_REGISTER(adc_config_ctrl_logger);
 
-AdcConfigurationController::AdcConfigurationController(std::shared_ptr<ConfigurationService<AdcConfig>> adc_configuration_service, std::shared_ptr<IAdcManager> adc_manager) :
+AdcConfigurationController::AdcConfigurationController(std::shared_ptr<ConfigurationService<AdcConfig>> adc_configuration_service) :
     adc_configuration_service_(std::move(adc_configuration_service)),
-    adc_manager_(std::move(adc_manager)),
+    adc_manager_(AdcFactory::Create()),
     adc_config_(nullptr),
     adc_configuration_(nullptr) {
+
+    adc_manager_->Initialize();
 
     if(Get(true) == nullptr)
         LOG_ERR("Failed to load ADC configuration.");
@@ -84,7 +88,7 @@ std::shared_ptr<IAdcManager> AdcConfigurationController::Get(bool force_load) {
         return adc_manager_;
     }
 
-    auto adc_configuration = std::make_shared<AdcConfiguration>();
+    auto adc_configuration = make_shared_ext<AdcConfiguration>();
 
     auto adc_config = adc_configuration_service_->Load();
     if(!adc_config.has_value())

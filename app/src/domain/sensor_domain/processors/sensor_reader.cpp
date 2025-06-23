@@ -11,22 +11,23 @@
 
 namespace eerie_leap::domain::sensor_domain::processors {
 
+using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::domain::hardware::adc_domain::utilities;
 
 SensorReader::SensorReader(
-    std::shared_ptr<ITimeService> time_service,
-    std::shared_ptr<GuidGenerator> guid_generator,
-    std::shared_ptr<AdcConfigurationController> adc_configuration_controller,
+    std::shared_ptr<ITimeService>& time_service,
+    std::shared_ptr<GuidGenerator>& guid_generator,
+    std::shared_ptr<AdcConfigurationController>& adc_configuration_controller,
     std::shared_ptr<IGpio> gpio,
-    std::shared_ptr<SensorReadingsFrame> readings_frame,
-    std::shared_ptr<Sensor> sensor)
-    : time_service_(std::move(time_service)),
-    guid_generator_(std::move(guid_generator)),
-    adc_configuration_controller_(std::move(adc_configuration_controller)),
+    std::shared_ptr<SensorReadingsFrame>& readings_frame,
+    std::shared_ptr<Sensor>& sensor)
+    : time_service_(time_service),
+    guid_generator_(guid_generator),
+    adc_configuration_controller_(adc_configuration_controller),
     gpio_(std::move(gpio)),
-    readings_frame_(std::move(readings_frame)),
-    sensor_(std::move(sensor)) {
+    readings_frame_(readings_frame),
+    sensor_(sensor) {
 
     if(sensor_->configuration.type == SensorType::PHYSICAL_ANALOG) {
         adc_manager_ = adc_configuration_controller_->Get();
@@ -36,7 +37,7 @@ SensorReader::SensorReader(
 }
 
 void SensorReader::Read(bool is_calibration_mode) {
-    auto reading = std::make_shared<SensorReading>(guid_generator_->Generate(), sensor_);
+    auto reading = make_shared_ext<SensorReading>(guid_generator_->Generate(), sensor_);
     reading->timestamp = time_service_->GetCurrentTime();
 
     if(is_calibration_mode) {

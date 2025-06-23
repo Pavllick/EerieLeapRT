@@ -23,13 +23,15 @@ private:
     std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service_;
 
 public:
-    HttpServer(
+    HttpServer() = default;
+    ~HttpServer() = default;
+
+    void Initialize(
         std::shared_ptr<MathParserService> math_parser_service,
         std::shared_ptr<SystemConfigurationController> system_configuration_controller,
         std::shared_ptr<AdcConfigurationController> adc_configuration_controller,
         std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller,
         std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service);
-
     void Start();
 };
 
