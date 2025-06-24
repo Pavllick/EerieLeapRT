@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <vector>
 #include <zephyr/sys/util.h>
 #include <zephyr/kernel.h>
@@ -39,7 +38,7 @@ void CalibrationService::ProcessCalibrationWorkTask(k_work* work) {
             task->reader->Read(true);
             auto reading = task->readings_frame->GetReading(task->sensor->id);
 
-            printf("ADC Calibration Reading: Value: %.3f, Time: %s\n",
+            printk("ADC Calibration Reading: Value: %.3f, Time: %s\n",
                 reading->value.value_or(0.0f),
                 TimeHelpers::GetFormattedString(*reading->timestamp).c_str());
         } catch (const std::exception& e) {

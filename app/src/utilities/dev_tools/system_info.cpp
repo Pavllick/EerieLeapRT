@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <malloc.h>
 #include <zephyr/logging/log.h>
 
@@ -23,7 +22,7 @@ static void print_stack_info_callback(thread_analyzer_info* info) {
 
     // Print stack usage information
     size_t used_percent = (info->stack_used * 100U) / info->stack_size;
-    
+
     LOG_INF("  %-14s: Unused %zu Usage %zu / %zu (%zu %%)",
         info->name,
         info->stack_size - info->stack_used,

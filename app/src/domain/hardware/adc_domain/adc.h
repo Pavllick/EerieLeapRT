@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef CONFIG_ADC
+
 #include <memory>
 #include <cstdint>
 #include <vector>
@@ -43,3 +45,5 @@ public:
 };
 
 }  // namespace eerie_leap::domain::hardware::adc_domain
+
+#endif // CONFIG_ADC

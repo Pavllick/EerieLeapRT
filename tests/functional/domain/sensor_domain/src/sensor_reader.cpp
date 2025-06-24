@@ -3,6 +3,12 @@
 #include "utilities/guid/guid_generator.h"
 #include "utilities/time/boot_elapsed_time_service.h"
 #include "utilities/math_parser/math_parser_service.hpp"
+
+#include "configuration/adc_config/adc_config.h"
+#include "configuration/services/configuration_service.h"
+#include "controllers/adc_configuration_controller.h"
+#include "domain/fs_domain/services/fs_service.h"
+
 #include "domain/hardware/adc_domain/models/adc_configuration.h"
 #include "domain/hardware/adc_domain/i_adc.h"
 #include "domain/hardware/adc_domain/adc_simulator.h"
@@ -138,49 +144,79 @@ std::vector<std::shared_ptr<Sensor>> sensors_reader_GetTestSensors(std::shared_p
     return sensors;
 }
 
+std::shared_ptr<AdcConfiguration> sensors_reader_GetTestConfiguration() {
+    std::vector<CalibrationData> adc_calibration_data_samples {
+        {0.0, 0.0},
+        {5.0, 5.0}
+    };
+
+    auto adc_calibration_data_samples_ptr = make_shared_ext<std::vector<CalibrationData>>(adc_calibration_data_samples);
+    auto adc_calibrator = make_shared_ext<AdcCalibrator>(InterpolationMethod::LINEAR, adc_calibration_data_samples_ptr);
+
+    auto adc_channel_configuration = make_shared_ext<AdcChannelConfiguration>(adc_calibrator);
+
+    std::vector<std::shared_ptr<AdcChannelConfiguration>> channel_configurations;
+    channel_configurations.reserve(8);
+    for(int i = 0; i < 8; i++)
+        channel_configurations.push_back(adc_channel_configuration);
+
+    auto adc_configuration = make_shared_ext<AdcConfiguration>();
+    adc_configuration->samples = 40;
+    adc_configuration->channel_configurations =
+        make_shared_ext<std::vector<std::shared_ptr<AdcChannelConfiguration>>>(channel_configurations);
+
+    return adc_configuration;
+}
+
 struct sensors_reader_HelperInstances {
-    std::shared_ptr<MathParserService> math_parser_service;
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame;
-    std::shared_ptr<SensorReader> sensor_reader;
+    std::shared_ptr<std::vector<std::shared_ptr<SensorReader>>> sensor_readers;
 };
 
 sensors_reader_HelperInstances sensors_reader_GetReadingInstances() {
-    auto time_service = std::make_shared<BootElapsedTimeService>();
-    time_service->Initialize();
-    auto guid_generator = std::make_shared<GuidGenerator>();
-    auto math_parser_service = std::make_shared<MathParserService>();
+    auto fs_service = std::make_shared<FsService>();
+    fs_service->Format();
 
-    auto adc = std::make_shared<AdcSimulator>();
-    adc->Initialize();
-    adc->UpdateConfiguration(AdcConfiguration {
-        .samples = 1
-    });
+    std::shared_ptr<ITimeService> time_service = std::make_shared<BootElapsedTimeService>();
+    time_service->Initialize();
+    std::shared_ptr<GuidGenerator> guid_generator = std::make_shared<GuidGenerator>();
+    std::shared_ptr<MathParserService> math_parser_service = std::make_shared<MathParserService>();
+
+    const auto adc_configuration = sensors_reader_GetTestConfiguration();
+
+    auto adc_configuration_service = std::make_shared<ConfigurationService<AdcConfig>>("adc_config", fs_service);
+    auto adc_configuration_controller = std::make_shared<AdcConfigurationController>(adc_configuration_service);
+    adc_configuration_controller->Update(adc_configuration);
+
     auto gpio = std::make_shared<GpioSimulator>();
     gpio->Initialize();
 
     auto sensor_readings_frame = std::make_shared<SensorReadingsFrame>();
-    auto sensor_reader = std::make_shared<SensorReader>(time_service, guid_generator, adc, gpio, sensor_readings_frame);
+    auto sensors = sensors_reader_GetTestSensors(math_parser_service);
+
+    auto sensor_readers = std::make_shared<std::vector<std::shared_ptr<SensorReader>>>();
+    for(int i = 0; i < sensors.size(); i++) {
+        auto sensor_reader = std::make_shared<SensorReader>(time_service, guid_generator, adc_configuration_controller, gpio, sensor_readings_frame, sensors[i]);
+        sensor_readers->push_back(sensor_reader);
+    }
 
     return sensors_reader_HelperInstances {
-        .math_parser_service = math_parser_service,
         .sensor_readings_frame = sensor_readings_frame,
-        .sensor_reader = sensor_reader
+        .sensor_readers = sensor_readers
     };
 }
 
 ZTEST(sensors_reader, test_Read) {
     auto helper = sensors_reader_GetReadingInstances();
 
-    auto math_parser_service = helper.math_parser_service;
     auto sensor_readings_frame = helper.sensor_readings_frame;
-    auto sensor_reader = helper.sensor_reader;
+    auto sensor_readers = helper.sensor_readers;
 
     auto readings = sensor_readings_frame->GetReadings();
     zassert_equal(readings.size(), 0);
 
-    auto sensors = sensors_reader_GetTestSensors(math_parser_service);
-    for(auto& sensor : sensors)
-        sensor_reader->Read(sensor);
+    for(int i = 0; i < sensor_readers->size(); i++)
+        sensor_readers->at(i)->Read();
 
     readings = sensor_readings_frame->GetReadings();
     zassert_equal(readings.size(), 5);

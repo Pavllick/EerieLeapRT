@@ -38,7 +38,7 @@ void ProcessingSchedulerService::ProcessSensorWorkTask(k_work* work) {
 
             auto reading = task->readings_frame->GetReading(task->sensor->id);
 
-            printf("Sensor Reading - ID: %s, Guid: %llu, Value: %.3f, Time: %s\n",
+            printk("Sensor Reading - ID: %s, Guid: %llu, Value: %.3f, Time: %s\n",
                 task->sensor->id.c_str(),
                 reading->id.AsUint64(),
                 reading->value.value_or(0.0f),

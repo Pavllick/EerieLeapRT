@@ -16,7 +16,7 @@ class AdcFactory {
 public:
     static std::shared_ptr<IAdcManager> Create() {
 #ifdef CONFIG_ADC_EMUL
-        return make_shared_ext<AdcEmulator>();
+        return make_shared_ext<AdcEmulatorManager>();
 #elif CONFIG_ADC
         return make_shared_ext<AdcManager>();
 #else

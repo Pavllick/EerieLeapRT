@@ -47,7 +47,10 @@ public:
         float y0 = lower->value;
         float y1 = upper->value;
 
-        float ratio = (voltage - x0) / (x1 - x0);
+        float ratio = 0.0f;
+        if(x1 != x0)
+            ratio = (voltage - x0) / (x1 - x0);
+
         return y0 + ratio * (y1 - y0);
     }
 

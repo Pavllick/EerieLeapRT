@@ -5,7 +5,7 @@
 #include "configuration/adc_config/adc_config.h"
 #include "configuration/services/configuration_service.h"
 #include "domain/hardware/adc_domain/models/adc_configuration.h"
-#include "domain/hardware/adc_domain/adc_manager.h"
+#include "domain/hardware/adc_domain/i_adc_manager.h"
 
 namespace eerie_leap::controllers {
 

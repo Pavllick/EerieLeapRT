@@ -34,13 +34,20 @@ public:
 
 class AdcSimulatorManager : public IAdcManager {
     private:
-        std::shared_ptr<std::vector<std::shared_ptr<AdcChannelConfiguration>>> adc_channel_configuration_;
         std::shared_ptr<IAdc> adc_;
+        std::shared_ptr<AdcConfiguration> adc_configuration_;
+
+        bool IsChannelValid(int channel) {
+            return adc_configuration_ != nullptr
+                && channel >= 0
+                && channel < adc_configuration_->channel_configurations->size()
+                && channel < GetChannelCount();
+        }
 
     public:
         AdcSimulatorManager() {
-            adc_channel_configuration_ = nullptr;
             adc_ = make_shared_ext<AdcSimulator>();
+            adc_configuration_ = nullptr;
         }
 
         int Initialize() override {
@@ -48,14 +55,22 @@ class AdcSimulatorManager : public IAdcManager {
         }
 
         void UpdateConfiguration(std::shared_ptr<AdcConfiguration>& adc_configuration) override {
+            adc_configuration_ = adc_configuration;
+
             adc_->UpdateConfiguration(adc_configuration->samples);
         }
 
         std::shared_ptr<AdcChannelConfiguration> GetChannelConfiguration(int channel) override {
-            return adc_channel_configuration_->at(channel);
+            if(!IsChannelValid(channel))
+                throw std::invalid_argument("ADC channel out of range.");
+
+            return adc_configuration_->channel_configurations->at(channel);
         }
 
         std::function<float ()> GetChannelReader(int channel) override {
+            if(!IsChannelValid(channel))
+                throw std::invalid_argument("ADC channel out of range.");
+
             return [this, channel]() { return adc_->ReadChannel(channel); };
         }
 

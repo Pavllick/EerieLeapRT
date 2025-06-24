@@ -1,5 +1,7 @@
 #pragma once
 
+#if defined(CONFIG_ADC) || defined(CONFIG_ADC_EMUL)
+
 #include <functional>
 #include <memory>
 #include <vector>
@@ -25,10 +27,16 @@ class AdcManager : public IAdcManager {
 private:
     std::vector<AdcDTInfo> adc_infos_;
 
-    std::shared_ptr<AdcConfiguration> adc_configuration_;
-
 protected:
     std::vector<std::shared_ptr<IAdc>> adcs_;
+    std::shared_ptr<AdcConfiguration> adc_configuration_;
+
+    bool IsChannelValid(int channel) {
+        return adc_configuration_ != nullptr
+            && channel >= 0
+            && channel < adc_configuration_->channel_configurations->size()
+            && channel < GetChannelCount();
+    }
 
 public:
     AdcManager() {
@@ -78,8 +86,8 @@ public:
     }
 
     int Initialize() override {
-        for(int i = 0; i < adcs_.size(); i++)
-            adcs_[i]->Initialize();
+        for(auto& adc : adcs_)
+            adc->Initialize();
 
         return 0;
     }
@@ -92,11 +100,7 @@ public:
     }
 
     std::shared_ptr<AdcChannelConfiguration> GetChannelConfiguration(int channel) override {
-        if(adc_configuration_ == nullptr
-            || adc_configuration_->channel_configurations == nullptr
-            || channel < 0
-            || channel >= adc_configuration_->channel_configurations->size()) {
-
+        if(!IsChannelValid(channel)) {
             throw std::invalid_argument("ADC channel out of range.");
         }
 
@@ -104,6 +108,9 @@ public:
     }
 
     std::pair<IAdc*, int> GetAdcForChannel(int channel) {
+        if(!IsChannelValid(channel))
+            throw std::invalid_argument("ADC channel out of range.");
+
         int channel_index = channel;
         for(auto& adc : adcs_) {
             if(channel_index < adc->GetChannelCount())
@@ -136,3 +143,5 @@ public:
 };
 
 }  // namespace eerie_leap::domain::hardware::adc_domain
+
+#endif // defined(CONFIG_ADC) || defined(CONFIG_ADC_EMUL)

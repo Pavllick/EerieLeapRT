@@ -1,3 +1,5 @@
+#ifdef CONFIG_ADC_EMUL
+
 #include <stdexcept>
 #include <zephyr/logging/log.h>
 #include <zephyr/drivers/adc/adc_emul.h>
@@ -9,7 +11,7 @@ namespace eerie_leap::domain::hardware::adc_domain {
 
 LOG_MODULE_REGISTER(adc_emulator_logger);
 
-int AdcEmulator::Initialize() {
+int AdcEmulatorManager::Initialize() {
     int res = AdcManager::Initialize();
 
     adc_device_ = DEVICE_DT_GET(ADC0_NODE);
@@ -19,7 +21,7 @@ int AdcEmulator::Initialize() {
     return res;
 }
 
-float AdcEmulator::ReadChannel(int channel) {
+float AdcEmulatorManager::ReadChannel(int channel) {
 #ifdef CONFIG_ADC_EMUL
     uint32_t raw = sys_rand32_get();
     uint16_t input_mv = static_cast<uint16_t>((static_cast<uint64_t>(raw) * 3301) >> 32);
@@ -40,11 +42,16 @@ float AdcEmulator::ReadChannel(int channel) {
     throw std::invalid_argument("ADC channel out of range.");
 }
 
-std::function<float ()> AdcEmulator::GetChannelReader(int channel) {
-    if(channel < 0 || channel > GetChannelCount())
-        throw std::invalid_argument("ADC channel is not available.");
+std::function<float ()> AdcEmulatorManager::GetChannelReader(int channel) {
+    if(adc_configuration_ == nullptr
+        || channel < 0
+        || channel >= adc_configuration_->channel_configurations->size()
+        || channel > GetChannelCount())
+            throw std::invalid_argument("ADC channel out of range.");
 
     return [this, channel]() { return ReadChannel(channel); };
 }
 
 }  // namespace eerie_leap::domain::hardware::adc_domain
+
+#endif // CONFIG_ADC_EMUL

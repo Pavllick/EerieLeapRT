@@ -12,7 +12,11 @@ using namespace eerie_leap::utilities::voltage_interpolator;
 
 static const std::vector<CalibrationData> adc_inverse_base_range_data {
     {0.0, 0.0},
+#ifdef CONFIG_ZTEST
+    {adc::ADC_VOLTAGE_MAX, adc::ADC_VOLTAGE_MAX}
+#else
     {adc::SENSOR_VOLTAGE_MAX, adc::ADC_VOLTAGE_MAX}
+#endif
 };
 static const auto adc_inverse_base_range_data_ptr = make_shared_ext<std::vector<CalibrationData>>(adc_inverse_base_range_data);
 static const auto adc_inverse_base_range_voltage_interpolator = make_shared_ext<LinearVoltageInterpolator>(adc_inverse_base_range_data_ptr);

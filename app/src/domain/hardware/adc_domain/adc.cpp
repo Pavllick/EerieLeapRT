@@ -1,3 +1,5 @@
+#ifdef CONFIG_ADC
+
 #include <stdexcept>
 #include <numeric>
 #include <zephyr/logging/log.h>
@@ -108,3 +110,5 @@ inline int Adc::GetChannelCount() {
 }
 
 }  // namespace eerie_leap::domain::hardware::adc_domain
+
+#endif // CONFIG_ADC

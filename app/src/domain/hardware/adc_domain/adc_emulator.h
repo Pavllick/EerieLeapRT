@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef CONFIG_ADC_EMUL
+
 #include "adc_manager.h"
 #include <functional>
 
@@ -7,7 +9,7 @@ namespace eerie_leap::domain::hardware::adc_domain {
 
 #define ADC0_NODE DT_ALIAS(adc0)
 
-class AdcEmulator : public AdcManager {
+class AdcEmulatorManager : public AdcManager {
 private:
     const device* adc_device_;
     float ReadChannel(int channel);
@@ -18,3 +20,5 @@ public:
 };
 
 }  // namespace eerie_leap::domain::hardware::adc_domain
+
+#endif // CONFIG_ADC_EMUL
