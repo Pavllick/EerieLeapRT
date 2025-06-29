@@ -18,6 +18,8 @@ public:
     virtual int GetAdcCount() = 0;
     virtual int GetChannelCount() = 0;
     virtual std::function<float ()> GetChannelReader(int channel) = 0;
+    virtual void UpdateSamplesCount(int samples) = 0;
+    virtual void ResetSamplesCount() = 0;
 };
 
 }  // namespace eerie_leap::domain::hardware::adc_domain

@@ -81,6 +81,14 @@ class AdcSimulatorManager : public IAdcManager {
         int GetChannelCount() override {
             return adc_->GetChannelCount();
         }
+
+        void UpdateSamplesCount(int samples) override {
+            adc_->UpdateConfiguration(samples);
+        }
+
+        void ResetSamplesCount() override {
+            adc_->UpdateConfiguration(adc_configuration_->samples);
+        }
     };
 
 }  // namespace eerie_leap::domain::hardware::adc_domain

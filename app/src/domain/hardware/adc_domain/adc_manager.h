@@ -140,6 +140,16 @@ public:
 
         return count;
     }
+
+    void UpdateSamplesCount(int samples) override {
+        for(auto& adc : adcs_)
+            adc->UpdateConfiguration(samples);
+    }
+
+    void ResetSamplesCount() override {
+        for(auto& adc : adcs_)
+            adc->UpdateConfiguration(adc_configuration_->samples);
+    }
 };
 
 }  // namespace eerie_leap::domain::hardware::adc_domain
