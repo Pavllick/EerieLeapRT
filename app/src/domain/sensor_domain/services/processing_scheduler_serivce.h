@@ -10,7 +10,6 @@
 #include "domain/hardware/gpio_domain/i_gpio.h"
 
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
-#include "domain/sensor_domain/processors/sensor_reader.h"
 #include "domain/sensor_domain/processors/sensor_processor.h"
 
 #include "sensor_task.hpp"
@@ -23,7 +22,6 @@ using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::domain::hardware::gpio_domain;
 using namespace eerie_leap::domain::hardware::adc_domain;
-using namespace eerie_leap::domain::sensor_domain::processors;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 
 class ProcessingSchedulerService {

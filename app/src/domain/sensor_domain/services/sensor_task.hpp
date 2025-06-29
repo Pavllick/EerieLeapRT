@@ -5,12 +5,13 @@
 
 #include "domain/sensor_domain/models/sensor.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
-#include "domain/sensor_domain/processors/sensor_reader.h"
+#include "domain/sensor_domain/processors/sensor_reader/i_sensor_reader.h"
 #include "domain/sensor_domain/processors/sensor_processor.h"
 
 namespace eerie_leap::domain::sensor_domain::services {
 
 using namespace eerie_leap::domain::sensor_domain::models;
+using namespace eerie_leap::domain::sensor_domain::processors::sensor_reader;
 using namespace eerie_leap::domain::sensor_domain::processors;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 
@@ -21,7 +22,7 @@ struct SensorTask {
     std::shared_ptr<Sensor> sensor;
 
     std::shared_ptr<SensorReadingsFrame> readings_frame;
-    std::shared_ptr<SensorReader> reader;
+    std::shared_ptr<ISensorReader> reader;
     std::shared_ptr<SensorProcessor> processor;
 };
 

@@ -4,12 +4,19 @@
 
 #include "utilities/time/time_helpers.hpp"
 #include "utilities/memory/heap_allocator.h"
+#include "domain/sensor_domain/models/sensor_type.h"
+#include "domain/sensor_domain/processors/sensor_reader/i_sensor_reader.h"
+#include "domain/sensor_domain/processors/sensor_reader/sensor_reader_physical_analog.h"
+#include "domain/sensor_domain/processors/sensor_reader/sensor_reader_physical_indicator.h"
+#include "domain/sensor_domain/processors/sensor_reader/sensor_reader_virtual_analog.h"
+#include "domain/sensor_domain/processors/sensor_reader/sensor_reader_virtual_indicator.h"
 #include "processing_scheduler_serivce.h"
 
 namespace eerie_leap::domain::sensor_domain::services {
 
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::domain::sensor_domain::models;
+using namespace eerie_leap::domain::sensor_domain::processors::sensor_reader;
 
 LOG_MODULE_REGISTER(processing_scheduler_logger);
 
@@ -61,15 +68,39 @@ std::shared_ptr<SensorTask> ProcessingSchedulerService::CreateSensorTask(std::sh
     task->sensor = sensor;
     task->readings_frame = sensor_readings_frame_;
 
-    auto sensor_reader = make_shared_ext<SensorReader>(
-        time_service_,
-        guid_generator_,
-        adc_configuration_controller_,
-        gpio_,
-        sensor_readings_frame_,
-        sensor);
-    task->reader = sensor_reader;
+    std::shared_ptr<ISensorReader> sensor_reader;
 
+    if(sensor->configuration.type == SensorType::PHYSICAL_ANALOG) {
+        sensor_reader = make_shared_ext<SensorReaderPhysicalAnalog>(
+            time_service_,
+            guid_generator_,
+            sensor_readings_frame_,
+            sensor,
+            adc_configuration_controller_);
+    } else if(sensor->configuration.type == SensorType::VIRTUAL_ANALOG) {
+        sensor_reader = make_shared_ext<SensorReaderVirtualAnalog>(
+            time_service_,
+            guid_generator_,
+            sensor_readings_frame_,
+            sensor);
+    } else if(sensor->configuration.type == SensorType::PHYSICAL_INDICATOR) {
+        sensor_reader = make_shared_ext<SensorReaderPhysicalIndicator>(
+            time_service_,
+            guid_generator_,
+            sensor_readings_frame_,
+            sensor,
+            gpio_);
+    } else if(sensor->configuration.type == SensorType::VIRTUAL_INDICATOR) {
+        sensor_reader = make_shared_ext<SensorReaderVirtualIndicator>(
+            time_service_,
+            guid_generator_,
+            sensor_readings_frame_,
+            sensor);
+    } else {
+        throw std::runtime_error("Unsupported sensor type");
+    }
+
+    task->reader = sensor_reader;
     task->processor = sensor_processor_;
 
     return task;
