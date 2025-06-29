@@ -15,7 +15,11 @@
 #include "domain/hardware/gpio_domain/i_gpio.h"
 #include "domain/hardware/gpio_domain/gpio_simulator.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
-#include "domain/sensor_domain/processors/sensor_reader.h"
+#include "domain/sensor_domain/processors/sensor_reader/i_sensor_reader.h"
+#include "domain/sensor_domain/processors/sensor_reader/sensor_reader_physical_analog.h"
+#include "domain/sensor_domain/processors/sensor_reader/sensor_reader_physical_indicator.h"
+#include "domain/sensor_domain/processors/sensor_reader/sensor_reader_virtual_analog.h"
+#include "domain/sensor_domain/processors/sensor_reader/sensor_reader_virtual_indicator.h"
 
 #include "domain/sensor_domain/models/sensor.h"
 #include "domain/sensor_domain/models/reading_status.h"
@@ -29,6 +33,7 @@ using namespace eerie_leap::domain::hardware::adc_domain;
 using namespace eerie_leap::domain::hardware::adc_domain::models;
 using namespace eerie_leap::domain::hardware::gpio_domain;
 using namespace eerie_leap::domain::sensor_domain::processors;
+using namespace eerie_leap::domain::sensor_domain::processors::sensor_reader;
 
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::utilities::voltage_interpolator;
@@ -170,7 +175,7 @@ std::shared_ptr<AdcConfiguration> sensors_reader_GetTestConfiguration() {
 
 struct sensors_reader_HelperInstances {
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame;
-    std::shared_ptr<std::vector<std::shared_ptr<SensorReader>>> sensor_readers;
+    std::shared_ptr<std::vector<std::shared_ptr<ISensorReader>>> sensor_readers;
 };
 
 sensors_reader_HelperInstances sensors_reader_GetReadingInstances() {
@@ -194,9 +199,40 @@ sensors_reader_HelperInstances sensors_reader_GetReadingInstances() {
     auto sensor_readings_frame = std::make_shared<SensorReadingsFrame>();
     auto sensors = sensors_reader_GetTestSensors(math_parser_service);
 
-    auto sensor_readers = std::make_shared<std::vector<std::shared_ptr<SensorReader>>>();
+    auto sensor_readers = std::make_shared<std::vector<std::shared_ptr<ISensorReader>>>();
     for(int i = 0; i < sensors.size(); i++) {
-        auto sensor_reader = std::make_shared<SensorReader>(time_service, guid_generator, adc_configuration_controller, gpio, sensor_readings_frame, sensors[i]);
+        std::shared_ptr<ISensorReader> sensor_reader;
+
+        if(sensors[i]->configuration.type == SensorType::PHYSICAL_ANALOG) {
+            sensor_reader = make_shared_ext<SensorReaderPhysicalAnalog>(
+                time_service,
+                guid_generator,
+                sensor_readings_frame,
+                sensors[i],
+                adc_configuration_controller);
+        } else if(sensors[i]->configuration.type == SensorType::VIRTUAL_ANALOG) {
+            sensor_reader = make_shared_ext<SensorReaderVirtualAnalog>(
+                time_service,
+                guid_generator,
+                sensor_readings_frame,
+                sensors[i]);
+        } else if(sensors[i]->configuration.type == SensorType::PHYSICAL_INDICATOR) {
+            sensor_reader = make_shared_ext<SensorReaderPhysicalIndicator>(
+                time_service,
+                guid_generator,
+                sensor_readings_frame,
+                sensors[i],
+                gpio);
+        } else if(sensors[i]->configuration.type == SensorType::VIRTUAL_INDICATOR) {
+            sensor_reader = make_shared_ext<SensorReaderVirtualIndicator>(
+                time_service,
+                guid_generator,
+                sensor_readings_frame,
+                sensors[i]);
+        } else {
+            throw std::runtime_error("Unsupported sensor type");
+        }
+
         sensor_readers->push_back(sensor_reader);
     }
 
