@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  zephyr-dev:
+    container_name: eerie_leap
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    environment:
+      - DISPLAY=:0
+    volumes:
+      - ./:/home/ubuntu/zephyr/eerie_leap_ws/eerie_leap:cached
+      - ${HOME}/.Xauthority:/home/ubuntu/.Xauthority:ro
+    ports:
+      - "5900:5900"
+    tty: true

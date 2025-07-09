@@ -1,0 +1,64 @@
+ARG BASE_IMAGE=ubuntu:24.04
+FROM ${BASE_IMAGE}
+
+ARG USERNAME=ubuntu
+ARG VNCPASSWD=zephyr
+ARG UBUNTU_MIRROR_ARCHIVE=archive.ubuntu.com/ubuntu
+ARG UBUNTU_MIRROR_SECURITY=security.ubuntu.com/ubuntu
+ARG UBUNTU_MIRROR_PORTS=ports.ubuntu.com/ubuntu-ports
+
+SHELL ["/bin/bash", "-c"]
+
+USER root
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends git curl cmake ninja-build gperf \
+        ccache dfu-util device-tree-compiler wget python3-dev python3-venv python3-tk \
+        xz-utils file make gcc gcc-multilib g++-multilib libsdl2-dev libmagic1 \
+        x11vnc xvfb openbox dos2unix xterm usbutils \
+        npm emacs && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN npm install -g html-minifier-terser
+
+# Add entrypoint and permissions
+ADD entrypoint.sh /home/${USERNAME}/entrypoint.sh
+RUN chmod +x /home/${USERNAME}/entrypoint.sh
+
+USER ${USERNAME}
+
+# Configure display
+ENV DISPLAY=:0
+
+# VNC password
+RUN mkdir -p /home/${USERNAME}/.vnc && \
+    x11vnc -storepasswd ${VNCPASSWD} /home/${USERNAME}/.vnc/passwd
+
+RUN python3 -m venv /home/${USERNAME}/zephyr/.venv
+
+RUN mkdir -p /home/${USERNAME}/zephyr/.venv && \
+    python3 -m venv /home/${USERNAME}/zephyr/.venv
+RUN echo "source /home/${USERNAME}/zephyr/.venv/bin/activate" >> /home/${USERNAME}/.bashrc && \
+    chmod +x /home/${USERNAME}/zephyr/.venv/bin/activate
+
+RUN source /home/${USERNAME}/zephyr/.venv/bin/activate && \
+    pip install --upgrade pip && \
+    pip install west
+
+RUN mkdir -p /home/${USERNAME}/zephyr/eerie_leap_ws
+RUN mkdir -p /home/${USERNAME}/zephyr/eerie_leap_ws/eerie_leap
+COPY ./west.yml /home/${USERNAME}/zephyr/eerie_leap_ws/eerie_leap/west.yml
+
+RUN source /home/${USERNAME}/zephyr/.venv/bin/activate && \
+    cd /home/${USERNAME}/zephyr/eerie_leap_ws && \
+    west init -l /home/${USERNAME}/zephyr/eerie_leap_ws/eerie_leap && \
+    west update && \
+    west zephyr-export && \
+    west packages pip --install
+
+RUN source /home/${USERNAME}/zephyr/.venv/bin/activate && \
+    cd /home/${USERNAME}/zephyr/eerie_leap_ws/zephyr && \
+    west sdk install
+
+WORKDIR /home/${USERNAME}/zephyr/eerie_leap_ws/eerie_leap
+CMD ["bash"]

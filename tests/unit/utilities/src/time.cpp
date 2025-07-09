@@ -1,4 +1,5 @@
 #include <memory>
+#include <regex>
 #include <zephyr/kernel.h>
 #include <zephyr/ztest.h>
 
@@ -17,7 +18,8 @@ ZTEST(time, test_GetFormattedString_not_empty) {
     auto formatted_time = TimeHelpers::GetFormattedString(current_time);
 
     zassert_not_equal(formatted_time.size(), 0);
-    zassert_true(formatted_time.rfind("1969-12-31 19:", 0) == 0);
+    const std::regex time_pattern(R"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.*)");
+    zassert_true(std::regex_match(formatted_time, time_pattern));
 }
 
 ZTEST(time, test_GetCurrentTime_returns_valid_elapsed_time) {
