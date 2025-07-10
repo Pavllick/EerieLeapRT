@@ -12,14 +12,18 @@ SHELL ["/bin/bash", "-c"]
 USER root
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y --no-install-recommends git curl cmake ninja-build gperf \
+    apt-get install -y --no-install-recommends git curl ninja-build gperf \
         ccache dfu-util device-tree-compiler wget python3-dev python3-venv python3-tk \
         xz-utils file make gcc gcc-multilib g++-multilib libsdl2-dev libmagic1 \
         x11vnc xvfb openbox dos2unix xterm usbutils \
         npm emacs && \
+        apt-get install -y sudo && \
     rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g html-minifier-terser
+
+RUN usermod -aG sudo ubuntu
+RUN echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/ubuntu
 
 # Add entrypoint and permissions
 ADD entrypoint.sh /home/${USERNAME}/entrypoint.sh
@@ -42,6 +46,9 @@ RUN echo "source /home/${USERNAME}/zephyr/.venv/bin/activate" >> /home/${USERNAM
     chmod +x /home/${USERNAME}/zephyr/.venv/bin/activate
 
 RUN source /home/${USERNAME}/zephyr/.venv/bin/activate && \
+    pip install cmake --upgrade
+
+RUN source /home/${USERNAME}/zephyr/.venv/bin/activate && \
     pip install --upgrade pip && \
     pip install west
 
@@ -54,7 +61,8 @@ RUN source /home/${USERNAME}/zephyr/.venv/bin/activate && \
     west init -l /home/${USERNAME}/zephyr/eerie_leap_ws/eerie_leap && \
     west update && \
     west zephyr-export && \
-    west packages pip --install
+    west packages pip --install && \
+    west blobs fetch hal_espressif
 
 RUN source /home/${USERNAME}/zephyr/.venv/bin/activate && \
     cd /home/${USERNAME}/zephyr/eerie_leap_ws/zephyr && \

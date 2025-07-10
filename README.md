@@ -4,26 +4,27 @@ EerieLeap is an open-source sensor monitoring system built with [Zephyr RTOS](ht
 
 ## Getting Started
 
-Before proceeding, ensure you have a properly set up Zephyr development environment. Follow the official [Zephyr Getting Started Guide](https://docs.zephyrproject.org/latest/getting_started/index.html).
+Development environment is based on [Docker](https://www.docker.com/). Use `example.docker-compose.yml` as an example. Rename to `docker-compose.yml` to use it.
 
-### Initialization
+### Hardware Access From Container
 
-First, initialize the workspace folder (`ws_eerie_leap`) where `eerie_leap` and all Zephyr modules will be cloned. Run the following commands:
+By default, the container will be run with `privileged` mode enabled and `pid` mode set to `host`, to allow access to devices connected to the host. Device have to be connected to the host before running the container.
+
+If using Docker for Windows with Docker using WSL2 engine, make sure to attach device to WSL container. It can be done with help of [usbipd-win](https://github.com/dorssel/usbipd-win) tool. Example:
 
 ```shell
-# Initialize ws_eerie_leap for the eerie_leap (main branch)
-west init -m https://github.com/pavllick/EerieLeapRT --mr main eerie_leap
-# Update Zephyr modules
-cd ws_eerie_leap
-west update
+usbipd attach --wsl --busid <busid>
 ```
+
+Where `<busid>` is the bus id of the device that can be found with `usbipd list` command.
+
+Connected device should be visible in the container as `/dev/ttyACM0`. Test presence of the device in the container with `ls /dev/ttyACM0` command.
 
 ### Building
 
 For VS Code build setup examples, refer to `.vscode_example/tasks.json`. Alternatively, you can build the application using the following command:
 
 ```shell
-cd eerie_leap
 west build -b $BOARD app
 ```
 

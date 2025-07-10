@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   zephyr-dev:
     container_name: eerie_leap
@@ -14,3 +12,5 @@ services:
     ports:
       - "5900:5900"
     tty: true
+    privileged: true
+    pid: host

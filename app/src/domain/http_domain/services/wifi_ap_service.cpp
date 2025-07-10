@@ -24,7 +24,7 @@ net_mgmt_event_callback WifiApService::callback_ = {};
 #define WIFI_AP_IP_ADDRESS "192.168.4.1"
 #define WIFI_AP_NETMASK    "255.255.255.0"
 
-void WifiApService::EventHandler(net_mgmt_event_callback *callback, uint32_t mgmt_event, net_if *iface) {
+void WifiApService::EventHandler(net_mgmt_event_callback *callback, uint64_t mgmt_event, net_if *iface) {
     char buf[NET_IPV4_ADDR_LEN];
 
     switch (mgmt_event) {

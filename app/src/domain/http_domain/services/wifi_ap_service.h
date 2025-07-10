@@ -18,7 +18,7 @@ private:
     static bool DHCPv4ServerInitialize();
     static bool DHCPv4ServerStart();
     static bool AccessPointInitialize();
-    static void EventHandler(net_mgmt_event_callback *callback, uint32_t mgmt_event, net_if *iface);
+    static void EventHandler(net_mgmt_event_callback *callback, uint64_t mgmt_event, net_if *iface);
 #endif // CONFIG_WIFI
 
 public:
