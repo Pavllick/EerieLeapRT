@@ -7,10 +7,11 @@ services:
     environment:
       - DISPLAY=:0
     volumes:
-      - ./:/home/ubuntu/zephyr/eerie_leap_ws/eerie_leap:cached
+      - ./:/home/ubuntu/zephyr/workspace/project:cached
       - ${HOME}/.Xauthority:/home/ubuntu/.Xauthority:ro
     ports:
       - "5900:5900"
+      - "8080:8080"
     tty: true
     privileged: true
     pid: host

@@ -157,11 +157,11 @@ zcbor code -sed --default-max-qty 24 -c ./app/src/configuration/cbor_schemas/sen
 
 #### ESP32S3 DevKitC v1.3
 
-Networking for ESP32S3 DevKitC v1.3 is currently experiencing issues with memory allocation. But if enough memory allocated to the heap, through disabling other features, it works. To access web interface, connect to the WiFi network with SSID `EerieLeap` and use address `192.168.4.1:8080` in the browser.
+To access web interface, connect to the WiFi network with SSID `EerieLeap` and use address `192.168.4.1:8080` in the browser.
 
 #### NativeSim
 
-In order to access web interface while running in the simulator, follow the instructions in the [Networking with native_sim board](https://docs.zephyrproject.org/latest/connectivity/networking/native_sim_setup.html) documentation. Run `./net-setup.sh` script first, then start the simulator. In order to gain access to the web interface, port needs to be forwarded from the loopback interface to the TAP IP, `socat` tool can be used for this purpose. Run the following command:
+In order to access web interface while running in the simulator, follow the instructions in the [Networking with native_sim board](https://docs.zephyrproject.org/latest/connectivity/networking/native_sim_setup.html) documentation. Run `./net-setup.sh up` script first, then start the simulator, in Docker container `net-tools` can be found in `~/zephyr/net-tools` directory. In order to gain access to the web interface, port needs to be forwarded from the loopback interface to the TAP IP, `socat` tool can be used for this purpose. Run the following command:
 
 ```shell
 socat TCP-LISTEN:8080,fork TCP:192.0.2.1:8080

@@ -45,6 +45,6 @@ void HttpServer::Start() {
 HTTP_RESOURCE_DEFINE(sensors_config_resource, http_service, "/api/sensors/config", &SensorsApiController::sensors_config_resource_detail);
 
 // View Resources
-HTTP_RESOURCE_DEFINE(sensors_config_editor_html_resource, http_service, "/sensors/editor", &SensorsEditorController::sensors_config_editor_html_resource_detail);
+HTTP_RESOURCE_DEFINE(sensors_config_editor_html_resource, http_service, "/", &SensorsEditorController::sensors_config_editor_html_resource_detail);
 
 } // namespace eerie_leap::domain::http_domain::services
