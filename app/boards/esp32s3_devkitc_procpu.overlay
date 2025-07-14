@@ -9,6 +9,10 @@
 		adc1 = &adc1;
 	};
 
+	chosen {
+		zephyr,console = &usb_serial;
+	};
+
     fstab {
         compatible = "zephyr,fstab";
         lfs1: lfs1 {
@@ -152,4 +156,8 @@
 		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
 		zephyr,resolution = <12>;
 	};
+};
+
+&usb_serial {
+	status = "okay";
 };
