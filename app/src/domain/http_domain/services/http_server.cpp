@@ -6,7 +6,7 @@
 #include "domain/http_domain/controllers/view/sensors_editor_controller.h"
 #include "http_server.h"
 
-HTTP_SERVICE_DEFINE(http_service, "0.0.0.0", &http_service_port_, 1, 10, nullptr, nullptr);
+HTTP_SERVICE_DEFINE(http_service, "0.0.0.0", &http_service_port_, 1, 10, nullptr, nullptr, nullptr);
 
 namespace eerie_leap::domain::http_domain::services {
 
