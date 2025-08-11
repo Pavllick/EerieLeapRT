@@ -1,0 +1,6 @@
+board:
+  name: esp32s3_pm_hw_02
+  full_name: ESP32-S3-PM-HW-02
+  vendor: eerieleap
+  socs:
+  - name: esp32s3

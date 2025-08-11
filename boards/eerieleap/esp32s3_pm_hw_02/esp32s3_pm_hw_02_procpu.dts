@@ -1,37 +1,35 @@
-// ESP32-S3 Reference Manual:
-// https://www.espressif.com/sites/default/files/documentation/esp32-s3_technical_reference_manual_en.pdf
+/*
+ * Copyright (c) 2024 Espressif Systems (Shanghai) Co., Ltd.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+/dts-v1/;
+
+#include <espressif/esp32s3/esp32s3_wroom_n8.dtsi>
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+#include <espressif/partitions_0x0_amp.dtsi>
+#include "esp32s3_pm_hw_02-pinctrl.dtsi"
 
 / {
-    aliases {
-		lfs1 = &lfs1;
+	model = "Espressif ESP32S3-DevkitC PROCPU";
+	compatible = "espressif,esp32s3";
+
+	aliases {
+		watchdog0 = &wdt0;
 		gpioc = &gpioc;
-        adc0 = &adc0;
+		adc0 = &adc0;
 		adc1 = &adc1;
+		uart-0 = &uart0;
 	};
 
 	chosen {
-		zephyr,console = &usb_serial;
+		zephyr,sram = &sram1;
+		zephyr,console = &uart0;
+		zephyr,shell-uart = &uart0;
+		zephyr,flash = &flash0;
+		zephyr,code-partition = &slot0_partition;
+		zephyr,bt-hci = &esp32_bt_hci;
 	};
-
-    fstab {
-        compatible = "zephyr,fstab";
-        lfs1: lfs1 {
-            compatible = "zephyr,fstab,littlefs";
-            read-size = <16>;
-			prog-size = <16>;
-			cache-size = <64>;
-			lookahead-size = <32>;
-            block-cycles = <512>;
-            partition = <&lfs1_partition>;
-            mount-point = "/lfs1";
-            automount;
-        };
-    };
-
-    ap_wifi: ap_wifi {
-        compatible = "espressif,esp32-wifi";
-        status = "okay";
-    };
 
 	gpioc: gpioc {
 		compatible = "gpio-keys";
@@ -62,36 +60,16 @@
 	};
 };
 
-&flash0 {
-    partitions {
-        compatible = "fixed-partitions";
-        #address-cells = <1>;
-        #size-cells = <1>;
+&gpio0 {
+	status = "okay";
+};
 
-        lfs1_partition: partition@700000 {
-            label = "lfs1_storage";
-            reg = <0x700000 DT_SIZE_M(1)>; // 1MB at offset 7MB
-        };
-    };
+&gpio1 {
+	status = "okay";
 };
 
 &psram0 {
-	size = <DT_SIZE_M(2)>;
-};
-
-&twai {
-    compatible = "espressif,esp32-twai";
-    pinctrl-0 = <&twai0_pins>;
-    status = "okay";
-};
-
-&pinctrl {
-    twai0_pins: twai0_pins {
-        group {
-            pinmux = <TWAI_TX_GPIO5>,
-                     <TWAI_RX_GPIO6>;
-        };
-    };
+	size = <DT_SIZE_M(8)>;
 };
 
 // ADC gain set to ADC_GAIN_1_4 corresponds to 12dB attenuation with measurement range of 0-3.1V
@@ -173,6 +151,31 @@
 	};
 };
 
-&usb_serial {
+// Needed for serial monitor
+&uart0 {
+	status = "okay";
+	current-speed = <115200>;
+	pinctrl-0 = <&uart0_default>;
+	pinctrl-names = "default";
+};
+
+&twai {
+	pinctrl-0 = <&twai_default>;
+	pinctrl-names = "default";
+};
+
+&wdt0 {
+	status = "okay";
+};
+
+&trng0 {
+	status = "okay";
+};
+
+&esp32_bt_hci {
+	status = "okay";
+};
+
+&wifi {
 	status = "okay";
 };

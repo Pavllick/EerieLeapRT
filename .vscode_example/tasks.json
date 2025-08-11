@@ -2,9 +2,20 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "Build EL02",
+            "type": "shell",
+            "command": "west build -p auto -b esp32s3_pm_hw_02/esp32s3/procpu --extra-conf boards/esp32s3_procpu_net.conf ./app",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$gcc"],
+            "detail": "Build the Zephyr project using native_sim POSIX board"
+        },
+        {
             "label": "Build ESP32S3",
             "type": "shell",
-            "command": "west build -p auto -b esp32s3_devkitc/esp32s3/procpu --extra-conf boards/esp32s3_devkitc_procpu_net.conf ./app",
+            "command": "west build -p auto -b esp32s3_devkitc/esp32s3/procpu --extra-conf boards/esp32s3_procpu_net.conf ./app",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -15,7 +26,7 @@
         {
             "label": "Build ESP32S3 With Bootloader",
             "type": "shell",
-            "command": "west build -p auto -b esp32s3_devkitc/esp32s3/procpu --sysbuild --extra-conf boards/esp32s3_devkitc_procpu_net.conf ./app",
+            "command": "west build -p auto -b esp32s3_devkitc/esp32s3/procpu --sysbuild --extra-conf boards/esp32s3_procpu_net.conf ./app",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -48,7 +59,7 @@
                 "isDefault": true
             },
             "problemMatcher": ["$gcc"],
-            "detail": "Build the Zephyr project using qemu_cortex_a9 board"
+            "detail": "Build the Zephyr project using native_sim POSIX board"
         },
         {
             "label": "Run DBG Server",
