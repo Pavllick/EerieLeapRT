@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Espressif Systems (Shanghai) Co., Ltd.
+ * Copyright (c) 2025 Pavel Maloletkov
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -19,7 +19,8 @@
 		gpioc = &gpioc;
 		adc0 = &adc0;
 		adc1 = &adc1;
-		uart-0 = &uart0;
+		uart0 = &uart0;
+		sdhc0 = &spi_sdhc0;
 	};
 
 	chosen {
@@ -35,27 +36,35 @@
 		compatible = "gpio-keys";
 
 		di_0: di_0 {
-			gpios = < &gpio0 9 GPIO_PULL_UP >;
+			gpios = < &gpio0 3 GPIO_PULL_UP >;
 		};
 
 		di_1: di_1 {
-			gpios = < &gpio0 10 GPIO_PULL_UP >;
+			gpios = < &gpio1 14 GPIO_PULL_UP >;
 		};
 
 		di_2: di_2 {
-			gpios = < &gpio0 11 GPIO_PULL_UP >;
+			gpios = < &gpio0 9 GPIO_PULL_UP >;
 		};
 
 		di_3: di_3 {
-			gpios = < &gpio0 12 GPIO_PULL_UP >;
+			gpios = < &gpio0 10 GPIO_PULL_UP >;
 		};
 
 		di_4: di_4 {
-			gpios = < &gpio0 13 GPIO_PULL_UP >;
+			gpios = < &gpio0 14 GPIO_PULL_UP >;
 		};
 
 		di_5: di_5 {
-			gpios = < &gpio0 14 GPIO_PULL_UP >;
+			gpios = < &gpio0 13 GPIO_PULL_UP >;
+		};
+
+		di_6: di_6 {
+			gpios = < &gpio0 12 GPIO_PULL_UP >;
+		};
+
+		di_7: di_7 {
+			gpios = < &gpio0 11 GPIO_PULL_UP >;
 		};
 	};
 };
@@ -80,32 +89,18 @@
 	#address-cells = <1>;
 	#size-cells = <0>;
 
-	channel@2 {
-		reg = <2>;
+	// IN0
+	channel@6 {
+		reg = <6>;
 		zephyr,gain = "ADC_GAIN_1_4";
 		zephyr,reference = "ADC_REF_INTERNAL";
 		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
 		zephyr,resolution = <12>;
 	};
 
-    channel@3 {
-		reg = <3>;
-		zephyr,gain = "ADC_GAIN_1_4";
-		zephyr,reference = "ADC_REF_INTERNAL";
-		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
-		zephyr,resolution = <12>;
-	};
-
-    channel@4 {
-		reg = <4>;
-		zephyr,gain = "ADC_GAIN_1_4";
-		zephyr,reference = "ADC_REF_INTERNAL";
-		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
-		zephyr,resolution = <12>;
-	};
-
-    channel@5 {
-		reg = <5>;
+	// IN6
+    channel@7 {
+		reg = <7>;
 		zephyr,gain = "ADC_GAIN_1_4";
 		zephyr,reference = "ADC_REF_INTERNAL";
 		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
@@ -118,15 +113,8 @@
 	#address-cells = <1>;
 	#size-cells = <0>;
 
-	channel@3 {
-		reg = <3>;
-		zephyr,gain = "ADC_GAIN_1_4";
-		zephyr,reference = "ADC_REF_INTERNAL";
-		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
-		zephyr,resolution = <12>;
-	};
-
-    channel@4 {
+	// IN1
+	channel@4 {
 		reg = <4>;
 		zephyr,gain = "ADC_GAIN_1_4";
 		zephyr,reference = "ADC_REF_INTERNAL";
@@ -134,6 +122,7 @@
 		zephyr,resolution = <12>;
 	};
 
+    // IN2
     channel@5 {
 		reg = <5>;
 		zephyr,gain = "ADC_GAIN_1_4";
@@ -142,8 +131,36 @@
 		zephyr,resolution = <12>;
 	};
 
+    // IN3
     channel@6 {
 		reg = <6>;
+		zephyr,gain = "ADC_GAIN_1_4";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
+
+    // IN4
+    channel@7 {
+		reg = <7>;
+		zephyr,gain = "ADC_GAIN_1_4";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
+
+    // IN5
+	channel@9 {
+		reg = <9>;
+		zephyr,gain = "ADC_GAIN_1_4";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
+
+	// IN7
+	channel@8 {
+		reg = <8>;
 		zephyr,gain = "ADC_GAIN_1_4";
 		zephyr,reference = "ADC_REF_INTERNAL";
 		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
@@ -157,6 +174,34 @@
 	current-speed = <115200>;
 	pinctrl-0 = <&uart0_default>;
 	pinctrl-names = "default";
+};
+
+&uart1 {
+	status = "okay";
+	current-speed = <115200>;
+	pinctrl-0 = <&uart1_default>;
+	pinctrl-names = "default";
+};
+
+&spi2 {
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	pinctrl-0 = <&spim2_default>;
+	pinctrl-names = "default";
+
+	spi_sdhc0: sdhc@0 {
+        compatible = "zephyr,sdhc-spi-slot";
+        reg = <0>;
+        status = "okay";
+        spi-max-frequency = <24000000>;
+
+        mmc {
+            compatible = "zephyr,sdmmc-disk";
+            disk-name = "SD";
+            status = "okay";
+        };
+    };
 };
 
 &twai {
