@@ -1,6 +1,7 @@
 / {
 	aliases {
 		lfs1 = &lfs1;
+		sdhc0 = &sdhc_disk;
 		gpioc = &gpioc;
 		adc0 = &adc_emul;
 	};
@@ -18,6 +19,13 @@
 			mount-point = "/lfs1";
 			automount;
 		};
+	};
+
+	sdhc_disk: storage_disk {
+		compatible = "zephyr,flash-disk";
+		partition = <&sdhc_partition>;
+		disk-name = "SD";
+		cache-size = <4096>;
 	};
 
 	gpioc: gpioc {
@@ -70,12 +78,12 @@
 };
 
 &flashcontroller0 {
-	reg = <0x00000000 DT_SIZE_M(4)>;  // 4MB flash controller
+	reg = <0x00000000 DT_SIZE_M(16)>;  // 16MB flash controller
 };
 
 // HEX Flash dump can be found in the duild/flash.bin file
 &flash0 {
-	reg = <0x00000000 DT_SIZE_M(4)>;  // 4MB total flash
+	reg = <0x00000000 DT_SIZE_M(16)>;  // 16MB total flash
 
 	partitions {
 		compatible = "fixed-partitions";
@@ -85,6 +93,11 @@
 		lfs1_partition: partition@1000 {
 			label = "lfs1_storage";
 			reg = <0x00001000 DT_SIZE_M(1)>;  // 0x00001000 offset, 1MB size
+		};
+
+		sdhc_partition: partition@101000 {
+			label = "sdhc_storage";
+			reg = <0x00101000 DT_SIZE_M(10)>;  // 0x00101000 offset, 10MB size
 		};
 	};
 };

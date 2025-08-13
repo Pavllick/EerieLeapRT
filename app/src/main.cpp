@@ -107,10 +107,13 @@ int main(void) {
         return -1;
     }
 
-    auto sd_fs_service = make_shared_ext<SdmmcService>(fs::SD_DRIVE_NAME, fs::SD_MOUNT_POINT);
+    std::shared_ptr<SdmmcService> sd_fs_service = nullptr;
+#if DT_HAS_ALIAS(sdhc0)
+    sd_fs_service = make_shared_ext<SdmmcService>(fs::SD_DRIVE_NAME, fs::SD_MOUNT_POINT);
     if(!sd_fs_service->Initialize()) {
         LOG_ERR("Failed to initialize SD File System.");
     }
+#endif // DT_HAS_ALIAS(sdhc0)
 
     auto time_service = make_shared_ext<BootElapsedTimeService>();
     time_service->Initialize();
