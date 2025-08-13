@@ -3,16 +3,18 @@
 #include <zephyr/arch/cpu.h>
 #include <zephyr/logging/log.h>
 
-#include "domain/sensor_domain/models/sensor_type.h"
+#include "utilities/constants.h"
 #include "utilities/memory/heap_allocator.h"
 #include "utilities/dev_tools/system_info.h"
 #include "utilities/guid/guid_generator.h"
 #include "utilities/time/boot_elapsed_time_service.h"
 #include "utilities/math_parser/math_parser_service.hpp"
 #include "domain/fs_domain/services/fs_service.h"
+#include "domain/fs_domain/services/sdmmc_service.h"
 #include "domain/hardware/gpio_domain/gpio_factory.hpp"
 #include "domain/sensor_domain/services/processing_scheduler_serivce.h"
 #include "domain/sensor_domain/services/calibration_service.h"
+#include "domain/sensor_domain/models/sensor_type.h"
 
 #include "configuration/system_config/system_config.h"
 #include "configuration/adc_config/adc_config.h"
@@ -34,6 +36,9 @@ using namespace eerie_leap::utilities::voltage_interpolator;
 using namespace eerie_leap::domain::sensor_domain::models;
 // End test sensors
 
+#define PARTITION_NODE DT_ALIAS(lfs1)
+FS_FSTAB_DECLARE_ENTRY(PARTITION_NODE);
+
 #ifdef CONFIG_WIFI
 #include "domain/http_domain/services/wifi_ap_service.h"
 #endif // CONFIG_WIFI
@@ -42,6 +47,7 @@ using namespace eerie_leap::domain::sensor_domain::models;
 #include "domain/http_domain/services/http_server.h"
 #endif // CONFIG_NETWORKING
 
+using namespace eerie_leap::utilities::constants;
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::dev_tools;
 using namespace eerie_leap::utilities::time;
@@ -95,7 +101,16 @@ int main(void) {
     http_server.Start();
 #endif // CONFIG_NETWORKING
 
-    auto fs_service = make_shared_ext<FsService>();
+    auto fs_service = make_shared_ext<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
+    if(!fs_service->Initialize()) {
+        LOG_ERR("Failed to initialize File System.");
+        return -1;
+    }
+
+    auto sd_fs_service = make_shared_ext<SdmmcService>(fs::SD_DRIVE_NAME, fs::SD_MOUNT_POINT);
+    if(!sd_fs_service->Initialize()) {
+        LOG_ERR("Failed to initialize SD File System.");
+    }
 
     auto time_service = make_shared_ext<BootElapsedTimeService>();
     time_service->Initialize();

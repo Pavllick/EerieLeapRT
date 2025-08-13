@@ -1,7 +1,8 @@
 #include <sstream>
+#include <filesystem>
 #include <zephyr/fs/fs.h>
 #include <zephyr/logging/log.h>
-#include <filesystem>
+#include <zephyr/storage/disk_access.h>
 
 #include "fs_service.h"
 
@@ -9,17 +10,22 @@ namespace eerie_leap::domain::fs_domain::services {
 
 LOG_MODULE_REGISTER(fs_service_logger);
 
+FsService::FsService(fs_mount_t mountpoint) : mountpoint_(mountpoint) { }
+
 bool FsService::Initialize() {
+    if(!IsMounted())
+        return Mount();
+
     return true;
 }
 
 bool FsService::WriteFile(const std::string& relative_path, const void* data_p, size_t data_size) {
-    if(!is_mounted_) {
+    if(!IsMounted()) {
         LOG_ERR("Filesystem not mounted.");
         return false;
     }
 
-    std::filesystem::path full_path(mountpoint_->mnt_point);
+    std::filesystem::path full_path(mountpoint_.mnt_point);
     full_path /= relative_path;
 
     struct fs_file_t file;
@@ -43,12 +49,12 @@ bool FsService::WriteFile(const std::string& relative_path, const void* data_p, 
 }
 
 bool FsService::ReadFile(const std::string& relative_path, void* data_p, size_t data_size, size_t& out_len) {
-    if(!is_mounted_) {
+    if(!IsMounted()) {
         LOG_ERR("Filesystem not mounted.");
         return false;
     }
 
-    std::filesystem::path full_path(mountpoint_->mnt_point);
+    std::filesystem::path full_path(mountpoint_.mnt_point);
     full_path /= relative_path;
 
     struct fs_file_t file;
@@ -74,14 +80,14 @@ bool FsService::ReadFile(const std::string& relative_path, void* data_p, size_t 
 }
 
 bool FsService::CreateDirectory(const std::string& relative_path) {
-    if(!is_mounted_) {
+    if(!IsMounted()) {
         LOG_ERR("Filesystem not mounted.");
         return false;
     }
 
     std::istringstream stream(relative_path);
     std::string segment;
-    std::filesystem::path full_path(mountpoint_->mnt_point);
+    std::filesystem::path full_path(mountpoint_.mnt_point);
 
     while(std::getline(stream, segment, '/')) {
         if(segment.empty()) continue;
@@ -100,12 +106,12 @@ bool FsService::CreateDirectory(const std::string& relative_path) {
 }
 
 bool FsService::Exists(const std::string& relative_path) {
-    if(!is_mounted_) {
+    if(!IsMounted()) {
         LOG_ERR("Filesystem not mounted.");
         return false;
     }
 
-    std::filesystem::path full_path(mountpoint_->mnt_point);
+    std::filesystem::path full_path(mountpoint_.mnt_point);
     full_path /= relative_path;
 
     struct fs_dirent entry;
@@ -115,10 +121,12 @@ bool FsService::Exists(const std::string& relative_path) {
 }
 
 bool FsService::DeleteFile(const std::string& relative_path) {
-    if(!is_mounted_)
+    if(!IsMounted()) {
+        LOG_ERR("Filesystem not mounted.");
         return false;
+    }
 
-    std::filesystem::path full_path(mountpoint_->mnt_point);
+    std::filesystem::path full_path(mountpoint_.mnt_point);
     full_path /= relative_path;
 
     int rc = fs_unlink(full_path.string().c_str());
@@ -131,12 +139,12 @@ bool FsService::DeleteFile(const std::string& relative_path) {
 }
 
 bool FsService::DeleteRecursive(const std::string& relative_path) {
-    if(!is_mounted_) {
+    if(!IsMounted()) {
         LOG_ERR("Filesystem not mounted.");
         return false;
     }
 
-    std::filesystem::path full_path(mountpoint_->mnt_point);
+    std::filesystem::path full_path(mountpoint_.mnt_point);
     full_path /= relative_path;
 
     struct fs_dir_t dir;
@@ -185,12 +193,12 @@ bool FsService::DeleteRecursive(const std::string& relative_path) {
 std::vector<std::string> FsService::ListFiles(const std::string& relative_path) const {
     std::vector<std::string> files;
 
-    if(!is_mounted_) {
+    if(!IsMounted()) {
         LOG_ERR("Filesystem not mounted.");
         return files;
     }
 
-    std::filesystem::path full_path(mountpoint_->mnt_point);
+    std::filesystem::path full_path(mountpoint_.mnt_point);
     full_path /= relative_path;
 
     struct fs_dir_t dir;
@@ -212,13 +220,13 @@ std::vector<std::string> FsService::ListFiles(const std::string& relative_path) 
 }
 
 size_t FsService::GetTotalSpace() const {
-    if(!is_mounted_) {
+    if(!IsMounted()) {
         LOG_ERR("Filesystem not mounted.");
         return 0;
     }
 
     struct fs_statvfs stat;
-    if(fs_statvfs(mountpoint_->mnt_point, &stat) < 0) {
+    if(fs_statvfs(mountpoint_.mnt_point, &stat) < 0) {
         LOG_ERR("fs_statvfs failed when querying total space.");
         return 0;
     }
@@ -227,11 +235,13 @@ size_t FsService::GetTotalSpace() const {
 }
 
 size_t FsService::GetUsedSpace() const {
-    if(!is_mounted_)
+    if(!IsMounted()) {
+        LOG_ERR("Filesystem not mounted.");
         return 0;
+    }
 
     struct fs_statvfs stat;
-    if(fs_statvfs(mountpoint_->mnt_point, &stat) < 0) {
+    if(fs_statvfs(mountpoint_.mnt_point, &stat) < 0) {
         LOG_ERR("fs_statvfs failed when querying used space.");
         return 0;
     }
@@ -241,10 +251,10 @@ size_t FsService::GetUsedSpace() const {
 
 
 bool FsService::Format() {
-    if(is_mounted_)
+    if(IsMounted())
         Unmount();
 
-    int rc = fs_mkfs(FS_LITTLEFS, (uintptr_t)MKFS_DEV_ID, NULL, 0);
+    int rc = fs_mkfs(FS_LITTLEFS, (uintptr_t)mountpoint_.storage_dev, NULL, 0);
 
 	if (rc < 0) {
 		LOG_ERR("Format failed.");
@@ -258,33 +268,34 @@ bool FsService::Format() {
 }
 
 bool FsService::Mount() {
-    if(is_mounted_)
+    if(IsMounted())
         return true;
 
-    int rc = fs_mount(mountpoint_);
+    int rc = fs_mount(&mountpoint_);
     if(rc < 0)
         LOG_ERR("Failed to mount LittleFS: %d.", rc);
 
-    is_mounted_ = (rc == 0);
-    if(is_mounted_)
-        LOG_INF("Mounted LittleFS at %s.", mountpoint_->mnt_point);
+    if(rc == 0)
+        LOG_INF("Mounted LittleFS at %s.", mountpoint_.mnt_point);
     else
         LOG_ERR("Failed to mount even after formatting.");
 
-    return is_mounted_;
+    return IsMounted();
 }
 
 void FsService::Unmount() {
-    if(!is_mounted_)
+    if(!IsMounted())
         return;
 
-    int rc = fs_unmount(mountpoint_);
-    if(rc < 0) {
+    int rc = fs_unmount(&mountpoint_);
+    if(rc < 0)
         LOG_ERR("Failed to unmount LittleFS: %d.", rc);
-    } else {
-        LOG_INF("Unmounted LittleFS from %s.", mountpoint_->mnt_point);
-        is_mounted_ = false;
-    }
+    else
+        LOG_INF("Unmounted LittleFS from %s.", mountpoint_.mnt_point);
+}
+
+bool FsService::IsMounted() const {
+    return sys_dnode_is_linked(&mountpoint_.node);
 }
 
 }

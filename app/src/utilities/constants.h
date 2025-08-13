@@ -10,4 +10,10 @@ namespace eerie_leap::utilities::constants {
         static const int ADC_CALIBRATION_SAMPLING_RATE_MS = 100;
     }
 
+    namespace fs {
+        static const int SD_CHECK_INTERVAL_MS = 1000;
+        static const char* SD_DRIVE_NAME = "SD";
+        static const char* SD_MOUNT_POINT = "/ext";
+    }
+
 } // namespace eerie_leap::utilities::constants
