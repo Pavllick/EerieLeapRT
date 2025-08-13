@@ -2,6 +2,10 @@ menu "Zephyr"
 source "Kconfig.zephyr"
 endmenu
 
+config EERIE_LEAP_FS_SD_THREAD_STACK_SIZE
+	int "SD thread stack size"
+	default 2048
+
 module = APP
 module-str = APP
 source "subsys/logging/Kconfig.template.log_config"

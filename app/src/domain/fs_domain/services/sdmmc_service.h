@@ -1,9 +1,8 @@
 #pragma once
 
 #include <string>
-#include <vector>
 #include <memory>
-#include <functional>
+#include <atomic>
 
 #include <zephyr/device.h>
 #include <zephyr/fs/fs.h>
@@ -13,25 +12,26 @@
 
 namespace eerie_leap::domain::fs_domain::services {
 
-struct SdMonitorTask {
-    k_work_delayable work;
-    k_timeout_t check_interval_ms;
-    const char* disk_name;
-    bool sd_card_present_;
-    std::function<bool()> IsDiskAvailable;
-    std::function<int()> Mount;
-    std::function<void()> Unmount;
-};
-
 class SdmmcService : public FsService {
 private:
     const std::string disk_name_;
     std::string mount_point_;
-    std::shared_ptr<SdMonitorTask> sd_monitor_task_;
 
-    std::shared_ptr<SdMonitorTask> CreateSdMonitorTask();
+    bool sd_card_present_ = false;
+    k_sem sd_monitor_stop_sem_;
+    std::atomic<bool> monitor_running_ = false;
+
+    static constexpr int k_stack_size_ = CONFIG_EERIE_LEAP_FS_SD_THREAD_STACK_SIZE;
+    static constexpr int k_priority_ = K_PRIO_COOP(7);
+
+    static z_thread_stack_element stack_area_[k_stack_size_];
+    k_tid_t thread_id_;
+    k_thread thread_data_;
+
+    void SdMonitorThreadEntry();
+
     static bool IsSdCardAttached(const char* disk_name);
-    static void SdMonitorWorkHandler(struct k_work *work);
+    void SdMonitorHandler();
     int SdMonitorStart();
     int SdMonitorStop();
     int PrintInfo() const;
