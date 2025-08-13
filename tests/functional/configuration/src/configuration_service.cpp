@@ -14,12 +14,15 @@ using namespace eerie_leap::domain::fs_domain::services;
 
 ZTEST_SUITE(configuration_service, NULL, NULL, NULL, NULL, NULL);
 
+#define PARTITION_NODE DT_ALIAS(lfs1)
+FS_FSTAB_DECLARE_ENTRY(PARTITION_NODE);
+
 ZTEST(configuration_service, test_SystemConfig_Save_config_successfully_saved) {
     SystemConfig system_config;
     system_config.hw_version = 22;
     system_config.sw_version = 2422;
 
-    auto fs_service = std::make_shared<FsService>();
+    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
     fs_service->Format();
     auto system_config_service = std::make_shared<ConfigurationService<SystemConfig>>("system_config", fs_service);
 
@@ -32,7 +35,7 @@ ZTEST(configuration_service, test_SystemConfig_Load_config_successfully_saved_an
     system_config.hw_version = 46;
     system_config.sw_version = 8624;
 
-    auto fs_service = std::make_shared<FsService>();
+    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
     fs_service->Format();
     auto system_config_service = std::make_shared<ConfigurationService<SystemConfig>>("system_config", fs_service);
 
@@ -117,7 +120,7 @@ ZTEST(configuration_service, test_SensorsConfig_Save_config_successfully_saved) 
 
     SensorsConfig sensors_config = { sensor_config_1, sensor_config_2 };
 
-    auto fs_service = std::make_shared<FsService>();
+    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
     fs_service->Format();
     auto sensors_config_service = std::make_shared<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
 
@@ -202,7 +205,7 @@ ZTEST(configuration_service, test_SensorsConfig_Load_config_successfully_saved_a
     };
 
     // Initialize services
-    auto fs_service = std::make_shared<FsService>();
+    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
     fs_service->Format();
     auto sensors_config_service = std::make_shared<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
 

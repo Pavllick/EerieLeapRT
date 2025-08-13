@@ -25,6 +25,9 @@ using namespace eerie_leap::utilities::voltage_interpolator;
 
 ZTEST_SUITE(sensors_configuration_controller, NULL, NULL, NULL, NULL, NULL);
 
+#define PARTITION_NODE DT_ALIAS(lfs1)
+FS_FSTAB_DECLARE_ENTRY(PARTITION_NODE);
+
 std::vector<std::shared_ptr<Sensor>> SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service) {
     // Test Sensors
 
@@ -106,7 +109,7 @@ std::vector<std::shared_ptr<Sensor>> SetupTestSensors(std::shared_ptr<MathParser
 }
 
 ZTEST(sensors_configuration_controller, test_SensorsConfigurationController_Save_config_successfully_saved) {
-    auto fs_service = std::make_shared<FsService>();
+    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
     fs_service->Format();
 
     auto sensors_configuration_service = std::make_shared<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
@@ -151,7 +154,7 @@ ZTEST(sensors_configuration_controller, test_SensorsConfigurationController_Save
 }
 
 ZTEST(sensors_configuration_controller, test_SensorsConfigurationController_Save_config_and_Load) {
-    auto fs_service = std::make_shared<FsService>();
+    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
     fs_service->Format();
 
     auto sensors_configuration_service = std::make_shared<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);

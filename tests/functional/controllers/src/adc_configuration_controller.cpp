@@ -13,6 +13,9 @@ using namespace eerie_leap::controllers;
 
 ZTEST_SUITE(adc_configuration_controller, NULL, NULL, NULL, NULL, NULL);
 
+#define PARTITION_NODE DT_ALIAS(lfs1)
+FS_FSTAB_DECLARE_ENTRY(PARTITION_NODE);
+
 std::shared_ptr<AdcConfiguration> adc_configuration_controller_GetTestConfiguration() {
     std::vector<CalibrationData> adc_calibration_data_samples {
         {0.0, 0.0},
@@ -38,7 +41,7 @@ std::shared_ptr<AdcConfiguration> adc_configuration_controller_GetTestConfigurat
 }
 
 ZTEST(adc_configuration_controller, test_AdcConfigurationController_Save_config_successfully_saved) {
-    auto fs_service = std::make_shared<FsService>();
+    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
     fs_service->Format();
 
     auto adc_configuration_service = std::make_shared<ConfigurationService<AdcConfig>>("adc_config", fs_service);
@@ -67,7 +70,7 @@ ZTEST(adc_configuration_controller, test_AdcConfigurationController_Save_config_
 }
 
 ZTEST(adc_configuration_controller, test_AdcConfigurationController_Save_config_and_Load) {
-    auto fs_service = std::make_shared<FsService>();
+    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
     fs_service->Format();
 
     auto adc_configuration_service = std::make_shared<ConfigurationService<AdcConfig>>("adc_config", fs_service);

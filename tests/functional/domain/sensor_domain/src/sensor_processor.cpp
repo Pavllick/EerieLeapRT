@@ -40,6 +40,9 @@ using namespace eerie_leap::utilities::voltage_interpolator;
 
 ZTEST_SUITE(sensor_processor, NULL, NULL, NULL, NULL, NULL);
 
+#define PARTITION_NODE DT_ALIAS(lfs1)
+FS_FSTAB_DECLARE_ENTRY(PARTITION_NODE);
+
 std::vector<std::shared_ptr<Sensor>> sensor_processor_GetTestSensors(std::shared_ptr<MathParserService> math_parser_service) {
     std::vector<CalibrationData> calibration_data_1 {
         {0.0, 0.0},
@@ -184,7 +187,7 @@ struct sensor_processor_HelperInstances {
 };
 
 sensor_processor_HelperInstances sensor_processor_GetReadingInstances() {
-    auto fs_service = std::make_shared<FsService>();
+    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
     fs_service->Format();
 
     std::shared_ptr<ITimeService> time_service = std::make_shared<BootElapsedTimeService>();

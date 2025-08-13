@@ -14,8 +14,11 @@ using namespace eerie_leap::controllers;
 
 ZTEST_SUITE(system_configuration_controller, NULL, NULL, NULL, NULL, NULL);
 
+#define PARTITION_NODE DT_ALIAS(lfs1)
+FS_FSTAB_DECLARE_ENTRY(PARTITION_NODE);
+
 ZTEST(system_configuration_controller, test_SystemConfigurationController_Save_config_successfully_saved) {
-    auto fs_service = std::make_shared<FsService>();
+    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
     fs_service->Format();
 
     auto system_configuration_service = std::make_shared<ConfigurationService<SystemConfig>>("system_config", fs_service);
@@ -37,7 +40,7 @@ ZTEST(system_configuration_controller, test_SystemConfigurationController_Save_c
 }
 
 ZTEST(system_configuration_controller, test_SystemConfigurationController_Save_config_and_Load) {
-    auto fs_service = std::make_shared<FsService>();
+    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
     fs_service->Format();
 
     auto system_configuration_service = std::make_shared<ConfigurationService<SystemConfig>>("system_config", fs_service);
