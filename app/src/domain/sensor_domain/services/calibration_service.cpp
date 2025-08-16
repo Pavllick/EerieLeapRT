@@ -2,7 +2,6 @@
 #include <zephyr/sys/util.h>
 #include <zephyr/kernel.h>
 
-#include "utilities/constants.h"
 #include "utilities/time/time_helpers.hpp"
 #include "utilities/memory/heap_allocator.h"
 #include "domain/hardware/adc_domain/utilities/adc_calibrator.h"
@@ -12,7 +11,6 @@
 
 namespace eerie_leap::domain::sensor_domain::services {
 
-using namespace eerie_leap::utilities::constants;
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::domain::hardware::adc_domain::utilities;
 using namespace eerie_leap::domain::sensor_domain::models;
@@ -60,7 +58,7 @@ std::shared_ptr<SensorTask> CalibrationService::CreateCalibrationTask(int channe
     sensor->id = "CalibrationSensor";
     sensor->configuration.type = SensorType::PHYSICAL_ANALOG;
     sensor->configuration.channel = channel;
-    sensor->configuration.sampling_rate_ms = adc::ADC_CALIBRATION_SAMPLING_RATE_MS;
+    sensor->configuration.sampling_rate_ms = CONFIG_EERIE_LEAP_ADC_CALIBRATION_SAMPLING_RATE_MS;
 
     auto sensor_readings_frame = make_shared_ext<SensorReadingsFrame>();
 
@@ -85,7 +83,7 @@ void CalibrationService::Start(int channel) {
     processing_scheduler_service_->Pause();
 
     auto adc_manager = adc_configuration_controller_->Get();
-    adc_manager->UpdateSamplesCount(adc::ADC_CALIBRATION_SAMPLES_COUNT);
+    adc_manager->UpdateSamplesCount(CONFIG_EERIE_LEAP_ADC_CALIBRATION_SAMPLES_COUNT);
 
     calibration_task_ = CreateCalibrationTask(channel);
 

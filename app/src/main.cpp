@@ -3,7 +3,6 @@
 #include <zephyr/arch/cpu.h>
 #include <zephyr/logging/log.h>
 
-#include "utilities/constants.h"
 #include "utilities/memory/heap_allocator.h"
 #include "utilities/dev_tools/system_info.h"
 #include "utilities/guid/guid_generator.h"
@@ -47,7 +46,6 @@ FS_FSTAB_DECLARE_ENTRY(PARTITION_NODE);
 #include "domain/http_domain/services/http_server.h"
 #endif // CONFIG_NETWORKING
 
-using namespace eerie_leap::utilities::constants;
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::dev_tools;
 using namespace eerie_leap::utilities::time;
@@ -109,7 +107,7 @@ int main(void) {
 
     std::shared_ptr<SdmmcService> sd_fs_service = nullptr;
 #if DT_HAS_ALIAS(sdhc0)
-    sd_fs_service = make_shared_ext<SdmmcService>(fs::SD_DRIVE_NAME, fs::SD_MOUNT_POINT);
+    sd_fs_service = make_shared_ext<SdmmcService>(CONFIG_EERIE_LEAP_SD_DRIVE_NAME, CONFIG_EERIE_LEAP_SD_MOUNT_POINT);
     if(!sd_fs_service->Initialize()) {
         LOG_ERR("Failed to initialize SD File System.");
     }

@@ -1,4 +1,3 @@
-#include "utilities/constants.h"
 #include "utilities/memory/heap_allocator.h"
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
@@ -6,16 +5,15 @@
 
 namespace eerie_leap::domain::hardware::adc_domain::utilities {
 
-using namespace eerie_leap::utilities::constants;
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::voltage_interpolator;
 
 static const std::vector<CalibrationData> adc_inverse_base_range_data {
     {0.0, 0.0},
 #ifdef CONFIG_ZTEST
-    {adc::ADC_VOLTAGE_MAX, adc::ADC_VOLTAGE_MAX}
+    {CONFIG_EERIE_LEAP_ADC_VOLTAGE_MAX_MV / 1000.0f, CONFIG_EERIE_LEAP_ADC_VOLTAGE_MAX_MV / 1000.0f}
 #else
-    {adc::SENSOR_VOLTAGE_MAX, adc::ADC_VOLTAGE_MAX}
+    {CONFIG_EERIE_LEAP_SENSOR_VOLTAGE_MAX_MV / 1000.0f, CONFIG_EERIE_LEAP_ADC_VOLTAGE_MAX_MV / 1000.0f}
 #endif
 };
 static const auto adc_inverse_base_range_data_ptr = make_shared_ext<std::vector<CalibrationData>>(adc_inverse_base_range_data);
@@ -52,7 +50,7 @@ AdcCalibrator::AdcCalibrator(
 
 static const std::vector<CalibrationData> adc_base_range_data {
     {0.0, 0.0},
-    {adc::ADC_VOLTAGE_MAX, adc::SENSOR_VOLTAGE_MAX}
+    {CONFIG_EERIE_LEAP_ADC_VOLTAGE_MAX_MV / 1000.0f, CONFIG_EERIE_LEAP_SENSOR_VOLTAGE_MAX_MV / 1000.0f}
 };
 static const auto adc_base_range_data_ptr = make_shared_ext<std::vector<CalibrationData>>(adc_base_range_data);
 static const auto adc_base_range_voltage_interpolator = make_shared_ext<LinearVoltageInterpolator>(adc_base_range_data_ptr);

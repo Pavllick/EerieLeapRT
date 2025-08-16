@@ -5,12 +5,9 @@
 #include <zephyr/logging/log.h>
 #include <zephyr/storage/disk_access.h>
 
-#include "utilities/constants.h"
 #include "sdmmc_service.h"
 
 namespace eerie_leap::domain::fs_domain::services {
-
-using namespace eerie_leap::utilities::constants;
 
 LOG_MODULE_REGISTER(sdmmc_service_logger);
 
@@ -81,7 +78,7 @@ void SdmmcService::SdMonitorThreadEntry() {
     while(monitor_running_) {
         SdMonitorHandler();
 
-        if(k_sem_take(&sd_monitor_stop_sem_, K_MSEC(fs::SD_CHECK_INTERVAL_MS)) == 0)
+        if(k_sem_take(&sd_monitor_stop_sem_, K_MSEC(CONFIG_EERIE_LEAP_SD_CHECK_INTERVAL_MS)) == 0)
             break;
     }
 }
