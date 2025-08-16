@@ -4,6 +4,7 @@
 / {
     aliases {
         lfs1 = &lfs1;
+		modbus0 = &modbus0;
 	};
 
     fstab {
@@ -42,9 +43,9 @@
 };
 
 &uart1 {
-	modbus0 {
+	modbus0: modbus0 {
 		compatible = "zephyr,modbus-serial";
 		status = "okay";
-		de-gpios = <&gpio1 10 GPIO_ACTIVE_LOW>;	/* GPIO42 DIR */
+		de-gpios = <&gpio1 10 GPIO_ACTIVE_HIGH>;	/* GPIO42 DIR */
 	};
 };

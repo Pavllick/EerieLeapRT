@@ -6,6 +6,14 @@ config EERIE_LEAP_FS_SD_THREAD_STACK_SIZE
 	int "SD thread stack size"
 	default 2048
 
+config EERIE_LEAP_MODBUS_BAUD_RATE
+	int "Modbus baud rate"
+	default 115200
+
+config EERIE_LEAP_MODBUS_RX_TIMEOUT
+	int "Modbus rx timeout"
+	default 50000
+
 module = APP
 module-str = APP
 source "subsys/logging/Kconfig.template.log_config"
