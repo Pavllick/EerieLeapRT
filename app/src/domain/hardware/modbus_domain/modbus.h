@@ -14,8 +14,8 @@ public:
     Modbus(const char* iface_name);
 
     int Initialize();
-    int ReadRegisters(uint8_t address, uint16_t start_address, void* data, size_t count);
-    int WriteRegisters(uint8_t address, uint16_t start_address, void* data, size_t count);
+    int ReadRegisters(uint8_t address, uint16_t start_address, void* data, size_t size_bytes);
+    int WriteRegisters(uint8_t address, uint16_t start_address, void* data, size_t size_bytes);
 };
 
 }  // namespace eerie_leap::domain::hardware::modbus_domain

@@ -23,12 +23,21 @@ int Modbus::Initialize() {
     return modbus_init_client(client_iface_, client_params_);
 };
 
-int Modbus::ReadRegisters(uint8_t address, uint16_t start_address, void* data, size_t count) {
-    return modbus_read_holding_regs(client_iface_, address, start_address, (uint16_t*)data, count);
+int Modbus::ReadRegisters(uint8_t address, uint16_t start_address, void* data, size_t size_bytes) {
+    if(size_bytes % 2 != 0) {
+        LOG_ERR("Modbus read registers: size_bytes must be even.");
+        return -1;
+    }
+
+    return modbus_read_holding_regs(client_iface_, address, start_address, (uint16_t*)data, size_bytes / 2);
 }
 
-int Modbus::WriteRegisters(uint8_t address, uint16_t start_address, void* data, size_t count) {
-    return modbus_write_holding_regs(client_iface_, address, start_address, (uint16_t*)data, count);
+int Modbus::WriteRegisters(uint8_t address, uint16_t start_address, void* data, size_t size_bytes) {
+    if(size_bytes % 2 != 0) {
+        LOG_ERR("Modbus write registers: size_bytes must be even.");
+        return -1;
+    }
+    return modbus_write_holding_regs(client_iface_, address, start_address, (uint16_t*)data, size_bytes / 2);
 }
 
 }  // namespace eerie_leap::domain::hardware::modbus_domain
