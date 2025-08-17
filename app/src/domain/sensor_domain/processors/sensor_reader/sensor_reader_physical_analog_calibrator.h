@@ -5,7 +5,7 @@
 namespace eerie_leap::domain::sensor_domain::processors::sensor_reader {
 
 using namespace eerie_leap::controllers;
-using namespace eerie_leap::domain::hardware::adc_domain;
+using namespace eerie_leap::subsys::adc;
 
 class SensorReaderPhysicalAnalogCalibrator : public SensorReaderPhysicalAnalog {
 public:

@@ -4,12 +4,12 @@
 
 #include "utilities/voltage_interpolator/calibration_data.h"
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
-#include "domain/hardware/adc_domain/models/adc_configuration.h"
-#include "domain/hardware/adc_domain/adc_simulator.h"
-#include "domain/hardware/adc_domain/adc_emulator.h"
+#include "subsys/adc/models/adc_configuration.h"
+#include "subsys/adc/adc_simulator.h"
+#include "subsys/adc/adc_emulator.h"
 
-using namespace eerie_leap::domain::hardware::adc_domain;
-using namespace eerie_leap::domain::hardware::adc_domain::models;
+using namespace eerie_leap::subsys::adc;
+using namespace eerie_leap::subsys::adc::models;
 
 ZTEST_SUITE(adc, NULL, NULL, NULL, NULL, NULL);
 

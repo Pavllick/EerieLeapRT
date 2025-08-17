@@ -5,10 +5,10 @@
 #include <unordered_set>
 #include <zephyr/ztest.h>
 
-#include "domain/fs_domain/services/i_fs_service.h"
-#include "domain/fs_domain/services/fs_service.h"
+#include "subsys/fs/services/i_fs_service.h"
+#include "subsys/fs/services/fs_service.h"
 
-using namespace eerie_leap::domain::fs_domain::services;
+using namespace eerie_leap::subsys::fs::services;
 
 void CleanUpFs(void *f);
 

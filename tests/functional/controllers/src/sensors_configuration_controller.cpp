@@ -10,15 +10,15 @@
 #include "configuration/sensor_config/sensor_config.h"
 #include "configuration/services/configuration_service.h"
 #include "controllers/sensors_configuration_controller.h"
-#include "domain/fs_domain/services/i_fs_service.h"
-#include "domain/fs_domain/services/fs_service.h"
+#include "subsys/fs/services/i_fs_service.h"
+#include "subsys/fs/services/fs_service.h"
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
 
 using namespace eerie_leap::utilities::cbor;
 using namespace eerie_leap::utilities::math_parser;
 using namespace eerie_leap::configuration::services;
-using namespace eerie_leap::domain::fs_domain::services;
+using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::controllers;
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::utilities::voltage_interpolator;

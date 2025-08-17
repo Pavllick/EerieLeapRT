@@ -7,7 +7,7 @@
 #include "utilities/guid/guid_generator.h"
 #include "controllers/sensors_configuration_controller.h"
 #include "controllers/adc_configuration_controller.h"
-#include "domain/hardware/gpio_domain/i_gpio.h"
+#include "subsys/gpio/i_gpio.h"
 
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 #include "domain/sensor_domain/processors/sensor_processor.h"
@@ -20,8 +20,8 @@ using namespace eerie_leap::controllers;
 
 using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::utilities::guid;
-using namespace eerie_leap::domain::hardware::gpio_domain;
-using namespace eerie_leap::domain::hardware::adc_domain;
+using namespace eerie_leap::subsys::gpio;
+using namespace eerie_leap::subsys::adc;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 
 class ProcessingSchedulerService {

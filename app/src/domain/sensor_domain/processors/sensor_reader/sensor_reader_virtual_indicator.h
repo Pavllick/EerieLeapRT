@@ -2,13 +2,10 @@
 
 #include <memory>
 
-#include "domain/hardware/gpio_domain/i_gpio.h"
 #include "domain/sensor_domain/models/sensor.h"
 #include "sensor_reader_base.h"
 
 namespace eerie_leap::domain::sensor_domain::processors::sensor_reader {
-
-using namespace eerie_leap::domain::hardware::gpio_domain;
 
 class SensorReaderVirtualIndicator : public SensorReaderBase {
 public:

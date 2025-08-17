@@ -31,14 +31,18 @@ file(GLOB_RECURSE APP_SRC_CONTROLLERS
   ${APP_SRC_CONTROLLERS_DIR}/*.cpp
 )
 
+set(APP_SRC_SUBSYS_DIR ${APP_SRC_DIR}/subsys)
+file(GLOB_RECURSE APP_SRC_SUBSYS
+  ${APP_SRC_SUBSYS_DIR}/adc/*.c
+  ${APP_SRC_SUBSYS_DIR}/adc/*.cpp
+  ${APP_SRC_SUBSYS_DIR}/gpio/*.c
+  ${APP_SRC_SUBSYS_DIR}/gpio/*.cpp
+  ${APP_SRC_SUBSYS_DIR}/fs/*.c
+  ${APP_SRC_SUBSYS_DIR}/fs/*.cpp
+)
+
 set(APP_SRC_DOMAIN_DIR ${APP_SRC_DIR}/domain)
 file(GLOB_RECURSE APP_SRC_DOMAIN
-  ${APP_SRC_DOMAIN_DIR}/hardware/adc_domain/*.c
-  ${APP_SRC_DOMAIN_DIR}/hardware/adc_domain/*.cpp
-  ${APP_SRC_DOMAIN_DIR}/hardware/gpio_domain/*.c
-  ${APP_SRC_DOMAIN_DIR}/hardware/gpio_domain/*.cpp
-  ${APP_SRC_DOMAIN_DIR}/fs_domain/*.c
-  ${APP_SRC_DOMAIN_DIR}/fs_domain/*.cpp
   ${APP_SRC_DOMAIN_DIR}/sensor_domain/*.c
   ${APP_SRC_DOMAIN_DIR}/sensor_domain/*.cpp
   ${APP_SRC_DOMAIN_DIR}/system_domain/*.c
@@ -58,6 +62,7 @@ file(GLOB_RECURSE TEST_SOURCES src/*.c src/*.cpp)
 target_sources(app PRIVATE
   ${APP_SRC_CONFIGURATION}
   ${APP_SRC_CONTROLLERS}
+  ${APP_SRC_SUBSYS}
   ${APP_SRC_DOMAIN}
   ${APP_SRC_UTILITIES}
   ${TEST_SOURCES}

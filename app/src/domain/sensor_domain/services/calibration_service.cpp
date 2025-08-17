@@ -4,7 +4,7 @@
 
 #include "utilities/time/time_helpers.hpp"
 #include "utilities/memory/heap_allocator.h"
-#include "domain/hardware/adc_domain/utilities/adc_calibrator.h"
+#include "subsys/adc/utilities/adc_calibrator.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 #include "domain/sensor_domain/processors/sensor_reader/sensor_reader_physical_analog_calibrator.h"
 #include "calibration_service.h"
@@ -12,7 +12,7 @@
 namespace eerie_leap::domain::sensor_domain::services {
 
 using namespace eerie_leap::utilities::memory;
-using namespace eerie_leap::domain::hardware::adc_domain::utilities;
+using namespace eerie_leap::subsys::adc::utilities;
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::domain::sensor_domain::processors::sensor_reader;
 

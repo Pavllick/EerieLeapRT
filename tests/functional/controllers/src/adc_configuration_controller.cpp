@@ -4,11 +4,11 @@
 
 #include "configuration/adc_config/adc_config.h"
 #include "configuration/services/configuration_service.h"
-#include "domain/fs_domain/services/fs_service.h"
+#include "subsys/fs/services/fs_service.h"
 #include "controllers/adc_configuration_controller.h"
 
 using namespace eerie_leap::configuration::services;
-using namespace eerie_leap::domain::fs_domain::services;
+using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::controllers;
 
 ZTEST_SUITE(adc_configuration_controller, NULL, NULL, NULL, NULL, NULL);

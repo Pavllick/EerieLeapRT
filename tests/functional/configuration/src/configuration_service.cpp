@@ -5,12 +5,12 @@
 #include "configuration/system_config/system_config.h"
 #include "configuration/sensor_config/sensor_config.h"
 #include "configuration/services/configuration_service.h"
-#include "domain/fs_domain/services/i_fs_service.h"
-#include "domain/fs_domain/services/fs_service.h"
+#include "subsys/fs/services/i_fs_service.h"
+#include "subsys/fs/services/fs_service.h"
 
 using namespace eerie_leap::utilities::cbor;
 using namespace eerie_leap::configuration::services;
-using namespace eerie_leap::domain::fs_domain::services;
+using namespace eerie_leap::subsys::fs::services;
 
 ZTEST_SUITE(configuration_service, NULL, NULL, NULL, NULL, NULL);
 

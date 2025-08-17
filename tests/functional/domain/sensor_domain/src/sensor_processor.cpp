@@ -4,12 +4,12 @@
 #include "utilities/time/boot_elapsed_time_service.h"
 #include "utilities/math_parser/math_parser_service.hpp"
 
-#include "domain/hardware/adc_domain/models/adc_configuration.h"
-#include "domain/hardware/adc_domain/i_adc.h"
-#include "domain/hardware/adc_domain/adc_simulator.h"
-#include "domain/hardware/gpio_domain/i_gpio.h"
-#include "domain/hardware/gpio_domain/gpio_simulator.h"
-#include "domain/fs_domain/services/fs_service.h"
+#include "subsys/adc/models/adc_configuration.h"
+#include "subsys/adc/i_adc.h"
+#include "subsys/adc/adc_simulator.h"
+#include "subsys/gpio/i_gpio.h"
+#include "subsys/gpio/gpio_simulator.h"
+#include "subsys/fs/services/fs_service.h"
 
 #include "domain/sensor_domain/utilities/sensors_order_resolver.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
@@ -28,9 +28,9 @@
 using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::utilities::math_parser;
-using namespace eerie_leap::domain::hardware::adc_domain;
-using namespace eerie_leap::domain::hardware::adc_domain::models;
-using namespace eerie_leap::domain::hardware::gpio_domain;
+using namespace eerie_leap::subsys::adc;
+using namespace eerie_leap::subsys::adc::models;
+using namespace eerie_leap::subsys::gpio;
 using namespace eerie_leap::domain::sensor_domain::processors;
 using namespace eerie_leap::domain::sensor_domain::processors::sensor_reader;
 

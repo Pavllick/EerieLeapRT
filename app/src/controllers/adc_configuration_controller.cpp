@@ -8,14 +8,14 @@
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
-#include "domain/hardware/adc_domain/adc_factory.hpp"
+#include "subsys/adc/adc_factory.hpp"
 #include "adc_configuration_controller.h"
 
 namespace eerie_leap::controllers {
 
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::voltage_interpolator;
-using namespace eerie_leap::domain::hardware::adc_domain;
+using namespace eerie_leap::subsys::adc;
 
 LOG_MODULE_REGISTER(adc_config_ctrl_logger);
 

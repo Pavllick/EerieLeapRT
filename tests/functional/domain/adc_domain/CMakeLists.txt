@@ -13,16 +13,16 @@ set(APP_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../app/src)
 
 include_directories(${APP_SRC_DIR})
 
-set(APP_SRC_ADC_DOMAIN_DIR ${APP_SRC_DIR}/domain/hardware/adc_domain)
-file(GLOB_RECURSE APP_SRC_ADC_DOMAIN
-  ${APP_SRC_ADC_DOMAIN_DIR}/*.c
-  ${APP_SRC_ADC_DOMAIN_DIR}/*.cpp
+set(APP_SRC_ADC_SUBSYS_DIR ${APP_SRC_DIR}/subsys/adc)
+file(GLOB_RECURSE APP_SRC_ADC_SUBSYS
+  ${APP_SRC_ADC_SUBSYS_DIR}/*.c
+  ${APP_SRC_ADC_SUBSYS_DIR}/*.cpp
 )
 
 file(GLOB_RECURSE TEST_SOURCES src/*.c src/*.cpp)
 
 # Add all source files to the app target
 target_sources(app PRIVATE
-  ${APP_SRC_ADC_DOMAIN}
+  ${APP_SRC_ADC_SUBSYS}
   ${TEST_SOURCES}
 )

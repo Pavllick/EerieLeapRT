@@ -16,7 +16,7 @@ using namespace eerie_leap::controllers;
 
 using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::utilities::guid;
-using namespace eerie_leap::domain::hardware::adc_domain;
+using namespace eerie_leap::subsys::adc;
 using namespace eerie_leap::domain::sensor_domain::processors;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 using namespace eerie_leap::domain::sensor_domain::services;

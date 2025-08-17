@@ -4,15 +4,15 @@
 #include <memory>
 
 #include "controllers/adc_configuration_controller.h"
-#include "domain/hardware/adc_domain/i_adc_manager.h"
-#include "domain/hardware/adc_domain/models/adc_configuration.h"
+#include "subsys/adc/i_adc_manager.h"
+#include "subsys/adc/models/adc_configuration.h"
 #include "domain/sensor_domain/models/sensor.h"
 #include "sensor_reader_base.h"
 
 namespace eerie_leap::domain::sensor_domain::processors::sensor_reader {
 
 using namespace eerie_leap::controllers;
-using namespace eerie_leap::domain::hardware::adc_domain;
+using namespace eerie_leap::subsys::adc;
 
 class SensorReaderPhysicalAnalog : public SensorReaderBase {
 private:
