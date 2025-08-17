@@ -17,11 +17,7 @@ private:
     std::vector<gpio_dt_spec> gpio_specs_;
 
 public:
-    GpioEmulator() {
-    #if DT_HAS_ALIAS(gpioc)
-        gpio_specs_ = { DT_FOREACH_CHILD_SEP(GPIOC0_NODE, GPIO_SPEC, (,)) };
-    #endif
-    }
+    GpioEmulator(std::vector<gpio_dt_spec> gpio_specs) : Gpio(gpio_specs), gpio_specs_(gpio_specs) {}
     virtual ~GpioEmulator() = default;
 
     int Initialize() override;

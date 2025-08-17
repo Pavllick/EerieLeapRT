@@ -8,20 +8,17 @@
 #include <zephyr/drivers/adc.h>
 
 #include "utilities/memory/heap_allocator.h"
+#include "domain/device_tree/adc_dt_info.h"
 #include "domain/hardware/adc_domain/models/adc_configuration.h"
+
 #include "i_adc_manager.h"
 #include "adc.h"
-#include "adc_dt_info.h"
 
 namespace eerie_leap::domain::hardware::adc_domain {
 
 using namespace eerie_leap::utilities::memory;
+using namespace eerie_leap::domain::device_tree;
 using namespace eerie_leap::domain::hardware::adc_domain::models;
-
-#define ADC_NODE(idx) DT_ALIAS(adc ## idx)
-
-#define ADC_CHANNEL_VREF(node_id) DT_PROP_OR(node_id, zephyr_vref_mv, 0)
-#define ADC_CHANNEL_RESOLUTION(node_id) DT_PROP_OR(node_id, zephyr_resolution, 0)
 
 class AdcManager : public IAdcManager {
 private:
@@ -39,46 +36,8 @@ protected:
     }
 
 public:
-    AdcManager() {
-    #if DT_HAS_ALIAS(adc0)
-        AdcDTInfo adc_info0 = {
-            .adc_device = DEVICE_DT_GET(ADC_NODE(0)),
-            .channel_configs = {DT_FOREACH_CHILD_SEP(ADC_NODE(0), ADC_CHANNEL_CFG_DT, (,))},
-            .references_mv = {DT_FOREACH_CHILD_SEP(ADC_NODE(0), ADC_CHANNEL_VREF, (,))},
-            .resolutions = {DT_FOREACH_CHILD_SEP(ADC_NODE(0), ADC_CHANNEL_RESOLUTION, (,))}
-        };
-        adc_infos_.push_back(adc_info0);
-    #endif
-
-    #if DT_HAS_ALIAS(adc1)
-        AdcDTInfo adc_info1 = {
-            .adc_device = DEVICE_DT_GET(ADC_NODE(1)),
-            .channel_configs = {DT_FOREACH_CHILD_SEP(ADC_NODE(1), ADC_CHANNEL_CFG_DT, (,))},
-            .references_mv = {DT_FOREACH_CHILD_SEP(ADC_NODE(1), ADC_CHANNEL_VREF, (,))},
-            .resolutions = {DT_FOREACH_CHILD_SEP(ADC_NODE(1), ADC_CHANNEL_RESOLUTION, (,))}
-        };
-        adc_infos_.push_back(adc_info1);
-    #endif
-
-    #if DT_HAS_ALIAS(adc2)
-        AdcDTInfo adc_info2 = {
-            .adc_device = DEVICE_DT_GET(ADC_NODE(2)),
-            .channel_configs = {DT_FOREACH_CHILD_SEP(ADC_NODE(2), ADC_CHANNEL_CFG_DT, (,))},
-            .references_mv = {DT_FOREACH_CHILD_SEP(ADC_NODE(2), ADC_CHANNEL_VREF, (,))},
-            .resolutions = {DT_FOREACH_CHILD_SEP(ADC_NODE(2), ADC_CHANNEL_RESOLUTION, (,))}
-        };
-        adc_infos_.push_back(adc_info2);
-    #endif
-
-    #if DT_HAS_ALIAS(adc3)
-        AdcDTInfo adc_info3 = {
-            .adc_device = DEVICE_DT_GET(ADC_NODE(3)),
-            .channel_configs = {DT_FOREACH_CHILD_SEP(ADC_NODE(3), ADC_CHANNEL_CFG_DT, (,))},
-            .references_mv = {DT_FOREACH_CHILD_SEP(ADC_NODE(3), ADC_CHANNEL_VREF, (,))},
-            .resolutions = {DT_FOREACH_CHILD_SEP(ADC_NODE(3), ADC_CHANNEL_RESOLUTION, (,))}
-        };
-        adc_infos_.push_back(adc_info3);
-    #endif
+    AdcManager(std::vector<AdcDTInfo> adc_infos) {
+        adc_infos_ = adc_infos;
 
         for(auto& adc_info : adc_infos_) {
             adcs_.push_back(make_shared_ext<Adc>(adc_info));

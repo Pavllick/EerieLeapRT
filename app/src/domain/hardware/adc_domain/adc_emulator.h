@@ -15,6 +15,8 @@ private:
     float ReadChannel(int channel);
 
 public:
+    AdcEmulatorManager(std::vector<AdcDTInfo> adc_infos) : AdcManager(adc_infos) {}
+
     int Initialize() override;
     std::function<float ()> GetChannelReader(int channel) override;
 };

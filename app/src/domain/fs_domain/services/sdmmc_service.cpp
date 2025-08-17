@@ -1,4 +1,3 @@
-#include <sstream>
 #include <filesystem>
 
 #include <zephyr/fs/fs.h>
@@ -19,17 +18,8 @@ Z_KERNEL_STACK_DEFINE_IN(SdmmcService::stack_area_, SdmmcService::k_stack_size_,
 K_KERNEL_STACK_MEMBER(SdmmcService::stack_area_, SdmmcService::k_stack_size_);
 #endif
 
-SdmmcService::SdmmcService(const std::string& disk_name, const std::string& mount_point) : disk_name_(disk_name) {
-    memset(&mountpoint_, 0, sizeof(mountpoint_));
-
-    std::filesystem::path full_path(mount_point);
-    mount_point_ = full_path.string();
-
-    mountpoint_.type = FS_LITTLEFS;
-    mountpoint_.mnt_point = mount_point_.c_str();
+SdmmcService::SdmmcService(fs_mount_t mountpoint) : FsService(mountpoint) {
     mountpoint_.fs_data = &sd_storage_;
-    mountpoint_.storage_dev = (void *)disk_name_.c_str();
-    mountpoint_.flags = FS_MOUNT_FLAG_USE_DISK_ACCESS;
 }
 
 bool SdmmcService::Initialize() {
@@ -54,8 +44,10 @@ bool SdmmcService::IsSdCardAttached(const char* disk_name) {
 void SdmmcService::SdMonitorHandler() {
     bool card_detected = GetTotalSpace() > 0;
 
-    if(!card_detected)
-        card_detected = IsSdCardAttached(disk_name_.c_str());
+    if(!card_detected) {
+        const char *disk_name = (const char*)mountpoint_.storage_dev;
+        card_detected = IsSdCardAttached(disk_name);
+    }
 
     if(card_detected != sd_card_present_) {
         sd_card_present_ = card_detected;

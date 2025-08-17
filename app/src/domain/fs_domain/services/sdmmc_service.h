@@ -14,9 +14,6 @@ namespace eerie_leap::domain::fs_domain::services {
 
 class SdmmcService : public FsService {
 private:
-    const std::string disk_name_;
-    std::string mount_point_;
-
     bool sd_card_present_ = false;
     k_sem sd_monitor_stop_sem_;
     std::atomic<bool> monitor_running_ = false;
@@ -37,7 +34,7 @@ private:
     int PrintInfo() const;
 
 public:
-    SdmmcService(const std::string& disk_name, const std::string& mount_point);
+    SdmmcService(fs_mount_t mountpoint);
 
     bool Initialize() override;
 };

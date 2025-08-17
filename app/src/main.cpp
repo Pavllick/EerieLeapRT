@@ -10,7 +10,9 @@
 #include "utilities/math_parser/math_parser_service.hpp"
 #include "domain/fs_domain/services/fs_service.h"
 #include "domain/fs_domain/services/sdmmc_service.h"
+#include "domain/device_tree/device_tree_setup.h"
 #include "domain/hardware/gpio_domain/gpio_factory.hpp"
+#include "domain/hardware/modbus_domain/modbus.h"
 #include "domain/sensor_domain/services/processing_scheduler_serivce.h"
 #include "domain/sensor_domain/services/calibration_service.h"
 #include "domain/sensor_domain/models/sensor_type.h"
@@ -35,9 +37,6 @@ using namespace eerie_leap::utilities::voltage_interpolator;
 using namespace eerie_leap::domain::sensor_domain::models;
 // End test sensors
 
-#define PARTITION_NODE DT_ALIAS(lfs1)
-FS_FSTAB_DECLARE_ENTRY(PARTITION_NODE);
-
 #ifdef CONFIG_WIFI
 #include "domain/http_domain/services/wifi_ap_service.h"
 #endif // CONFIG_WIFI
@@ -54,8 +53,11 @@ using namespace eerie_leap::utilities::math_parser;
 
 using namespace eerie_leap::controllers;
 
-using namespace eerie_leap::domain::hardware::adc_domain;
+using namespace eerie_leap::domain::device_tree;
 using namespace eerie_leap::domain::hardware::gpio_domain;
+using namespace eerie_leap::domain::hardware::adc_domain;
+using namespace eerie_leap::domain::hardware::modbus_domain;
+
 using namespace eerie_leap::domain::sensor_domain::services;
 using namespace eerie_leap::domain::fs_domain::services;
 using namespace eerie_leap::configuration::services;
@@ -99,19 +101,23 @@ int main(void) {
     http_server.Start();
 #endif // CONFIG_NETWORKING
 
-    auto fs_service = make_shared_ext<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
+    auto device_tree_setup = DeviceTreeSetup::Get();
+    device_tree_setup.Initialize();
+
+    auto fs_service = make_shared_ext<FsService>(device_tree_setup.GetInternalFsMp().value());
     if(!fs_service->Initialize()) {
         LOG_ERR("Failed to initialize File System.");
         return -1;
     }
 
     std::shared_ptr<SdmmcService> sd_fs_service = nullptr;
-#if DT_HAS_ALIAS(sdhc0)
-    sd_fs_service = make_shared_ext<SdmmcService>(CONFIG_EERIE_LEAP_SD_DRIVE_NAME, CONFIG_EERIE_LEAP_SD_MOUNT_POINT);
-    if(!sd_fs_service->Initialize()) {
-        LOG_ERR("Failed to initialize SD File System.");
+    auto sd_fs_mp = device_tree_setup.GetSdFsMp();
+    if(sd_fs_mp.has_value()) {
+        sd_fs_service = make_shared_ext<SdmmcService>(sd_fs_mp.value());
+        if(!sd_fs_service->Initialize()) {
+            LOG_ERR("Failed to initialize SD File System.");
+        }
     }
-#endif // DT_HAS_ALIAS(sdhc0)
 
     auto time_service = make_shared_ext<BootElapsedTimeService>();
     time_service->Initialize();

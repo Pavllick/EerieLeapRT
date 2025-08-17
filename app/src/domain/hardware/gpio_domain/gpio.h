@@ -10,22 +10,12 @@
 
 namespace eerie_leap::domain::hardware::gpio_domain {
 
-#define GPIOC0_NODE DT_ALIAS(gpioc)
-
-#define GPIO_SPEC(node_id) GPIO_DT_SPEC_GET(node_id, gpios)
-
 class Gpio : public IGpio {
-
-
 protected:
     std::vector<gpio_dt_spec> gpio_specs_;
 
 public:
-    Gpio() {
-    #if DT_HAS_ALIAS(gpioc)
-        gpio_specs_ = { DT_FOREACH_CHILD_SEP(GPIOC0_NODE, GPIO_SPEC, (,)) };
-    #endif
-    }
+    Gpio(std::vector<gpio_dt_spec> gpio_specs) : gpio_specs_(gpio_specs) {}
 
     int Initialize() override;
     bool ReadChannel(int channel) override;
