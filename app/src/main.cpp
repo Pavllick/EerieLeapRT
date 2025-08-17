@@ -8,11 +8,12 @@
 #include "utilities/guid/guid_generator.h"
 #include "utilities/time/boot_elapsed_time_service.h"
 #include "utilities/math_parser/math_parser_service.hpp"
+
+#include "domain/device_tree/device_tree_setup.h"
 #include "domain/fs_domain/services/fs_service.h"
 #include "domain/fs_domain/services/sdmmc_service.h"
-#include "domain/device_tree/device_tree_setup.h"
+#include "domain/modbus_domain/modbus.h"
 #include "domain/hardware/gpio_domain/gpio_factory.hpp"
-#include "domain/hardware/modbus_domain/modbus.h"
 #include "domain/sensor_domain/services/processing_scheduler_serivce.h"
 #include "domain/sensor_domain/services/calibration_service.h"
 #include "domain/sensor_domain/models/sensor_type.h"
@@ -54,9 +55,9 @@ using namespace eerie_leap::utilities::math_parser;
 using namespace eerie_leap::controllers;
 
 using namespace eerie_leap::domain::device_tree;
+using namespace eerie_leap::domain::modbus_domain;
 using namespace eerie_leap::domain::hardware::gpio_domain;
 using namespace eerie_leap::domain::hardware::adc_domain;
-using namespace eerie_leap::domain::hardware::modbus_domain;
 
 using namespace eerie_leap::domain::sensor_domain::services;
 using namespace eerie_leap::domain::fs_domain::services;
