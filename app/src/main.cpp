@@ -15,6 +15,7 @@
 #include "subsys/modbus/modbus.h"
 
 #include "domain/device_tree/device_tree_setup.h"
+#include "domain/interface_domain/interface.h"
 #include "domain/sensor_domain/services/processing_scheduler_serivce.h"
 #include "domain/sensor_domain/services/calibration_service.h"
 #include "domain/sensor_domain/models/sensor_type.h"
@@ -58,6 +59,7 @@ using namespace eerie_leap::subsys::gpio;
 
 using namespace eerie_leap::domain::device_tree;
 
+using namespace eerie_leap::domain::interface_domain;
 using namespace eerie_leap::domain::sensor_domain::services;
 using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::configuration::services;
@@ -103,8 +105,8 @@ int main(void) {
     http_server.Start();
 #endif // CONFIG_NETWORKING
 
-    auto device_tree_setup = DeviceTreeSetup::Get();
-    device_tree_setup.Initialize();
+    DeviceTreeSetup::Initialize();
+    auto& device_tree_setup = DeviceTreeSetup::Get();
 
     auto fs_service = make_shared_ext<FsService>(device_tree_setup.GetInternalFsMp().value());
     if(!fs_service->Initialize()) {
@@ -144,6 +146,18 @@ int main(void) {
         math_parser_service,
         sensors_config_service,
         adc_configuration_controller->Get()->GetChannelCount());
+
+    auto modbus = make_shared_ext<Modbus>(device_tree_setup.GetModbusIface().value());
+    auto interface = make_shared_ext<Interface>(modbus);
+    interface->Initialize();
+
+    interface->ServerIdResolver();
+
+    auto server_ids = interface->GetServerIds();
+    LOG_INF("Server IDs count: %zu", server_ids->size());
+    for(auto server_id : *server_ids) {
+        LOG_INF("Server ID: %d", server_id);
+    }
 
     // TODO: For test purposes only
     SetupTestSensors(math_parser_service, sensors_configuration_controller);
