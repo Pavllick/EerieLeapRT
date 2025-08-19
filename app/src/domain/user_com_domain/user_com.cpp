@@ -1,18 +1,18 @@
 #include <zephyr/logging/log.h>
 
-#include "interface.h"
+#include "user_com.h"
 
-namespace eerie_leap::domain::interface_domain {
+namespace eerie_leap::domain::user_com_domain {
 
 LOG_MODULE_REGISTER(interface_logger);
 
-Interface::Interface(std::shared_ptr<Modbus> modbus) : modbus_(modbus), server_ids_(std::make_shared<std::vector<uint8_t>>()) { }
+UserCom::UserCom(std::shared_ptr<Modbus> modbus) : modbus_(modbus), server_ids_(std::make_shared<std::vector<uint8_t>>()) { }
 
-int Interface::Initialize() {
+int UserCom::Initialize() {
     return modbus_->Initialize();
 }
 
-int Interface::ServerIdResolver() {
+int UserCom::ServerIdResolver() {
     uint16_t data = 0;
     LOG_INF("Server ID Resole set");
     Set(Modbus::SERVER_ID_ALL, RequestType::GET_RESOLVE_SERVER_ID, &data, sizeof(data));
@@ -46,12 +46,12 @@ int Interface::ServerIdResolver() {
     return 0;
 }
 
-int Interface::Get(uint8_t server_id, RequestType request_type, void* data, size_t size_bytes) {
+int UserCom::Get(uint8_t server_id, RequestType request_type, void* data, size_t size_bytes) {
     return modbus_->ReadHoldingRegisters(server_id, static_cast<uint16_t>(request_type), data, size_bytes);
 }
 
-int Interface::Set(uint8_t server_id, RequestType request_type, void* data, size_t size_bytes) {
+int UserCom::Set(uint8_t server_id, RequestType request_type, void* data, size_t size_bytes) {
     return modbus_->WriteHoldingRegisters(server_id, static_cast<uint16_t>(request_type), data, size_bytes);
 }
 
-} // namespace eerie_leap::domain::interface_domain
+} // namespace eerie_leap::domain::user_com_domain

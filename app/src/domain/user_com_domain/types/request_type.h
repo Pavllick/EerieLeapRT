@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace eerie_leap::domain::interface_domain::types {
+namespace eerie_leap::domain::user_com_domain::types {
 
 enum class RequestType : uint16_t {
     GET_RESOLVE_SERVER_ID = 0,
@@ -11,4 +11,4 @@ enum class RequestType : uint16_t {
     SET_RESOLVE_SERVER_ID_GUID = 127,
 };
 
-} // namespace eerie_leap::domain::interface_domain::types
+} // namespace eerie_leap::domain::user_com_domain::types

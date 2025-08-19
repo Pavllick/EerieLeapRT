@@ -9,13 +9,13 @@
 
 #include "types/request_type.h"
 
-namespace eerie_leap::domain::interface_domain {
+namespace eerie_leap::domain::user_com_domain {
 
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::subsys::modbus;
-using namespace eerie_leap::domain::interface_domain::types;
+using namespace eerie_leap::domain::user_com_domain::types;
 
-class Interface {
+class UserCom {
 private:
     std::shared_ptr<Modbus> modbus_;
     std::shared_ptr<GuidGenerator> guid_generator_;
@@ -26,7 +26,7 @@ private:
     int Set(uint8_t server_id, RequestType request_type, void* data, size_t size_bytes);
 
 public:
-    explicit Interface(std::shared_ptr<Modbus> modbus);
+    explicit UserCom(std::shared_ptr<Modbus> modbus);
     int Initialize();
 
     int ServerIdResolver();
@@ -34,4 +34,4 @@ public:
     std::shared_ptr<std::vector<uint8_t>> GetServerIds() { return server_ids_; }
 };
 
-} // namespace eerie_leap::domain::interface_domain
+} // namespace eerie_leap::domain::user_com_domain
