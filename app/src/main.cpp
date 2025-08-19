@@ -151,12 +151,12 @@ int main(void) {
     auto user_com_interface = make_shared_ext<UserCom>(modbus);
     user_com_interface->Initialize();
 
-    user_com_interface->ServerIdResolver();
+    // user_com_interface->ServerIdResolver();
 
-    auto server_ids = user_com_interface->GetServerIds();
-    LOG_INF("Server IDs count: %zu", server_ids->size());
-    for(auto server_id : *server_ids) {
-        LOG_INF("Server ID: %d", server_id);
+    auto user_ids = user_com_interface->GetUserIds();
+    LOG_INF("User IDs count: %zu", user_ids->size());
+    for(auto user_id : *user_ids) {
+        LOG_INF("User ID: %d", user_id);
     }
 
     // TODO: For test purposes only
@@ -167,7 +167,8 @@ int main(void) {
         guid_generator,
         gpio,
         adc_configuration_controller,
-        sensors_configuration_controller);
+        sensors_configuration_controller,
+        user_com_interface);
 
     auto calibration_service = make_shared_ext<CalibrationService>(
         time_service,

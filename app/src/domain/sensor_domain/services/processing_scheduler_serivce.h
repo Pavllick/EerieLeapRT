@@ -11,6 +11,7 @@
 
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 #include "domain/sensor_domain/processors/sensor_processor.h"
+#include "domain/user_com_domain/user_com.h"
 
 #include "sensor_task.hpp"
 
@@ -23,6 +24,7 @@ using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::subsys::gpio;
 using namespace eerie_leap::subsys::adc;
 using namespace eerie_leap::domain::sensor_domain::utilities;
+using namespace eerie_leap::domain::user_com_domain;
 
 class ProcessingSchedulerService {
 private:
@@ -34,6 +36,7 @@ private:
     std::shared_ptr<IGpio> gpio_;
     std::shared_ptr<AdcConfigurationController> adc_configuration_controller_;
     std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller_;
+    std::shared_ptr<UserCom> user_com_;
 
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame_;
     std::shared_ptr<SensorProcessor> sensor_processor_;
@@ -50,7 +53,8 @@ public:
         std::shared_ptr<GuidGenerator> guid_generator,
         std::shared_ptr<IGpio> gpio,
         std::shared_ptr<AdcConfigurationController> adc_configuration_controller,
-        std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller);
+        std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller,
+        std::shared_ptr<UserCom> user_com);
 
     void Start();
     void Restart();

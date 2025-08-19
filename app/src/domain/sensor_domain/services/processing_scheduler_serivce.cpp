@@ -25,12 +25,14 @@ ProcessingSchedulerService::ProcessingSchedulerService(
     std::shared_ptr<GuidGenerator> guid_generator,
     std::shared_ptr<IGpio> gpio,
     std::shared_ptr<AdcConfigurationController> adc_configuration_controller,
-    std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller)
+    std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller,
+    std::shared_ptr<UserCom> user_com)
     : time_service_(std::move(time_service)),
     guid_generator_(std::move(guid_generator)),
     gpio_(std::move(gpio)),
     adc_configuration_controller_(std::move(adc_configuration_controller)),
-    sensors_configuration_controller_(std::move(sensors_configuration_controller)) {
+    sensors_configuration_controller_(std::move(sensors_configuration_controller)),
+    user_com_(std::move(user_com)) {
 
     k_sem_init(&processing_semaphore_, 1, 1);
 };
@@ -44,6 +46,7 @@ void ProcessingSchedulerService::ProcessSensorWorkTask(k_work* work) {
             task->processor->ProcessReading(task->readings_frame->GetReading(task->sensor->id));
 
             auto reading = task->readings_frame->GetReading(task->sensor->id);
+            task->user_com->SendReading(*reading);
 
             printk("Sensor Reading - ID: %s, Guid: %llu, Value: %.3f, Time: %s\n",
                 task->sensor->id.c_str(),
@@ -67,6 +70,7 @@ std::shared_ptr<SensorTask> ProcessingSchedulerService::CreateSensorTask(std::sh
     task->sampling_rate_ms = K_MSEC(sensor->configuration.sampling_rate_ms);
     task->sensor = sensor;
     task->readings_frame = sensor_readings_frame_;
+    task->user_com = user_com_;
 
     std::shared_ptr<ISensorReader> sensor_reader;
 

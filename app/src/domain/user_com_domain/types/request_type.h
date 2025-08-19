@@ -9,6 +9,7 @@ enum class RequestType : uint16_t {
     GET_RESOLVE_SERVER_ID_GUID = 1,
 
     SET_RESOLVE_SERVER_ID_GUID = 127,
+    SET_READING = 128,
 };
 
 } // namespace eerie_leap::domain::user_com_domain::types
