@@ -10,7 +10,7 @@
 #include "domain/sensor_domain/processors/sensor_reader/sensor_reader_physical_indicator.h"
 #include "domain/sensor_domain/processors/sensor_reader/sensor_reader_virtual_analog.h"
 #include "domain/sensor_domain/processors/sensor_reader/sensor_reader_virtual_indicator.h"
-#include "processing_scheduler_serivce.h"
+#include "processing_scheduler_service.h"
 
 namespace eerie_leap::domain::sensor_domain::services {
 

@@ -18,7 +18,7 @@ Z_KERNEL_STACK_DEFINE_IN(SdmmcService::stack_area_, SdmmcService::k_stack_size_,
 K_KERNEL_STACK_MEMBER(SdmmcService::stack_area_, SdmmcService::k_stack_size_);
 #endif
 
-SdmmcService::SdmmcService(fs_mount_t mountpoint) : FsService(mountpoint) {
+SdmmcService::SdmmcService(fs_mount_t mountpoint) : FsService(mountpoint), monitor_running_(ATOMIC_INIT(0)) {
     mountpoint_.fs_data = &sd_storage_;
 }
 
@@ -77,7 +77,7 @@ void SdmmcService::SdMonitorThreadEntry() {
 
 int SdmmcService::SdMonitorStart() {
     k_sem_init(&sd_monitor_stop_sem_, 0, 1);
-    monitor_running_ = true;
+    atomic_set(&monitor_running_, 1);
 
     thread_id_ = k_thread_create(
         &thread_data_,
@@ -95,10 +95,10 @@ int SdmmcService::SdMonitorStart() {
 }
 
 int SdmmcService::SdMonitorStop() {
-    if(!monitor_running_)
+    if(!atomic_get(&monitor_running_))
         return 0;
 
-    monitor_running_ = false;
+    atomic_set(&monitor_running_, 0);
     k_sem_give(&sd_monitor_stop_sem_);
     k_thread_join(&thread_data_, K_FOREVER);
 

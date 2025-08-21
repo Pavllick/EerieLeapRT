@@ -6,7 +6,7 @@
 #include "utilities/time/i_time_service.h"
 #include "utilities/guid/guid_generator.h"
 #include "controllers/adc_configuration_controller.h"
-#include "domain/sensor_domain/services/processing_scheduler_serivce.h"
+#include "domain/sensor_domain/services/processing_scheduler_service.h"
 
 #include "sensor_task.hpp"
 

@@ -6,7 +6,7 @@
 #include <zephyr/data/json.h>
 
 #include "controllers/sensors_configuration_controller.h"
-#include "domain/sensor_domain/services/processing_scheduler_serivce.h"
+#include "domain/sensor_domain/services/processing_scheduler_service.h"
 
 namespace eerie_leap::domain::http_domain::controllers::api {
 

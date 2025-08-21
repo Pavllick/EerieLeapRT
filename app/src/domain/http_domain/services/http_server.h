@@ -5,7 +5,7 @@
 #include "controllers/system_configuration_controller.h"
 #include "controllers/adc_configuration_controller.h"
 #include "controllers/sensors_configuration_controller.h"
-#include "domain/sensor_domain/services/processing_scheduler_serivce.h"
+#include "domain/sensor_domain/services/processing_scheduler_service.h"
 
 static constexpr uint16_t http_service_port_ = 8080;
 

@@ -16,7 +16,7 @@
 
 #include "domain/device_tree/device_tree_setup.h"
 #include "domain/user_com_domain/user_com.h"
-#include "domain/sensor_domain/services/processing_scheduler_serivce.h"
+#include "domain/sensor_domain/services/processing_scheduler_service.h"
 #include "domain/sensor_domain/services/calibration_service.h"
 #include "domain/sensor_domain/models/sensor_type.h"
 
