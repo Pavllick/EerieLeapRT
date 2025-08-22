@@ -19,13 +19,13 @@ class AdcFactory {
 public:
     static std::shared_ptr<IAdcManager> Create() {
 #ifdef CONFIG_ADC_EMUL
-        if(DeviceTreeSetup::Get().GetAdcInfos().has_value())
-            return make_shared_ext<AdcEmulatorManager>(DeviceTreeSetup::Get().GetAdcInfos().value());
+        if(DeviceTreeSetup::Get()->GetAdcInfos().has_value())
+            return make_shared_ext<AdcEmulatorManager>(DeviceTreeSetup::Get()->GetAdcInfos().value());
 #endif
 
 #ifdef CONFIG_ADC
-        if(DeviceTreeSetup::Get().GetAdcInfos().has_value())
-            return make_shared_ext<AdcManager>(DeviceTreeSetup::Get().GetAdcInfos().value());
+        if(DeviceTreeSetup::Get()->GetAdcInfos().has_value())
+            return make_shared_ext<AdcManager>(DeviceTreeSetup::Get()->GetAdcInfos().value());
 #endif
 
         return make_shared_ext<AdcSimulatorManager>();

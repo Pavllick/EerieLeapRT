@@ -34,6 +34,8 @@ namespace eerie_leap::domain::device_tree {
 
 class DeviceTreeSetup {
 private:
+    static std::shared_ptr<DeviceTreeSetup> instance_;
+
     static std::optional<fs_mount_t> int_fs_mp_;
     static std::optional<fs_mount_t> sd_fs_mp_;
     static std::optional<char*> modbus_iface_;
@@ -49,14 +51,15 @@ private:
     static void InitAdc();
 
 public:
-    static DeviceTreeSetup& Get();
-    static void Initialize();
+    static std::shared_ptr<DeviceTreeSetup>& Create();
+    static std::shared_ptr<DeviceTreeSetup>& Get();
+    void Initialize();
 
-    static std::optional<fs_mount_t>& GetInternalFsMp() { return int_fs_mp_; }
-    static std::optional<fs_mount_t>& GetSdFsMp() { return sd_fs_mp_; }
-    static std::optional<char*>& GetModbusIface() { return modbus_iface_; }
-    static std::optional<std::vector<gpio_dt_spec>>& GetGpioSpecs() { return gpio_specs_; }
-    static std::optional<std::vector<AdcDTInfo>>& GetAdcInfos() { return adc_infos_; }
+    std::optional<fs_mount_t>& GetInternalFsMp() { return int_fs_mp_; }
+    std::optional<fs_mount_t>& GetSdFsMp() { return sd_fs_mp_; }
+    std::optional<char*>& GetModbusIface() { return modbus_iface_; }
+    std::optional<std::vector<gpio_dt_spec>>& GetGpioSpecs() { return gpio_specs_; }
+    std::optional<std::vector<AdcDTInfo>>& GetAdcInfos() { return adc_infos_; }
 };
 
 } // namespace eerie_leap::domain::device_tree
