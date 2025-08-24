@@ -11,7 +11,7 @@
 #include "adc_dt_info.h"
 
 // File System
-#define INT_FS_NODE DT_ALIAS(lfs1)
+#define INT_FS_NODE DT_ALIAS(fs0)
 FS_FSTAB_DECLARE_ENTRY(INT_FS_NODE);
 
 // Modbus

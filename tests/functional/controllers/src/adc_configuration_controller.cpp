@@ -13,7 +13,7 @@ using namespace eerie_leap::controllers;
 
 ZTEST_SUITE(adc_configuration_controller, NULL, NULL, NULL, NULL, NULL);
 
-#define PARTITION_NODE DT_ALIAS(lfs1)
+#define PARTITION_NODE DT_ALIAS(fs0)
 FS_FSTAB_DECLARE_ENTRY(PARTITION_NODE);
 
 std::shared_ptr<AdcConfiguration> adc_configuration_controller_GetTestConfiguration() {

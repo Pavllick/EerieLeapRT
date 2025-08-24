@@ -40,7 +40,7 @@ using namespace eerie_leap::utilities::voltage_interpolator;
 
 ZTEST_SUITE(sensor_processor, NULL, NULL, NULL, NULL, NULL);
 
-#define PARTITION_NODE DT_ALIAS(lfs1)
+#define PARTITION_NODE DT_ALIAS(fs0)
 FS_FSTAB_DECLARE_ENTRY(PARTITION_NODE);
 
 std::vector<std::shared_ptr<Sensor>> sensor_processor_GetTestSensors(std::shared_ptr<MathParserService> math_parser_service) {

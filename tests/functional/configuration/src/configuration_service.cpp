@@ -14,7 +14,7 @@ using namespace eerie_leap::subsys::fs::services;
 
 ZTEST_SUITE(configuration_service, NULL, NULL, NULL, NULL, NULL);
 
-#define PARTITION_NODE DT_ALIAS(lfs1)
+#define PARTITION_NODE DT_ALIAS(fs0)
 FS_FSTAB_DECLARE_ENTRY(PARTITION_NODE);
 
 ZTEST(configuration_service, test_SystemConfig_Save_config_successfully_saved) {

@@ -14,7 +14,7 @@ using namespace eerie_leap::controllers;
 
 ZTEST_SUITE(system_configuration_controller, NULL, NULL, NULL, NULL, NULL);
 
-#define PARTITION_NODE DT_ALIAS(lfs1)
+#define PARTITION_NODE DT_ALIAS(fs0)
 FS_FSTAB_DECLARE_ENTRY(PARTITION_NODE);
 
 ZTEST(system_configuration_controller, test_SystemConfigurationController_Save_config_successfully_saved) {
