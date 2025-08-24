@@ -8,17 +8,19 @@
 #include "subsys/fs/services/fs_service.h"
 #include "controllers/sensors_configuration_controller.h"
 
+#include "domain/device_tree/dt_fs.h"
+
 using namespace eerie_leap::configuration::services;
 using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::controllers;
+using namespace eerie_leap::domain::device_tree;
 
 ZTEST_SUITE(system_configuration_controller, NULL, NULL, NULL, NULL, NULL);
 
-#define PARTITION_NODE DT_ALIAS(fs0)
-FS_FSTAB_DECLARE_ENTRY(PARTITION_NODE);
-
 ZTEST(system_configuration_controller, test_SystemConfigurationController_Save_config_successfully_saved) {
-    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
+    DtFs::InitInternalFs();
+    auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
+
     fs_service->Format();
 
     auto system_configuration_service = std::make_shared<ConfigurationService<SystemConfig>>("system_config", fs_service);
@@ -40,15 +42,16 @@ ZTEST(system_configuration_controller, test_SystemConfigurationController_Save_c
 }
 
 ZTEST(system_configuration_controller, test_SystemConfigurationController_Save_config_and_Load) {
-    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
+    DtFs::InitInternalFs();
+    auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
+
     fs_service->Format();
 
     auto system_configuration_service = std::make_shared<ConfigurationService<SystemConfig>>("system_config", fs_service);
     auto system_configuration_controller = std::make_shared<SystemConfigurationController>(system_configuration_service);
 
     SystemConfiguration system_configuration {
-        .hw_version = 34567,
-        .sw_version = 98765
+        .device_id = 14
     };
     auto system_configuration_ptr = std::make_shared<SystemConfiguration>(system_configuration);
 
@@ -60,6 +63,7 @@ ZTEST(system_configuration_controller, test_SystemConfigurationController_Save_c
 
     auto saved_system_configuration = *system_configuration_controller->Get();
 
-    zassert_equal(saved_system_configuration.hw_version, system_configuration_ptr->hw_version);
-    zassert_equal(saved_system_configuration.sw_version, system_configuration_ptr->sw_version);
+    zassert_equal(saved_system_configuration.device_id, system_configuration_ptr->device_id);
+    zassert_equal(saved_system_configuration.hw_version, 0x02090006);
+    zassert_equal(saved_system_configuration.sw_version, 0x07080004);
 }

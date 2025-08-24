@@ -14,6 +14,8 @@
 #include "subsys/adc/adc_simulator.h"
 #include "subsys/gpio/i_gpio.h"
 #include "subsys/gpio/gpio_simulator.h"
+
+#include "domain/device_tree/dt_fs.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 #include "domain/sensor_domain/processors/sensor_reader/i_sensor_reader.h"
 #include "domain/sensor_domain/processors/sensor_reader/sensor_reader_physical_analog.h"
@@ -32,6 +34,8 @@ using namespace eerie_leap::utilities::math_parser;
 using namespace eerie_leap::subsys::adc;
 using namespace eerie_leap::subsys::adc::models;
 using namespace eerie_leap::subsys::gpio;
+
+using namespace eerie_leap::domain::device_tree;
 using namespace eerie_leap::domain::sensor_domain::processors;
 using namespace eerie_leap::domain::sensor_domain::processors::sensor_reader;
 
@@ -39,9 +43,6 @@ using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::utilities::voltage_interpolator;
 
 ZTEST_SUITE(sensors_reader, NULL, NULL, NULL, NULL, NULL);
-
-#define PARTITION_NODE DT_ALIAS(fs0)
-FS_FSTAB_DECLARE_ENTRY(PARTITION_NODE);
 
 std::vector<std::shared_ptr<Sensor>> sensors_reader_GetTestSensors(std::shared_ptr<MathParserService> math_parser_service) {
     std::vector<CalibrationData> calibration_data_1 {
@@ -182,7 +183,9 @@ struct sensors_reader_HelperInstances {
 };
 
 sensors_reader_HelperInstances sensors_reader_GetReadingInstances() {
-    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
+    DtFs::InitInternalFs();
+    auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
+
     fs_service->Format();
 
     std::shared_ptr<ITimeService> time_service = std::make_shared<BootElapsedTimeService>();

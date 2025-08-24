@@ -5,3 +5,15 @@ endmenu
 config EERIE_LEAP_FS_SD_THREAD_STACK_SIZE
 	int "SD thread stack size"
 	default 2048
+
+config EERIE_LEAP_SD_CHECK_INTERVAL_MS
+	int "SD check interval ms"
+	default 1000
+
+config EERIE_LEAP_SD_DRIVE_NAME
+	string "SD drive name"
+	default "SD"
+
+config EERIE_LEAP_SD_MOUNT_POINT
+	string "SD mount point"
+	default "/ext"

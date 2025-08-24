@@ -7,14 +7,14 @@
 #include "subsys/fs/services/fs_service.h"
 #include "controllers/adc_configuration_controller.h"
 
+#include "domain/device_tree/dt_fs.h"
+
 using namespace eerie_leap::configuration::services;
 using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::controllers;
+using namespace eerie_leap::domain::device_tree;
 
 ZTEST_SUITE(adc_configuration_controller, NULL, NULL, NULL, NULL, NULL);
-
-#define PARTITION_NODE DT_ALIAS(fs0)
-FS_FSTAB_DECLARE_ENTRY(PARTITION_NODE);
 
 std::shared_ptr<AdcConfiguration> adc_configuration_controller_GetTestConfiguration() {
     std::vector<CalibrationData> adc_calibration_data_samples {
@@ -41,7 +41,9 @@ std::shared_ptr<AdcConfiguration> adc_configuration_controller_GetTestConfigurat
 }
 
 ZTEST(adc_configuration_controller, test_AdcConfigurationController_Save_config_successfully_saved) {
-    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
+    DtFs::InitInternalFs();
+    auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
+
     fs_service->Format();
 
     auto adc_configuration_service = std::make_shared<ConfigurationService<AdcConfig>>("adc_config", fs_service);
@@ -70,7 +72,9 @@ ZTEST(adc_configuration_controller, test_AdcConfigurationController_Save_config_
 }
 
 ZTEST(adc_configuration_controller, test_AdcConfigurationController_Save_config_and_Load) {
-    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
+    DtFs::InitInternalFs();
+    auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
+
     fs_service->Format();
 
     auto adc_configuration_service = std::make_shared<ConfigurationService<AdcConfig>>("adc_config", fs_service);

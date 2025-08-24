@@ -4,12 +4,16 @@
 
 #include "utilities/voltage_interpolator/calibration_data.h"
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
+
 #include "subsys/adc/models/adc_configuration.h"
 #include "subsys/adc/adc_simulator.h"
 #include "subsys/adc/adc_emulator.h"
 
+#include "domain/device_tree/dt_adc.h"
+
 using namespace eerie_leap::subsys::adc;
 using namespace eerie_leap::subsys::adc::models;
+using namespace eerie_leap::domain::device_tree;
 
 ZTEST_SUITE(adc, NULL, NULL, NULL, NULL, NULL);
 
@@ -67,7 +71,9 @@ ZTEST(adc, test_Simulator_ReadChannel_has_config) {
 }
 
 ZTEST(adc, test_Emulator_ReadChannel_has_config) {
-    auto adc = std::make_shared<AdcEmulatorManager>();
+    DtAdc::Initialize();
+
+    auto adc = std::make_shared<AdcEmulatorManager>(DtAdc::Get().value());
     ReadChannel_has_config(adc);
 }
 
@@ -91,7 +97,9 @@ ZTEST(adc, test_Simulator_ReadChannel_no_config) {
 
 ZTEST_EXPECT_FAIL(adc, test_Emulator_ReadChannel_no_config);
 ZTEST(adc, test_Emulator_ReadChannel_no_config) {
-    auto adc = std::make_shared<AdcEmulatorManager>();
+    DtAdc::Initialize();
+
+    auto adc = std::make_shared<AdcEmulatorManager>(DtAdc::Get().value());
     ReadChannel_no_config(adc);
 }
 
@@ -126,6 +134,8 @@ ZTEST(adc, test_Simulator_ReadChannel_out_of_range) {
 
 ZTEST_EXPECT_FAIL(adc, test_Emulator_ReadChannel_out_of_range);
 ZTEST(adc, test_Emulator_ReadChannel_out_of_range) {
-    auto adc = std::make_shared<AdcEmulatorManager>();
+    DtAdc::Initialize();
+
+    auto adc = std::make_shared<AdcEmulatorManager>(DtAdc::Get().value());
     ReadChannel_out_of_range(adc);
 }

@@ -8,14 +8,14 @@
 #include "subsys/fs/services/i_fs_service.h"
 #include "subsys/fs/services/fs_service.h"
 
+#include "domain/device_tree/dt_fs.h"
+
 using namespace eerie_leap::subsys::fs::services;
+using namespace eerie_leap::domain::device_tree;
 
 void CleanUpFs(void *f);
 
 ZTEST_SUITE(fs_service, NULL, NULL, CleanUpFs, CleanUpFs, NULL);
-
-#define PARTITION_NODE DT_ALIAS(lfs1)
-FS_FSTAB_DECLARE_ENTRY(PARTITION_NODE);
 
 struct TestData {
     std::string str;
@@ -23,7 +23,9 @@ struct TestData {
 };
 
 void CleanUpFs(void *f) {
-    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
+    DtFs::InitInternalFs();
+    auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
+
     fs_service->Format();
 }
 
@@ -55,7 +57,8 @@ void SetupFiles(std::shared_ptr<FsService> fs_service, std::string& name_prefix)
 }
 
 ZTEST(fs_service, test_WriteFile) {
-    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
+    DtFs::InitInternalFs();
+    auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
 
     TestData test_data = {
         .str = "Some test string test_WriteFile",
@@ -69,7 +72,8 @@ ZTEST(fs_service, test_WriteFile) {
 }
 
 ZTEST(fs_service, test_ReadFile) {
-    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
+    DtFs::InitInternalFs();
+    auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
 
     TestData test_data = {
         .str = "Some test string test_ReadFile",
@@ -93,7 +97,8 @@ ZTEST(fs_service, test_ReadFile) {
 }
 
 ZTEST(fs_service, test_Exists) {
-    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
+    DtFs::InitInternalFs();
+    auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
 
     TestData test_data = {
         .str = "Some test string test_Exists",
@@ -113,7 +118,8 @@ ZTEST(fs_service, test_Exists) {
 }
 
 ZTEST(fs_service, test_CreateDirectory) {
-    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
+    DtFs::InitInternalFs();
+    auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
 
     std::string dir_path = "test_CreateDirectory";
     bool result = fs_service->CreateDirectory(dir_path);
@@ -128,7 +134,8 @@ ZTEST(fs_service, test_CreateDirectory) {
 }
 
 ZTEST(fs_service, test_ListFiles) {
-    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
+    DtFs::InitInternalFs();
+    auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
 
     std::string name_prefix = "ListFiles";
     std::string dir_path = "test_" + name_prefix + "_dir";
@@ -156,7 +163,8 @@ ZTEST(fs_service, test_ListFiles) {
 }
 
 ZTEST(fs_service, test_Delete) {
-    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
+    DtFs::InitInternalFs();
+    auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
 
     std::string name_prefix = "Delete";
     std::string dir_path = "test_" + name_prefix + "_dir";
@@ -204,7 +212,8 @@ ZTEST(fs_service, test_Delete) {
 }
 
 ZTEST(fs_service, test_DeleteRecursive) {
-    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
+    DtFs::InitInternalFs();
+    auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
 
     auto core_files = fs_service->ListFiles();
     zassert_equal(core_files.size(), 0);
@@ -225,7 +234,8 @@ ZTEST(fs_service, test_DeleteRecursive) {
 }
 
 ZTEST(fs_service, test_Format) {
-    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
+    DtFs::InitInternalFs();
+    auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
 
     auto core_files = fs_service->ListFiles();
     zassert_equal(core_files.size(), 0);

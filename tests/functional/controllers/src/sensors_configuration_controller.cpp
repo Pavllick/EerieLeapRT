@@ -9,11 +9,16 @@
 #include "configuration/system_config/system_config.h"
 #include "configuration/sensor_config/sensor_config.h"
 #include "configuration/services/configuration_service.h"
+
 #include "controllers/sensors_configuration_controller.h"
+
 #include "subsys/fs/services/i_fs_service.h"
 #include "subsys/fs/services/fs_service.h"
+
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
+
+#include "domain/device_tree/dt_fs.h"
 
 using namespace eerie_leap::utilities::cbor;
 using namespace eerie_leap::utilities::math_parser;
@@ -22,11 +27,9 @@ using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::controllers;
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::utilities::voltage_interpolator;
+using namespace eerie_leap::domain::device_tree;
 
 ZTEST_SUITE(sensors_configuration_controller, NULL, NULL, NULL, NULL, NULL);
-
-#define PARTITION_NODE DT_ALIAS(fs0)
-FS_FSTAB_DECLARE_ENTRY(PARTITION_NODE);
 
 std::vector<std::shared_ptr<Sensor>> SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service) {
     // Test Sensors
@@ -109,7 +112,9 @@ std::vector<std::shared_ptr<Sensor>> SetupTestSensors(std::shared_ptr<MathParser
 }
 
 ZTEST(sensors_configuration_controller, test_SensorsConfigurationController_Save_config_successfully_saved) {
-    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
+    DtFs::InitInternalFs();
+    auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
+
     fs_service->Format();
 
     auto sensors_configuration_service = std::make_shared<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
@@ -154,7 +159,9 @@ ZTEST(sensors_configuration_controller, test_SensorsConfigurationController_Save
 }
 
 ZTEST(sensors_configuration_controller, test_SensorsConfigurationController_Save_config_and_Load) {
-    auto fs_service = std::make_shared<FsService>(FS_FSTAB_ENTRY(PARTITION_NODE));
+    DtFs::InitInternalFs();
+    auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
+
     fs_service->Format();
 
     auto sensors_configuration_service = std::make_shared<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);

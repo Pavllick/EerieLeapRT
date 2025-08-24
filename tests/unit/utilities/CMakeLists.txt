@@ -20,6 +20,9 @@ file(GLOB_RECURSE MUPARSER_SOURCES ${MUPARSER_SRC_DIR}/*.cpp)
 include_directories(${MUPARSER_INCLUDE_DIR})
 
 # Collect all source files for the test
+set(APP_SRC_SUBSYS_DIR ${APP_SRC_DIR}/subsys)
+file(GLOB_RECURSE APP_SRC_SUBSYS_RANDOM ${APP_SRC_SUBSYS_DIR}/random/*.cpp)
+
 set(APP_SRC_UTILITIES_DIR ${APP_SRC_DIR}/utilities)
 file(GLOB_RECURSE APP_SRC_UTILITIES
   ${APP_SRC_UTILITIES_DIR}/*.c
@@ -30,6 +33,7 @@ file(GLOB_RECURSE TEST_SOURCES src/*.c src/*.cpp)
 
 # Add all source files to the app target
 target_sources(app PRIVATE
+  ${APP_SRC_SUBSYS_RANDOM}
   ${APP_SRC_UTILITIES}
   ${TEST_SOURCES}
   ${MUPARSER_SOURCES}

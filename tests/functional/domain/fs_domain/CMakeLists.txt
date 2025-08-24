@@ -13,6 +13,11 @@ set(APP_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../app/src)
 
 include_directories(${APP_SRC_DIR})
 
+set(APP_SRC_DOMAIN_DT_DIR ${APP_SRC_DIR}/domain/device_tree)
+file(GLOB_RECURSE APP_SRC_DOMAIN_DT
+  ${APP_SRC_DOMAIN_DT_DIR}/dt_fs.cpp
+)
+
 set(APP_SRC_FS_SUBSYS_DIR ${APP_SRC_DIR}/subsys/fs)
 file(GLOB_RECURSE APP_SRC_FS_SUBSYS
   ${APP_SRC_FS_SUBSYS_DIR}/*.c
@@ -23,6 +28,7 @@ file(GLOB_RECURSE TEST_SOURCES src/*.c src/*.cpp)
 
 # Add all source files to the app target
 target_sources(app PRIVATE
+  ${APP_SRC_DOMAIN_DT}
   ${APP_SRC_FS_SUBSYS}
   ${TEST_SOURCES}
 )

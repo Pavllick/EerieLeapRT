@@ -39,6 +39,12 @@ file(GLOB_RECURSE APP_SRC_SUBSYS
   ${APP_SRC_SUBSYS_DIR}/gpio/*.cpp
   ${APP_SRC_SUBSYS_DIR}/fs/*.c
   ${APP_SRC_SUBSYS_DIR}/fs/*.cpp
+  ${APP_SRC_SUBSYS_DIR}/random/*.cpp
+)
+
+set(APP_SRC_DOMAIN_DT_DIR ${APP_SRC_DIR}/domain/device_tree)
+file(GLOB_RECURSE APP_SRC_DOMAIN_DT
+  ${APP_SRC_DOMAIN_DT_DIR}/dt_fs.cpp
 )
 
 set(APP_SRC_DOMAIN_DIR ${APP_SRC_DIR}/domain)
@@ -63,6 +69,7 @@ target_sources(app PRIVATE
   ${APP_SRC_CONFIGURATION}
   ${APP_SRC_CONTROLLERS}
   ${APP_SRC_SUBSYS}
+  ${APP_SRC_DOMAIN_DT}
   ${APP_SRC_DOMAIN}
   ${APP_SRC_UTILITIES}
   ${TEST_SOURCES}
