@@ -2,7 +2,7 @@
 
 #include "dt_modbus.h"
 
-namespace eerie_leap::domain::device_tree {
+namespace eerie_leap::subsys::device_tree {
 
 LOG_MODULE_REGISTER(dt_modbus_logger);
 
@@ -15,4 +15,4 @@ void DtModbus::Initialize() {
 #endif
 }
 
-} // namespace eerie_leap::domain::device_tree
+} // namespace eerie_leap::subsys::device_tree

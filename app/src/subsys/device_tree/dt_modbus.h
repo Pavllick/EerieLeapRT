@@ -9,7 +9,7 @@
 #define MODBUS_NODE DT_ALIAS(modbus0)
 #endif
 
-namespace eerie_leap::domain::device_tree {
+namespace eerie_leap::subsys::device_tree {
 
 class DtModbus {
 private:
@@ -23,4 +23,4 @@ public:
     static std::optional<char*>& Get() { return iface_; }
 };
 
-} // namespace eerie_leap::domain::device_tree
+} // namespace eerie_leap::subsys::device_tree

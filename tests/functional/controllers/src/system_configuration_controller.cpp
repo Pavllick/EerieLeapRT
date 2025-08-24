@@ -5,15 +5,15 @@
 #include "configuration/system_config/system_config.h"
 #include "configuration/services/configuration_service.h"
 #include "controllers/system_configuration_controller.h"
+
+#include "subsys/device_tree/dt_fs.h"
 #include "subsys/fs/services/fs_service.h"
 #include "controllers/sensors_configuration_controller.h"
 
-#include "domain/device_tree/dt_fs.h"
-
 using namespace eerie_leap::configuration::services;
+using namespace eerie_leap::subsys::device_tree;
 using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::controllers;
-using namespace eerie_leap::domain::device_tree;
 
 ZTEST_SUITE(system_configuration_controller, NULL, NULL, NULL, NULL, NULL);
 

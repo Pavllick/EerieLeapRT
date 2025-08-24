@@ -1,6 +1,6 @@
 #pragma once
 
-namespace eerie_leap::domain::device_tree {
+namespace eerie_leap::subsys::device_tree {
 
 class DtConfigurator {
 private:
@@ -10,4 +10,4 @@ public:
     static void Initialize();
 };
 
-} // namespace eerie_leap::domain::device_tree
+} // namespace eerie_leap::subsys::device_tree

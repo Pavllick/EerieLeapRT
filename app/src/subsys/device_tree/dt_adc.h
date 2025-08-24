@@ -12,7 +12,7 @@
 #define ADC_CHANNEL_VREF(node_id) DT_PROP_OR(node_id, zephyr_vref_mv, 0)
 #define ADC_CHANNEL_RESOLUTION(node_id) DT_PROP_OR(node_id, zephyr_resolution, 0)
 
-namespace eerie_leap::domain::device_tree {
+namespace eerie_leap::subsys::device_tree {
 
 class DtAdc {
 private:
@@ -26,4 +26,4 @@ public:
     static std::optional<std::vector<AdcDTInfo>>& Get() { return adc_infos_; }
 };
 
-} // namespace eerie_leap::domain::device_tree
+} // namespace eerie_leap::subsys::device_tree

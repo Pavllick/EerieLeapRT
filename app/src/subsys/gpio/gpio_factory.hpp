@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "utilities/memory/heap_allocator.h"
-#include "domain/device_tree/dt_gpio.h"
+#include "subsys/device_tree/dt_gpio.h"
 #include "gpio.h"
 #include "gpio_emulator.h"
 #include "gpio_simulator.h"
@@ -11,7 +11,7 @@
 namespace eerie_leap::subsys::gpio {
 
 using namespace eerie_leap::utilities::memory;
-using namespace eerie_leap::domain::device_tree;
+using namespace eerie_leap::subsys::device_tree;
 
 class GpioFactory {
 public:

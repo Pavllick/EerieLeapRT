@@ -5,13 +5,12 @@
 #include <unordered_set>
 #include <zephyr/ztest.h>
 
+#include "subsys/device_tree/dt_fs.h"
 #include "subsys/fs/services/i_fs_service.h"
 #include "subsys/fs/services/fs_service.h"
 
-#include "domain/device_tree/dt_fs.h"
-
+using namespace eerie_leap::subsys::device_tree;
 using namespace eerie_leap::subsys::fs::services;
-using namespace eerie_leap::domain::device_tree;
 
 void CleanUpFs(void *f);
 

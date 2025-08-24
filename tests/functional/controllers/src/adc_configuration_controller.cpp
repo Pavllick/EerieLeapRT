@@ -4,15 +4,16 @@
 
 #include "configuration/adc_config/adc_config.h"
 #include "configuration/services/configuration_service.h"
-#include "subsys/fs/services/fs_service.h"
-#include "controllers/adc_configuration_controller.h"
 
-#include "domain/device_tree/dt_fs.h"
+#include "subsys/device_tree/dt_fs.h"
+#include "subsys/fs/services/fs_service.h"
+
+#include "controllers/adc_configuration_controller.h"
 
 using namespace eerie_leap::configuration::services;
 using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::controllers;
-using namespace eerie_leap::domain::device_tree;
+using namespace eerie_leap::subsys::device_tree;
 
 ZTEST_SUITE(adc_configuration_controller, NULL, NULL, NULL, NULL, NULL);
 

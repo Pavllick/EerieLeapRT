@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "utilities/memory/heap_allocator.h"
-#include "domain/device_tree/dt_adc.h"
+#include "subsys/device_tree/dt_adc.h"
 
 #include "i_adc_manager.h"
 #include "adc_emulator.h"
@@ -13,7 +13,7 @@
 namespace eerie_leap::subsys::adc {
 
 using namespace eerie_leap::utilities::memory;
-using namespace eerie_leap::domain::device_tree;
+using namespace eerie_leap::subsys::device_tree;
 
 class AdcFactory {
 public:

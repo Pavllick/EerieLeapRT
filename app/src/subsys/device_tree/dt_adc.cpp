@@ -2,7 +2,7 @@
 
 #include "dt_adc.h"
 
-namespace eerie_leap::domain::device_tree {
+namespace eerie_leap::subsys::device_tree {
 
 LOG_MODULE_REGISTER(dt_adc_logger);
 
@@ -62,4 +62,4 @@ void DtAdc::Initialize() {
 #endif
 }
 
-} // namespace eerie_leap::domain::device_tree
+} // namespace eerie_leap::subsys::device_tree

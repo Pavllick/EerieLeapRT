@@ -5,7 +5,7 @@
 
 #include "dt_configurator.h"
 
-namespace eerie_leap::domain::device_tree {
+namespace eerie_leap::subsys::device_tree {
 
 void DtConfigurator::Initialize() {
     DtFs::InitInternalFs();
@@ -15,4 +15,4 @@ void DtConfigurator::Initialize() {
     DtAdc::Initialize();
 }
 
-} // namespace eerie_leap::domain::device_tree
+} // namespace eerie_leap::subsys::device_tree

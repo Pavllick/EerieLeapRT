@@ -12,7 +12,7 @@
 #define GPIO_SPEC(node_id) GPIO_DT_SPEC_GET(node_id, gpios)
 #endif
 
-namespace eerie_leap::domain::device_tree {
+namespace eerie_leap::subsys::device_tree {
 
 class DtGpio {
 private:
@@ -26,4 +26,4 @@ public:
     static std::optional<std::vector<gpio_dt_spec>>& Get() { return gpio_specs_; }
 };
 
-} // namespace eerie_leap::domain::device_tree
+} // namespace eerie_leap::subsys::device_tree

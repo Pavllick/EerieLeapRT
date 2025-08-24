@@ -2,7 +2,7 @@
 
 #include "dt_gpio.h"
 
-namespace eerie_leap::domain::device_tree {
+namespace eerie_leap::subsys::device_tree {
 
 LOG_MODULE_REGISTER(dt_gpio_logger);
 
@@ -15,4 +15,4 @@ void DtGpio::Initialize() {
 #endif
 }
 
-} // namespace eerie_leap::domain::device_tree
+} // namespace eerie_leap::subsys::device_tree

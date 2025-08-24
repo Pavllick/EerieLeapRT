@@ -4,7 +4,7 @@
 #include <vector>
 #include <zephyr/drivers/adc.h>
 
-namespace eerie_leap::domain::device_tree {
+namespace eerie_leap::subsys::device_tree {
 
 struct AdcDTInfo {
     const device* adc_device;
@@ -13,4 +13,4 @@ struct AdcDTInfo {
     std::vector<uint8_t> resolutions;
 };
 
-} // namespace eerie_leap::domain::device_tree
+} // namespace eerie_leap::subsys::device_tree

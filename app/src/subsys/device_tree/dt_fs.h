@@ -11,7 +11,7 @@
 #define INT_FS_NODE DT_ALIAS(fs0)
 FS_FSTAB_DECLARE_ENTRY(INT_FS_NODE);
 
-namespace eerie_leap::domain::device_tree {
+namespace eerie_leap::subsys::device_tree {
 
 class DtFs {
 private:
@@ -28,4 +28,4 @@ public:
     static std::optional<fs_mount_t>& GetSdFsMp() { return sd_fs_mp_; }
 };
 
-} // namespace eerie_leap::domain::device_tree
+} // namespace eerie_leap::subsys::device_tree

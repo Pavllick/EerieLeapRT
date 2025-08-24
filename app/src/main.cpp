@@ -9,14 +9,14 @@
 #include "utilities/time/boot_elapsed_time_service.h"
 #include "utilities/math_parser/math_parser_service.hpp"
 
+#include "subsys/device_tree/dt_configurator.h"
+#include "subsys/device_tree/dt_fs.h"
+#include "subsys/device_tree/dt_modbus.h"
+
 #include "subsys/fs/services/fs_service.h"
 #include "subsys/fs/services/sdmmc_service.h"
 #include "subsys/gpio/gpio_factory.hpp"
 #include "subsys/modbus/modbus.h"
-
-#include "domain/device_tree/dt_configurator.h"
-#include "domain/device_tree/dt_fs.h"
-#include "domain/device_tree/dt_modbus.h"
 
 #include "domain/user_com_domain/user_com.h"
 #include "domain/sensor_domain/services/processing_scheduler_service.h"
@@ -57,10 +57,9 @@ using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::utilities::math_parser;
 
+using namespace eerie_leap::subsys::device_tree;
 using namespace eerie_leap::subsys::modbus;
 using namespace eerie_leap::subsys::gpio;
-
-using namespace eerie_leap::domain::device_tree;
 
 using namespace eerie_leap::domain::user_com_domain;
 using namespace eerie_leap::domain::sensor_domain::services;

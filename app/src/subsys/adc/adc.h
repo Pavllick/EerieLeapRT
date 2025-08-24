@@ -9,14 +9,14 @@
 #include <unordered_set>
 #include <zephyr/drivers/adc.h>
 
-#include "domain/device_tree/adc_dt_info.h"
+#include "subsys/device_tree/adc_dt_info.h"
 #include "models/adc_configuration.h"
 
 #include "i_adc.h"
 
 namespace eerie_leap::subsys::adc {
 
-using namespace eerie_leap::domain::device_tree;
+using namespace eerie_leap::subsys::device_tree;
 using namespace eerie_leap::subsys::adc::models;
 
 class Adc : public IAdc {

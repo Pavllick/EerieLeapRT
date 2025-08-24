@@ -11,7 +11,7 @@
 #include "subsys/gpio/gpio_simulator.h"
 #include "subsys/fs/services/fs_service.h"
 
-#include "domain/device_tree/dt_fs.h"
+#include "subsys/device_tree/dt_fs.h"
 #include "domain/sensor_domain/utilities/sensors_order_resolver.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 #include "domain/sensor_domain/processors/sensor_reader/i_sensor_reader.h"
@@ -29,11 +29,12 @@
 using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::utilities::math_parser;
+
+using namespace eerie_leap::subsys::device_tree;
 using namespace eerie_leap::subsys::adc;
 using namespace eerie_leap::subsys::adc::models;
 using namespace eerie_leap::subsys::gpio;
 
-using namespace eerie_leap::domain::device_tree;
 using namespace eerie_leap::domain::sensor_domain::processors;
 using namespace eerie_leap::domain::sensor_domain::processors::sensor_reader;
 

@@ -4,7 +4,7 @@
 
 #include "dt_fs.h"
 
-namespace eerie_leap::domain::device_tree {
+namespace eerie_leap::subsys::device_tree {
 
 LOG_MODULE_REGISTER(dt_fs_logger);
 
@@ -36,4 +36,4 @@ void DtFs::InitSdFs() {
 #endif
 }
 
-} // namespace eerie_leap::domain::device_tree
+} // namespace eerie_leap::subsys::device_tree
