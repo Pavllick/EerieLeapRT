@@ -18,8 +18,14 @@ private:
     std::shared_ptr<SystemConfig> system_config_;
     std::shared_ptr<SystemConfiguration> system_configuration_;
 
+    bool UpdateHwVersion(uint32_t hw_version);
+    bool UpdateSwVersion(uint32_t sw_version);
+    bool CreateDefaultSystemConfiguration();
+
 public:
     explicit SystemConfigurationController(std::shared_ptr<ConfigurationService<SystemConfig>> system_configuration_service);
+
+    bool UpdateBuildNumber(uint32_t build_number);
 
     bool Update(std::shared_ptr<SystemConfiguration> system_configuration);
     std::shared_ptr<SystemConfiguration> Get(bool force_load = false);

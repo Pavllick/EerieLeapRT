@@ -7,6 +7,10 @@
 		modbus0 = &modbus0;
 	};
 
+    chosen {
+		zephyr,entropy = &trng0;
+    };
+
     fstab {
         compatible = "zephyr,fstab";
 
