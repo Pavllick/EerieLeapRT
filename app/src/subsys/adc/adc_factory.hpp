@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "utilities/memory/heap_allocator.h"
-#include "domain/device_tree/device_tree_setup.h"
+#include "domain/device_tree/dt_adc.h"
 
 #include "i_adc_manager.h"
 #include "adc_emulator.h"
@@ -19,13 +19,13 @@ class AdcFactory {
 public:
     static std::shared_ptr<IAdcManager> Create() {
 #ifdef CONFIG_ADC_EMUL
-        if(DeviceTreeSetup::Get()->GetAdcInfos().has_value())
-            return make_shared_ext<AdcEmulatorManager>(DeviceTreeSetup::Get()->GetAdcInfos().value());
+        if(DtAdc::Get().has_value())
+            return make_shared_ext<AdcEmulatorManager>(DtAdc::Get().value());
 #endif
 
 #ifdef CONFIG_ADC
-        if(DeviceTreeSetup::Get()->GetAdcInfos().has_value())
-            return make_shared_ext<AdcManager>(DeviceTreeSetup::Get()->GetAdcInfos().value());
+        if(DtAdc::Get().has_value())
+            return make_shared_ext<AdcManager>(DtAdc::Get().value());
 #endif
 
         return make_shared_ext<AdcSimulatorManager>();

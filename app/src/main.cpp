@@ -14,7 +14,10 @@
 #include "subsys/gpio/gpio_factory.hpp"
 #include "subsys/modbus/modbus.h"
 
-#include "domain/device_tree/device_tree_setup.h"
+#include "domain/device_tree/dt_configurator.h"
+#include "domain/device_tree/dt_fs.h"
+#include "domain/device_tree/dt_modbus.h"
+
 #include "domain/user_com_domain/user_com.h"
 #include "domain/sensor_domain/services/processing_scheduler_service.h"
 #include "domain/sensor_domain/services/calibration_service.h"
@@ -105,17 +108,16 @@ int main(void) {
     http_server.Start();
 #endif // CONFIG_NETWORKING
 
-    auto& device_tree_setup = DeviceTreeSetup::Create();
-    device_tree_setup->Initialize();
+    DtConfigurator::Initialize();
 
-    auto fs_service = make_shared_ext<FsService>(device_tree_setup->GetInternalFsMp().value());
+    auto fs_service = make_shared_ext<FsService>(DtFs::GetInternalFsMp().value());
     if(!fs_service->Initialize()) {
         LOG_ERR("Failed to initialize File System.");
         return -1;
     }
 
     std::shared_ptr<SdmmcService> sd_fs_service = nullptr;
-    auto sd_fs_mp = device_tree_setup->GetSdFsMp();
+    auto sd_fs_mp = DtFs::GetSdFsMp();
     if(sd_fs_mp.has_value()) {
         sd_fs_service = make_shared_ext<SdmmcService>(sd_fs_mp.value());
         if(!sd_fs_service->Initialize()) {
@@ -147,7 +149,7 @@ int main(void) {
         sensors_config_service,
         adc_configuration_controller->Get()->GetChannelCount());
 
-    auto modbus = make_shared_ext<Modbus>(device_tree_setup->GetModbusIface().value());
+    auto modbus = make_shared_ext<Modbus>(DtModbus::Get().value());
     auto user_com_interface = make_shared_ext<UserCom>(modbus, system_configuration_controller);
     user_com_interface->Initialize();
 
