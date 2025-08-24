@@ -148,15 +148,15 @@ int main(void) {
         adc_configuration_controller->Get()->GetChannelCount());
 
     auto modbus = make_shared_ext<Modbus>(device_tree_setup->GetModbusIface().value());
-    auto user_com_interface = make_shared_ext<UserCom>(modbus);
+    auto user_com_interface = make_shared_ext<UserCom>(modbus, system_configuration_controller);
     user_com_interface->Initialize();
 
-    // user_com_interface->ServerIdResolver();
+    // user_com_interface->ResolveUserIds();
 
-    auto user_ids = user_com_interface->GetUserIds();
-    LOG_INF("User IDs count: %zu", user_ids->size());
-    for(auto user_id : *user_ids) {
-        LOG_INF("User ID: %d", user_id);
+    auto com_users = user_com_interface->GetUsers();
+    LOG_INF("User IDs count: %zu", com_users->size());
+    for(auto com_user : *com_users) {
+        LOG_INF("Com User Device ID: %llu, Server ID: %hu", com_user.device_id, com_user.server_id);
     }
 
     // TODO: For test purposes only

@@ -7,7 +7,14 @@ namespace eerie_leap::domain::user_com_domain {
 
 LOG_MODULE_REGISTER(interface_logger);
 
-UserCom::UserCom(std::shared_ptr<Modbus> modbus) : modbus_(modbus), user_ids_(std::make_shared<std::vector<uint8_t>>()) { }
+UserCom::UserCom(std::shared_ptr<Modbus> modbus, std::shared_ptr<SystemConfigurationController> system_configuration_controller)
+    : modbus_(modbus),
+    system_configuration_controller_(system_configuration_controller) {
+
+        com_users_ = std::make_shared<std::vector<ComUserConfiguration>>(
+            system_configuration_controller_->Get()->com_users
+        );
+    }
 
 int UserCom::Initialize() {
     return modbus_->Initialize();
@@ -19,36 +26,37 @@ int UserCom::SendReading(const SensorReading& reading, uint8_t user_id) {
     return modbus_->WriteHoldingRegisters(user_id, static_cast<uint16_t>(RequestType::SET_READING), &dto, sizeof(dto));
 }
 
-int UserCom::ServerIdResolver() {
-    uint16_t data = 0;
-    LOG_INF("Server ID Resole set");
-    Set(Modbus::SERVER_ID_ALL, RequestType::GET_RESOLVE_SERVER_ID, &data, sizeof(data));
+int UserCom::ResolveUserIds() {
+    LOG_INF("Resolving server IDs...");
 
+    uint16_t data = 0;
+    Set(Modbus::SERVER_ID_ALL, RequestType::SET_RESOLVE_SERVER_ID, &data, sizeof(data));
     k_msleep(500);
 
-    Guid guid = {
-        .device_hash = 0,
-        .counter = 0,
-        .timestamp = 0,
-    };
+    uint64_t server_device_id_ = 0;
 
     for(int i = 1; i < 10; i++) {
-        int res = Get(i, RequestType::GET_RESOLVE_SERVER_ID_GUID, &guid, sizeof(guid));
+        int res = Get(i, RequestType::GET_RESOLVE_SERVER_ID_GUID, &server_device_id_, sizeof(server_device_id_));
+        if(res != 0 || server_device_id_ == 0) {
+            LOG_ERR("Server Device ID request failed");
+            break;
+        }
+
+        LOG_INF("Resolving Server Device Id: %llu", server_device_id_);
+
+        res = Set(i, RequestType::SET_RESOLVE_SERVER_ID_GUID, &server_device_id_, sizeof(server_device_id_));
         if(res != 0) {
-            LOG_ERR("Server ID Guid request failed");
+            LOG_ERR("Server Device ID confirmation failed");
             return res;
         }
 
-        LOG_INF("Server GUID: %llu", guid.AsUint64());
-
-        res = Set(i, RequestType::SET_RESOLVE_SERVER_ID_GUID, &guid, sizeof(guid));
-        if(res != 0) {
-            LOG_ERR("Server ID Guid set failed");
-            return res;
-        }
-
-        user_ids_->push_back(i);
+        com_users_->push_back({
+            .device_id = server_device_id_,
+            .server_id = static_cast<uint16_t>(i)
+        });
     }
+
+    system_configuration_controller_->UpdateComUsers(*com_users_);
 
     return 0;
 }

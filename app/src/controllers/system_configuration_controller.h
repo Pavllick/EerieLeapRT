@@ -26,6 +26,7 @@ public:
     explicit SystemConfigurationController(std::shared_ptr<ConfigurationService<SystemConfig>> system_configuration_service);
 
     bool UpdateBuildNumber(uint32_t build_number);
+    bool UpdateComUsers(const std::vector<ComUserConfiguration>& com_users);
 
     bool Update(std::shared_ptr<SystemConfiguration> system_configuration);
     std::shared_ptr<SystemConfiguration> Get(bool force_load = false);

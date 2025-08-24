@@ -54,6 +54,22 @@ bool SystemConfigurationController::UpdateBuildNumber(uint32_t build_number) {
     return true;
 }
 
+bool SystemConfigurationController::UpdateComUsers(const std::vector<ComUserConfiguration>& com_users) {
+    auto system_configuration = Get();
+    if(system_configuration == nullptr)
+        return false;
+
+    system_configuration->com_users = com_users;
+
+    bool result = Update(system_configuration);
+    if(!result)
+        return false;
+
+    LOG_INF("Com Users updated. Total count: %zu.", system_configuration->com_users.size());
+
+    return true;
+}
+
 bool SystemConfigurationController::UpdateHwVersion(uint32_t hw_version) {
     auto system_configuration = Get();
     if(system_configuration == nullptr)
@@ -111,6 +127,16 @@ bool SystemConfigurationController::Update(std::shared_ptr<SystemConfiguration> 
         .build_number = system_configuration->build_number
     };
 
+    system_config.ComUserConfig_m_count = 0;
+    memset(system_config.ComUserConfig_m, 0, sizeof(system_config.ComUserConfig_m));
+
+    for(size_t i = 0; i < system_configuration->com_users.size() && i < 24; i++) {
+        system_config.ComUserConfig_m[i].device_id = system_configuration->com_users[i].device_id;
+        system_config.ComUserConfig_m[i].server_id = system_configuration->com_users[i].server_id;
+
+        system_config.ComUserConfig_m_count++;
+    }
+
     if(!system_configuration_service_->Save(&system_config))
         return false;
 
@@ -138,6 +164,15 @@ std::shared_ptr<SystemConfiguration> SystemConfigurationController::Get(bool for
         .sw_version = system_config_->sw_version,
         .build_number = system_config_->build_number
     };
+
+    for(size_t i = 0; i < system_config_->ComUserConfig_m_count; i++) {
+        ComUserConfiguration com_user {
+            .device_id = system_config_->ComUserConfig_m[i].device_id,
+            .server_id = system_config_->ComUserConfig_m[i].server_id
+        };
+        system_configuration.com_users.push_back(com_user);
+    }
+
     system_configuration_ = make_shared_ext<SystemConfiguration>(system_configuration);
 
     return system_configuration_;

@@ -1,14 +1,21 @@
 #pragma once
 
 #include <cstdint>
+#include <vector>
 
 namespace eerie_leap::domain::system_domain {
+
+struct ComUserConfiguration {
+    uint64_t device_id;
+    uint16_t server_id;
+};
 
 struct SystemConfiguration {
     uint64_t device_id;
     uint32_t hw_version;
     uint32_t sw_version;
     uint32_t build_number;
+    std::vector<ComUserConfiguration> com_users;
 
     std::string GetFormattedHwVersion() const {
         uint8_t hw_version_major = (hw_version >> 24) & 0xFF;

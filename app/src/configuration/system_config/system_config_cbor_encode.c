@@ -25,18 +25,32 @@
 	} \
 } while(0)
 
+static bool encode_ComUserConfig(zcbor_state_t *state, const struct ComUserConfig *input);
 static bool encode_SystemConfig(zcbor_state_t *state, const struct SystemConfig *input);
 
+
+static bool encode_ComUserConfig(
+		zcbor_state_t *state, const struct ComUserConfig *input)
+{
+	zcbor_log("%s\r\n", __func__);
+
+	bool res = (((zcbor_list_start_encode(state, 2) && ((((zcbor_uint64_encode(state, (&(*input).device_id))))
+	&& ((zcbor_uint32_encode(state, (&(*input).server_id))))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 2))));
+
+	log_result(state, res, __func__);
+	return res;
+}
 
 static bool encode_SystemConfig(
 		zcbor_state_t *state, const struct SystemConfig *input)
 {
 	zcbor_log("%s\r\n", __func__);
 
-	bool res = (((zcbor_list_start_encode(state, 4) && ((((zcbor_uint64_encode(state, (&(*input).device_id))))
+	bool res = (((zcbor_list_start_encode(state, 5) && ((((zcbor_uint64_encode(state, (&(*input).device_id))))
 	&& ((zcbor_uint32_encode(state, (&(*input).hw_version))))
 	&& ((zcbor_uint32_encode(state, (&(*input).sw_version))))
-	&& ((zcbor_uint32_encode(state, (&(*input).build_number))))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 4))));
+	&& ((zcbor_uint32_encode(state, (&(*input).build_number))))
+	&& ((zcbor_list_start_encode(state, 24) && ((zcbor_multi_encode_minmax(0, 24, &(*input).ComUserConfig_m_count, (zcbor_encoder_t *)encode_ComUserConfig, state, (*&(*input).ComUserConfig_m), sizeof(struct ComUserConfig))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 24)))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 5))));
 
 	log_result(state, res, __func__);
 	return res;
@@ -49,7 +63,7 @@ int cbor_encode_SystemConfig(
 		const struct SystemConfig *input,
 		size_t *payload_len_out)
 {
-	zcbor_state_t states[3];
+	zcbor_state_t states[5];
 
 	return zcbor_entry_function(payload, payload_len, (void *)input, payload_len_out, states,
 		(zcbor_decoder_t *)encode_SystemConfig, sizeof(states) / sizeof(zcbor_state_t), 1);

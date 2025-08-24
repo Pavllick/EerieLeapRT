@@ -25,11 +25,18 @@ extern "C" {
  */
 #define DEFAULT_MAX_QTY 24
 
+struct ComUserConfig {
+	uint64_t device_id;
+	uint32_t server_id;
+};
+
 struct SystemConfig {
 	uint64_t device_id;
 	uint32_t hw_version;
 	uint32_t sw_version;
 	uint32_t build_number;
+	struct ComUserConfig ComUserConfig_m[24];
+	size_t ComUserConfig_m_count;
 };
 
 #ifdef __cplusplus
