@@ -56,18 +56,6 @@ config EERIE_LEAP_SD_CHECK_INTERVAL_MS
 	int "SD check interval ms"
 	default 1000
 
-config EERIE_LEAP_SD_DRIVE_NAME
-	string "SD drive name"
-	default "SD"
-
-config EERIE_LEAP_SD_MOUNT_POINT
-	string "SD mount point"
-	default "/ext"
-
-config EERIE_LEAP_SD_MOUNT_POINT
-	string "SD mount point"
-	default "/ext"
-
 config EERIE_LEAP_MODBUS_BAUD_RATE
 	int "Modbus baud rate"
 	default 115200

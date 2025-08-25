@@ -43,10 +43,13 @@ void CalibrationService::ProcessCalibrationWorkTask(k_work* work) {
                 reading->value.value_or(0.0f),
                 TimeHelpers::GetFormattedString(*reading->timestamp).c_str());
         } catch (const std::exception& e) {
-            LOG_ERR("Error processing calibrator on channel %d, Error: %s", task->sensor->configuration.channel, e.what());
+            LOG_ERR("Error processing calibrator on channel %d, Error: %s",
+                task->sensor->configuration.channel.value_or(-1),
+                e.what());
         }
     } else {
-        LOG_ERR("Lock take timed out for calibrator on channel %d", task->sensor->configuration.channel);
+        LOG_ERR("Lock take timed out for calibrator on channel %d",
+            task->sensor->configuration.channel.value_or(-1));
     }
 
     k_sem_give(task->processing_semaphore);

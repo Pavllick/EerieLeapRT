@@ -1,4 +1,5 @@
 #include <filesystem>
+#include <ff.h>
 
 #include <zephyr/fs/fs.h>
 #include <zephyr/logging/log.h>
@@ -10,7 +11,7 @@ namespace eerie_leap::subsys::fs::services {
 
 LOG_MODULE_REGISTER(sdmmc_service_logger);
 
-FS_LITTLEFS_DECLARE_DEFAULT_CONFIG(sd_storage_);
+static FATFS fat_fs;
 
 #ifdef CONFIG_SHARED_MULTI_HEAP
 Z_KERNEL_STACK_DEFINE_IN(SdmmcService::stack_area_, SdmmcService::k_stack_size_, __attribute__((section(".ext_ram.bss"))));
@@ -18,9 +19,7 @@ Z_KERNEL_STACK_DEFINE_IN(SdmmcService::stack_area_, SdmmcService::k_stack_size_,
 K_KERNEL_STACK_MEMBER(SdmmcService::stack_area_, SdmmcService::k_stack_size_);
 #endif
 
-SdmmcService::SdmmcService(fs_mount_t mountpoint) : FsService(mountpoint), monitor_running_(ATOMIC_INIT(0)) {
-    mountpoint_.fs_data = &sd_storage_;
-}
+SdmmcService::SdmmcService(fs_mount_t mountpoint) : FsService(mountpoint), monitor_running_(ATOMIC_INIT(0)) { }
 
 bool SdmmcService::Initialize() {
     sd_card_present_ = FsService::Initialize();
@@ -30,6 +29,23 @@ bool SdmmcService::Initialize() {
         return false;
 
     PrintInfo();
+
+    return true;
+}
+
+bool SdmmcService::Format() {
+    if(IsMounted())
+        Unmount();
+
+    int rc = fs_mkfs(FS_FATFS, (uintptr_t)mountpoint_.storage_dev, NULL, 0);
+
+	if (rc < 0) {
+		LOG_ERR("Format failed.");
+		return false;
+	}
+
+    LOG_INF("Successfully formatted File System.");
+    Mount();
 
     return true;
 }

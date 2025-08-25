@@ -273,10 +273,10 @@ bool FsService::Mount() {
 
     int rc = fs_mount(&mountpoint_);
     if(rc < 0)
-        LOG_ERR("Failed to mount LittleFS: %d.", rc);
+        LOG_ERR("Failed to mount FS: %d.", rc);
 
     if(rc == 0)
-        LOG_INF("Mounted LittleFS at %s.", mountpoint_.mnt_point);
+        LOG_INF("Mounted FS at %s.", mountpoint_.mnt_point);
     else
         LOG_ERR("Failed to mount even after formatting.");
 
@@ -289,9 +289,9 @@ void FsService::Unmount() {
 
     int rc = fs_unmount(&mountpoint_);
     if(rc < 0)
-        LOG_ERR("Failed to unmount LittleFS: %d.", rc);
+        LOG_ERR("Failed to unmount FS: %d.", rc);
     else
-        LOG_INF("Unmounted LittleFS from %s.", mountpoint_.mnt_point);
+        LOG_INF("Unmounted FS from %s.", mountpoint_.mnt_point);
 }
 
 bool FsService::IsMounted() const {

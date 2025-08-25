@@ -38,8 +38,7 @@ file(GLOB_RECURSE APP_SRC_SUBSYS
   ${APP_SRC_SUBSYS_DIR}/adc/*.cpp
   ${APP_SRC_SUBSYS_DIR}/gpio/*.c
   ${APP_SRC_SUBSYS_DIR}/gpio/*.cpp
-  ${APP_SRC_SUBSYS_DIR}/fs/*.c
-  ${APP_SRC_SUBSYS_DIR}/fs/*.cpp
+  ${APP_SRC_SUBSYS_DIR}/fs/fs_service.cpp
   ${APP_SRC_SUBSYS_DIR}/random/*.cpp
 )
 

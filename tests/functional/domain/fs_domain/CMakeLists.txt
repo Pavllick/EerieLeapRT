@@ -20,8 +20,7 @@ file(GLOB_RECURSE APP_SRC_SUBSYS_DT
 
 set(APP_SRC_SUBSYS_FS_DIR ${APP_SRC_DIR}/subsys/fs)
 file(GLOB_RECURSE APP_SRC_SUBSYS_FS
-  ${APP_SRC_SUBSYS_FS_DIR}/*.c
-  ${APP_SRC_SUBSYS_FS_DIR}/*.cpp
+  ${APP_SRC_SUBSYS_FS_DIR}/fs_service.cpp
 )
 
 file(GLOB_RECURSE TEST_SOURCES src/*.c src/*.cpp)

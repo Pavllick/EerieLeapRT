@@ -2,7 +2,6 @@
 
 #include <zephyr/device.h>
 #include <zephyr/fs/fs.h>
-#include <zephyr/fs/littlefs.h>
 #include <zephyr/sys/atomic.h>
 
 #include "fs_service.h"
@@ -34,6 +33,8 @@ public:
     SdmmcService(fs_mount_t mountpoint);
 
     bool Initialize() override;
+
+    bool Format() override;
 };
 
 } // namespace eerie_leap::subsys::fs::services
