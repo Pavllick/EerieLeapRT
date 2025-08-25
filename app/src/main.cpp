@@ -90,6 +90,17 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
 // Formula evaluation takes minimum of 1800us, applicable to virtual sensors
 
 int main(void) {
+    DtConfigurator::Initialize();
+
+    std::shared_ptr<SdmmcService> sd_fs_service = nullptr;
+    auto sd_fs_mp = DtFs::GetSdFsMp();
+    if(sd_fs_mp.has_value()) {
+        sd_fs_service = make_shared_ext<SdmmcService>(sd_fs_mp.value());
+        if(!sd_fs_service->Initialize()) {
+            LOG_ERR("Failed to initialize SD File System.");
+        }
+    }
+
     // NOTE: Don't use for WiFi supporting boards as WiFi is broken in Zephyr 4.1 and has memory allocation issues
     // At least on ESP32S3, it does connect if Zephyr revision is set to "main", but heap allocations cannot be moved
     // to the external RAM (e.g. PSRAM)
@@ -107,21 +118,10 @@ int main(void) {
     http_server.Start();
 #endif // CONFIG_NETWORKING
 
-    DtConfigurator::Initialize();
-
     auto fs_service = make_shared_ext<FsService>(DtFs::GetInternalFsMp().value());
     if(!fs_service->Initialize()) {
         LOG_ERR("Failed to initialize File System.");
         return -1;
-    }
-
-    std::shared_ptr<SdmmcService> sd_fs_service = nullptr;
-    auto sd_fs_mp = DtFs::GetSdFsMp();
-    if(sd_fs_mp.has_value()) {
-        sd_fs_service = make_shared_ext<SdmmcService>(sd_fs_mp.value());
-        if(!sd_fs_service->Initialize()) {
-            LOG_ERR("Failed to initialize SD File System.");
-        }
     }
 
     auto time_service = make_shared_ext<BootElapsedTimeService>();
