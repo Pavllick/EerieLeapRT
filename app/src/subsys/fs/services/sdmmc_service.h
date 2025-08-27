@@ -33,8 +33,6 @@ public:
     SdmmcService(fs_mount_t mountpoint);
 
     bool Initialize() override;
-
-    bool Format() override;
 };
 
 } // namespace eerie_leap::subsys::fs::services

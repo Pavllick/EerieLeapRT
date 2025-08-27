@@ -254,7 +254,7 @@ bool FsService::Format() {
     if(IsMounted())
         Unmount();
 
-    int rc = fs_mkfs(FS_LITTLEFS, (uintptr_t)mountpoint_.storage_dev, NULL, 0);
+    int rc = fs_mkfs(mountpoint_.type, (uintptr_t)mountpoint_.storage_dev, NULL, 0);
 
 	if (rc < 0) {
 		LOG_ERR("Format failed.");
@@ -268,25 +268,16 @@ bool FsService::Format() {
 }
 
 bool FsService::Mount() {
-    if(IsMounted())
-        return true;
-
     int rc = fs_mount(&mountpoint_);
-    if(rc < 0)
-        LOG_ERR("Failed to mount FS: %d.", rc);
-
     if(rc == 0)
         LOG_INF("Mounted FS at %s.", mountpoint_.mnt_point);
     else
-        LOG_ERR("Failed to mount even after formatting.");
+        LOG_ERR("Failed to mount FS: %d.", rc);
 
     return IsMounted();
 }
 
 void FsService::Unmount() {
-    if(!IsMounted())
-        return;
-
     int rc = fs_unmount(&mountpoint_);
     if(rc < 0)
         LOG_ERR("Failed to unmount FS: %d.", rc);
