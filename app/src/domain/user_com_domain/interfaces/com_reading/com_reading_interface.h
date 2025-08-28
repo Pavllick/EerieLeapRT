@@ -7,7 +7,7 @@
 
 #include "com_reading_task.hpp"
 
-namespace eerie_leap::domain::user_com_domain::interface::com_reading {
+namespace eerie_leap::domain::user_com_domain::interfaces::com_reading {
 
 using namespace eerie_leap::domain::sensor_domain::models;
 
@@ -34,4 +34,4 @@ public:
     int SendReading(std::shared_ptr<SensorReading> reading, uint8_t user_id = Modbus::SERVER_ID_ALL);
 };
 
-} // namespace eerie_leap::domain::user_com_domain::interface::com_reading
+} // namespace eerie_leap::domain::user_com_domain::interfaces::com_reading

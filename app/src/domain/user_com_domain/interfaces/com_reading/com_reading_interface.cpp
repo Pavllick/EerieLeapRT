@@ -1,11 +1,14 @@
+#include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 
 #include "domain/user_com_domain/types/sensor_reading_dto.h"
+#include "subsys/random/rng.h"
 
 #include "com_reading_interface.h"
 
-namespace eerie_leap::domain::user_com_domain::interface::com_reading {
+namespace eerie_leap::domain::user_com_domain::interfaces::com_reading {
 
+using namespace eerie_leap::subsys::random;
 using namespace eerie_leap::domain::user_com_domain::types;
 
 LOG_MODULE_REGISTER(com_reading_interface_logger);
@@ -58,9 +61,13 @@ void ComReadingInterface::SendReadingWorkTask(k_work* work) {
     }
 
     auto dto = types::SensorReadingDto::FromSensorReading(*task->reading);
+
+    uint32_t raw = Rng::Get32();
+    dto.value = (raw / static_cast<float>(UINT32_MAX)) * 100;
+
     task->user_com->Send(task->user_id, RequestType::SET_READING, &dto, sizeof(dto));
 
     k_sem_give(task->processing_semaphore);
 }
 
-} // namespace eerie_leap::domain::user_com_domain::interface::com_reading
+} // namespace eerie_leap::domain::user_com_domain::interfaces::com_reading

@@ -19,8 +19,8 @@
 #include "subsys/modbus/modbus.h"
 
 #include "domain/user_com_domain/user_com.h"
-#include "domain/user_com_domain/interface/com_reading/com_reading_interface.h"
-#include "domain/user_com_domain/interface/com_reading/com_reading_processor.h"
+#include "domain/user_com_domain/interfaces/com_reading/com_reading_interface.h"
+#include "domain/user_com_domain/interfaces/com_reading/com_reading_processor.h"
 
 #include "domain/sensor_domain/processors/sensor_processor.h"
 #include "domain/sensor_domain/services/processing_scheduler_service.h"
@@ -65,8 +65,7 @@ using namespace eerie_leap::subsys::modbus;
 using namespace eerie_leap::subsys::gpio;
 
 using namespace eerie_leap::domain::user_com_domain;
-using namespace eerie_leap::domain::user_com_domain::interface;
-using namespace eerie_leap::domain::user_com_domain::interface::com_reading;
+using namespace eerie_leap::domain::user_com_domain::interfaces::com_reading;
 
 using namespace eerie_leap::domain::sensor_domain::processors;
 using namespace eerie_leap::domain::sensor_domain::services;

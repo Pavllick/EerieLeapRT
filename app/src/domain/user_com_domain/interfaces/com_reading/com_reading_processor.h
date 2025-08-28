@@ -6,7 +6,7 @@
 #include "domain/sensor_domain/processors/i_reading_processor.h"
 #include "com_reading_interface.h"
 
-namespace eerie_leap::domain::user_com_domain::interface::com_reading {
+namespace eerie_leap::domain::user_com_domain::interfaces::com_reading {
 
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::domain::sensor_domain::processors;
@@ -21,4 +21,4 @@ public:
     void ProcessReading(std::shared_ptr<SensorReading> reading) override;
 };
 
-} // namespace eerie_leap::domain::user_com_domain::interface::com_reading
+} // namespace eerie_leap::domain::user_com_domain::interfaces::com_reading

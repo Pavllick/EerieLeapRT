@@ -6,7 +6,7 @@
 
 #include "com_reading_processor.h"
 
-namespace eerie_leap::domain::user_com_domain::interface::com_reading {
+namespace eerie_leap::domain::user_com_domain::interfaces::com_reading {
 
 using namespace eerie_leap::subsys::random;
 using namespace eerie_leap::domain::user_com_domain::types;
@@ -18,4 +18,4 @@ void ComReadingProcessor::ProcessReading(std::shared_ptr<SensorReading> reading)
     com_reading_interface_->SendReading(reading);
 }
 
-} // namespace eerie_leap::domain::user_com_domain::interface::com_reading
+} // namespace eerie_leap::domain::user_com_domain::interfaces::com_reading

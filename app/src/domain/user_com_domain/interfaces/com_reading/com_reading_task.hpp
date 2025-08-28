@@ -7,7 +7,7 @@
 #include "domain/sensor_domain/models/sensor_reading.h"
 #include "domain/user_com_domain/user_com.h"
 
-namespace eerie_leap::domain::user_com_domain::interface {
+namespace eerie_leap::domain::user_com_domain::interfaces::com_reading {
 
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::domain::user_com_domain;
@@ -20,4 +20,4 @@ struct ComReadingTask {
     std::shared_ptr<SensorReading> reading;
 };
 
-} // namespace eerie_leap::domain::user_com_domain::interface
+} // namespace eerie_leap::domain::user_com_domain::interfaces::com_reading
