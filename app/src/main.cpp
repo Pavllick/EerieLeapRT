@@ -19,11 +19,12 @@
 #include "subsys/modbus/modbus.h"
 
 #include "domain/user_com_domain/user_com.h"
-#include "domain/user_com_domain/interface/com_reading_interface.h"
+#include "domain/user_com_domain/interface/com_reading/com_reading_interface.h"
+#include "domain/user_com_domain/interface/com_reading/com_reading_processor.h"
 
+#include "domain/sensor_domain/processors/sensor_processor.h"
 #include "domain/sensor_domain/services/processing_scheduler_service.h"
 #include "domain/sensor_domain/services/calibration_service.h"
-#include "domain/sensor_domain/models/sensor_type.h"
 
 #include "configuration/system_config/system_config.h"
 #include "configuration/adc_config/adc_config.h"
@@ -65,7 +66,9 @@ using namespace eerie_leap::subsys::gpio;
 
 using namespace eerie_leap::domain::user_com_domain;
 using namespace eerie_leap::domain::user_com_domain::interface;
+using namespace eerie_leap::domain::user_com_domain::interface::com_reading;
 
+using namespace eerie_leap::domain::sensor_domain::processors;
 using namespace eerie_leap::domain::sensor_domain::services;
 using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::configuration::services;
@@ -170,13 +173,21 @@ int main(void) {
     // TODO: For test purposes only
     SetupTestSensors(math_parser_service, sensors_configuration_controller);
 
+    auto sensor_readings_frame = make_shared_ext<SensorReadingsFrame>();
+
+    auto sensor_processor = make_shared_ext<SensorProcessor>(sensor_readings_frame);
+    auto com_reading_processor = make_shared_ext<ComReadingProcessor>(com_reading_interface);
+
     auto processing_scheduler_service = make_shared_ext<ProcessingSchedulerService>(
         time_service,
         guid_generator,
         gpio,
         adc_configuration_controller,
         sensors_configuration_controller,
-        com_reading_interface);
+        sensor_readings_frame);
+
+    processing_scheduler_service->RegisterReadingProcessor(sensor_processor);
+    processing_scheduler_service->RegisterReadingProcessor(com_reading_processor);
 
     auto calibration_service = make_shared_ext<CalibrationService>(
         time_service,

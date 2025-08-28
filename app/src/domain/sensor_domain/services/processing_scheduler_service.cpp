@@ -26,13 +26,14 @@ ProcessingSchedulerService::ProcessingSchedulerService(
     std::shared_ptr<IGpio> gpio,
     std::shared_ptr<AdcConfigurationController> adc_configuration_controller,
     std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller,
-    std::shared_ptr<ComReadingInterface> com_reading_interface)
+    std::shared_ptr<SensorReadingsFrame> sensor_readings_frame)
     : time_service_(std::move(time_service)),
     guid_generator_(std::move(guid_generator)),
     gpio_(std::move(gpio)),
     adc_configuration_controller_(std::move(adc_configuration_controller)),
     sensors_configuration_controller_(std::move(sensors_configuration_controller)),
-    com_reading_interface_(std::move(com_reading_interface)) {
+    sensor_readings_frame_(std::move(sensor_readings_frame)),
+    reading_processors_(std::make_shared<std::vector<std::shared_ptr<IReadingProcessor>>>()) {
 
     k_sem_init(&processing_semaphore_, 1, 1);
 };
@@ -43,10 +44,10 @@ void ProcessingSchedulerService::ProcessSensorWorkTask(k_work* work) {
     if(k_sem_take(task->processing_semaphore, PROCESSING_TIMEOUT) == 0) {
         try {
             task->reader->Read();
-            task->processor->ProcessReading(task->readings_frame->GetReading(task->sensor->id));
-
             auto reading = task->readings_frame->GetReading(task->sensor->id);
-            task->com_reading_interface->SendReading(reading);
+
+            for(auto processor : *task->reading_processors)
+                processor->ProcessReading(reading);
 
             LOG_DBG("Sensor Reading - ID: %s, Guid: %llu, Value: %.3f, Time: %s",
                 task->sensor->id.c_str(),
@@ -70,7 +71,7 @@ std::shared_ptr<SensorTask> ProcessingSchedulerService::CreateSensorTask(std::sh
     task->sampling_rate_ms = K_MSEC(sensor->configuration.sampling_rate_ms);
     task->sensor = sensor;
     task->readings_frame = sensor_readings_frame_;
-    task->com_reading_interface = com_reading_interface_;
+    task->reading_processors = reading_processors_;
 
     std::shared_ptr<ISensorReader> sensor_reader;
 
@@ -105,7 +106,6 @@ std::shared_ptr<SensorTask> ProcessingSchedulerService::CreateSensorTask(std::sh
     }
 
     task->reader = sensor_reader;
-    task->processor = sensor_processor_;
 
     return task;
 }
@@ -121,11 +121,11 @@ void ProcessingSchedulerService::StartTasks() {
     k_sleep(K_MSEC(1));
 }
 
+void ProcessingSchedulerService::RegisterReadingProcessor(std::shared_ptr<IReadingProcessor> processor) {
+    reading_processors_->push_back(processor);
+}
+
 void ProcessingSchedulerService::Start() {
-    sensor_readings_frame_ = make_shared_ext<SensorReadingsFrame>();
-
-    sensor_processor_ = make_shared_ext<SensorProcessor>(sensor_readings_frame_);
-
     auto sensors = sensors_configuration_controller_->Get();
 
     for(const auto& sensor : *sensors) {
@@ -156,6 +156,7 @@ void ProcessingSchedulerService::Restart() {
     LOG_INF("Processing Scheduler Service stopped");
 
     sensor_tasks_.clear();
+    sensor_readings_frame_->ClearReadings();
     Start();
 }
 

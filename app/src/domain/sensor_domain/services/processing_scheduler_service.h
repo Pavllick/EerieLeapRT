@@ -1,6 +1,8 @@
 #pragma once
 
 #include <memory>
+#include <vector>
+
 #include <zephyr/kernel.h>
 
 #include "utilities/time/i_time_service.h"
@@ -10,8 +12,7 @@
 #include "subsys/gpio/i_gpio.h"
 
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
-#include "domain/sensor_domain/processors/sensor_processor.h"
-#include "domain/user_com_domain/interface/com_reading_interface.h"
+#include "domain/sensor_domain/processors/i_reading_processor.h"
 
 #include "sensor_task.hpp"
 
@@ -24,7 +25,7 @@ using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::subsys::gpio;
 using namespace eerie_leap::subsys::adc;
 using namespace eerie_leap::domain::sensor_domain::utilities;
-using namespace eerie_leap::domain::user_com_domain::interface;
+using namespace eerie_leap::domain::sensor_domain::processors;
 
 class ProcessingSchedulerService {
 private:
@@ -36,12 +37,11 @@ private:
     std::shared_ptr<IGpio> gpio_;
     std::shared_ptr<AdcConfigurationController> adc_configuration_controller_;
     std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller_;
-    std::shared_ptr<ComReadingInterface> com_reading_interface_;
 
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame_;
-    std::shared_ptr<SensorProcessor> sensor_processor_;
 
     std::vector<std::shared_ptr<SensorTask>> sensor_tasks_;
+    std::shared_ptr<std::vector<std::shared_ptr<IReadingProcessor>>> reading_processors_;
 
     void StartTasks();
     std::shared_ptr<SensorTask> CreateSensorTask(std::shared_ptr<Sensor> sensor);
@@ -54,8 +54,9 @@ public:
         std::shared_ptr<IGpio> gpio,
         std::shared_ptr<AdcConfigurationController> adc_configuration_controller,
         std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller,
-        std::shared_ptr<ComReadingInterface> com_reading_interface);
+        std::shared_ptr<SensorReadingsFrame> sensor_readings_frame);
 
+    void RegisterReadingProcessor(std::shared_ptr<IReadingProcessor> processor);
     void Start();
     void Restart();
     void Pause();

@@ -4,7 +4,7 @@
 
 #include "com_reading_interface.h"
 
-namespace eerie_leap::domain::user_com_domain::interface {
+namespace eerie_leap::domain::user_com_domain::interface::com_reading {
 
 using namespace eerie_leap::domain::user_com_domain::types;
 
@@ -63,4 +63,4 @@ void ComReadingInterface::SendReadingWorkTask(k_work* work) {
     k_sem_give(task->processing_semaphore);
 }
 
-} // namespace eerie_leap::domain::user_com_domain::interface
+} // namespace eerie_leap::domain::user_com_domain::interface::com_reading

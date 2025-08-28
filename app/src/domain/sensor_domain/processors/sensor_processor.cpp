@@ -3,6 +3,7 @@
 
 #include "utilities/memory/heap_allocator.h"
 #include "domain/sensor_domain/models/reading_status.h"
+
 #include "sensor_processor.h"
 
 namespace eerie_leap::domain::sensor_domain::processors {
