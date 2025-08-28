@@ -1,8 +1,9 @@
 #include <string>
 
 #include <zephyr/logging/log.h>
+#ifdef CONFIG_SDMMC_SUBSYS
 #include <zephyr/sd/sd.h>
-#include <zephyr/drivers/sdhc.h>
+#endif
 #include "dt_fs.h"
 
 namespace eerie_leap::subsys::device_tree {
@@ -11,7 +12,9 @@ LOG_MODULE_REGISTER(dt_fs_logger);
 
 std::optional<fs_mount_t> DtFs::int_fs_mp_ = std::nullopt;
 std::optional<fs_mount_t> DtFs::sd_fs_mp_ = std::nullopt;
+#ifdef CONFIG_SDMMC_SUBSYS
 sdhc_host_props DtFs::sd_host_props_;
+#endif
 uint32_t DtFs::sd_relative_addr_ = 0;
 const char* DtFs::sd_disk_name_ = nullptr;
 
@@ -23,7 +26,7 @@ void DtFs::InitInternalFs() {
 }
 
 void DtFs::InitSdFs() {
-#if DT_HAS_ALIAS(sdhc0) && DT_HAS_ALIAS(sdfs0)
+#if DT_HAS_ALIAS(sdhc0) && DT_HAS_ALIAS(sdfs0) && CONFIG_SDMMC_SUBSYS
     sd_fs_mp_ = std::make_optional<fs_mount_t>(FS_FSTAB_ENTRY(SD_FS_NODE));
     sd_fs_mp_.value().storage_dev = (void *)SD_DEV;
 
@@ -41,6 +44,7 @@ void DtFs::InitSdFs() {
 #endif
 }
 
+#ifdef CONFIG_SDMMC_SUBSYS
 /*
  * Requests card to publish a new relative card address, and move from
  * identification to data mode
@@ -96,9 +100,10 @@ bool DtFs::SdmmcReadStatus(const struct device* dev) {
 
     return true;
 }
+#endif
 
 bool DtFs::IsSdCardPresent() {
-#if DT_HAS_ALIAS(sdhc0) && DT_HAS_ALIAS(sdfs0)
+#if DT_HAS_ALIAS(sdhc0) && DT_HAS_ALIAS(sdfs0) && CONFIG_SDMMC_SUBSYS
     // NOTE: SPI SDHC driver does not support card detection.
     if(sd_host_props_.is_spi)
         return SdmmcReadStatus(SD_DEV);

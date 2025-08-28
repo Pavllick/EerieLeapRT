@@ -5,7 +5,9 @@
 
 #include <zephyr/devicetree.h>
 #include <zephyr/device.h>
+#ifdef CONFIG_SDMMC_SUBSYS
 #include <zephyr/drivers/sdhc.h>
+#endif
 #include <zephyr/fs/fs.h>
 
 // Internal File System
@@ -31,14 +33,18 @@ private:
     static std::optional<fs_mount_t> int_fs_mp_;
 
     static std::optional<fs_mount_t> sd_fs_mp_;
+#ifdef CONFIG_SDMMC_SUBSYS
     static sdhc_host_props sd_host_props_;
+#endif
     static uint32_t sd_relative_addr_;
     static const char* sd_disk_name_;
 
     DtFs() = default;
 
+#ifdef CONFIG_SDMMC_SUBSYS
     static int SdmmcRequestRca(const struct device* dev);
     static bool SdmmcReadStatus(const struct device* dev);
+#endif
 
 public:
     static void InitInternalFs();
