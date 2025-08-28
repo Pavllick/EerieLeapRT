@@ -6,6 +6,8 @@
 #include "utilities/memory/heap_allocator.h"
 #include "utilities/dev_tools/system_info.h"
 #include "utilities/guid/guid_generator.h"
+#include "utilities/time/time_service.h"
+#include "utilities/time/rtc_service.h"
 #include "utilities/time/boot_elapsed_time_service.h"
 #include "utilities/math_parser/math_parser_service.hpp"
 
@@ -130,7 +132,9 @@ int main(void) {
         return -1;
     }
 
-    auto time_service = make_shared_ext<BootElapsedTimeService>();
+    auto rtc_service = make_shared_ext<RtcService>();
+    auto boot_elapsed_time_service = make_shared_ext<BootElapsedTimeService>();
+    auto time_service = make_shared_ext<TimeService>(rtc_service, boot_elapsed_time_service);
     time_service->Initialize();
 
     auto guid_generator = make_shared_ext<GuidGenerator>();
