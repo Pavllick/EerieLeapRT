@@ -19,6 +19,8 @@
 #include "subsys/modbus/modbus.h"
 
 #include "domain/user_com_domain/user_com.h"
+#include "domain/user_com_domain/interface/com_reading_interface.h"
+
 #include "domain/sensor_domain/services/processing_scheduler_service.h"
 #include "domain/sensor_domain/services/calibration_service.h"
 #include "domain/sensor_domain/models/sensor_type.h"
@@ -62,6 +64,8 @@ using namespace eerie_leap::subsys::modbus;
 using namespace eerie_leap::subsys::gpio;
 
 using namespace eerie_leap::domain::user_com_domain;
+using namespace eerie_leap::domain::user_com_domain::interface;
+
 using namespace eerie_leap::domain::sensor_domain::services;
 using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::configuration::services;
@@ -160,6 +164,8 @@ int main(void) {
         LOG_INF("Com User Device ID: %llu, Server ID: %hu", com_user.device_id, com_user.server_id);
     }
 
+    auto com_reading_interface = make_shared_ext<ComReadingInterface>(user_com_interface);
+
     // TODO: For test purposes only
     SetupTestSensors(math_parser_service, sensors_configuration_controller);
 
@@ -169,7 +175,7 @@ int main(void) {
         gpio,
         adc_configuration_controller,
         sensors_configuration_controller,
-        user_com_interface);
+        com_reading_interface);
 
     auto calibration_service = make_shared_ext<CalibrationService>(
         time_service,

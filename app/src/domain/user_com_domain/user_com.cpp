@@ -1,7 +1,6 @@
 #include <zephyr/logging/log.h>
 
 #include "user_com.h"
-#include "types/sensor_reading_dto.h"
 
 namespace eerie_leap::domain::user_com_domain {
 
@@ -20,17 +19,11 @@ int UserCom::Initialize() {
     return modbus_->Initialize();
 }
 
-int UserCom::SendReading(const SensorReading& reading, uint8_t user_id) {
-    auto dto = types::SensorReadingDto::FromSensorReading(reading);
-
-    return modbus_->WriteHoldingRegisters(user_id, static_cast<uint16_t>(RequestType::SET_READING), &dto, sizeof(dto));
-}
-
 int UserCom::ResolveUserIds() {
     LOG_INF("Resolving server IDs...");
 
     uint16_t data = 0;
-    Set(Modbus::SERVER_ID_ALL, RequestType::SET_RESOLVE_SERVER_ID, &data, sizeof(data));
+    Send(Modbus::SERVER_ID_ALL, RequestType::SET_RESOLVE_SERVER_ID, &data, sizeof(data));
     k_msleep(500);
 
     uint64_t server_device_id_ = 0;
@@ -44,7 +37,7 @@ int UserCom::ResolveUserIds() {
 
         LOG_INF("Resolving Server Device Id: %llu", server_device_id_);
 
-        res = Set(i, RequestType::SET_RESOLVE_SERVER_ID_GUID, &server_device_id_, sizeof(server_device_id_));
+        res = Send(i, RequestType::SET_RESOLVE_SERVER_ID_GUID, &server_device_id_, sizeof(server_device_id_));
         if(res != 0) {
             LOG_ERR("Server Device ID confirmation failed");
             return res;
@@ -65,7 +58,7 @@ int UserCom::Get(uint8_t user_id, RequestType request_type, void* data, size_t s
     return modbus_->ReadHoldingRegisters(user_id, static_cast<uint16_t>(request_type), data, size_bytes);
 }
 
-int UserCom::Set(uint8_t user_id, RequestType request_type, void* data, size_t size_bytes) {
+int UserCom::Send(uint8_t user_id, RequestType request_type, void* data, size_t size_bytes) {
     return modbus_->WriteHoldingRegisters(user_id, static_cast<uint16_t>(request_type), data, size_bytes);
 }
 

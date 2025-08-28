@@ -1,6 +1,7 @@
 #pragma once
 
-#include <zephyr/random/random.h>
+#include <cstdint>
+#include <cstddef>
 
 namespace eerie_leap::subsys::random {
 
