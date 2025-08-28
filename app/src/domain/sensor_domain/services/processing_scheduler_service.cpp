@@ -46,7 +46,7 @@ void ProcessingSchedulerService::ProcessSensorWorkTask(k_work* work) {
             task->processor->ProcessReading(task->readings_frame->GetReading(task->sensor->id));
 
             auto reading = task->readings_frame->GetReading(task->sensor->id);
-            task->com_reading_interface->SendReading(*reading);
+            task->com_reading_interface->SendReading(reading);
 
             LOG_DBG("Sensor Reading - ID: %s, Guid: %llu, Value: %.3f, Time: %s",
                 task->sensor->id.c_str(),

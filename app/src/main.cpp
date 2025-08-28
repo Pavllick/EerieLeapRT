@@ -165,6 +165,7 @@ int main(void) {
     }
 
     auto com_reading_interface = make_shared_ext<ComReadingInterface>(user_com_interface);
+    com_reading_interface->Initialize();
 
     // TODO: For test purposes only
     SetupTestSensors(math_parser_service, sensors_configuration_controller);
