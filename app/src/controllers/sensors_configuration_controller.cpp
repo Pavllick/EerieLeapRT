@@ -137,7 +137,7 @@ const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfiguration
         std::shared_ptr<Sensor> sensor = make_shared_ext<Sensor>();
 
         sensor->id = CborHelpers::ToStdString(sensor_config.id);
-        sensor->id_hash = string_hasher(sensor->id);
+        sensor->id_hash = static_cast<uint32_t>(string_hasher(sensor->id));
         sensor->configuration.type = static_cast<SensorType>(sensor_config.configuration.type);
 
         if(sensor_config.configuration.channel_present)

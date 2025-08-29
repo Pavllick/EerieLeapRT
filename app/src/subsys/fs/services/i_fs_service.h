@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <string>
 #include <vector>
 
@@ -8,7 +9,7 @@ namespace eerie_leap::subsys::fs::services {
 class IFsService {
 public:
     virtual bool Initialize() = 0;
-    virtual bool WriteFile(const std::string& relative_path, const void* data_p, size_t data_size) = 0;
+    virtual bool WriteFile(const std::string& relative_path, const void* data_p, size_t data_size, bool append = false) = 0;
     virtual bool ReadFile(const std::string& relative_path, void* data_p, size_t data_size, size_t& out_len) = 0;
     virtual bool CreateDirectory(const std::string& relative_path) = 0;
     virtual bool Exists(const std::string& relative_path) = 0;

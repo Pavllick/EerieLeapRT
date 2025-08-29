@@ -28,6 +28,9 @@
 #include "domain/sensor_domain/services/processing_scheduler_service.h"
 #include "domain/sensor_domain/services/calibration_service.h"
 
+#include "domain/logging_domain/services/log_writer_service.h"
+#include "domain/logging_domain/processors/log_reading_processor.h"
+
 #include "configuration/system_config/system_config.h"
 #include "configuration/adc_config/adc_config.h"
 #include "configuration/sensor_config/sensor_config.h"
@@ -63,6 +66,7 @@ using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::utilities::math_parser;
 
 using namespace eerie_leap::subsys::device_tree;
+using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::subsys::modbus;
 using namespace eerie_leap::subsys::gpio;
 
@@ -71,7 +75,10 @@ using namespace eerie_leap::domain::user_com_domain::interfaces::com_reading;
 
 using namespace eerie_leap::domain::sensor_domain::processors;
 using namespace eerie_leap::domain::sensor_domain::services;
-using namespace eerie_leap::subsys::fs::services;
+
+using namespace eerie_leap::domain::logging_domain::services;
+using namespace eerie_leap::domain::logging_domain::processors;
+
 using namespace eerie_leap::configuration::services;
 
 using namespace eerie_leap::controllers;
@@ -158,6 +165,9 @@ int main(void) {
         sensors_config_service,
         adc_configuration_controller->Get()->GetChannelCount());
 
+
+    std::shared_ptr<ComReadingProcessor> com_reading_processor = nullptr;
+    if(DtModbus::Get().has_value()) {
     auto modbus = make_shared_ext<Modbus>(DtModbus::Get().value());
     auto user_com_interface = make_shared_ext<UserCom>(modbus, system_configuration_controller);
     user_com_interface->Initialize();
@@ -173,13 +183,24 @@ int main(void) {
     auto com_reading_interface = make_shared_ext<ComReadingInterface>(user_com_interface);
     com_reading_interface->Initialize();
 
+        com_reading_processor = make_shared_ext<ComReadingProcessor>(com_reading_interface);
+    }
+
+    std::shared_ptr<LogWriterService> log_writer_service = nullptr;
+    std::shared_ptr<LogReadingProcessor> log_reading_processor = nullptr;
+    if(sd_fs_service != nullptr) {
+        log_writer_service = make_shared_ext<LogWriterService>(sd_fs_service, time_service);
+        log_writer_service->Initialize();
+
+        log_reading_processor = make_shared_ext<LogReadingProcessor>(log_writer_service);
+    }
+
     // TODO: For test purposes only
     SetupTestSensors(math_parser_service, sensors_configuration_controller);
 
     auto sensor_readings_frame = make_shared_ext<SensorReadingsFrame>();
 
     auto sensor_processor = make_shared_ext<SensorProcessor>(sensor_readings_frame);
-    auto com_reading_processor = make_shared_ext<ComReadingProcessor>(com_reading_interface);
 
     auto processing_scheduler_service = make_shared_ext<ProcessingSchedulerService>(
         time_service,
@@ -190,7 +211,10 @@ int main(void) {
         sensor_readings_frame);
 
     processing_scheduler_service->RegisterReadingProcessor(sensor_processor);
+    if(com_reading_processor != nullptr)
     processing_scheduler_service->RegisterReadingProcessor(com_reading_processor);
+    if(log_reading_processor != nullptr)
+        processing_scheduler_service->RegisterReadingProcessor(log_reading_processor);
 
     auto calibration_service = make_shared_ext<CalibrationService>(
         time_service,

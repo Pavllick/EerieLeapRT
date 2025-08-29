@@ -1,17 +1,21 @@
 #pragma once
 
+#include <cstdint>
+#include <chrono>
+
 #include "utilities/time/time_helpers.hpp"
 #include "domain/sensor_domain/models/sensor_reading.h"
 
 namespace eerie_leap::domain::user_com_domain::types {
 
+using namespace std::chrono;
 using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::domain::sensor_domain::models;
 
 struct SensorReadingDto {
     Guid id;
-    size_t sensor_id_hash;
-    std::chrono::milliseconds timestamp_ms;
+    uint32_t sensor_id_hash;
+    milliseconds timestamp_ms;
     float value;
     ReadingStatus status;
 

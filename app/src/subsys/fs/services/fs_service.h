@@ -22,7 +22,7 @@ public:
     FsService(fs_mount_t mountpoint);
 
     bool Initialize() override;
-    bool WriteFile(const std::string& relative_path, const void* data_p, size_t data_size) override;
+    bool WriteFile(const std::string& relative_path, const void* data_p, size_t data_size, bool append = false) override;
     bool ReadFile(const std::string& relative_path, void* data_p, size_t data_size, size_t& out_len) override;
     bool CreateDirectory(const std::string& relative_path) override;
     bool Exists(const std::string& relative_path) override;

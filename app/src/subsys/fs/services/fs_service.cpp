@@ -19,7 +19,7 @@ bool FsService::Initialize() {
     return true;
 }
 
-bool FsService::WriteFile(const std::string& relative_path, const void* data_p, size_t data_size) {
+bool FsService::WriteFile(const std::string& relative_path, const void* data_p, size_t data_size, bool append) {
     if(!IsMounted()) {
         LOG_ERR("Filesystem not mounted.");
         return false;
@@ -31,7 +31,10 @@ bool FsService::WriteFile(const std::string& relative_path, const void* data_p, 
     struct fs_file_t file;
     fs_file_t_init(&file);
 
-    int rc = fs_open(&file, full_path.string().c_str(), FS_O_WRITE | FS_O_CREATE | FS_O_TRUNC);
+    int rc = fs_open(
+        &file,
+        full_path.string().c_str(),
+        FS_O_WRITE | FS_O_CREATE | (append ? FS_O_APPEND : FS_O_TRUNC));
     if(rc < 0) {
         LOG_ERR("fs_open failed: %d.", rc);
         return false;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include <chrono>
 
@@ -26,12 +27,28 @@ public:
         return formatted_time + "." + std::to_string(millis);
     }
 
-    static std::chrono::milliseconds ToMilliseconds(const system_clock::time_point& tp) {
-        return duration_cast<std::chrono::milliseconds>(tp.time_since_epoch());
+    static milliseconds ToMilliseconds(const system_clock::time_point& tp) {
+        return duration_cast<milliseconds>(tp.time_since_epoch());
     }
 
-    static system_clock::time_point FromMilliseconds(const std::chrono::milliseconds& ms) {
+    static system_clock::time_point FromMilliseconds(const milliseconds& ms) {
         return system_clock::time_point(ms);
+    }
+
+    static nanoseconds ToNanoseconds(const system_clock::time_point& tp) {
+        return duration_cast<nanoseconds>(tp.time_since_epoch());
+    }
+
+    static system_clock::time_point FromNanoseconds(const nanoseconds& ns) {
+        return system_clock::time_point(ns);
+    }
+
+    static uint32_t ToUint32(const system_clock::time_point& tp) {
+        return ToMilliseconds(tp).count();
+    }
+
+    static uint64_t ToUint64(const system_clock::time_point& tp) {
+        return ToNanoseconds(tp).count();
     }
 
     /**

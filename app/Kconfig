@@ -32,9 +32,18 @@ config EERIE_LEAP_SW_VERSION_PATCH
 	range 0 65535
 	default 0
 
+config LOG_METADATA_FILE_VERSION
+	int "Log metadata file version"
+	range 0 65535
+	default 0
+
+config EERIE_LEAP_LOG_WRITER_STACK_SIZE
+	int "Log writer stack size"
+	default 8192
+
 config EERIE_LEAP_FS_SD_THREAD_STACK_SIZE
 	int "SD thread stack size"
-	default 2048
+	default 3072
 
 config EERIE_LEAP_ADC_VOLTAGE_MAX_MV
 	int "ADC voltage max"
