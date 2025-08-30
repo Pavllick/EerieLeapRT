@@ -271,6 +271,9 @@ bool FsService::Format() {
 }
 
 bool FsService::Mount() {
+    if(IsMounted())
+        return true;
+
     int rc = fs_mount(&mountpoint_);
     if(rc == 0)
         LOG_INF("Mounted FS at %s.", mountpoint_.mnt_point);
@@ -281,6 +284,9 @@ bool FsService::Mount() {
 }
 
 void FsService::Unmount() {
+    if(!IsMounted())
+        return;
+
     int rc = fs_unmount(&mountpoint_);
     if(rc < 0)
         LOG_ERR("Failed to unmount FS: %d.", rc);
