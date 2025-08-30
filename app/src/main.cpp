@@ -114,6 +114,8 @@ int main(void) {
         if(!sd_fs_service->Initialize()) {
             LOG_ERR("Failed to initialize SD File System.");
         }
+
+        sd_fs_service->SdMonitorStart();
     }
 
     // NOTE: Don't use for WiFi supporting boards as WiFi is broken in Zephyr 4.1 and has memory allocation issues

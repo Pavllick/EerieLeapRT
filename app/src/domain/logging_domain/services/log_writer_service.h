@@ -24,7 +24,7 @@ private:
     atomic_t logger_running_;
 
     static constexpr int k_stack_size_ = CONFIG_EERIE_LEAP_LOG_WRITER_STACK_SIZE;
-    static constexpr int k_priority_ = K_PRIO_COOP(9);
+    static constexpr int k_priority_ = K_PRIO_PREEMPT(6);
 
     static z_thread_stack_element stack_area_[k_stack_size_];
     k_work_q work_q;

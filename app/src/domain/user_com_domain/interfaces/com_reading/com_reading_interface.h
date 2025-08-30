@@ -14,7 +14,7 @@ using namespace eerie_leap::domain::sensor_domain::models;
 class ComReadingInterface {
 private:
     static constexpr int k_stack_size_ = 1024;
-    static constexpr int k_priority_ = K_PRIO_COOP(10);
+    static constexpr int k_priority_ = K_PRIO_PREEMPT(6);
 
     static z_thread_stack_element stack_area_[k_stack_size_];
     k_work_q work_q;

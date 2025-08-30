@@ -4,8 +4,10 @@
 #include <zephyr/fs/fs.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/storage/disk_access.h>
+#ifdef CONFIG_LOG_BACKEND_FS
 #include <zephyr/logging/log_backend.h>
 #include <zephyr/logging/log_backend_fs.h>
+#endif // CONFIG_LOG_BACKEND_FS
 
 #include "subsys/device_tree/dt_fs.h"
 
@@ -27,8 +29,6 @@ SdmmcService::SdmmcService(fs_mount_t mountpoint) : FsService(mountpoint), monit
 
 bool SdmmcService::Initialize() {
     sd_card_present_ = FsService::Initialize();
-    SdMonitorStart();
-
     if(!sd_card_present_)
         return false;
 
@@ -66,8 +66,10 @@ void SdmmcService::SdMonitorHandler() {
         }
     }
 
+#ifdef CONFIG_LOG_BACKEND_FS
     if(sd_card_present_ && log_backend_fs_get_state() == BACKEND_FS_CORRUPTED)
         log_backend_init(log_backend_fs_get());
+#endif // CONFIG_LOG_BACKEND_FS
 }
 
 void SdmmcService::SdMonitorThreadEntry() {
