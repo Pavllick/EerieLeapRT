@@ -7,11 +7,11 @@
 
 #include "com_reading_task.hpp"
 
-namespace eerie_leap::domain::user_com_domain::interfaces::com_reading {
+namespace eerie_leap::domain::user_com_domain::services::com_reading {
 
 using namespace eerie_leap::domain::sensor_domain::models;
 
-class ComReadingInterface {
+class ComReadingInterfaceService {
 private:
     static constexpr int k_stack_size_ = 1024;
     static constexpr int k_priority_ = K_PRIO_PREEMPT(6);
@@ -28,10 +28,10 @@ private:
     std::shared_ptr<UserCom> user_com_;
 
 public:
-    explicit ComReadingInterface(std::shared_ptr<UserCom> user_com);
+    explicit ComReadingInterfaceService(std::shared_ptr<UserCom> user_com);
     void Initialize();
 
     int SendReading(std::shared_ptr<SensorReading> reading, uint8_t user_id = Modbus::SERVER_ID_ALL);
 };
 
-} // namespace eerie_leap::domain::user_com_domain::interfaces::com_reading
+} // namespace eerie_leap::domain::user_com_domain::services::com_reading

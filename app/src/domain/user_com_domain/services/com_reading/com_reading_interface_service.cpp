@@ -2,28 +2,26 @@
 #include <zephyr/logging/log.h>
 
 #include "domain/user_com_domain/types/sensor_reading_dto.h"
-#include "subsys/random/rng.h"
 
-#include "com_reading_interface.h"
+#include "com_reading_interface_service.h"
 
-namespace eerie_leap::domain::user_com_domain::interfaces::com_reading {
+namespace eerie_leap::domain::user_com_domain::services::com_reading {
 
-using namespace eerie_leap::subsys::random;
 using namespace eerie_leap::domain::user_com_domain::types;
 
 LOG_MODULE_REGISTER(com_reading_interface_logger);
 
 #ifdef CONFIG_SHARED_MULTI_HEAP
-Z_KERNEL_STACK_DEFINE_IN(ComReadingInterface::stack_area_, ComReadingInterface::k_stack_size_, __attribute__((section(".ext_ram.bss"))));
+Z_KERNEL_STACK_DEFINE_IN(ComReadingInterfaceService::stack_area_, ComReadingInterfaceService::k_stack_size_, __attribute__((section(".ext_ram.bss"))));
 #else
-K_KERNEL_STACK_MEMBER(ComReadingInterface::stack_area_, ComReadingInterface::k_stack_size_);
+K_KERNEL_STACK_MEMBER(ComReadingInterfaceService::stack_area_, ComReadingInterfaceService::k_stack_size_);
 #endif
 
-ComReadingInterface::ComReadingInterface(std::shared_ptr<UserCom> user_com) : user_com_(std::move(user_com)) {
+ComReadingInterfaceService::ComReadingInterfaceService(std::shared_ptr<UserCom> user_com) : user_com_(std::move(user_com)) {
     k_sem_init(&processing_semaphore_, 1, 1);
 }
 
-int ComReadingInterface::SendReading(std::shared_ptr<SensorReading> reading, uint8_t user_id) {
+int ComReadingInterfaceService::SendReading(std::shared_ptr<SensorReading> reading, uint8_t user_id) {
     if(k_sem_count_get(&processing_semaphore_) == 0)
         return -1;
 
@@ -36,7 +34,7 @@ int ComReadingInterface::SendReading(std::shared_ptr<SensorReading> reading, uin
     return 0;
 }
 
-void ComReadingInterface::Initialize() {
+void ComReadingInterfaceService::Initialize() {
     k_work_queue_init(&work_q);
     k_work_queue_start(&work_q, stack_area_,
         K_THREAD_STACK_SIZEOF(stack_area_),
@@ -51,7 +49,7 @@ void ComReadingInterface::Initialize() {
     LOG_INF("Com Reading interface initialized.");
 }
 
-void ComReadingInterface::SendReadingWorkTask(k_work* work) {
+void ComReadingInterfaceService::SendReadingWorkTask(k_work* work) {
     ComReadingTask* task = CONTAINER_OF(work, ComReadingTask, work);
 
     if(k_sem_take(task->processing_semaphore, SENDING_TIMEOUT) != 0) {
@@ -61,13 +59,9 @@ void ComReadingInterface::SendReadingWorkTask(k_work* work) {
     }
 
     auto dto = types::SensorReadingDto::FromSensorReading(*task->reading);
-
-    uint32_t raw = Rng::Get32();
-    dto.value = (raw / static_cast<float>(UINT32_MAX)) * 100;
-
     task->user_com->Send(task->user_id, RequestType::SET_READING, &dto, sizeof(dto));
 
     k_sem_give(task->processing_semaphore);
 }
 
-} // namespace eerie_leap::domain::user_com_domain::interfaces::com_reading
+} // namespace eerie_leap::domain::user_com_domain::services::com_reading
