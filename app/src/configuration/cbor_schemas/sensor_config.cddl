@@ -17,6 +17,7 @@ SensorConfigurationConfig = [
 
 SensorConfig = [
   id: tstr,
+  id_hash: uint,
   metadata: SensorMetadataConfig,
   configuration: SensorConfigurationConfig
 ]

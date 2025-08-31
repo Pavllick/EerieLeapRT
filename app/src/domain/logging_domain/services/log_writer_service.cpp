@@ -2,17 +2,21 @@
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
+#include <zephyr/sys/crc.h>
 
 #include "subsys/random/rng.h"
 
-#include "domain/logging_domain/models/log_metadata.h"
-#include "domain/logging_domain/models/log_record.h"
+#include "utilities/constants.h"
+#include "domain/logging_domain/models/log_metadata_header.h"
+#include "domain/logging_domain/models/log_data_header.h"
+#include "domain/logging_domain/models/log_data_record.h"
 
 #include "log_writer_service.h"
 
 namespace eerie_leap::domain::logging_domain::services {
 
 using namespace eerie_leap::subsys::random;
+using namespace eerie_leap::utilities::constants::logging;
 using namespace eerie_leap::domain::logging_domain::models;
 
 LOG_MODULE_REGISTER(log_writer_service_logger);
@@ -59,29 +63,82 @@ void LogWriterService::Initialize() {
     LOG_INF("Log writer service initialized.");
 }
 
-std::string LogWriterService::GetNewFileName(const system_clock::time_point& tp) {
-    return "data_logs/" +
-        std::to_string(TimeHelpers::ToUint32(tp)) +
-        "_" +
-        std::to_string(Rng::Get16()) +
-        ".ell";
+int LogWriterService::SaveLogMetadata(const std::span<uint8_t> sensors_metadata) {
+    auto log_metadata_header = LogMetadataHeader::Create();
+
+    if(!fs_service_->Exists(CONFIG_EERIE_LEAP_LOG_METADATA_FILE_DIR))
+        if(!fs_service_->CreateDirectory(CONFIG_EERIE_LEAP_LOG_METADATA_FILE_DIR)) {
+            LOG_ERR("Failed to create %s directory", CONFIG_EERIE_LEAP_LOG_METADATA_FILE_DIR);
+            return -1;
+        }
+
+    std::string path = CONFIG_EERIE_LEAP_LOG_METADATA_FILE_DIR;
+    path += "/";
+    path += CONFIG_EERIE_LEAP_LOG_METADATA_FILE_NAME;
+    path += ".";
+    path += LOG_METADATA_FILE_EXTENSION;
+
+    if(fs_service_->Exists(path))
+        fs_service_->DeleteFile(path);
+
+    bool success = fs_service_->WriteFile(path, &log_metadata_header, sizeof(log_metadata_header));
+    if(!success) {
+        LOG_ERR("Failed to save log metadata header.");
+        return -1;
+    }
+
+    success = fs_service_->WriteFile(path, sensors_metadata.data(), sensors_metadata.size(), true);
+    if(!success) {
+        LOG_ERR("Failed to save log metadata.");
+        return -1;
+    }
+
+    uint32_t crc = crc32_ieee((uint8_t*)(&log_metadata_header), sizeof(log_metadata_header));
+    crc = crc32_ieee_update(crc, (uint8_t*)(&sensors_metadata), sensors_metadata.size());
+
+    success = fs_service_->WriteFile(path, &crc, sizeof(crc), true);
+    if(!success) {
+        LOG_ERR("Failed to save log metadata CRC.");
+        return -1;
+    }
+
+    LOG_INF("Log metadata saved successfully, %s", path.c_str());
+
+    return 0;
+}
+
+std::string LogWriterService::GetNewLogDataFileName(const system_clock::time_point& tp) {
+    std::string file_name_prefix = CONFIG_EERIE_LEAP_LOG_DATA_FILE_PREFIX;
+    if(file_name_prefix.length() > 0)
+        file_name_prefix += '_';
+
+    std::string path = CONFIG_EERIE_LEAP_LOG_DATA_FILES_DIR;
+    path += "/";
+    path += file_name_prefix;
+    path += std::to_string(TimeHelpers::ToUint32(tp));
+    path += "_";
+    path += std::to_string(Rng::Get16());
+    path += ".";
+    path += LOG_DATA_FILE_EXTENSION;
+
+    return path;
 }
 
 int LogWriterService::LogWriterStart() {
     auto current_time = time_service_->GetCurrentTime();
-    auto log_metadata = LogMetadata::Create(current_time);
+    auto log_header = LogDataHeader::Create(current_time);
 
     int res = 0;
 
-    if(!fs_service_->Exists("data_logs"))
-        if(!fs_service_->CreateDirectory("data_logs")) {
-            LOG_ERR("Failed to create data_logs directory");
+    if(!fs_service_->Exists(CONFIG_EERIE_LEAP_LOG_DATA_FILES_DIR))
+        if(!fs_service_->CreateDirectory(CONFIG_EERIE_LEAP_LOG_DATA_FILES_DIR)) {
+            LOG_ERR("Failed to create %s directory", CONFIG_EERIE_LEAP_LOG_DATA_FILES_DIR);
             return -1;
         }
 
     std::string file_name;
     for(int i = 0; i < 10; i++) {
-        auto new_file_name = GetNewFileName(current_time);
+        auto new_file_name = GetNewLogDataFileName(current_time);
         if(!fs_service_->Exists(new_file_name)) {
             file_name = new_file_name;
             break;
@@ -93,7 +150,7 @@ int LogWriterService::LogWriterStart() {
         return -1;
     }
 
-    if(!fs_service_->WriteFile(file_name, &log_metadata, sizeof(log_metadata))) {
+    if(!fs_service_->WriteFile(file_name, &log_header, sizeof(log_header))) {
         LOG_ERR("Failed to create log file");
         return -1;
     }
@@ -129,7 +186,7 @@ void LogWriterService::LogReadingWorkTask(k_work* work) {
     float float_value = task->reading->value.value_or(0.0f);
     memcpy(&value, &float_value, sizeof(value));
 
-    auto log_record = LogRecord<uint32_t>::Create(
+    auto log_record = LogDataRecord<uint32_t>::Create(
         TimeHelpers::ToUint32(task->reading->timestamp.value()),
         task->reading->sensor->id_hash,
         value);

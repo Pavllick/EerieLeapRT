@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <memory>
+#include <span>
 
 #include "utilities/math_parser/math_parser_service.hpp"
 #include <utilities/memory/heap_allocator.h>
@@ -30,6 +31,7 @@ public:
 
     bool Update(const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>>& sensors);
     const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> Get(bool force_load = false);
+    const std::span<uint8_t> GetRaw();
 };
 
 } // namespace eerie_leap::controllers

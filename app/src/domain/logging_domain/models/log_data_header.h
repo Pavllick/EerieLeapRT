@@ -15,23 +15,23 @@ using namespace std::chrono;
 using namespace eerie_leap::utilities::constants::logging;
 using namespace eerie_leap::utilities::time;
 
-struct LogMetadata {
+struct LogDataHeader {
     uint32_t file_type;
     uint32_t version;
     uint64_t start_timestamp;
     uint64_t reserved;
     uint32_t crc;
 
-    static LogMetadata Create(const system_clock::time_point& tp) {
-        LogMetadata metadata {
-            .file_type = LOG_METADATA_FILE_TYPE,
-            .version = CONFIG_LOG_METADATA_FILE_VERSION,
+    static LogDataHeader Create(const system_clock::time_point& tp) {
+        LogDataHeader header {
+            .file_type = LOG_DATA_FILE_TYPE,
+            .version = CONFIG_EERIE_LEAP_LOG_DATA_FILE_VERSION,
             .start_timestamp = TimeHelpers::ToUint64(tp)
         };
-        metadata.crc = sys_cpu_to_le32(
-            crc32_ieee((uint8_t*)(&metadata), sizeof(metadata) - sizeof(metadata.crc)));
+        header.crc = sys_cpu_to_le32(
+            crc32_ieee((uint8_t*)(&header), sizeof(header) - sizeof(header.crc)));
 
-        return metadata;
+        return header;
     }
 } __attribute__((packed, aligned(1))); // Ensure no padding
 

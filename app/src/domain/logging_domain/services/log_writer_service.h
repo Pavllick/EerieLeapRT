@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <chrono>
+#include <span>
 
 #include <zephyr/kernel.h>
 #include <zephyr/sys/atomic.h>
@@ -21,6 +22,7 @@ class LogWriterService {
 private:
     std::shared_ptr<IFsService> fs_service_;
     std::shared_ptr<ITimeService> time_service_;
+
     atomic_t logger_running_;
 
     static constexpr int k_stack_size_ = CONFIG_EERIE_LEAP_LOG_WRITER_STACK_SIZE;
@@ -34,12 +36,13 @@ private:
     static constexpr k_timeout_t SEMAPHORE_TIMEOUT = K_MSEC(200);
 
     static void LogReadingWorkTask(k_work* work);
-    static std::string GetNewFileName(const system_clock::time_point& tp);
+    static std::string GetNewLogDataFileName(const system_clock::time_point& tp);
 
 public:
     LogWriterService(std::shared_ptr<IFsService> fs_service, std::shared_ptr<ITimeService> time_service);
     void Initialize();
 
+    int SaveLogMetadata(const std::span<uint8_t> sensors_metadata);
     int LogReading(std::shared_ptr<SensorReading> reading);
     int LogWriterStart();
     int LogWriterStop();

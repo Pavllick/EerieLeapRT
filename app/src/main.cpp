@@ -21,8 +21,8 @@
 #include "subsys/modbus/modbus.h"
 
 #include "domain/user_com_domain/user_com.h"
-#include "domain/user_com_domain/interfaces/com_reading/com_reading_interface.h"
-#include "domain/user_com_domain/interfaces/com_reading/com_reading_processor.h"
+#include "domain/user_com_domain/services/com_reading/com_reading_interface_service.h"
+#include "domain/user_com_domain/processors/com_reading_processor.h"
 
 #include "domain/sensor_domain/processors/sensor_processor.h"
 #include "domain/sensor_domain/services/processing_scheduler_service.h"
@@ -38,6 +38,7 @@
 #include "controllers/sensors_configuration_controller.h"
 #include "controllers/adc_configuration_controller.h"
 #include "controllers/system_configuration_controller.h"
+#include "controllers/logging_controller.h"
 
 // Test sensors includes
 #include "utilities/math_parser/expression_evaluator.h"
@@ -71,7 +72,7 @@ using namespace eerie_leap::subsys::modbus;
 using namespace eerie_leap::subsys::gpio;
 
 using namespace eerie_leap::domain::user_com_domain;
-using namespace eerie_leap::domain::user_com_domain::interfaces::com_reading;
+using namespace eerie_leap::domain::user_com_domain::processors;
 
 using namespace eerie_leap::domain::sensor_domain::processors;
 using namespace eerie_leap::domain::sensor_domain::services;
@@ -182,18 +183,19 @@ int main(void) {
         LOG_INF("Com User Device ID: %llu, Server ID: %hu", com_user.device_id, com_user.server_id);
     }
 
-    auto com_reading_interface = make_shared_ext<ComReadingInterface>(user_com_interface);
-    com_reading_interface->Initialize();
+        auto com_reading_interface_service = make_shared_ext<ComReadingInterfaceService>(user_com_interface);
+        com_reading_interface_service->Initialize();
 
-        com_reading_processor = make_shared_ext<ComReadingProcessor>(com_reading_interface);
+        com_reading_processor = make_shared_ext<ComReadingProcessor>(com_reading_interface_service);
     }
 
-    std::shared_ptr<LogWriterService> log_writer_service = nullptr;
+    std::shared_ptr<LoggingController> logging_controller = nullptr;
     std::shared_ptr<LogReadingProcessor> log_reading_processor = nullptr;
     if(sd_fs_service != nullptr) {
-        log_writer_service = make_shared_ext<LogWriterService>(sd_fs_service, time_service);
+        auto log_writer_service = make_shared_ext<LogWriterService>(sd_fs_service, time_service);
         log_writer_service->Initialize();
 
+        logging_controller = make_shared_ext<LoggingController>(log_writer_service, sensors_configuration_controller);
         log_reading_processor = make_shared_ext<LogReadingProcessor>(log_writer_service);
     }
 

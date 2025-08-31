@@ -32,10 +32,31 @@ config EERIE_LEAP_SW_VERSION_PATCH
 	range 0 65535
 	default 0
 
-config LOG_METADATA_FILE_VERSION
+config EERIE_LEAP_LOG_METADATA_FILE_VERSION
 	int "Log metadata file version"
 	range 0 65535
 	default 0
+
+config EERIE_LEAP_LOG_METADATA_FILE_DIR
+	string "Log metadata file directory"
+	default "data_logs"
+
+config EERIE_LEAP_LOG_METADATA_FILE_NAME
+	string "Log metadata file name"
+	default "log_metadata"
+
+config EERIE_LEAP_LOG_DATA_FILE_VERSION
+	int "Log data file version"
+	range 0 65535
+	default 0
+
+config EERIE_LEAP_LOG_DATA_FILES_DIR
+	string "Log data files directory"
+	default "data_logs"
+
+config EERIE_LEAP_LOG_DATA_FILE_PREFIX
+	string "Log data files prefix"
+	default "log_data"
 
 config EERIE_LEAP_LOG_WRITER_STACK_SIZE
 	int "Log writer stack size"

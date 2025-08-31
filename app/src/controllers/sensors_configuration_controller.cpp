@@ -38,6 +38,7 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
     memset(sensors_config.get(), 0, sizeof(SensorsConfig));
 
     SensorsOrderResolver resolver;
+    std::hash<std::string> string_hasher;
 
     for(size_t i = 0; i < sensors->size(); ++i) {
         const auto& sensor = sensors->at(i);
@@ -46,6 +47,7 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
         memset(sensor_config.get(), 0, sizeof(SensorConfig));
 
         sensor_config->id = CborHelpers::ToZcborString(&sensor->id);
+        sensor_config->id_hash = static_cast<uint32_t>(string_hasher(sensor->id));
         sensor_config->configuration.type = static_cast<uint32_t>(sensor->configuration.type);
 
         if(sensor->configuration.channel.has_value()) {
@@ -130,14 +132,13 @@ const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfiguration
     sensors_config_raw_ = sensors_config.value().config_raw;
     sensors_config_ = sensors_config.value().config;
     SensorsOrderResolver resolver;
-    std::hash<std::string> string_hasher;
 
     for(size_t i = 0; i < sensors_config_->SensorConfig_m_count; ++i) {
         const auto& sensor_config = sensors_config_->SensorConfig_m[i];
         std::shared_ptr<Sensor> sensor = make_shared_ext<Sensor>();
 
         sensor->id = CborHelpers::ToStdString(sensor_config.id);
-        sensor->id_hash = static_cast<uint32_t>(string_hasher(sensor->id));
+        sensor->id_hash = sensor_config.id_hash;
         sensor->configuration.type = static_cast<SensorType>(sensor_config.configuration.type);
 
         if(sensor_config.configuration.channel_present)
@@ -197,4 +198,8 @@ const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfiguration
     return ordered_sensors_;
 }
 
-} // namespace eerie_leap::domain::sensor_domain::controllers
+const std::span<uint8_t> SensorsConfigurationController::GetRaw() {
+    return *sensors_config_raw_.get();
+}
+
+} // namespace eerie_leap::controllers

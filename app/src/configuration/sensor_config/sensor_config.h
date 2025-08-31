@@ -55,6 +55,7 @@ struct SensorConfigurationConfig {
 
 struct SensorConfig {
 	struct zcbor_string id;
+	uint32_t id_hash;
 	struct SensorMetadataConfig metadata;
 	struct SensorConfigurationConfig configuration;
 };
