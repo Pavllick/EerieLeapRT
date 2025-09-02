@@ -16,14 +16,16 @@ RUN apt-get update && \
         ccache dfu-util device-tree-compiler wget python3-dev python3-venv python3-tk \
         xz-utils file make gcc gcc-multilib g++-multilib libsdl2-dev libmagic1 \
         x11vnc xvfb openbox dos2unix xterm usbutils \
-        iproute2 npm socat emacs && \
+        iproute2 npm socat emacs tree && \
         apt-get install -y sudo && \
     rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g html-minifier-terser
 
-RUN usermod -aG sudo ubuntu
-RUN echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/ubuntu
+RUN usermod -aG sudo ${USERNAME}
+RUN usermod -aG root ${USERNAME}
+
+RUN echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${USERNAME}
 
 # Add entrypoint and permissions
 ADD entrypoint.sh /home/${USERNAME}/entrypoint.sh
@@ -33,6 +35,8 @@ USER ${USERNAME}
 
 # Configure display
 ENV DISPLAY=:0
+
+RUN sudo apt-get update
 
 # VNC password
 RUN mkdir -p /home/${USERNAME}/.vnc && \
