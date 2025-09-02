@@ -19,13 +19,18 @@ using namespace eerie_leap::subsys::device_tree;
 
 LOG_MODULE_REGISTER(sdmmc_service_logger);
 
-#ifdef CONFIG_SHARED_MULTI_HEAP
-Z_KERNEL_STACK_DEFINE_IN(SdmmcService::stack_area_, SdmmcService::k_stack_size_, __attribute__((section(".ext_ram.bss"))));
-#else
-K_KERNEL_STACK_MEMBER(SdmmcService::stack_area_, SdmmcService::k_stack_size_);
-#endif
+// #ifdef CONFIG_SHARED_MULTI_HEAP
+// Z_KERNEL_STACK_DEFINE_IN(SdmmcService::stack_area_, SdmmcService::k_stack_size_, __attribute__((section(".ext_ram.bss"))));
+// #else
+// K_KERNEL_STACK_MEMBER(SdmmcService::stack_area_, SdmmcService::k_stack_size_);
+// #endif
 
 SdmmcService::SdmmcService(fs_mount_t mountpoint) : FsService(mountpoint), monitor_running_(ATOMIC_INIT(0)) { }
+
+SdmmcService::~SdmmcService() {
+    k_thread_join(thread_id_, K_FOREVER);
+    k_thread_stack_free(stack_area_);
+}
 
 bool SdmmcService::Initialize() {
     sd_card_present_ = FsService::Initialize();
@@ -85,10 +90,11 @@ int SdmmcService::SdMonitorStart() {
     k_sem_init(&sd_monitor_stop_sem_, 0, 1);
     atomic_set(&monitor_running_, 1);
 
+    stack_area_ = k_thread_stack_alloc(k_stack_size_, 0);
     thread_id_ = k_thread_create(
         &thread_data_,
         stack_area_,
-        K_THREAD_STACK_SIZEOF(stack_area_),
+        k_stack_size_,
         [](void* instance, void* p2, void* p3) { static_cast<SdmmcService*>(instance)->SdMonitorThreadEntry(); },
         this, nullptr, nullptr,
         k_priority_, 0, K_NO_WAIT);

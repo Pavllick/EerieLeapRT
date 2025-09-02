@@ -21,15 +21,20 @@ using namespace eerie_leap::domain::logging_domain::models;
 
 LOG_MODULE_REGISTER(log_writer_service_logger);
 
-#ifdef CONFIG_SHARED_MULTI_HEAP
-Z_KERNEL_STACK_DEFINE_IN(LogWriterService::stack_area_, LogWriterService::k_stack_size_, __attribute__((section(".ext_ram.bss"))));
-#else
-K_KERNEL_STACK_MEMBER(LogWriterService::stack_area_, LogWriterService::k_stack_size_);
-#endif
+// #ifdef CONFIG_SHARED_MULTI_HEAP
+// Z_KERNEL_STACK_DEFINE_IN(LogWriterService::stack_area_, LogWriterService::k_stack_size_, __attribute__((section(".ext_ram.bss"))));
+// #else
+// K_KERNEL_STACK_MEMBER(LogWriterService::stack_area_, LogWriterService::k_stack_size_);
+// #endif
 
 LogWriterService::LogWriterService(std::shared_ptr<IFsService> fs_service, std::shared_ptr<ITimeService> time_service)
     : fs_service_(std::move(fs_service)), time_service_(std::move(time_service)), logger_running_(ATOMIC_INIT(0)) {
     k_sem_init(&processing_semaphore_, 1, 1);
+}
+
+LogWriterService::~LogWriterService() {
+    k_work_queue_stop(&work_q, K_FOREVER);
+    k_thread_stack_free(stack_area_);
 }
 
 int LogWriterService::LogReading(std::shared_ptr<SensorReading> reading) {
@@ -47,10 +52,9 @@ int LogWriterService::LogReading(std::shared_ptr<SensorReading> reading) {
 }
 
 void LogWriterService::Initialize() {
+    stack_area_ = k_thread_stack_alloc(k_stack_size_, 0);
     k_work_queue_init(&work_q);
-    k_work_queue_start(&work_q, stack_area_,
-        K_THREAD_STACK_SIZEOF(stack_area_),
-        k_priority_, nullptr);
+    k_work_queue_start(&work_q, stack_area_, k_stack_size_, k_priority_, nullptr);
 
     k_thread_name_set(&work_q.thread, "log_writer_service");
 

@@ -28,7 +28,7 @@ private:
     static constexpr int k_stack_size_ = CONFIG_EERIE_LEAP_LOG_WRITER_STACK_SIZE;
     static constexpr int k_priority_ = K_PRIO_PREEMPT(6);
 
-    static z_thread_stack_element stack_area_[k_stack_size_];
+    k_thread_stack_t* stack_area_;
     k_work_q work_q;
     std::shared_ptr<LogWriterTask> task_;
 
@@ -40,6 +40,8 @@ private:
 
 public:
     LogWriterService(std::shared_ptr<IFsService> fs_service, std::shared_ptr<ITimeService> time_service);
+    ~LogWriterService();
+
     void Initialize();
 
     int SaveLogMetadata(const std::span<uint8_t> sensors_metadata);

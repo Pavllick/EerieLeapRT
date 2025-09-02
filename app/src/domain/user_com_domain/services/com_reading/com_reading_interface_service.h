@@ -16,7 +16,7 @@ private:
     static constexpr int k_stack_size_ = 1024;
     static constexpr int k_priority_ = K_PRIO_PREEMPT(6);
 
-    static z_thread_stack_element stack_area_[k_stack_size_];
+    k_thread_stack_t* stack_area_;
     k_work_q work_q;
     std::shared_ptr<ComReadingTask> task_;
 
@@ -29,6 +29,8 @@ private:
 
 public:
     explicit ComReadingInterfaceService(std::shared_ptr<UserCom> user_com);
+    ~ComReadingInterfaceService();
+
     void Initialize();
 
     int SendReading(std::shared_ptr<SensorReading> reading, uint8_t user_id = Modbus::SERVER_ID_ALL);

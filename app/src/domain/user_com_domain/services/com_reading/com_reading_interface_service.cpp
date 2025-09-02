@@ -11,14 +11,19 @@ using namespace eerie_leap::domain::user_com_domain::types;
 
 LOG_MODULE_REGISTER(com_reading_interface_logger);
 
-#ifdef CONFIG_SHARED_MULTI_HEAP
-Z_KERNEL_STACK_DEFINE_IN(ComReadingInterfaceService::stack_area_, ComReadingInterfaceService::k_stack_size_, __attribute__((section(".ext_ram.bss"))));
-#else
-K_KERNEL_STACK_MEMBER(ComReadingInterfaceService::stack_area_, ComReadingInterfaceService::k_stack_size_);
-#endif
+// #ifdef CONFIG_SHARED_MULTI_HEAP
+// Z_KERNEL_STACK_DEFINE_IN(ComReadingInterfaceService::stack_area_, ComReadingInterfaceService::k_stack_size_, __attribute__((section(".ext_ram.bss"))));
+// #else
+// K_KERNEL_STACK_MEMBER(ComReadingInterfaceService::stack_area_, ComReadingInterfaceService::k_stack_size_);
+// #endif
 
 ComReadingInterfaceService::ComReadingInterfaceService(std::shared_ptr<UserCom> user_com) : user_com_(std::move(user_com)) {
     k_sem_init(&processing_semaphore_, 1, 1);
+}
+
+ComReadingInterfaceService::~ComReadingInterfaceService() {
+    k_work_queue_stop(&work_q, K_FOREVER);
+    k_thread_stack_free(stack_area_);
 }
 
 int ComReadingInterfaceService::SendReading(std::shared_ptr<SensorReading> reading, uint8_t user_id) {
@@ -35,10 +40,9 @@ int ComReadingInterfaceService::SendReading(std::shared_ptr<SensorReading> readi
 }
 
 void ComReadingInterfaceService::Initialize() {
+    stack_area_ = k_thread_stack_alloc(k_stack_size_, 0);
     k_work_queue_init(&work_q);
-    k_work_queue_start(&work_q, stack_area_,
-        K_THREAD_STACK_SIZEOF(stack_area_),
-        k_priority_, nullptr);
+    k_work_queue_start(&work_q, stack_area_, k_stack_size_, k_priority_, nullptr);
 
     k_thread_name_set(&work_q.thread, "com_reading_interface");
 
