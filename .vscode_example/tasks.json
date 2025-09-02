@@ -24,6 +24,17 @@
             "detail": "Build the Zephyr project using native_sim POSIX board"
         },
         {
+            "label": "Build STM32H7",
+            "type": "shell",
+            "command": "west build -p auto -b devebox_stm32h743_hw_20 ./app",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$gcc"],
+            "detail": "Build the Zephyr project using native_sim POSIX board"
+        },
+        {
             "label": "Build ESP32S3 With Bootloader",
             "type": "shell",
             "command": "west build -p auto -b esp32s3_devkitc/esp32s3/procpu --sysbuild --extra-conf boards/esp32s3_procpu_net.conf ./app",

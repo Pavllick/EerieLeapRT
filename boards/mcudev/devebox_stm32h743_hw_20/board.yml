@@ -1,0 +1,6 @@
+board:
+  name: devebox_stm32h743_hw_20
+  full_name: MCUDev DevEBox STM32H743VIT6 Board HW 2.0
+  vendor: mcudev
+  socs:
+    - name: stm32h743xx

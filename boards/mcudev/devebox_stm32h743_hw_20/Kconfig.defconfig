@@ -1,0 +1,5 @@
+if BOARD_DEVEBOX_STM32H743_HW_20
+
+source "boards/common/usb/Kconfig.cdc_acm_serial.defconfig"
+
+endif # BOARD_DEVEBOX_STM32H743_HW_20

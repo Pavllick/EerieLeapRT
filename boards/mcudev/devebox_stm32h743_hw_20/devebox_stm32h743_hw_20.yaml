@@ -1,0 +1,18 @@
+identifier: devebox_stm32h743_hw_20
+name: MCUDev DevEBox STM32H743VIT6 Board HW 2.0
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+  - gnuarmemb
+ram: 512
+flash: 2048
+supported:
+  - gpio
+  - counter
+  - spi
+  - backup_sram
+  - watchdog
+  - qspi
+  - video
+vendor: mcudev

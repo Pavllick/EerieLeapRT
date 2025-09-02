@@ -1,12 +1,18 @@
 #include <zephyr/logging/log.h>
+
+#ifdef CONFIG_HTTP_SERVER
 #include <zephyr/net/http/server.h>
 #include <zephyr/net/http/service.h>
+#endif // CONFIG_HTTP_SERVER
 
 #include "domain/http_domain/controllers/api/sensors_api_controller.h"
 #include "domain/http_domain/controllers/view/sensors_editor_controller.h"
+
 #include "http_server.h"
 
+#ifdef CONFIG_HTTP_SERVER
 HTTP_SERVICE_DEFINE(http_service, "0.0.0.0", &http_service_port_, 1, 10, nullptr, nullptr, nullptr);
+#endif // CONFIG_HTTP_SERVER
 
 namespace eerie_leap::domain::http_domain::services {
 
@@ -34,17 +40,23 @@ void HttpServer::Initialize(
     }
 
 void HttpServer::Start() {
+#ifdef CONFIG_HTTP_SERVER
     int ret = http_server_start();
     if (ret != 0)
         LOG_ERR("Failed to start HTTP server, error: %d", ret);
     else
         LOG_INF("HTTP server started on port %u", http_service_port_);
+#else
+    LOG_INF("HTTP server is not supported.");
+#endif // CONFIG_HTTP_SERVER
 }
 
+#ifdef CONFIG_HTTP_SERVER
 // API Resources
 HTTP_RESOURCE_DEFINE(sensors_config_resource, http_service, "/api/sensors/config", &SensorsApiController::sensors_config_resource_detail);
 
 // View Resources
 HTTP_RESOURCE_DEFINE(sensors_config_editor_html_resource, http_service, "/", &SensorsEditorController::sensors_config_editor_html_resource_detail);
+#endif // CONFIG_HTTP_SERVER
 
 } // namespace eerie_leap::domain::http_domain::services
