@@ -10,10 +10,12 @@ UserCom::UserCom(std::shared_ptr<Modbus> modbus, std::shared_ptr<SystemConfigura
     : modbus_(modbus),
     system_configuration_controller_(system_configuration_controller) {
 
-        com_users_ = std::make_shared<std::vector<ComUserConfiguration>>(
-            system_configuration_controller_->Get()->com_users
-        );
-    }
+    k_sem_init(&processing_semaphore_, 1, 1);
+    k_sem_init(&availability_semaphore_, 1, 1);
+
+    com_users_ = std::make_shared<std::vector<ComUserConfiguration>>(
+        system_configuration_controller_->Get()->com_users);
+}
 
 int UserCom::Initialize() {
     return modbus_->Initialize();
@@ -23,13 +25,18 @@ int UserCom::ResolveUserIds() {
     LOG_INF("Resolving server IDs...");
 
     uint16_t data = 0;
-    Send(Modbus::SERVER_ID_ALL, RequestType::SET_RESOLVE_SERVER_ID, &data, sizeof(data));
+    Send(Modbus::SERVER_ID_ALL, ComRequestType::SET_RESOLVE_SERVER_ID, &data, sizeof(data));
     k_msleep(500);
 
     uint64_t server_device_id_ = 0;
 
+    com_users_->clear();
+
     for(int i = 1; i < 10; i++) {
-        int res = Get(i, RequestType::GET_RESOLVE_SERVER_ID_GUID, &server_device_id_, sizeof(server_device_id_));
+        int res = Get(i,
+            ComRequestType::GET_RESOLVE_SERVER_ID_GUID,
+            &server_device_id_,
+            sizeof(server_device_id_));
         if(res != 0 || server_device_id_ == 0) {
             LOG_ERR("Server Device ID request failed");
             break;
@@ -37,7 +44,10 @@ int UserCom::ResolveUserIds() {
 
         LOG_INF("Resolving Server Device Id: %llu", server_device_id_);
 
-        res = Send(i, RequestType::SET_RESOLVE_SERVER_ID_GUID, &server_device_id_, sizeof(server_device_id_));
+        res = Send(i,
+            ComRequestType::SET_RESOLVE_SERVER_ID_GUID,
+            &server_device_id_,
+            sizeof(server_device_id_));
         if(res != 0) {
             LOG_ERR("Server Device ID confirmation failed");
             return res;
@@ -54,12 +64,43 @@ int UserCom::ResolveUserIds() {
     return 0;
 }
 
-int UserCom::Get(uint8_t user_id, RequestType request_type, void* data, size_t size_bytes) {
-    return modbus_->ReadHoldingRegisters(user_id, static_cast<uint16_t>(request_type), data, size_bytes);
+bool UserCom::IsAvailable() {
+    return k_sem_count_get(&availability_semaphore_) > 0 &&
+        k_sem_count_get(&processing_semaphore_) > 0;
 }
 
-int UserCom::Send(uint8_t user_id, RequestType request_type, void* data, size_t size_bytes) {
-    return modbus_->WriteHoldingRegisters(user_id, static_cast<uint16_t>(request_type), data, size_bytes);
+bool UserCom::Lock() {
+    if(k_sem_count_get(&availability_semaphore_) == 0)
+        return false;
+
+    return k_sem_take(&availability_semaphore_, K_NO_WAIT) == 0;
+}
+
+void UserCom::Unlock() {
+    if(k_sem_count_get(&availability_semaphore_) > 0)
+        return;
+
+    k_sem_give(&availability_semaphore_);
+}
+
+int UserCom::Get(uint8_t user_id, ComRequestType com_request_type, void* data, size_t size_bytes, k_timeout_t timeout) {
+    if(k_sem_take(&processing_semaphore_, timeout) != 0)
+        return -1;
+
+    int res = modbus_->ReadHoldingRegisters(user_id, static_cast<uint16_t>(com_request_type), data, size_bytes);
+    k_sem_give(&processing_semaphore_);
+
+    return res;
+}
+
+int UserCom::Send(uint8_t user_id, ComRequestType com_request_type, void* data, size_t size_bytes, k_timeout_t timeout) {
+    if(k_sem_take(&processing_semaphore_, timeout) != 0)
+        return -1;
+
+    int res = modbus_->WriteHoldingRegisters(user_id, static_cast<uint16_t>(com_request_type), data, size_bytes);
+    k_sem_give(&processing_semaphore_);
+
+    return res;
 }
 
 } // namespace eerie_leap::domain::user_com_domain

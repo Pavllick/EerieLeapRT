@@ -27,7 +27,7 @@ ComReadingInterfaceService::~ComReadingInterfaceService() {
 }
 
 int ComReadingInterfaceService::SendReading(std::shared_ptr<SensorReading> reading, uint8_t user_id) {
-    if(k_sem_count_get(&processing_semaphore_) == 0)
+    if(!user_com_->IsAvailable() || k_sem_count_get(&processing_semaphore_) == 0)
         return -1;
 
     task_->reading = std::move(reading);
