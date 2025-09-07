@@ -170,6 +170,15 @@ int main(void) {
         sensors_config_service,
         adc_configuration_controller->Get()->GetChannelCount());
 
+    std::shared_ptr<LoggingController> logging_controller = nullptr;
+    std::shared_ptr<LogReadingProcessor> log_reading_processor = nullptr;
+    if(sd_fs_service != nullptr) {
+        auto log_writer_service = make_shared_ext<LogWriterService>(sd_fs_service, time_service);
+        log_writer_service->Initialize();
+
+        logging_controller = make_shared_ext<LoggingController>(log_writer_service, sensors_configuration_controller);
+        log_reading_processor = make_shared_ext<LogReadingProcessor>(log_writer_service);
+    }
 
     std::shared_ptr<ComPollingInterfaceService> com_polling_interface_service = nullptr;
     std::shared_ptr<ComReadingInterfaceService> com_reading_interface_service = nullptr;
