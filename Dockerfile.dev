@@ -15,8 +15,8 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends git curl ca-certificates ninja-build gperf \
         ccache dfu-util device-tree-compiler wget python3-dev python3-venv python3-tk \
         xz-utils file make gcc gcc-multilib g++-multilib libsdl2-dev libmagic1 \
-        x11vnc xvfb openbox dos2unix xterm usbutils \
-        iproute2 npm socat emacs tree && \
+        x11vnc xvfb openbox dos2unix xterm usbutils openocd \
+        iproute2 npm socat emacs tree locales && \
         apt-get install -y sudo && \
     rm -rf /var/lib/apt/lists/*
 
@@ -31,6 +31,13 @@ RUN echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${USERNAME}
 ADD entrypoint.sh /home/${USERNAME}/entrypoint.sh
 RUN chmod +x /home/${USERNAME}/entrypoint.sh
 
+# Set the locale
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
+    locale-gen
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+
 USER ${USERNAME}
 
 # Configure display
@@ -41,6 +48,17 @@ RUN sudo apt-get update
 # VNC password
 RUN mkdir -p /home/${USERNAME}/.vnc && \
     x11vnc -storepasswd ${VNCPASSWD} /home/${USERNAME}/.vnc/passwd
+
+RUN mkdir -p /home/${USERNAME}/zephyr/workspace
+RUN mkdir -p /home/${USERNAME}/zephyr/workspace/project
+RUN mkdir -p /home/${USERNAME}/zephyr/workspace/project/tools/
+
+COPY ./tools/ /home/${USERNAME}/zephyr/workspace/project/tools/
+RUN if [ -f "/home/${USERNAME}/zephyr/workspace/project/tools/st-stm32cubeclt_1.19.0.sh" ]; then \
+    sudo chmod +x "/home/${USERNAME}/zephyr/workspace/project/tools/st-stm32cubeclt_1.19.0.sh" && \
+    echo | sudo LICENSE_ALREADY_ACCEPTED=1 "/home/${USERNAME}/zephyr/workspace/project/tools/st-stm32cubeclt_1.19.0.sh" && \
+    echo 'export PATH=$PATH:/opt/st/stm32cubeclt_1.19.0/STM32CubeProgrammer/bin' >> "/home/${USERNAME}/.bashrc"; \
+fi
 
 RUN python3 -m venv /home/${USERNAME}/zephyr/.venv
 
@@ -57,8 +75,6 @@ RUN source /home/${USERNAME}/zephyr/.venv/bin/activate && \
     pip install west && \
     pip install zcbor
 
-RUN mkdir -p /home/${USERNAME}/zephyr/workspace
-RUN mkdir -p /home/${USERNAME}/zephyr/workspace/project
 COPY ./west.yml /home/${USERNAME}/zephyr/workspace/project/west.yml
 
 RUN source /home/${USERNAME}/zephyr/.venv/bin/activate && \

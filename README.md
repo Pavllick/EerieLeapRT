@@ -113,6 +113,28 @@ west espressif monitor
 
 </details>
 
+<details>
+<summary>
+    STM32H7
+</summary>
+<br>
+
+**Required tools**
+
+STM32CubeProgrammer needs to be installed on the host machine. If using Docker, you can take an advantate of build script expecting to find STM32CubeCLT in `tools/st-stm32cubeclt_1.19.0.sh`, source the tool from [STM Website](https://www.st.com/en/development-tools/stm32cubeclt.html) and unpack it to `tools/st-stm32cubeclt_1.19.0.sh`. Dockerfile will take care of installing it during build process.
+
+**Build**  
+```shell
+west build -p auto -b mcudev_devebox_stm32h743_hw_20 ./app
+```
+
+**Debug**
+
+<a href="https://github.com/Marus/cortex-debug">Cortex-Debug</a> extension for <a href="https://marketplace.visualstudio.com/items?itemName=marus25.cortex-debug">VS Code</a> can be used for debugging, example configuration valid for Docker container in combination with ST-Link connected over SWD can be found in `.vscode_example/launch.json`.
+
+
+</details>
+
 ## Development
 
 ### Required tools

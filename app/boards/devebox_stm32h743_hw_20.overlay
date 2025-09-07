@@ -113,7 +113,7 @@
 	};
 };
 
-&flash0 {
+&w25q64_qspi {
 	partitions {
 		compatible = "fixed-partitions";
 		#address-cells = <1>;

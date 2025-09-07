@@ -2,7 +2,24 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug Native Sim",
+            "name": "STM32H743 Cortex Debug",
+            "cwd": "${workspaceFolder}",
+            "executable": "./build/zephyr/zephyr.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "runToEntryPoint": "main",
+            "servertype": "openocd",
+            "interface": "swd",
+            "svdFile": "/opt/st/stm32cubeclt_1.19.0/STMicroelectronics_CMSIS_SVD/STM32H743.svd",
+            "toolchainPrefix": "arm-zephyr-eabi",
+            "armToolchainPath": "/home/ubuntu/zephyr-sdk-0.17.4/arm-zephyr-eabi/bin/",
+            "showDevDebugOutput": "raw",
+            "configFiles": [
+                "${workspaceFolder}/boards/mcudev/devebox_stm32h743_hw_20/support/openocd.cfg"
+            ]
+        },
+        {
+            "name": "Native Sim Debug",
             "preLaunchTask": "Build NativeSim",
             "type": "cppdbg",
             "request": "launch",
@@ -26,7 +43,7 @@
             }
         },
         {
-            "name": "Debug QEMU Cortex-M3",
+            "name": "QEMU Cortex-M3 Debug",
             "preLaunchTask": "Build QEMU Cortex-M3",
             "type": "cppdbg",
             "request": "launch",

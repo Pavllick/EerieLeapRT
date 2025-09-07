@@ -24,3 +24,6 @@ __pycache__/
 
 # docker
 /docker-compose.yml
+
+# tools
+/tools
