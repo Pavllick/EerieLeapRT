@@ -51,6 +51,7 @@ RUN mkdir -p /home/${USERNAME}/.vnc && \
 
 RUN mkdir -p /home/${USERNAME}/zephyr/workspace
 RUN mkdir -p /home/${USERNAME}/zephyr/workspace/project
+RUN mkdir -p /home/${USERNAME}/zephyr/workspace/utilities/
 RUN mkdir -p /home/${USERNAME}/zephyr/workspace/project/tools/
 
 COPY ./tools/ /home/${USERNAME}/zephyr/workspace/project/tools/
@@ -59,6 +60,11 @@ RUN if [ -f "/home/${USERNAME}/zephyr/workspace/project/tools/st-stm32cubeclt_1.
     echo | sudo LICENSE_ALREADY_ACCEPTED=1 "/home/${USERNAME}/zephyr/workspace/project/tools/st-stm32cubeclt_1.19.0.sh" && \
     echo 'export PATH=$PATH:/opt/st/stm32cubeclt_1.19.0/STM32CubeProgrammer/bin' >> "/home/${USERNAME}/.bashrc"; \
 fi
+
+# Setup OpenOCD for ESP32
+RUN curl -sL -o /home/${USERNAME}/zephyr/workspace/utilities/openocd.tar.gz \
+    https://github.com/espressif/openocd-esp32/releases/download/v0.12.0-esp32-20250707/openocd-esp32-linux-amd64-0.12.0-esp32-20250707.tar.gz
+RUN tar -xvzf /home/${USERNAME}/zephyr/workspace/utilities/openocd.tar.gz -C /home/${USERNAME}/zephyr/workspace/utilities
 
 RUN python3 -m venv /home/${USERNAME}/zephyr/.venv
 
