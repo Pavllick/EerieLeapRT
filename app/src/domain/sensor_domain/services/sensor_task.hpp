@@ -16,6 +16,7 @@ using namespace eerie_leap::domain::sensor_domain::processors::sensor_reader;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 
 struct SensorTask {
+    k_work_q* work_q;
     k_work_delayable work;
     k_sem* processing_semaphore;
     k_timeout_t sampling_rate_ms;

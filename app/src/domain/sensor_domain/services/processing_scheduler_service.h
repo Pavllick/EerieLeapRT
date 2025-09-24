@@ -32,6 +32,12 @@ private:
     k_sem processing_semaphore_;
     static constexpr k_timeout_t PROCESSING_TIMEOUT = K_MSEC(200);
 
+    static constexpr int k_stack_size_ = 4096;
+    static constexpr int k_priority_ = K_PRIO_PREEMPT(6);
+
+    k_thread_stack_t* stack_area_;
+    k_work_q work_q;
+
     std::shared_ptr<ITimeService> time_service_;
     std::shared_ptr<GuidGenerator> guid_generator_;
     std::shared_ptr<IGpio> gpio_;
@@ -55,6 +61,9 @@ public:
         std::shared_ptr<AdcConfigurationController> adc_configuration_controller,
         std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller,
         std::shared_ptr<SensorReadingsFrame> sensor_readings_frame);
+    ~ProcessingSchedulerService();
+
+    void Initialize();
 
     void RegisterReadingProcessor(std::shared_ptr<IReadingProcessor> processor);
     void Start();

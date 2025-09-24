@@ -118,7 +118,9 @@ int main(void) {
             LOG_ERR("Failed to initialize SD File System.");
         }
 
-        sd_fs_service->SdMonitorStart();
+        // TODO: SPI SD card detection causes card to be
+        // constatly mounted/umounted during logging
+        // sd_fs_service->SdMonitorStart();
     }
 
     // NOTE: Don't use for WiFi supporting boards as WiFi is broken in Zephyr 4.1 and has memory allocation issues
@@ -203,16 +205,20 @@ int main(void) {
         com_reading_interface_service->Initialize();
 
         com_reading_processor = make_shared_ext<ComReadingProcessor>(com_reading_interface_service);
-    }
+    
+        com_polling_interface_service->RegisterHandler(ComUserStatus::START_LOGGING, [&logging_controller]() {
+            if(logging_controller != nullptr)
+                logging_controller->LogWriterStart();
 
-    std::shared_ptr<LoggingController> logging_controller = nullptr;
-    std::shared_ptr<LogReadingProcessor> log_reading_processor = nullptr;
-    if(sd_fs_service != nullptr) {
-        auto log_writer_service = make_shared_ext<LogWriterService>(sd_fs_service, time_service);
-        log_writer_service->Initialize();
+            return 0;
+        });
 
-        logging_controller = make_shared_ext<LoggingController>(log_writer_service, sensors_configuration_controller);
-        log_reading_processor = make_shared_ext<LogReadingProcessor>(log_writer_service);
+        com_polling_interface_service->RegisterHandler(ComUserStatus::STOP_LOGGING, [&logging_controller]() {
+            if(logging_controller != nullptr)
+                logging_controller->LogWriterStop();
+
+            return 0;
+        });
     }
 
     // TODO: For test purposes only
@@ -229,6 +235,7 @@ int main(void) {
         adc_configuration_controller,
         sensors_configuration_controller,
         sensor_readings_frame);
+    processing_scheduler_service->Initialize();
 
     processing_scheduler_service->RegisterReadingProcessor(sensor_processor);
     if(com_reading_processor != nullptr)
@@ -320,8 +327,8 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
         },
         .configuration = {
             .type = SensorType::PHYSICAL_ANALOG,
-            .channel = 1,
-            .sampling_rate_ms = 250,
+            .channel = 0,
+            .sampling_rate_ms = 10,
             .voltage_interpolator = make_shared_ext<LinearVoltageInterpolator>(calibration_data_1_ptr),
             // .expression_evaluator = make_shared_ext<ExpressionEvaluator>(expression_evaluator_1)
         }
@@ -347,7 +354,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
         },
         .configuration = {
             .type = SensorType::PHYSICAL_ANALOG,
-            .channel = 6,
+            .channel = 1,
             .sampling_rate_ms = 500,
             .voltage_interpolator = make_shared_ext<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
             .expression_evaluator = make_shared_ext<ExpressionEvaluator>(expression_evaluator_2)
@@ -404,8 +411,8 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
         make_shared_ext<Sensor>(sensor_1),
         make_shared_ext<Sensor>(sensor_2),
         make_shared_ext<Sensor>(sensor_3),
-        make_shared_ext<Sensor>(sensor_4),
-        make_shared_ext<Sensor>(sensor_5)
+        // make_shared_ext<Sensor>(sensor_4),
+        // make_shared_ext<Sensor>(sensor_5)
     };
 
     auto sensors_ptr = make_shared_ext<std::vector<std::shared_ptr<Sensor>>>(sensors);

@@ -38,6 +38,19 @@ ProcessingSchedulerService::ProcessingSchedulerService(
     k_sem_init(&processing_semaphore_, 1, 1);
 };
 
+ProcessingSchedulerService::~ProcessingSchedulerService() {
+    k_work_queue_stop(&work_q, K_FOREVER);
+    k_thread_stack_free(stack_area_);
+}
+
+void ProcessingSchedulerService::Initialize() {
+    stack_area_ = k_thread_stack_alloc(k_stack_size_, 0);
+    k_work_queue_init(&work_q);
+    k_work_queue_start(&work_q, stack_area_, k_stack_size_, k_priority_, nullptr);
+
+    k_thread_name_set(&work_q.thread, "processing_scheduler_service");
+}
+
 void ProcessingSchedulerService::ProcessSensorWorkTask(k_work* work) {
     SensorTask* task = CONTAINER_OF(work, SensorTask, work);
 
@@ -62,11 +75,12 @@ void ProcessingSchedulerService::ProcessSensorWorkTask(k_work* work) {
     }
 
     k_sem_give(task->processing_semaphore);
-    k_work_reschedule(&task->work, task->sampling_rate_ms);
+    k_work_reschedule_for_queue(task->work_q, &task->work, task->sampling_rate_ms);
 }
 
 std::shared_ptr<SensorTask> ProcessingSchedulerService::CreateSensorTask(std::shared_ptr<Sensor> sensor) {
     auto task = make_shared_ext<SensorTask>();
+    task->work_q = &work_q;
     task->processing_semaphore = &processing_semaphore_;
     task->sampling_rate_ms = K_MSEC(sensor->configuration.sampling_rate_ms);
     task->sensor = sensor;
@@ -115,7 +129,7 @@ void ProcessingSchedulerService::StartTasks() {
         k_work_delayable* work = &task->work;
         k_work_init_delayable(work, ProcessSensorWorkTask);
 
-        k_work_schedule(work, K_NO_WAIT);
+        k_work_schedule_for_queue(&work_q, work, K_NO_WAIT);
     }
 
     k_sleep(K_MSEC(1));
