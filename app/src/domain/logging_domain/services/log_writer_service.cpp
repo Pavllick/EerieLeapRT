@@ -129,12 +129,20 @@ std::string LogWriterService::GetNewLogDataFileName(const system_clock::time_poi
 }
 
 int LogWriterService::LogWriterStart() {
+    if(atomic_get(&logger_running_))
+        return 0;
+
+    if(!fs_service_->IsAvailable()) {
+        LOG_ERR("SD card is not available.");
+        return -1;
+    }
+
     auto current_time = time_service_->GetCurrentTime();
     auto log_header = LogDataHeader::Create(current_time);
 
     int res = 0;
 
-    if(!fs_service_->Exists(CONFIG_EERIE_LEAP_LOG_DATA_FILES_DIR))
+    if(!fs_service_->Exists(CONFIG_EERIE_LEAP_LOG_DATA_FILES_DIR)) {}
         if(!fs_service_->CreateDirectory(CONFIG_EERIE_LEAP_LOG_DATA_FILES_DIR)) {
             LOG_ERR("Failed to create %s directory", CONFIG_EERIE_LEAP_LOG_DATA_FILES_DIR);
             return -1;
@@ -159,7 +167,7 @@ int LogWriterService::LogWriterStart() {
         return -1;
     }
 
-    LOG_INF("Log file created: %s", file_name.c_str());
+    LOG_INF("Logging started. Log file created: %s", file_name.c_str());
 
     task_->file_name = file_name;
 
@@ -173,6 +181,8 @@ int LogWriterService::LogWriterStop() {
         return 0;
 
     atomic_set(&logger_running_, 0);
+
+    LOG_INF("Logging stopped. Saved file: %s", task_->file_name.c_str());
 
     return 0;
 }
