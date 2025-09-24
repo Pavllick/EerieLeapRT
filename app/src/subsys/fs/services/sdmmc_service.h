@@ -33,6 +33,7 @@ public:
     ~SdmmcService();
 
     bool Initialize() override;
+    bool IsAvailable() const override;
 
     int SdMonitorStart();
     int SdMonitorStop();

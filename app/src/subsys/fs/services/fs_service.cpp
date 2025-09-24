@@ -19,6 +19,10 @@ bool FsService::Initialize() {
     return true;
 }
 
+bool FsService::IsAvailable() const {
+    return IsMounted();
+}
+
 bool FsService::WriteFile(const std::string& relative_path, const void* data_p, size_t data_size, bool append) {
     if(!IsMounted()) {
         LOG_ERR("Filesystem not mounted.");

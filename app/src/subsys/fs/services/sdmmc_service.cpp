@@ -41,6 +41,10 @@ bool SdmmcService::Initialize() {
     return true;
 }
 
+bool SdmmcService::IsAvailable() const {
+    return sd_card_present_;
+}
+
 bool SdmmcService::IsSdCardAttached(const char* disk_name) {
     bool bool_true = true;
     disk_access_ioctl(disk_name, DISK_IOCTL_CTRL_DEINIT, &bool_true);
