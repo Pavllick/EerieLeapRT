@@ -18,7 +18,6 @@
 		watchdog0 = &wdt0;
 		gpioc = &gpioc;
 		adc0 = &adc0;
-		adc1 = &adc1;
 		uart0 = &uart0;
 		sdhc0 = &spi_sdhc0;
 	};
