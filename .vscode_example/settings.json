@@ -1,3 +1,20 @@
 {
-    "cmake.sourceDirectory": "./app"
+    "cmake.sourceDirectory": "./app",
+
+    "devicetree.cwd": "/home/ubuntu/zephyr/workspace/zephyr",
+    "devicetree.allowAdhocContexts": true,
+    "devicetree.defaultBindingType": "Zephyr",
+    "devicetree.defaultZephyrBindings": ["/home/ubuntu/zephyr/workspace/zephyr/dts/bindings"],
+    "devicetree.defaultIncludePaths": [
+        "/home/ubuntu/zephyr/workspace/zephyr/dts",
+        "/home/ubuntu/zephyr/workspace/zephyr/dts/bindings",
+        "/home/ubuntu/zephyr/workspace/zephyr/dts/bindings/base",
+        "/home/ubuntu/zephyr/workspace/zephyr/dts/arm",
+        "/home/ubuntu/zephyr/workspace/zephyr/dts/arm64/",
+        "/home/ubuntu/zephyr/workspace/zephyr/dts/riscv",
+        "/home/ubuntu/zephyr/workspace/zephyr/dts/common",
+        "/home/ubuntu/zephyr/workspace/zephyr/dts/vendor",
+        "/home/ubuntu/zephyr/workspace/zephyr/include",
+        "/home/ubuntu/zephyr/workspace/zephyr/dts/xtensa"
+    ]
 }

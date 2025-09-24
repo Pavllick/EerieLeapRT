@@ -2,6 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
+            // https://github.com/zephyrproject-rtos/zephyr/issues/62791
             // https://docs.espressif.com/projects/esp-idf/en/v5.5.1/esp32s3/api-guides/jtag-debugging/using-debugger.html
             // https://docs.espressif.com/projects/esp-idf/en/v5.5.1/esp32s3/api-guides/jtag-debugging/tips-and-quirks.html#jtag-debugging-tip-debugger-startup-commands
             "name": "ESP32S3 Debug",

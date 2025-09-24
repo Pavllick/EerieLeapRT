@@ -11,6 +11,8 @@ namespace eerie_leap::domain::http_domain::controllers::api {
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::voltage_interpolator;
 
+const size_t SensorsApiController::sensors_config_post_buffer_size_;
+
 std::shared_ptr<ExtVector> SensorsApiController::sensors_config_post_buffer_;
 std::shared_ptr<ExtVector> SensorsApiController::sensors_config_get_buffer_;
 

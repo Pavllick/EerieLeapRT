@@ -140,7 +140,8 @@ And GDB in another:
 
 <details>
 <summary>
-    STM32H7
+    MCUDev DevEBox STM32H7XX_M
+    <a href="https://github.com/mcauser/MCUDEV_DEVEBOX_H7XX_M/tree/master">(Reference Docs)</a>
 </summary>
 <br>
 

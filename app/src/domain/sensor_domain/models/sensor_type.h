@@ -22,7 +22,6 @@ constexpr const std::array SensorTypeNames = {
     "VIRTUAL_INDICATOR"sv
 };
 
-
 inline const char* GetSensorTypeName(SensorType type) {
     return SensorTypeNames[static_cast<std::uint8_t>(type)].data();
 }

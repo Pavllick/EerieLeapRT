@@ -6,6 +6,8 @@ LOG_MODULE_REGISTER(modbus_logger);
 
 namespace eerie_leap::subsys::modbus {
 
+const uint8_t Modbus::SERVER_ID_ALL;
+
 Modbus::Modbus(const char* iface_name) : iface_name_(iface_name) {
     client_iface_ = modbus_iface_get_by_name(iface_name_);
 
