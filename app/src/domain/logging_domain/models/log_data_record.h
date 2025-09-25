@@ -30,8 +30,7 @@ struct LogDataRecord {
         record.timestamp_delta = timestamp_delta;
         record.sensor_id = sensor_id;
         record.data = data;
-        record.crc = sys_cpu_to_le16(
-            crc32_ieee((uint8_t*)(&record), sizeof(record) - sizeof(record.crc)));
+        record.crc = crc32_ieee((uint8_t*)(&record), sizeof(record) - sizeof(record.crc));
 
         return record;
     }

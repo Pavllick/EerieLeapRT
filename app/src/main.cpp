@@ -40,6 +40,7 @@
 #include "controllers/adc_configuration_controller.h"
 #include "controllers/system_configuration_controller.h"
 #include "controllers/logging_controller.h"
+#include "controllers/com_polling_controller.h"
 
 // Test sensors includes
 #include "utilities/math_parser/expression_evaluator.h"
@@ -185,6 +186,7 @@ int main(void) {
     std::shared_ptr<ComPollingInterfaceService> com_polling_interface_service = nullptr;
     std::shared_ptr<ComReadingInterfaceService> com_reading_interface_service = nullptr;
     std::shared_ptr<ComReadingProcessor> com_reading_processor = nullptr;
+    std::shared_ptr<ComPollingController> com_polling_controller = nullptr;
     if(DtModbus::Get().has_value()) {
     auto modbus = make_shared_ext<Modbus>(DtModbus::Get().value());
     auto user_com_interface = make_shared_ext<UserCom>(modbus, system_configuration_controller);
@@ -206,19 +208,10 @@ int main(void) {
 
         com_reading_processor = make_shared_ext<ComReadingProcessor>(com_reading_interface_service);
     
-        com_polling_interface_service->RegisterHandler(ComUserStatus::START_LOGGING, [&logging_controller]() {
-            if(logging_controller != nullptr)
-                logging_controller->LogWriterStart();
-
-            return 0;
-        });
-
-        com_polling_interface_service->RegisterHandler(ComUserStatus::STOP_LOGGING, [&logging_controller]() {
-            if(logging_controller != nullptr)
-                logging_controller->LogWriterStop();
-
-            return 0;
-        });
+        if(logging_controller != nullptr) {
+            com_polling_controller = make_shared_ext<ComPollingController>(com_polling_interface_service, logging_controller);
+            com_polling_controller->Initialize();
+        }
     }
 
     // TODO: For test purposes only

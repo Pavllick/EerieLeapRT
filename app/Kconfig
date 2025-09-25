@@ -39,7 +39,7 @@ config EERIE_LEAP_LOG_METADATA_FILE_VERSION
 
 config EERIE_LEAP_LOG_METADATA_FILE_DIR
 	string "Log metadata file directory"
-	default "data_logs"
+	default "logs_metadata"
 
 config EERIE_LEAP_LOG_METADATA_FILE_NAME
 	string "Log metadata file name"

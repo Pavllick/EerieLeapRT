@@ -1,4 +1,5 @@
 #include <string>
+#include <cstdio>
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
@@ -76,14 +77,24 @@ int LogWriterService::SaveLogMetadata(const std::span<uint8_t> sensors_metadata)
             return -1;
         }
 
+    uint32_t crc = crc32_ieee((uint8_t*)(&log_metadata_header), sizeof(log_metadata_header));
+    crc = crc32_ieee_update(crc, sensors_metadata.data(), sensors_metadata.size());
+    log_metadata_file_version_ = crc;
+
+    std::string version_str;
+    version_str.resize(sizeof(log_metadata_file_version_) * 2);
+    snprintf(version_str.data(), version_str.size() + 1, "%08x", log_metadata_file_version_);
+
     std::string path = CONFIG_EERIE_LEAP_LOG_METADATA_FILE_DIR;
     path += "/";
     path += CONFIG_EERIE_LEAP_LOG_METADATA_FILE_NAME;
+    path += "_";
+    path += version_str;
     path += ".";
     path += LOG_METADATA_FILE_EXTENSION;
 
     if(fs_service_->Exists(path))
-        fs_service_->DeleteFile(path);
+        return 0;
 
     bool success = fs_service_->WriteFile(path, &log_metadata_header, sizeof(log_metadata_header));
     if(!success) {
@@ -96,9 +107,6 @@ int LogWriterService::SaveLogMetadata(const std::span<uint8_t> sensors_metadata)
         LOG_ERR("Failed to save log metadata.");
         return -1;
     }
-
-    uint32_t crc = crc32_ieee((uint8_t*)(&log_metadata_header), sizeof(log_metadata_header));
-    crc = crc32_ieee_update(crc, (uint8_t*)(&sensors_metadata), sensors_metadata.size());
 
     success = fs_service_->WriteFile(path, &crc, sizeof(crc), true);
     if(!success) {
@@ -130,17 +138,20 @@ std::string LogWriterService::GetNewLogDataFileName(const system_clock::time_poi
 
 int LogWriterService::LogWriterStart() {
     if(atomic_get(&logger_running_))
-        return 0;
+        return -1;
 
     if(!fs_service_->IsAvailable()) {
         LOG_ERR("SD card is not available.");
         return -1;
     }
 
-    auto current_time = time_service_->GetCurrentTime();
-    auto log_header = LogDataHeader::Create(current_time);
+    if(log_metadata_file_version_ == 0) {
+        LOG_ERR("Log metadata file version is not set.");
+        return -1;
+    }
 
-    int res = 0;
+    auto current_time = time_service_->GetCurrentTime();
+    auto log_header = LogDataHeader::Create(current_time, log_metadata_file_version_);
 
     if(!fs_service_->Exists(CONFIG_EERIE_LEAP_LOG_DATA_FILES_DIR)) {}
         if(!fs_service_->CreateDirectory(CONFIG_EERIE_LEAP_LOG_DATA_FILES_DIR)) {
@@ -178,7 +189,7 @@ int LogWriterService::LogWriterStart() {
 
 int LogWriterService::LogWriterStop() {
     if(!atomic_get(&logger_running_))
-        return 0;
+        return -1;
 
     atomic_set(&logger_running_, 0);
 

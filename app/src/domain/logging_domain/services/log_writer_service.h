@@ -24,6 +24,7 @@ private:
     std::shared_ptr<ITimeService> time_service_;
 
     atomic_t logger_running_;
+    uint32_t log_metadata_file_version_;
 
     static constexpr int k_stack_size_ = CONFIG_EERIE_LEAP_LOG_WRITER_STACK_SIZE;
     static constexpr int k_priority_ = K_PRIO_PREEMPT(6);
