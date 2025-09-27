@@ -189,7 +189,7 @@ int LogWriterService::LogWriterStart() {
 
 int LogWriterService::LogWriterStop() {
     if(!atomic_get(&logger_running_))
-        return -1;
+        return 0;
 
     atomic_set(&logger_running_, 0);
 

@@ -19,7 +19,6 @@ public:
         std::shared_ptr<LogWriterService> log_writer_service,
         std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller);
 
-    int SaveLogMetadata();
     int LogWriterStart();
     int LogWriterStop();
 };

@@ -108,8 +108,8 @@ void ComPollingInterfaceService::ProcessStatusWorkTask(k_work* work) {
 }
 
 void ComPollingInterfaceService::RegisterHandler(ComUserStatus status, ComPollingHandler handler) {
-    if(handlers_->find(status) == handlers_->end())
-        handlers_->insert({status, std::make_shared<std::vector<ComPollingHandler>>()});
+    if(!handlers_->contains(status))
+        handlers_->emplace(status, std::make_shared<std::vector<ComPollingHandler>>());
 
     handlers_->at(status)->push_back(handler);
 }

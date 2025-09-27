@@ -8,12 +8,13 @@ LoggingController::LoggingController(
     : log_writer_service_(std::move(log_writer_service)),
     sensors_configuration_controller_(std::move(sensors_configuration_controller)) { }
 
-int LoggingController::SaveLogMetadata() {
-    return log_writer_service_->SaveLogMetadata(sensors_configuration_controller_->GetRaw());
-}
-
 int LoggingController::LogWriterStart() {
-    return log_writer_service_->LogWriterStart();
+    int res = log_writer_service_->SaveLogMetadata(sensors_configuration_controller_->GetRaw());
+
+    if(res == 0)
+        res = log_writer_service_->LogWriterStart();
+
+    return res;
 }
 
 int LoggingController::LogWriterStop() {

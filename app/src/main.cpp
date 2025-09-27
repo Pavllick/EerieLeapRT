@@ -209,7 +209,7 @@ int main(void) {
         com_reading_processor = make_shared_ext<ComReadingProcessor>(com_reading_interface_service);
     
         if(logging_controller != nullptr) {
-            com_polling_controller = make_shared_ext<ComPollingController>(com_polling_interface_service, logging_controller);
+            com_polling_controller = make_shared_ext<ComPollingController>(user_com_interface, com_polling_interface_service, logging_controller);
             com_polling_controller->Initialize();
         }
     }
