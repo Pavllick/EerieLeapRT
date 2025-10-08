@@ -127,6 +127,8 @@ int main(void) {
     // NOTE: Don't use for WiFi supporting boards as WiFi is broken in Zephyr 4.1 and has memory allocation issues
     // At least on ESP32S3, it does connect if Zephyr revision is set to "main", but heap allocations cannot be moved
     // to the external RAM (e.g. PSRAM)
+
+    // NOTE: Wifi thread seems to run out of memory on ESP32S3 after random period of time
 #ifdef CONFIG_WIFI
     WifiApService::Initialize();
 #endif // CONFIG_WIFI

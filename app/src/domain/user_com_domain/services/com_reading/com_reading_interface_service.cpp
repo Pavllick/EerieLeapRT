@@ -63,7 +63,7 @@ void ComReadingInterfaceService::SendReadingWorkTask(k_work* work) {
     }
 
     auto dto = types::SensorReadingDto::FromSensorReading(*task->reading);
-    task->user_com->Send(task->user_id, RequestType::SET_READING, &dto, sizeof(dto));
+    task->user_com->Send(task->user_id, ComRequestType::SET_READING, &dto, sizeof(dto));
 
     k_sem_give(task->processing_semaphore);
 }

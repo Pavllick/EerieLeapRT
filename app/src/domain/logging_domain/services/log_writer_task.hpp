@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <chrono>
 
 #include <zephyr/kernel.h>
 
@@ -21,6 +22,7 @@ struct LogWriterTask {
     std::shared_ptr<IFsService> fs_service;
     std::shared_ptr<ITimeService> time_service;
     std::shared_ptr<SensorReading> reading;
+    system_clock::time_point start_time;
     std::string file_name;
 };
 

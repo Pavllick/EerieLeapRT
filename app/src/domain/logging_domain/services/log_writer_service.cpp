@@ -150,8 +150,8 @@ int LogWriterService::LogWriterStart() {
         return -1;
     }
 
-    auto current_time = time_service_->GetCurrentTime();
-    auto log_header = LogDataHeader::Create(current_time, log_metadata_file_version_);
+    auto start_time = time_service_->GetCurrentTime();
+    auto log_header = LogDataHeader::Create(start_time, log_metadata_file_version_);
 
     if(!fs_service_->Exists(CONFIG_EERIE_LEAP_LOG_DATA_FILES_DIR)) {}
         if(!fs_service_->CreateDirectory(CONFIG_EERIE_LEAP_LOG_DATA_FILES_DIR)) {
@@ -161,7 +161,7 @@ int LogWriterService::LogWriterStart() {
 
     std::string file_name;
     for(int i = 0; i < 10; i++) {
-        auto new_file_name = GetNewLogDataFileName(current_time);
+        auto new_file_name = GetNewLogDataFileName(start_time);
         if(!fs_service_->Exists(new_file_name)) {
             file_name = new_file_name;
             break;
@@ -180,6 +180,7 @@ int LogWriterService::LogWriterStart() {
 
     LOG_INF("Logging started. Log file created: %s", file_name.c_str());
 
+    task_->start_time = start_time;
     task_->file_name = file_name;
 
     atomic_set(&logger_running_, 1);
@@ -212,7 +213,7 @@ void LogWriterService::LogReadingWorkTask(k_work* work) {
     memcpy(&value, &float_value, sizeof(value));
 
     auto log_record = LogDataRecord<uint32_t>::Create(
-        TimeHelpers::ToUint32(task->reading->timestamp.value()),
+        task->reading->timestamp.value() - task->start_time,
         task->reading->sensor->id_hash,
         value);
 

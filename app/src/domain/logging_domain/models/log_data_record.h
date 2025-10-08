@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <chrono>
 
 #include <zephyr/sys/byteorder.h>
 #include <zephyr/sys/crc.h>
@@ -24,10 +25,10 @@ struct LogDataRecord {
 
     LogDataRecord() : data_length(sizeof(T)) {}
 
-    static LogDataRecord Create(uint32_t timestamp_delta, uint32_t sensor_id, T data) {
+    static LogDataRecord Create(system_clock::duration timestamp_delta, uint32_t sensor_id, T data) {
         LogDataRecord record;
         record.record_start_mark = LOG_DATA_RECORD_START_MARK;
-        record.timestamp_delta = timestamp_delta;
+        record.timestamp_delta = duration_cast<milliseconds>(timestamp_delta).count();
         record.sensor_id = sensor_id;
         record.data = data;
         record.crc = crc32_ieee((uint8_t*)(&record), sizeof(record) - sizeof(record.crc));
