@@ -11,7 +11,7 @@ class LogDataRecord:
     def __init__(self):
         # self.record_start_mark: bytes         # 4 bytes
         self.time_delta_ms: int                 # 4 bytes
-        self.sensor_id: bytes                   # 4 bytes
+        self.sensor_id: int                     # 4 bytes
         # self.data_length: bytes               # 1 byte
         self.data: bytes                        # data_length bytes
         self.crc: bytes                         # 4 bytes
@@ -39,9 +39,10 @@ class LogDataRecord:
             return None
         instance.time_delta_ms = struct.unpack('<I', timestamp_delta)[0]
 
-        instance.sensor_id = bytes(stream.read(4))
-        if not instance.sensor_id:
+        sensor_id = bytes(stream.read(4))
+        if not sensor_id:
             return None
+        instance.sensor_id = struct.unpack('<I', sensor_id)[0]
 
         data_length: int = stream.read(1)[0]
         if not data_length:
@@ -61,7 +62,7 @@ class LogDataRecord:
     def to_dictionary(self):  # type: ignore
         return {
             'timestamp_delta': self.time_delta_ms,
-            'sensor_id': self.sensor_id.hex(),
+            'sensor_id': self.sensor_id,
             'data': self.get_data(),
             'crc': self.crc.hex()
         } # type: ignore
