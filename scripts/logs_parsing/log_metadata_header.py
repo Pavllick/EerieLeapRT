@@ -2,7 +2,6 @@
 
 import io
 import struct
-import json
 
 class LogMetadataHeader:
     LOG_METADATA_FILE_TYPE = bytes.fromhex('4D4C4C45')[::-1].decode("ascii")
@@ -36,26 +35,3 @@ class LogMetadataHeader:
             'version': self.version,
             'reserved': self.reserved.hex(),
         } # type: ignore
-
-class LogMetadata:
-    @staticmethod
-    def to_json(path: str, output: io.IOBase):
-        with open(path, "rb") as f:
-            output.write("{")
-            output.write("\"header\": ")
-
-            header = LogMetadataHeader.create(f)
-            if not header:
-                return False
-
-            output.write(json.dumps(header.to_dictionary()))
-
-            output.write("}")
-
-        return True
-
-with io.StringIO() as output_json_file:
-    LogMetadata.to_json("logs_metadata/log_metadata_b67001c5.elm", output_json_file)
-
-    formatted = json.dumps(json.loads(output_json_file.getvalue()), indent=2)
-    print(formatted)
