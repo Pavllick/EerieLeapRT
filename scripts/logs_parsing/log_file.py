@@ -42,17 +42,17 @@ class LogFile:
 
         if self.metadata:
             sensors = self.metadata.sensors.to_dictionary()
-            header: str = "Time (sec)"
+            header: str = "\"Time (sec)\""
 
             for i in range(len(sensors)):
                 sensor_ids.append(sensors[i].id_hash)
 
-                header += "," + sensors[i].metadata.name
-                header += " (" + sensors[i].metadata.unit + ")"
+                header += ",\"" + sensors[i].metadata.name
+                header += " (" + sensors[i].metadata.unit + ")\""
 
             output.write(header + "\n")
         else:
-            output.write("Time (sec),Value\n")
+            output.write("\"Time (sec)\",\"Value\"\n")
 
         header = LogDataHeader.create(input)
         if not header:
