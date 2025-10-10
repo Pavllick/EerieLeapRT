@@ -1,0 +1,165 @@
+#include <zephyr/kernel.h>
+#include <zephyr/devicetree.h>
+#include <zephyr/drivers/display.h>
+#include <zephyr/logging/log.h>
+#include <zephyr/display/cfb.h>
+
+#include "subsys/device_tree/dt_display.h"
+
+#include "cfb.h"
+
+LOG_MODULE_REGISTER(cfb_logger);
+
+namespace eerie_leap::subsys::cfb {
+
+using namespace eerie_leap::subsys::device_tree;
+
+Cfb::Cfb() {
+    k_sem_init(&processing_semaphore_, 1, 1);
+}
+
+bool Cfb::Initialize() {
+    LOG_INF("Cfb initialization started.");
+
+    if(!DtDisplay::Get()) {
+        LOG_ERR("Display device not found.");
+        return false;
+    }
+
+    if (display_set_pixel_format(DtDisplay::Get(), PIXEL_FORMAT_MONO10) != 0) {
+        LOG_ERR("Failed to set pixel format");
+        return false;
+	}
+
+    if (cfb_framebuffer_init(DtDisplay::Get())) {
+		LOG_ERR("Framebuffer initialization failed!");
+		return false;
+	}
+
+	cfb_framebuffer_clear(DtDisplay::Get(), true);
+    cfb_framebuffer_invert(DtDisplay::Get());
+
+	display_blanking_off(DtDisplay::Get());
+    cfb_framebuffer_finalize(DtDisplay::Get());
+
+    SetFont(0);
+    cfb_set_kerning(DtDisplay::Get(), 0);
+
+    LOG_INF("Cfb initialized successfully.");
+
+    x_res_ = cfb_get_display_parameter(DtDisplay::Get(), CFB_DISPLAY_WIDTH);
+    y_res_ = cfb_get_display_parameter(DtDisplay::Get(), CFB_DISPLAY_HEIGHT);
+
+    PrintScreenInfo();
+
+    InitializeThread();
+
+    return true;
+}
+
+void Cfb::InitializeThread() {
+    stack_area_ = k_thread_stack_alloc(k_stack_size_, 0);
+    k_work_queue_init(&work_q);
+    k_work_queue_start(&work_q, stack_area_, k_stack_size_, k_priority_, nullptr);
+
+    k_thread_name_set(&work_q.thread, "display_service");
+
+    k_work_init(&task_.work, CfbTaskWorkTask);
+    task_.work_q = &work_q;
+    task_.processing_semaphore = &processing_semaphore_;
+
+    LOG_INF("Display service initialized.");
+}
+
+void Cfb::CfbTaskWorkTask(k_work* work) {
+    CfbTask* task = CONTAINER_OF(work, CfbTask, work);
+
+    if(k_sem_take(task->processing_semaphore, PROCESSING_TIMEOUT) != 0) {
+        LOG_ERR("Display service lock timed out");
+
+        return;
+    }
+
+    cfb_framebuffer_finalize(DtDisplay::Get());
+
+    k_sem_give(task->processing_semaphore);
+}
+
+bool Cfb::Flush() {
+    if(k_sem_count_get(&processing_semaphore_) == 0)
+        return false;
+
+    k_work_submit_to_queue(&work_q, &task_.work);
+    k_work_flush(&task_.work, &work_sync_);
+
+    return true;
+}
+
+bool Cfb::SetFont(uint8_t font_idx) {
+    if(cfb_framebuffer_set_font(DtDisplay::Get(), font_idx) != 0) {
+        LOG_ERR("Failed to set font");
+        return false;
+    }
+
+    return true;
+}
+
+bool Cfb::PrintString(const char* str, const Coordinate& coordinate) {
+    if(cfb_print(DtDisplay::Get(), str, coordinate.x, coordinate.y)) {
+        LOG_ERR("Failed to print a string");
+        return false;
+    }
+
+    return true;
+}
+
+bool Cfb::PrintStringLine(const char* str, const Coordinate& coordinate) {
+    if(cfb_draw_text(DtDisplay::Get(), str, coordinate.x, coordinate.y)) {
+        LOG_ERR("Failed to print a string");
+        return false;
+    }
+
+    return true;
+}
+
+bool Cfb::DrawRectangle(const Coordinate& start, const Coordinate& end) {
+    cfb_position cbf_start = {start.x, start.y};
+    cfb_position cbf_end = {end.x, end.y};
+
+    if(cfb_draw_rect(DtDisplay::Get(), &cbf_start, &cbf_end)) {
+        LOG_ERR("Failed to draw a rectangle");
+        return false;
+    }
+
+    return true;
+}
+
+bool Cfb::Clear(bool clear_display) {
+    if(cfb_framebuffer_clear(DtDisplay::Get(), clear_display)) {
+        LOG_ERR("Failed to clear the screen");
+        return false;
+    }
+
+    return true;
+}
+
+void Cfb::PrintScreenInfo() {
+	uint16_t rows = cfb_get_display_parameter(DtDisplay::Get(), CFB_DISPLAY_ROWS);
+	uint8_t ppt = cfb_get_display_parameter(DtDisplay::Get(), CFB_DISPLAY_PPT);
+    uint16_t cols = cfb_get_display_parameter(DtDisplay::Get(), CFB_DISPLAY_COLS);
+
+    LOG_INF("x_res %d, y_res %d, ppt %d, rows %d, cols %d",
+        x_res_, y_res_, ppt, rows, cols);
+
+    uint8_t font_width;
+	uint8_t font_height;
+
+	for(int idx = 0; idx < 42; idx++) {
+		if(cfb_get_font_size(DtDisplay::Get(), idx, &font_width, &font_height))
+			break;
+
+		LOG_INF("font %d: width %d, height %d", idx, font_width, font_height);
+	}
+}
+
+}  // namespace eerie_leap::subsys::cfb

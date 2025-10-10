@@ -19,6 +19,7 @@
 #include "subsys/fs/services/sdmmc_service.h"
 #include "subsys/gpio/gpio_factory.hpp"
 #include "subsys/modbus/modbus.h"
+#include "subsys/cfb/cfb.h"
 
 #include "domain/user_com_domain/user_com.h"
 #include "domain/user_com_domain/services/com_polling/com_polling_interface_service.h"
@@ -72,6 +73,7 @@ using namespace eerie_leap::subsys::device_tree;
 using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::subsys::modbus;
 using namespace eerie_leap::subsys::gpio;
+using namespace eerie_leap::subsys::cfb;
 
 using namespace eerie_leap::domain::user_com_domain;
 using namespace eerie_leap::domain::user_com_domain::services::com_polling;
@@ -110,6 +112,12 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
 
 int main(void) {
     DtConfigurator::Initialize();
+
+    auto cfb = make_shared_ext<Cfb>();
+    if(!cfb->Initialize()) {
+        LOG_ERR("Failed to initialize CFB.");
+        return -1;
+    }
 
     std::shared_ptr<SdmmcService> sd_fs_service = nullptr;
     auto sd_fs_mp = DtFs::GetSdFsMp();

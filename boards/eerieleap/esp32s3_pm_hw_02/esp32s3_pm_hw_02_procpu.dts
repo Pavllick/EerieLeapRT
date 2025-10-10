@@ -30,6 +30,7 @@
 		zephyr,code-partition = &slot0_partition;
 		zephyr,sdhc = &spi_sdhc0;
 		zephyr,bt-hci = &esp32_bt_hci;
+		zephyr,display = &ssd1306_ssd1306_128x32;
 	};
 
 	gpioc: gpioc {
@@ -138,6 +139,28 @@
             status = "okay";
         };
     };
+};
+
+&i2c0 {
+	status = "okay";
+	clock-frequency = <I2C_BITRATE_STANDARD>;
+	pinctrl-0 = <&i2c0_default>;
+	pinctrl-names = "default";
+
+	ssd1306_ssd1306_128x32: ssd1306@3c {
+		compatible = "solomon,ssd1306fb";
+		reg = <0x3c>;
+		width = <128>;
+		height = <32>;
+		segment-offset = <0>;
+		page-offset = <0>;
+		display-offset = <0>;
+		multiplex-ratio = <31>;
+		segment-remap;
+		com-invdir;
+		com-sequential;
+		prechargep = <0x22>;
+	};
 };
 
 &usb_serial {
