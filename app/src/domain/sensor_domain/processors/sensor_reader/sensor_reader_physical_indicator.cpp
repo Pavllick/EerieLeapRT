@@ -10,12 +10,17 @@ namespace eerie_leap::domain::sensor_domain::processors::sensor_reader {
 using namespace eerie_leap::utilities::memory;
 
 SensorReaderPhysicalIndicator::SensorReaderPhysicalIndicator(
-    std::shared_ptr<ITimeService>& time_service,
-    std::shared_ptr<GuidGenerator>& guid_generator,
-    std::shared_ptr<SensorReadingsFrame>& readings_frame,
-    std::shared_ptr<Sensor>& sensor,
+    std::shared_ptr<ITimeService> time_service,
+    std::shared_ptr<GuidGenerator> guid_generator,
+    std::shared_ptr<SensorReadingsFrame> readings_frame,
+    std::shared_ptr<Sensor> sensor,
     std::shared_ptr<IGpio> gpio)
-    : SensorReaderBase(time_service, guid_generator, readings_frame, sensor), gpio_(std::move(gpio)) {
+        : SensorReaderBase(
+            std::move(time_service),
+            std::move(guid_generator),
+            std::move(readings_frame),
+            std::move(sensor)),
+        gpio_(std::move(gpio)) {
 
     if(sensor_->configuration.type != SensorType::PHYSICAL_INDICATOR)
         throw std::runtime_error("Unsupported sensor type");

@@ -13,14 +13,14 @@ namespace eerie_leap::subsys::device_tree {
 
 class DtModbus {
 private:
-    static std::optional<char*> iface_;
+    static char* iface_;
 
     DtModbus() = default;
 
 public:
     static void Initialize();
 
-    static std::optional<char*>& Get() { return iface_; }
+    static char* Get() { return iface_; }
 };
 
 } // namespace eerie_leap::subsys::device_tree

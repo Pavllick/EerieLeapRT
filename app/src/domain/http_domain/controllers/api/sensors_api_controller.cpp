@@ -175,8 +175,7 @@ void SensorsApiController::ParseSensorsConfigJson(uint8_t *buffer, size_t len)
         sensors.push_back(sensor);
     }
 
-    auto sensors_ptr = make_shared_ext<std::vector<std::shared_ptr<Sensor>>>(sensors);
-    if(sensors_configuration_manager_->Update(sensors_ptr))
+    if(sensors_configuration_manager_->Update(sensors))
         printk("Sensors configuration updated successfully\n");
     else
         throw std::runtime_error("Failed to update sensors configuration.");

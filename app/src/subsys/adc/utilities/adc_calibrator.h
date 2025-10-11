@@ -16,7 +16,7 @@ private:
     std::shared_ptr<IVoltageInterpolator> calibrated_voltage_interpolator_;
 
 public:
-    AdcCalibrator(InterpolationMethod interpolation_method, const std::shared_ptr<std::vector<CalibrationData>>& calibration_data);
+    AdcCalibrator(InterpolationMethod interpolation_method, const std::shared_ptr<std::vector<CalibrationData>> calibration_data);
 
     static float InterpolateToInputRange(float value);
 

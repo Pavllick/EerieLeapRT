@@ -12,11 +12,15 @@ using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::subsys::adc::utilities;
 
 SensorReaderVirtualAnalog::SensorReaderVirtualAnalog(
-    std::shared_ptr<ITimeService>& time_service,
-    std::shared_ptr<GuidGenerator>& guid_generator,
-    std::shared_ptr<SensorReadingsFrame>& readings_frame,
-    std::shared_ptr<Sensor>& sensor)
-    : SensorReaderBase(time_service, guid_generator, readings_frame, sensor) {
+    std::shared_ptr<ITimeService> time_service,
+    std::shared_ptr<GuidGenerator> guid_generator,
+    std::shared_ptr<SensorReadingsFrame> readings_frame,
+    std::shared_ptr<Sensor> sensor)
+        : SensorReaderBase(
+            std::move(time_service),
+            std::move(guid_generator),
+            std::move(readings_frame),
+            std::move(sensor)) {
 
     if(sensor_->configuration.type != SensorType::VIRTUAL_ANALOG)
         throw std::runtime_error("Unsupported sensor type");

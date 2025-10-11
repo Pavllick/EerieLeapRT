@@ -38,25 +38,25 @@ AdcConfigurationManager::AdcConfigurationManager(std::shared_ptr<ConfigurationSe
     }
 }
 
-bool AdcConfigurationManager::Update(const std::shared_ptr<AdcConfiguration>& adc_configuration) {
+bool AdcConfigurationManager::Update(const AdcConfiguration& adc_configuration) {
     auto adc_config = make_shared_ext<AdcConfig>();
     memset(adc_config.get(), 0, sizeof(AdcConfig));
 
-    adc_config->samples = adc_configuration->samples;
+    adc_config->samples = adc_configuration.samples;
 
-    for(size_t i = 0; i < adc_configuration->channel_configurations->size(); ++i) {
+    for(size_t i = 0; i < adc_configuration.channel_configurations->size(); ++i) {
         auto adc_channel_config = make_shared_ext<AdcChannelConfig>();
         memset(adc_channel_config.get(), 0, sizeof(AdcChannelConfig));
 
-        auto interpolation_method = adc_configuration->channel_configurations->at(i)->calibrator != nullptr
-            ? adc_configuration->channel_configurations->at(i)->calibrator->GetInterpolationMethod()
+        auto interpolation_method = adc_configuration.channel_configurations->at(i)->calibrator != nullptr
+            ? adc_configuration.channel_configurations->at(i)->calibrator->GetInterpolationMethod()
             : InterpolationMethod::NONE;
 
         adc_channel_config->interpolation_method = static_cast<uint32_t>(interpolation_method);
         if(interpolation_method != InterpolationMethod::NONE) {
             adc_channel_config->calibration_table_present = true;
 
-            auto& calibration_table = *adc_configuration->channel_configurations->at(i)->calibrator->GetCalibrationTable();
+            auto& calibration_table = *adc_configuration.channel_configurations->at(i)->calibrator->GetCalibrationTable();
             adc_channel_config->calibration_table.float32float_count = calibration_table.size();
 
             if(calibration_table.size() < 2)
@@ -160,7 +160,7 @@ void AdcConfigurationManager::SetDefaultConfiguration() {
     adc_configuration->channel_configurations =
         make_shared_ext<std::vector<std::shared_ptr<AdcChannelConfiguration>>>(channel_configurations);
 
-    if(!Update(adc_configuration))
+    if(!Update(*adc_configuration.get()))
         throw std::runtime_error("Cannot save ADCs config");
 }
 

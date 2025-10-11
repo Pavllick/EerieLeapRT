@@ -13,7 +13,7 @@ using namespace eerie_leap::subsys::adc::models;
 class IAdcManager {
 public:
     virtual int Initialize() = 0;
-    virtual void UpdateConfiguration(std::shared_ptr<AdcConfiguration>& adc_configuration) = 0;
+    virtual void UpdateConfiguration(std::shared_ptr<AdcConfiguration> adc_configuration) = 0;
     virtual std::shared_ptr<AdcChannelConfiguration> GetChannelConfiguration(int channel) = 0;
     virtual int GetAdcCount() = 0;
     virtual int GetChannelCount() = 0;

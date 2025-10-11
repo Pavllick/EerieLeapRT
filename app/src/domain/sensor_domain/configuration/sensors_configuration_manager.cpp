@@ -33,15 +33,15 @@ SensorsConfigurationManager::SensorsConfigurationManager(
         LOG_INF("Sensors Configuration Controller initialized successfully.");
 }
 
-bool SensorsConfigurationManager::Update(const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>>& sensors) {
+bool SensorsConfigurationManager::Update(const std::vector<std::shared_ptr<Sensor>>& sensors) {
     auto sensors_config = make_shared_ext<SensorsConfig>();
     memset(sensors_config.get(), 0, sizeof(SensorsConfig));
 
     SensorsOrderResolver resolver;
     std::hash<std::string> string_hasher;
 
-    for(size_t i = 0; i < sensors->size(); ++i) {
-        const auto& sensor = sensors->at(i);
+    for(size_t i = 0; i < sensors.size(); ++i) {
+        const auto& sensor = sensors.at(i);
 
         auto sensor_config = make_shared_ext<SensorConfig>();
         memset(sensor_config.get(), 0, sizeof(SensorConfig));

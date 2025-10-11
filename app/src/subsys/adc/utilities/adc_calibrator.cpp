@@ -21,8 +21,8 @@ static const auto adc_inverse_base_range_voltage_interpolator = make_shared_ext<
 
 AdcCalibrator::AdcCalibrator(
     InterpolationMethod interpolation_method,
-    const std::shared_ptr<std::vector<CalibrationData>>& calibration_data)
-    : calibration_data_(calibration_data) {
+    const std::shared_ptr<std::vector<CalibrationData>> calibration_data)
+    : calibration_data_(std::move(calibration_data)) {
 
     std::vector<CalibrationData> adc_calibration_data_normalized;
     for(auto& calibration_data : *calibration_data_) {

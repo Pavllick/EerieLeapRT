@@ -11,13 +11,17 @@ using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::subsys::adc::utilities;
 
 SensorReaderPhysicalAnalog::SensorReaderPhysicalAnalog(
-    std::shared_ptr<ITimeService>& time_service,
-    std::shared_ptr<GuidGenerator>& guid_generator,
-    std::shared_ptr<SensorReadingsFrame>& readings_frame,
-    std::shared_ptr<Sensor>& sensor,
-    std::shared_ptr<AdcConfigurationManager>& adc_configuration_manager)
-    : SensorReaderBase(time_service, guid_generator, readings_frame, sensor),
-    adc_configuration_manager_(adc_configuration_manager) {
+    std::shared_ptr<ITimeService> time_service,
+    std::shared_ptr<GuidGenerator> guid_generator,
+    std::shared_ptr<SensorReadingsFrame> readings_frame,
+    std::shared_ptr<Sensor> sensor,
+    std::shared_ptr<AdcConfigurationManager> adc_configuration_manager)
+        : SensorReaderBase(
+            std::move(time_service),
+            std::move(guid_generator),
+            std::move(readings_frame),
+            std::move(sensor)),
+        adc_configuration_manager_(std::move(adc_configuration_manager)) {
 
     if(sensor_->configuration.type != SensorType::PHYSICAL_ANALOG)
         throw std::runtime_error("Unsupported sensor type");

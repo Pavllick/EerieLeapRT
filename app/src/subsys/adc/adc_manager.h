@@ -51,11 +51,11 @@ public:
         return 0;
     }
 
-    void UpdateConfiguration(std::shared_ptr<AdcConfiguration>& adc_configuration) override {
-        adc_configuration_ = adc_configuration;
+    void UpdateConfiguration(std::shared_ptr<AdcConfiguration> adc_configuration) override {
+        adc_configuration_ = std::move(adc_configuration);
 
         for(auto& adc : adcs_)
-            adc->UpdateConfiguration(adc_configuration->samples);
+            adc->UpdateConfiguration(adc_configuration_->samples);
     }
 
     std::shared_ptr<AdcChannelConfiguration> GetChannelConfiguration(int channel) override {

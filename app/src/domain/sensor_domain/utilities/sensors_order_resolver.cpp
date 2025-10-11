@@ -25,8 +25,8 @@ void SensorsOrderResolver::AddSensor(std::shared_ptr<Sensor> sensor) {
 bool SensorsOrderResolver::HasCyclicDependency(
     const std::string& sensorId,
     std::unordered_set<std::string>& visited,
-    std::unordered_set<std::string>& temp
-) {
+    std::unordered_set<std::string>& temp) {
+
     if(temp.contains(sensorId))
         return true;
     if(visited.contains(sensorId))

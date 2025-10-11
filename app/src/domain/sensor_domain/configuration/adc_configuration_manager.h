@@ -26,7 +26,7 @@ private:
 public:
     AdcConfigurationManager(std::shared_ptr<ConfigurationService<AdcConfig>> adc_configuration_service);
 
-    bool Update(const std::shared_ptr<AdcConfiguration>& adc_configuration);
+    bool Update(const AdcConfiguration& adc_configuration);
     std::shared_ptr<IAdcManager> Get(bool force_load = false);
 };
 

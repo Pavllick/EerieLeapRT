@@ -204,8 +204,8 @@ int main(void) {
     std::shared_ptr<ComReadingInterfaceService> com_reading_interface_service = nullptr;
     std::shared_ptr<ComReadingProcessor> com_reading_processor = nullptr;
     std::shared_ptr<ComPollingController> com_polling_controller = nullptr;
-    if(DtModbus::Get().has_value()) {
-    auto modbus = make_shared_ext<Modbus>(DtModbus::Get().value());
+    if(DtModbus::Get() != nullptr) {
+        auto modbus = make_shared_ext<Modbus>(DtModbus::Get());
         auto user_com_interface = make_shared_ext<UserCom>(modbus, system_configuration_manager);
     user_com_interface->Initialize();
 
@@ -322,7 +322,7 @@ void SetupAdcConfiguration(std::shared_ptr<AdcConfigurationManager> adc_configur
     adc_configuration->channel_configurations =
         make_shared_ext<std::vector<std::shared_ptr<AdcChannelConfiguration>>>(channel_configurations);
 
-    if(!adc_configuration_manager->Update(adc_configuration))
+    if(!adc_configuration_manager->Update(*adc_configuration.get()))
         throw std::runtime_error("Cannot save ADCs config");
 }
 
@@ -434,8 +434,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
         // make_shared_ext<Sensor>(sensor_5)
     };
 
-    auto sensors_ptr = make_shared_ext<std::vector<std::shared_ptr<Sensor>>>(sensors);
-    auto res = sensors_configuration_manager->Update(sensors_ptr);
+    auto res = sensors_configuration_manager->Update(sensors);
     if(!res)
         throw std::runtime_error("Cannot save Sensors config");
 }

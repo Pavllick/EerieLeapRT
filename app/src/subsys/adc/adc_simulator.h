@@ -54,10 +54,10 @@ class AdcSimulatorManager : public IAdcManager {
             return adc_->Initialize();
         }
 
-        void UpdateConfiguration(std::shared_ptr<AdcConfiguration>& adc_configuration) override {
-            adc_configuration_ = adc_configuration;
+        void UpdateConfiguration(std::shared_ptr<AdcConfiguration> adc_configuration) override {
+            adc_configuration_ = std::move(adc_configuration);
 
-            adc_->UpdateConfiguration(adc_configuration->samples);
+            adc_->UpdateConfiguration(adc_configuration_->samples);
         }
 
         std::shared_ptr<AdcChannelConfiguration> GetChannelConfiguration(int channel) override {

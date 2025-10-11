@@ -10,11 +10,15 @@ namespace eerie_leap::domain::sensor_domain::processors::sensor_reader {
 using namespace eerie_leap::utilities::memory;
 
 SensorReaderVirtualIndicator::SensorReaderVirtualIndicator(
-    std::shared_ptr<ITimeService>& time_service,
-    std::shared_ptr<GuidGenerator>& guid_generator,
-    std::shared_ptr<SensorReadingsFrame>& readings_frame,
-    std::shared_ptr<Sensor>& sensor)
-    : SensorReaderBase(time_service, guid_generator, readings_frame, sensor) {
+    std::shared_ptr<ITimeService> time_service,
+    std::shared_ptr<GuidGenerator> guid_generator,
+    std::shared_ptr<SensorReadingsFrame> readings_frame,
+    std::shared_ptr<Sensor> sensor)
+        : SensorReaderBase(
+            std::move(time_service),
+            std::move(guid_generator),
+            std::move(readings_frame),
+            std::move(sensor)) {
 
     if(sensor_->configuration.type != SensorType::VIRTUAL_INDICATOR)
         throw std::runtime_error("Unsupported sensor type");

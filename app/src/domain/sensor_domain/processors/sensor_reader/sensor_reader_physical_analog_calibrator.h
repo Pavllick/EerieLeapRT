@@ -10,11 +10,11 @@ using namespace eerie_leap::domain::sensor_domain::configuration;
 class SensorReaderPhysicalAnalogCalibrator : public SensorReaderPhysicalAnalog {
 public:
     SensorReaderPhysicalAnalogCalibrator(
-        std::shared_ptr<ITimeService>& time_service,
-        std::shared_ptr<GuidGenerator>& guid_generator,
-        std::shared_ptr<SensorReadingsFrame>& readings_frame,
-        std::shared_ptr<Sensor>& sensor,
-        std::shared_ptr<AdcConfigurationManager>& adc_configuration_manager);
+        std::shared_ptr<ITimeService> time_service,
+        std::shared_ptr<GuidGenerator> guid_generator,
+        std::shared_ptr<SensorReadingsFrame> readings_frame,
+        std::shared_ptr<Sensor> sensor,
+        std::shared_ptr<AdcConfigurationManager> adc_configuration_manager);
 
     ~SensorReaderPhysicalAnalogCalibrator() override = default;
 

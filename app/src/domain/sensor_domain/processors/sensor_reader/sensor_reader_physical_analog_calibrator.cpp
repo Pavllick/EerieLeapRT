@@ -11,12 +11,17 @@ using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::subsys::adc::utilities;
 
 SensorReaderPhysicalAnalogCalibrator::SensorReaderPhysicalAnalogCalibrator(
-    std::shared_ptr<ITimeService>& time_service,
-    std::shared_ptr<GuidGenerator>& guid_generator,
-    std::shared_ptr<SensorReadingsFrame>& readings_frame,
-    std::shared_ptr<Sensor>& sensor,
-    std::shared_ptr<AdcConfigurationManager>& adc_configuration_manager)
-    : SensorReaderPhysicalAnalog(time_service, guid_generator, readings_frame, sensor, adc_configuration_manager) { }
+    std::shared_ptr<ITimeService> time_service,
+    std::shared_ptr<GuidGenerator> guid_generator,
+    std::shared_ptr<SensorReadingsFrame> readings_frame,
+    std::shared_ptr<Sensor> sensor,
+    std::shared_ptr<AdcConfigurationManager> adc_configuration_manager)
+        : SensorReaderPhysicalAnalog(
+            std::move(time_service),
+            std::move(guid_generator),
+            std::move(readings_frame),
+            std::move(sensor),
+            std::move(adc_configuration_manager)) { }
 
 void SensorReaderPhysicalAnalogCalibrator::Read() {
     auto reading = make_shared_ext<SensorReading>(guid_generator_->Generate(), sensor_);

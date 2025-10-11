@@ -23,14 +23,14 @@ protected:
 
 public:
     SensorReaderBase(
-        std::shared_ptr<ITimeService>& time_service,
-        std::shared_ptr<GuidGenerator>& guid_generator,
-        std::shared_ptr<SensorReadingsFrame>& readings_frame,
-        std::shared_ptr<Sensor>& sensor)
-        : time_service_(time_service),
-        guid_generator_(guid_generator),
-        readings_frame_(readings_frame),
-        sensor_(sensor) {}
+        std::shared_ptr<ITimeService> time_service,
+        std::shared_ptr<GuidGenerator> guid_generator,
+        std::shared_ptr<SensorReadingsFrame> readings_frame,
+        std::shared_ptr<Sensor> sensor)
+        : time_service_(std::move(time_service)),
+        guid_generator_(std::move(guid_generator)),
+        readings_frame_(std::move(readings_frame)),
+        sensor_(std::move(sensor)) {}
 
     virtual ~SensorReaderBase() = default;
 };
