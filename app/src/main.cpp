@@ -37,7 +37,7 @@
 #include "configuration/adc_config/adc_config.h"
 #include "configuration/sensor_config/sensor_config.h"
 #include "configuration/services/configuration_service.h"
-#include "controllers/sensors_configuration_controller.h"
+#include "domain/sensor_domain/configuration/sensors_configuration_manager.h"
 #include "domain/sensor_domain/configuration/adc_configuration_manager.h"
 #include "domain/system_domain/configuration/system_configuration_manager.h"
 #include "controllers/logging_controller.h"
@@ -105,7 +105,7 @@ LOG_MODULE_REGISTER(main_logger);
 constexpr uint32_t SLEEP_TIME_MS = 10000;
 
 void SetupAdcConfiguration(std::shared_ptr<AdcConfigurationManager> adc_configuration_manager);
-void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller);
+void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager);
 
 // NOTE: ADC reading timing for ESP32S3:
 // Each sample adds up to about 25us to the reading time
@@ -185,7 +185,7 @@ int main(void) {
     gpio->Initialize();
 
     auto system_configuration_manager = make_shared_ext<SystemConfigurationManager>(system_config_service);
-    auto sensors_configuration_controller = make_shared_ext<SensorsConfigurationController>(
+    auto sensors_configuration_manager = make_shared_ext<SensorsConfigurationManager>(
         math_parser_service,
         sensors_config_service,
         adc_configuration_manager->Get()->GetChannelCount());
@@ -196,7 +196,7 @@ int main(void) {
         auto log_writer_service = make_shared_ext<LogWriterService>(sd_fs_service, time_service);
         log_writer_service->Initialize();
 
-        logging_controller = make_shared_ext<LoggingController>(log_writer_service, sensors_configuration_controller);
+        logging_controller = make_shared_ext<LoggingController>(log_writer_service, sensors_configuration_manager);
         log_reading_processor = make_shared_ext<LogReadingProcessor>(log_writer_service);
     }
 
@@ -232,7 +232,7 @@ int main(void) {
     }
 
     // TODO: For test purposes only
-    SetupTestSensors(math_parser_service, sensors_configuration_controller);
+    SetupTestSensors(math_parser_service, sensors_configuration_manager);
 
     auto sensor_readings_frame = make_shared_ext<SensorReadingsFrame>();
 
@@ -243,7 +243,7 @@ int main(void) {
         guid_generator,
         gpio,
         adc_configuration_manager,
-        sensors_configuration_controller,
+        sensors_configuration_manager,
         sensor_readings_frame);
     processing_scheduler_service->Initialize();
 
@@ -264,7 +264,7 @@ int main(void) {
         math_parser_service,
         system_configuration_manager,
         adc_configuration_manager,
-        sensors_configuration_controller,
+        sensors_configuration_manager,
         processing_scheduler_service);
 #endif // CONFIG_NETWORKING
 
@@ -326,7 +326,7 @@ void SetupAdcConfiguration(std::shared_ptr<AdcConfigurationManager> adc_configur
         throw std::runtime_error("Cannot save ADCs config");
 }
 
-void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller) {
+void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager) {
     // Test Sensors
 
     std::vector<CalibrationData> calibration_data_1 {
@@ -435,7 +435,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
     };
 
     auto sensors_ptr = make_shared_ext<std::vector<std::shared_ptr<Sensor>>>(sensors);
-    auto res = sensors_configuration_controller->Update(sensors_ptr);
+    auto res = sensors_configuration_manager->Update(sensors_ptr);
     if(!res)
         throw std::runtime_error("Cannot save Sensors config");
 }

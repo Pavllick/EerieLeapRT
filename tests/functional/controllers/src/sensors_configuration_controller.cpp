@@ -10,7 +10,7 @@
 #include "configuration/sensor_config/sensor_config.h"
 #include "configuration/services/configuration_service.h"
 
-#include "controllers/sensors_configuration_controller.h"
+#include "domain/sensor_domain/configuration/sensors_configuration_manager.h"
 
 #include "subsys/device_tree/dt_fs.h"
 #include "subsys/fs/services/i_fs_service.h"
@@ -23,12 +23,12 @@ using namespace eerie_leap::utilities::cbor;
 using namespace eerie_leap::utilities::math_parser;
 using namespace eerie_leap::configuration::services;
 using namespace eerie_leap::subsys::fs::services;
-using namespace eerie_leap::controllers;
+using namespace eerie_leap::domain::sensor_domain::configuration;
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::utilities::voltage_interpolator;
 using namespace eerie_leap::subsys::device_tree;
 
-ZTEST_SUITE(sensors_configuration_controller, NULL, NULL, NULL, NULL, NULL);
+ZTEST_SUITE(sensors_configuration_manager, NULL, NULL, NULL, NULL, NULL);
 
 std::vector<std::shared_ptr<Sensor>> SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service) {
     // Test Sensors
@@ -110,7 +110,7 @@ std::vector<std::shared_ptr<Sensor>> SetupTestSensors(std::shared_ptr<MathParser
     return sensors;
 }
 
-ZTEST(sensors_configuration_controller, test_SensorsConfigurationController_Save_config_successfully_saved) {
+ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_config_successfully_saved) {
     DtFs::InitInternalFs();
     auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
 
@@ -119,13 +119,13 @@ ZTEST(sensors_configuration_controller, test_SensorsConfigurationController_Save
     auto sensors_configuration_service = std::make_shared<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
 
     auto math_parser_service = std::make_shared<MathParserService>();
-    auto sensors_configuration_controller = std::make_shared<SensorsConfigurationController>(math_parser_service, sensors_configuration_service, 16);
+    auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(math_parser_service, sensors_configuration_service, 16);
 
     auto sensors = SetupTestSensors(math_parser_service);
     auto sensors_ptr = std::make_shared<std::vector<std::shared_ptr<Sensor>>>(sensors);
-    sensors_configuration_controller->Update(sensors_ptr);
+    sensors_configuration_manager->Update(sensors_ptr);
 
-    auto saved_sensors = *sensors_configuration_controller->Get();
+    auto saved_sensors = *sensors_configuration_manager->Get();
 
     zassert_equal(saved_sensors.size(), sensors.size());
 
@@ -157,7 +157,7 @@ ZTEST(sensors_configuration_controller, test_SensorsConfigurationController_Save
     }
 }
 
-ZTEST(sensors_configuration_controller, test_SensorsConfigurationController_Save_config_and_Load) {
+ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_config_and_Load) {
     DtFs::InitInternalFs();
     auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
 
@@ -166,16 +166,16 @@ ZTEST(sensors_configuration_controller, test_SensorsConfigurationController_Save
     auto sensors_configuration_service = std::make_shared<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
 
     auto math_parser_service = std::make_shared<MathParserService>();
-    auto sensors_configuration_controller = std::make_shared<SensorsConfigurationController>(math_parser_service, sensors_configuration_service, 16);
+    auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(math_parser_service, sensors_configuration_service, 16);
 
     auto sensors = SetupTestSensors(math_parser_service);
     auto sensors_ptr = std::make_shared<std::vector<std::shared_ptr<Sensor>>>(sensors);
-    sensors_configuration_controller->Update(sensors_ptr);
+    sensors_configuration_manager->Update(sensors_ptr);
 
-    sensors_configuration_controller = nullptr;
-    sensors_configuration_controller = std::make_shared<SensorsConfigurationController>(math_parser_service, sensors_configuration_service, 16);
+    sensors_configuration_manager = nullptr;
+    sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(math_parser_service, sensors_configuration_service, 16);
 
-    auto saved_sensors = *sensors_configuration_controller->Get();
+    auto saved_sensors = *sensors_configuration_manager->Get();
 
     zassert_equal(saved_sensors.size(), sensors.size());
 

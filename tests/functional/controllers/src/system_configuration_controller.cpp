@@ -8,7 +8,7 @@
 
 #include "subsys/device_tree/dt_fs.h"
 #include "subsys/fs/services/fs_service.h"
-#include "controllers/sensors_configuration_controller.h"
+#include "domain/sensor_domain/configuration/sensors_configuration_manager.h"
 
 using namespace eerie_leap::configuration::services;
 using namespace eerie_leap::subsys::device_tree;

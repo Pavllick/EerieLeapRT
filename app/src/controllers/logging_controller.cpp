@@ -4,12 +4,12 @@ namespace eerie_leap::controllers {
 
 LoggingController::LoggingController(
     std::shared_ptr<LogWriterService> log_writer_service,
-    std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller)
+    std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager)
     : log_writer_service_(std::move(log_writer_service)),
-    sensors_configuration_controller_(std::move(sensors_configuration_controller)) { }
+    sensors_configuration_manager_(std::move(sensors_configuration_manager)) { }
 
 int LoggingController::LogWriterStart() {
-    int res = log_writer_service_->SaveLogMetadata(sensors_configuration_controller_->GetRaw());
+    int res = log_writer_service_->SaveLogMetadata(sensors_configuration_manager_->GetRaw());
 
     if(res == 0)
         res = log_writer_service_->LogWriterStart();

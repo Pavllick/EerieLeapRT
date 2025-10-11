@@ -7,7 +7,7 @@
 
 #include "utilities/time/i_time_service.h"
 #include "utilities/guid/guid_generator.h"
-#include "controllers/sensors_configuration_controller.h"
+#include "domain/sensor_domain/configuration/sensors_configuration_manager.h"
 #include "domain/sensor_domain/configuration/adc_configuration_manager.h"
 #include "subsys/gpio/i_gpio.h"
 
@@ -17,8 +17,6 @@
 #include "sensor_task.hpp"
 
 namespace eerie_leap::domain::sensor_domain::services {
-
-using namespace eerie_leap::controllers;
 
 using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::utilities::guid;
@@ -43,7 +41,7 @@ private:
     std::shared_ptr<GuidGenerator> guid_generator_;
     std::shared_ptr<IGpio> gpio_;
     std::shared_ptr<AdcConfigurationManager> adc_configuration_manager_;
-    std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller_;
+    std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager_;
 
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame_;
 
@@ -60,7 +58,7 @@ public:
         std::shared_ptr<GuidGenerator> guid_generator,
         std::shared_ptr<IGpio> gpio,
         std::shared_ptr<AdcConfigurationManager> adc_configuration_manager,
-        std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller,
+        std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager,
         std::shared_ptr<SensorReadingsFrame> sensor_readings_frame);
     ~ProcessingSchedulerService();
 

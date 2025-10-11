@@ -5,12 +5,12 @@
 #include <zephyr/net/http/service.h>
 #include <zephyr/data/json.h>
 
-#include "controllers/sensors_configuration_controller.h"
+#include "domain/sensor_domain/configuration/sensors_configuration_manager.h"
 #include "domain/sensor_domain/services/processing_scheduler_service.h"
 
 namespace eerie_leap::domain::http_domain::controllers::api {
 
-using namespace eerie_leap::controllers;
+using namespace eerie_leap::domain::sensor_domain::configuration;
 using namespace eerie_leap::domain::sensor_domain::services;
 
 struct SensorMetadataJsonDto {
@@ -83,7 +83,7 @@ private:
     static std::shared_ptr<ExtVector> sensors_config_get_buffer_;
 
     static std::shared_ptr<MathParserService> math_parser_service_;
-    static std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller_;
+    static std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager_;
     static std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service_;
 
     static void ParseSensorsConfigJson(uint8_t *buffer, size_t len);
@@ -97,7 +97,7 @@ public:
 
     SensorsApiController(
         std::shared_ptr<MathParserService> math_parser_service,
-        std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller,
+        std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager,
         std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service);
 };
 

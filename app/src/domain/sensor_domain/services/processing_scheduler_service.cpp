@@ -26,13 +26,13 @@ ProcessingSchedulerService::ProcessingSchedulerService(
     std::shared_ptr<GuidGenerator> guid_generator,
     std::shared_ptr<IGpio> gpio,
     std::shared_ptr<AdcConfigurationManager> adc_configuration_manager,
-    std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller,
+    std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager,
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame)
     : time_service_(std::move(time_service)),
     guid_generator_(std::move(guid_generator)),
     gpio_(std::move(gpio)),
     adc_configuration_manager_(std::move(adc_configuration_manager)),
-    sensors_configuration_controller_(std::move(sensors_configuration_controller)),
+    sensors_configuration_manager_(std::move(sensors_configuration_manager)),
     sensor_readings_frame_(std::move(sensor_readings_frame)),
     reading_processors_(std::make_shared<std::vector<std::shared_ptr<IReadingProcessor>>>()) {
 
@@ -141,7 +141,7 @@ void ProcessingSchedulerService::RegisterReadingProcessor(std::shared_ptr<IReadi
 }
 
 void ProcessingSchedulerService::Start() {
-    auto sensors = sensors_configuration_controller_->Get();
+    auto sensors = sensors_configuration_manager_->Get();
 
     for(const auto& sensor : *sensors) {
         LOG_INF("Creating task for sensor: %s", sensor->id.c_str());

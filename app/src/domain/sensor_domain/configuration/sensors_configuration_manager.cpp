@@ -2,13 +2,13 @@
 
 #include <zephyr/logging/log.h>
 
-#include "sensors_configuration_controller.h"
+#include "sensors_configuration_manager.h"
 #include "utilities/cbor/cbor_helpers.hpp"
 #include "domain/sensor_domain/utilities/sensors_order_resolver.h"
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
 
-namespace eerie_leap::controllers {
+namespace eerie_leap::domain::sensor_domain::configuration {
 
 LOG_MODULE_REGISTER(sensors_config_ctrl_logger);
 
@@ -16,7 +16,7 @@ using namespace eerie_leap::utilities::cbor;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 using namespace eerie_leap::utilities::voltage_interpolator;
 
-SensorsConfigurationController::SensorsConfigurationController(
+SensorsConfigurationManager::SensorsConfigurationManager(
     std::shared_ptr<MathParserService> math_parser_service,
     std::shared_ptr<ConfigurationService<SensorsConfig>> sensors_configuration_service,
     int adc_channel_count) :
@@ -33,7 +33,7 @@ SensorsConfigurationController::SensorsConfigurationController(
         LOG_INF("Sensors Configuration Controller initialized successfully.");
 }
 
-bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>>& sensors) {
+bool SensorsConfigurationManager::Update(const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>>& sensors) {
     auto sensors_config = make_shared_ext<SensorsConfig>();
     memset(sensors_config.get(), 0, sizeof(SensorsConfig));
 
@@ -121,7 +121,7 @@ bool SensorsConfigurationController::Update(const std::shared_ptr<std::vector<st
     return true;
 }
 
-const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfigurationController::Get(bool force_load) {
+const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfigurationManager::Get(bool force_load) {
     if(ordered_sensors_ != nullptr && !force_load)
         return ordered_sensors_;
 
@@ -198,8 +198,8 @@ const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfiguration
     return ordered_sensors_;
 }
 
-const std::span<uint8_t> SensorsConfigurationController::GetRaw() {
+const std::span<uint8_t> SensorsConfigurationManager::GetRaw() {
     return *sensors_config_raw_.get();
 }
 
-} // namespace eerie_leap::controllers
+} // namespace eerie_leap::domain::sensor_domain::configuration

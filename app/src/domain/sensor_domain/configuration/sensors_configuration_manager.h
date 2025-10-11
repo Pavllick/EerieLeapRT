@@ -10,14 +10,14 @@
 #include "configuration/services/configuration_service.h"
 #include "domain/sensor_domain/models/sensor.h"
 
-namespace eerie_leap::controllers {
+namespace eerie_leap::domain::sensor_domain::configuration {
 
 using namespace eerie_leap::utilities::math_parser;
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::configuration::services;
 
-class SensorsConfigurationController {
+class SensorsConfigurationManager {
 private:
     std::shared_ptr<MathParserService> math_parser_service_;
     std::shared_ptr<ConfigurationService<SensorsConfig>> sensors_configuration_service_;
@@ -27,11 +27,11 @@ private:
     int adc_channel_count_;
 
 public:
-    SensorsConfigurationController(std::shared_ptr<MathParserService> math_parser_service, std::shared_ptr<ConfigurationService<SensorsConfig>> sensors_configuration_service, int adc_channel_count);
+    SensorsConfigurationManager(std::shared_ptr<MathParserService> math_parser_service, std::shared_ptr<ConfigurationService<SensorsConfig>> sensors_configuration_service, int adc_channel_count);
 
     bool Update(const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>>& sensors);
     const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> Get(bool force_load = false);
     const std::span<uint8_t> GetRaw();
 };
 
-} // namespace eerie_leap::controllers
+} // namespace eerie_leap::domain::sensor_domain::configuration

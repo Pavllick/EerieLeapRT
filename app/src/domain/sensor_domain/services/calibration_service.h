@@ -12,8 +12,6 @@
 
 namespace eerie_leap::domain::sensor_domain::services {
 
-using namespace eerie_leap::controllers;
-
 using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::subsys::adc;

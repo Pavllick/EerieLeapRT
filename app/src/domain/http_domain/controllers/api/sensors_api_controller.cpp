@@ -17,18 +17,18 @@ std::shared_ptr<ExtVector> SensorsApiController::sensors_config_post_buffer_;
 std::shared_ptr<ExtVector> SensorsApiController::sensors_config_get_buffer_;
 
 std::shared_ptr<MathParserService> SensorsApiController::math_parser_service_ = nullptr;
-std::shared_ptr<SensorsConfigurationController> SensorsApiController::sensors_configuration_controller_ = nullptr;
+std::shared_ptr<SensorsConfigurationManager> SensorsApiController::sensors_configuration_manager_ = nullptr;
 std::shared_ptr<ProcessingSchedulerService> SensorsApiController::processing_scheduler_service_ = nullptr;
 
 SensorsApiController::SensorsApiController(
     std::shared_ptr<MathParserService> math_parser_service,
-    std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller,
+    std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager,
     std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service) {
 
     sensors_config_post_buffer_ = make_shared_ext<ExtVector>(sensors_config_post_buffer_size_);
 
     math_parser_service_ = std::move(math_parser_service);
-    sensors_configuration_controller_ = std::move(sensors_configuration_controller);
+    sensors_configuration_manager_ = std::move(sensors_configuration_manager);
     processing_scheduler_service_ = std::move(processing_scheduler_service);
 }
 
@@ -38,7 +38,7 @@ int SensorsApiController::sensors_config_get_handler(http_client_ctx *client, en
     }
 
     if (status == HTTP_SERVER_DATA_FINAL) {
-        auto sensors_configuration = sensors_configuration_controller_->Get();
+        auto sensors_configuration = sensors_configuration_manager_->Get();
 
         std::vector<SensorJsonDto> sensors;
         for(const auto& sensor : *sensors_configuration) {
@@ -176,7 +176,7 @@ void SensorsApiController::ParseSensorsConfigJson(uint8_t *buffer, size_t len)
     }
 
     auto sensors_ptr = make_shared_ext<std::vector<std::shared_ptr<Sensor>>>(sensors);
-    if(sensors_configuration_controller_->Update(sensors_ptr))
+    if(sensors_configuration_manager_->Update(sensors_ptr))
         printk("Sensors configuration updated successfully\n");
     else
         throw std::runtime_error("Failed to update sensors configuration.");
