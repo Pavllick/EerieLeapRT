@@ -67,8 +67,11 @@ void Cfb::InitializeThread() {
     k_work_init(&task_.work, CfbTaskWorkTask);
     task_.work_q = &work_q;
     task_.processing_semaphore = &processing_semaphore_;
+    atomic_set(&task_.is_animation_running_, 0);
 
     LOG_INF("Display service initialized.");
+
+    k_work_submit_to_queue(&work_q, &task_.work);
 }
 
 void Cfb::CfbTaskWorkTask(k_work* work) {
@@ -80,7 +83,19 @@ void Cfb::CfbTaskWorkTask(k_work* work) {
         return;
     }
 
+    bool is_animation_running = atomic_get(&task->is_animation_running_)
+        && task->frame_rate > 0
+        && task->animation_handler;
+
+    if(is_animation_running)
+        task->animation_handler();
+
     cfb_framebuffer_finalize(DtDisplay::Get());
+
+    if(is_animation_running) {
+        k_sleep(K_MSEC(1000 / task->frame_rate));
+        k_work_submit_to_queue(task->work_q, &task->work);
+    }
 
     k_sem_give(task->processing_semaphore);
 }
@@ -105,7 +120,7 @@ bool Cfb::SetFont(uint8_t font_idx) {
 }
 
 bool Cfb::PrintString(const char* str, const Coordinate& coordinate) {
-    if(cfb_print(DtDisplay::Get(), str, coordinate.x, coordinate.y)) {
+    if(cfb_print(DtDisplay::Get(), str, coordinate.x, coordinate.y) != 0) {
         LOG_ERR("Failed to print a string");
         return false;
     }
@@ -114,8 +129,31 @@ bool Cfb::PrintString(const char* str, const Coordinate& coordinate) {
 }
 
 bool Cfb::PrintStringLine(const char* str, const Coordinate& coordinate) {
-    if(cfb_draw_text(DtDisplay::Get(), str, coordinate.x, coordinate.y)) {
+    if(cfb_draw_text(DtDisplay::Get(), str, coordinate.x, coordinate.y) != 0) {
         LOG_ERR("Failed to print a string");
+        return false;
+    }
+
+    return true;
+}
+
+bool Cfb::DrawPoint(const Coordinate& coordinate) {
+    cfb_position cbf_coordinate = {coordinate.x, coordinate.y};
+
+    if(cfb_draw_point(DtDisplay::Get(), &cbf_coordinate) != 0) {
+        LOG_ERR("Failed to draw a point");
+        return false;
+    }
+
+    return true;
+}
+
+bool Cfb::DrawLine(const Coordinate& start, const Coordinate& end) {
+    cfb_position cbf_start = {start.x, start.y};
+    cfb_position cbf_end = {end.x, end.y};
+
+    if(cfb_draw_line(DtDisplay::Get(), &cbf_start, &cbf_end) != 0) {
+        LOG_ERR("Failed to draw a line");
         return false;
     }
 
@@ -126,7 +164,7 @@ bool Cfb::DrawRectangle(const Coordinate& start, const Coordinate& end) {
     cfb_position cbf_start = {start.x, start.y};
     cfb_position cbf_end = {end.x, end.y};
 
-    if(cfb_draw_rect(DtDisplay::Get(), &cbf_start, &cbf_end)) {
+    if(cfb_draw_rect(DtDisplay::Get(), &cbf_start, &cbf_end) != 0) {
         LOG_ERR("Failed to draw a rectangle");
         return false;
     }
@@ -134,13 +172,38 @@ bool Cfb::DrawRectangle(const Coordinate& start, const Coordinate& end) {
     return true;
 }
 
+bool Cfb::DrawCircle(const Coordinate& center, uint16_t radius) {
+    cfb_position cbf_center = {center.x, center.y};
+
+    if(cfb_draw_circle(DtDisplay::Get(), &cbf_center, radius) != 0) {
+        LOG_ERR("Failed to draw a circle");
+        return false;
+    }
+
+    return true;
+}
+
 bool Cfb::Clear(bool clear_display) {
-    if(cfb_framebuffer_clear(DtDisplay::Get(), clear_display)) {
+    if(cfb_framebuffer_clear(DtDisplay::Get(), clear_display) != 0) {
         LOG_ERR("Failed to clear the screen");
         return false;
     }
 
     return true;
+}
+
+void Cfb::SetAnimationHandler(std::function<void()> handler, uint32_t frame_rate) {
+    task_.animation_handler = handler;
+    task_.frame_rate = frame_rate;
+}
+
+void Cfb::StartAnimation() {
+    atomic_set(&task_.is_animation_running_, 1);
+    k_work_submit_to_queue(&work_q, &task_.work);
+}
+
+void Cfb::StopAnimation() {
+    atomic_set(&task_.is_animation_running_, 0);
 }
 
 void Cfb::PrintScreenInfo() {

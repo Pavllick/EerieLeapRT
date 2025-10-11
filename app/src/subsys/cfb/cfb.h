@@ -37,13 +37,20 @@ public:
     bool SetFont(uint8_t font_idx);
     bool PrintString(const char* str, const Coordinate& coordinate);
     bool PrintStringLine(const char* str, const Coordinate& coordinate);
+    bool DrawPoint(const Coordinate& coordinate);
+    bool DrawLine(const Coordinate& start, const Coordinate& end);
     bool DrawRectangle(const Coordinate& start, const Coordinate& end);
+    bool DrawCircle(const Coordinate& center, uint16_t radius);
 
     bool Flush();
     bool Clear(bool clear_display = false);
 
     [[nodiscard]] uint16_t GetXRes() const { return x_res_; }
     [[nodiscard]] uint16_t GetYRes() const { return y_res_; }
+
+    void SetAnimationHandler(std::function<void()> handler, uint32_t frame_rate);
+    void StartAnimation();
+    void StopAnimation();
 };
 
 }  // namespace eerie_leap::subsys::cfb
