@@ -38,7 +38,7 @@
 #include "configuration/sensor_config/sensor_config.h"
 #include "configuration/services/configuration_service.h"
 #include "controllers/sensors_configuration_controller.h"
-#include "controllers/adc_configuration_controller.h"
+#include "domain/sensor_domain/configuration/adc_configuration_manager.h"
 #include "domain/system_domain/configuration/system_configuration_manager.h"
 #include "controllers/logging_controller.h"
 #include "controllers/com_polling_controller.h"
@@ -54,6 +54,7 @@
 #include "views/main_view.h"
 
 using namespace eerie_leap::utilities::voltage_interpolator;
+using namespace eerie_leap::domain::sensor_domain::configuration;
 using namespace eerie_leap::domain::sensor_domain::models;
 // End test sensors
 
@@ -103,7 +104,7 @@ LOG_MODULE_REGISTER(main_logger);
 
 constexpr uint32_t SLEEP_TIME_MS = 10000;
 
-void SetupAdcConfiguration(std::shared_ptr<AdcConfigurationController> adc_configuration_controller);
+void SetupAdcConfiguration(std::shared_ptr<AdcConfigurationManager> adc_configuration_manager);
 void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller);
 
 // NOTE: ADC reading timing for ESP32S3:
@@ -175,10 +176,10 @@ int main(void) {
     auto adc_config_service = make_shared_ext<ConfigurationService<AdcConfig>>("adc_config", fs_service);
     auto sensors_config_service = make_shared_ext<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
 
-    auto adc_configuration_controller = make_shared_ext<AdcConfigurationController>(adc_config_service);
+    auto adc_configuration_manager = make_shared_ext<AdcConfigurationManager>(adc_config_service);
 
     // TODO: For test purposes only
-    // SetupAdcConfiguration(adc_configuration_controller);
+    // SetupAdcConfiguration(adc_configuration_manager);
 
     auto gpio = GpioFactory::Create();
     gpio->Initialize();
@@ -187,7 +188,7 @@ int main(void) {
     auto sensors_configuration_controller = make_shared_ext<SensorsConfigurationController>(
         math_parser_service,
         sensors_config_service,
-        adc_configuration_controller->Get()->GetChannelCount());
+        adc_configuration_manager->Get()->GetChannelCount());
 
     std::shared_ptr<LoggingController> logging_controller = nullptr;
     std::shared_ptr<LogReadingProcessor> log_reading_processor = nullptr;
@@ -241,7 +242,7 @@ int main(void) {
         time_service,
         guid_generator,
         gpio,
-        adc_configuration_controller,
+        adc_configuration_manager,
         sensors_configuration_controller,
         sensor_readings_frame);
     processing_scheduler_service->Initialize();
@@ -255,14 +256,14 @@ int main(void) {
     auto calibration_service = make_shared_ext<CalibrationService>(
         time_service,
         guid_generator,
-        adc_configuration_controller,
+        adc_configuration_manager,
         processing_scheduler_service);
 
 #ifdef CONFIG_NETWORKING
     http_server.Initialize(
         math_parser_service,
         system_configuration_manager,
-        adc_configuration_controller,
+        adc_configuration_manager,
         sensors_configuration_controller,
         processing_scheduler_service);
 #endif // CONFIG_NETWORKING
@@ -292,7 +293,7 @@ int main(void) {
     return 0;
 }
 
-void SetupAdcConfiguration(std::shared_ptr<AdcConfigurationController> adc_configuration_controller) {
+void SetupAdcConfiguration(std::shared_ptr<AdcConfigurationManager> adc_configuration_manager) {
     std::vector<CalibrationData> adc_calibration_data_samples {
         {0.501, 0.469},
         {1.0, 0.968},
@@ -321,7 +322,7 @@ void SetupAdcConfiguration(std::shared_ptr<AdcConfigurationController> adc_confi
     adc_configuration->channel_configurations =
         make_shared_ext<std::vector<std::shared_ptr<AdcChannelConfiguration>>>(channel_configurations);
 
-    if(!adc_configuration_controller->Update(adc_configuration))
+    if(!adc_configuration_manager->Update(adc_configuration))
         throw std::runtime_error("Cannot save ADCs config");
 }
 

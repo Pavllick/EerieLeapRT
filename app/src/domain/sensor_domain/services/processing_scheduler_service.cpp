@@ -25,13 +25,13 @@ ProcessingSchedulerService::ProcessingSchedulerService(
     std::shared_ptr<ITimeService> time_service,
     std::shared_ptr<GuidGenerator> guid_generator,
     std::shared_ptr<IGpio> gpio,
-    std::shared_ptr<AdcConfigurationController> adc_configuration_controller,
+    std::shared_ptr<AdcConfigurationManager> adc_configuration_manager,
     std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller,
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame)
     : time_service_(std::move(time_service)),
     guid_generator_(std::move(guid_generator)),
     gpio_(std::move(gpio)),
-    adc_configuration_controller_(std::move(adc_configuration_controller)),
+    adc_configuration_manager_(std::move(adc_configuration_manager)),
     sensors_configuration_controller_(std::move(sensors_configuration_controller)),
     sensor_readings_frame_(std::move(sensor_readings_frame)),
     reading_processors_(std::make_shared<std::vector<std::shared_ptr<IReadingProcessor>>>()) {
@@ -96,7 +96,7 @@ std::shared_ptr<SensorTask> ProcessingSchedulerService::CreateSensorTask(std::sh
             guid_generator_,
             sensor_readings_frame_,
             sensor,
-            adc_configuration_controller_);
+            adc_configuration_manager_);
     } else if(sensor->configuration.type == SensorType::VIRTUAL_ANALOG) {
         sensor_reader = make_shared_ext<SensorReaderVirtualAnalog>(
             time_service_,

@@ -8,16 +8,16 @@
 #include "subsys/device_tree/dt_fs.h"
 #include "subsys/fs/services/fs_service.h"
 
-#include "controllers/adc_configuration_controller.h"
+#include "domain/sensor_domain/configuration/adc_configuration_manager.h"
 
 using namespace eerie_leap::configuration::services;
 using namespace eerie_leap::subsys::fs::services;
-using namespace eerie_leap::controllers;
 using namespace eerie_leap::subsys::device_tree;
+using namespace eerie_leap::domain::sensor_domain::configuration;
 
-ZTEST_SUITE(adc_configuration_controller, NULL, NULL, NULL, NULL, NULL);
+ZTEST_SUITE(adc_configuration_manager, NULL, NULL, NULL, NULL, NULL);
 
-std::shared_ptr<AdcConfiguration> adc_configuration_controller_GetTestConfiguration() {
+std::shared_ptr<AdcConfiguration> adc_configuration_manager_GetTestConfiguration() {
     std::vector<CalibrationData> adc_calibration_data_samples {
         {0.0, 0.0},
         {5.0, 5.0}
@@ -41,21 +41,21 @@ std::shared_ptr<AdcConfiguration> adc_configuration_controller_GetTestConfigurat
     return adc_configuration;
 }
 
-ZTEST(adc_configuration_controller, test_AdcConfigurationController_Save_config_successfully_saved) {
+ZTEST(adc_configuration_manager, test_AdcConfigurationManager_Save_config_successfully_saved) {
     DtFs::InitInternalFs();
     auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
 
     fs_service->Format();
 
     auto adc_configuration_service = std::make_shared<ConfigurationService<AdcConfig>>("adc_config", fs_service);
-    auto adc_configuration_controller = std::make_shared<AdcConfigurationController>(adc_configuration_service);
+    auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(adc_configuration_service);
 
-    auto adc_configuration = adc_configuration_controller_GetTestConfiguration();
+    auto adc_configuration = adc_configuration_manager_GetTestConfiguration();
 
-    bool result = adc_configuration_controller->Update(adc_configuration);
+    bool result = adc_configuration_manager->Update(adc_configuration);
     zassert_true(result);
 
-    auto adc_manager = adc_configuration_controller->Get();
+    auto adc_manager = adc_configuration_manager->Get();
 
     for(int i = 0; i < adc_manager->GetChannelCount(); i++) {
         auto adc_channel_configuration = adc_manager->GetChannelConfiguration(i);
@@ -72,24 +72,24 @@ ZTEST(adc_configuration_controller, test_AdcConfigurationController_Save_config_
     }
 }
 
-ZTEST(adc_configuration_controller, test_AdcConfigurationController_Save_config_and_Load) {
+ZTEST(adc_configuration_manager, test_AdcConfigurationManager_Save_config_and_Load) {
     DtFs::InitInternalFs();
     auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
 
     fs_service->Format();
 
     auto adc_configuration_service = std::make_shared<ConfigurationService<AdcConfig>>("adc_config", fs_service);
-    auto adc_configuration_controller = std::make_shared<AdcConfigurationController>(adc_configuration_service);
+    auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(adc_configuration_service);
 
-    auto adc_configuration = adc_configuration_controller_GetTestConfiguration();
+    auto adc_configuration = adc_configuration_manager_GetTestConfiguration();
 
-    bool result = adc_configuration_controller->Update(adc_configuration);
+    bool result = adc_configuration_manager->Update(adc_configuration);
     zassert_true(result);
 
-    adc_configuration_controller = nullptr;
-    adc_configuration_controller = std::make_shared<AdcConfigurationController>(adc_configuration_service);
+    adc_configuration_manager = nullptr;
+    adc_configuration_manager = std::make_shared<AdcConfigurationManager>(adc_configuration_service);
 
-    auto adc_manager = adc_configuration_controller->Get();
+    auto adc_manager = adc_configuration_manager->Get();
 
     for(int i = 0; i < adc_manager->GetChannelCount(); i++) {
         auto adc_channel_configuration = adc_manager->GetChannelConfiguration(i);

@@ -9,9 +9,9 @@
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
 #include "subsys/adc/adc_factory.hpp"
-#include "adc_configuration_controller.h"
+#include "adc_configuration_manager.h"
 
-namespace eerie_leap::controllers {
+namespace eerie_leap::domain::sensor_domain::configuration {
 
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::voltage_interpolator;
@@ -19,7 +19,7 @@ using namespace eerie_leap::subsys::adc;
 
 LOG_MODULE_REGISTER(adc_config_ctrl_logger);
 
-AdcConfigurationController::AdcConfigurationController(std::shared_ptr<ConfigurationService<AdcConfig>> adc_configuration_service) :
+AdcConfigurationManager::AdcConfigurationManager(std::shared_ptr<ConfigurationService<AdcConfig>> adc_configuration_service) :
     adc_configuration_service_(std::move(adc_configuration_service)),
     adc_manager_(AdcFactory::Create()),
     adc_config_(nullptr),
@@ -38,7 +38,7 @@ AdcConfigurationController::AdcConfigurationController(std::shared_ptr<Configura
     }
 }
 
-bool AdcConfigurationController::Update(const std::shared_ptr<AdcConfiguration>& adc_configuration) {
+bool AdcConfigurationManager::Update(const std::shared_ptr<AdcConfiguration>& adc_configuration) {
     auto adc_config = make_shared_ext<AdcConfig>();
     memset(adc_config.get(), 0, sizeof(AdcConfig));
 
@@ -90,7 +90,7 @@ bool AdcConfigurationController::Update(const std::shared_ptr<AdcConfiguration>&
     return true;
 }
 
-std::shared_ptr<IAdcManager> AdcConfigurationController::Get(bool force_load) {
+std::shared_ptr<IAdcManager> AdcConfigurationManager::Get(bool force_load) {
     if (adc_configuration_ != nullptr && !force_load) {
         return adc_manager_;
     }
@@ -137,7 +137,7 @@ std::shared_ptr<IAdcManager> AdcConfigurationController::Get(bool force_load) {
     return adc_manager_;
 }
 
-void AdcConfigurationController::SetDefaultConfiguration() {
+void AdcConfigurationManager::SetDefaultConfiguration() {
     std::vector<CalibrationData> adc_calibration_data_samples {
         {0.501, 0.469},
         {1.0, 0.968},
@@ -164,4 +164,4 @@ void AdcConfigurationController::SetDefaultConfiguration() {
         throw std::runtime_error("Cannot save ADCs config");
 }
 
-} // namespace eerie_leap::controllers
+} // namespace eerie_leap::domain::sensor_domain::configuration

@@ -4,8 +4,8 @@
 
 namespace eerie_leap::domain::sensor_domain::processors::sensor_reader {
 
-using namespace eerie_leap::controllers;
 using namespace eerie_leap::subsys::adc;
+using namespace eerie_leap::domain::sensor_domain::configuration;
 
 class SensorReaderPhysicalAnalogCalibrator : public SensorReaderPhysicalAnalog {
 public:
@@ -14,7 +14,7 @@ public:
         std::shared_ptr<GuidGenerator>& guid_generator,
         std::shared_ptr<SensorReadingsFrame>& readings_frame,
         std::shared_ptr<Sensor>& sensor,
-        std::shared_ptr<AdcConfigurationController>& adc_configuration_controller);
+        std::shared_ptr<AdcConfigurationManager>& adc_configuration_manager);
 
     ~SensorReaderPhysicalAnalogCalibrator() override = default;
 

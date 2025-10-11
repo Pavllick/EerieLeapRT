@@ -15,14 +15,14 @@ SensorReaderPhysicalAnalog::SensorReaderPhysicalAnalog(
     std::shared_ptr<GuidGenerator>& guid_generator,
     std::shared_ptr<SensorReadingsFrame>& readings_frame,
     std::shared_ptr<Sensor>& sensor,
-    std::shared_ptr<AdcConfigurationController>& adc_configuration_controller)
+    std::shared_ptr<AdcConfigurationManager>& adc_configuration_manager)
     : SensorReaderBase(time_service, guid_generator, readings_frame, sensor),
-    adc_configuration_controller_(adc_configuration_controller) {
+    adc_configuration_manager_(adc_configuration_manager) {
 
     if(sensor_->configuration.type != SensorType::PHYSICAL_ANALOG)
         throw std::runtime_error("Unsupported sensor type");
 
-    adc_manager_ = adc_configuration_controller_->Get();
+    adc_manager_ = adc_configuration_manager_->Get();
     adc_channel_configuration_ = adc_manager_->GetChannelConfiguration(sensor_->configuration.channel.value());
     AdcChannelReader = adc_manager_->GetChannelReader(sensor_->configuration.channel.value());
 }

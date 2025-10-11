@@ -5,7 +5,7 @@
 
 #include "utilities/time/i_time_service.h"
 #include "utilities/guid/guid_generator.h"
-#include "controllers/adc_configuration_controller.h"
+#include "domain/sensor_domain/configuration/adc_configuration_manager.h"
 #include "domain/sensor_domain/services/processing_scheduler_service.h"
 
 #include "sensor_task.hpp"
@@ -17,6 +17,7 @@ using namespace eerie_leap::controllers;
 using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::subsys::adc;
+using namespace eerie_leap::domain::sensor_domain::configuration;
 using namespace eerie_leap::domain::sensor_domain::processors;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 using namespace eerie_leap::domain::sensor_domain::services;
@@ -28,7 +29,7 @@ private:
 
     std::shared_ptr<ITimeService> time_service_;
     std::shared_ptr<GuidGenerator> guid_generator_;
-    std::shared_ptr<AdcConfigurationController> adc_configuration_controller_;
+    std::shared_ptr<AdcConfigurationManager> adc_configuration_manager_;
     std::shared_ptr<SensorTask> calibration_task_;
     std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service_;
 
@@ -39,7 +40,7 @@ public:
     CalibrationService(
         std::shared_ptr<ITimeService> time_service,
         std::shared_ptr<GuidGenerator> guid_generator,
-        std::shared_ptr<AdcConfigurationController> adc_configuration_controller,
+        std::shared_ptr<AdcConfigurationManager> adc_configuration_manager,
         std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service);
 
     void Start(int channel);

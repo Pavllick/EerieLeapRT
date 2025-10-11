@@ -7,13 +7,13 @@
 #include "subsys/adc/models/adc_configuration.h"
 #include "subsys/adc/i_adc_manager.h"
 
-namespace eerie_leap::controllers {
+namespace eerie_leap::domain::sensor_domain::configuration {
 
 using namespace eerie_leap::configuration::services;
 using namespace eerie_leap::subsys::adc;
 using namespace eerie_leap::subsys::adc::models;
 
-class AdcConfigurationController {
+class AdcConfigurationManager {
 private:
     std::shared_ptr<ConfigurationService<AdcConfig>> adc_configuration_service_;
     std::shared_ptr<IAdcManager> adc_manager_;
@@ -24,10 +24,10 @@ private:
     void SetDefaultConfiguration();
 
 public:
-    AdcConfigurationController(std::shared_ptr<ConfigurationService<AdcConfig>> adc_configuration_service);
+    AdcConfigurationManager(std::shared_ptr<ConfigurationService<AdcConfig>> adc_configuration_service);
 
     bool Update(const std::shared_ptr<AdcConfiguration>& adc_configuration);
     std::shared_ptr<IAdcManager> Get(bool force_load = false);
 };
 
-} // namespace eerie_leap::controllers
+} // namespace eerie_leap::domain::sensor_domain::configuration

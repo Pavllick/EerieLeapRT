@@ -201,8 +201,8 @@ sensor_processor_HelperInstances sensor_processor_GetReadingInstances() {
     const auto adc_configuration = sensor_processor_GetTestConfiguration();
 
     auto adc_configuration_service = std::make_shared<ConfigurationService<AdcConfig>>("adc_config", fs_service);
-    auto adc_configuration_controller = std::make_shared<AdcConfigurationController>(adc_configuration_service);
-    adc_configuration_controller->Update(adc_configuration);
+    auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(adc_configuration_service);
+    adc_configuration_manager->Update(adc_configuration);
 
     auto gpio = std::make_shared<GpioSimulator>();
     gpio->Initialize();
@@ -220,7 +220,7 @@ sensor_processor_HelperInstances sensor_processor_GetReadingInstances() {
                 guid_generator,
                 sensor_readings_frame,
                 sensors[i],
-                adc_configuration_controller);
+                adc_configuration_manager);
         } else if(sensors[i]->configuration.type == SensorType::VIRTUAL_ANALOG) {
             sensor_reader = make_shared_ext<SensorReaderVirtualAnalog>(
                 time_service,

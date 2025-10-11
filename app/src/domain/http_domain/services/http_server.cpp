@@ -26,13 +26,13 @@ static std::shared_ptr<SensorsApiController> sensors_http_controller_;
 void HttpServer::Initialize(
     std::shared_ptr<MathParserService> math_parser_service,
     std::shared_ptr<SystemConfigurationManager> system_configuration_manager,
-    std::shared_ptr<AdcConfigurationController> adc_configuration_controller,
+    std::shared_ptr<AdcConfigurationManager> adc_configuration_manager,
     std::shared_ptr<SensorsConfigurationController> sensors_configuration_controller,
     std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service) {
 
         math_parser_service_ = std::move(math_parser_service);
         system_configuration_manager_ = std::move(system_configuration_manager);
-        adc_configuration_controller_ = std::move(adc_configuration_controller);
+        adc_configuration_manager_ = std::move(adc_configuration_manager);
         sensors_configuration_controller_ = sensors_configuration_controller;
         processing_scheduler_service_ = processing_scheduler_service;
 

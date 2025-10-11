@@ -6,7 +6,7 @@
 
 #include "configuration/adc_config/adc_config.h"
 #include "configuration/services/configuration_service.h"
-#include "controllers/adc_configuration_controller.h"
+#include "domain/sensor_domain/services/adc_configuration_manager.h"
 
 #include "subsys/device_tree/dt_fs.h"
 #include "subsys/fs/services/fs_service.h"
@@ -37,6 +37,7 @@ using namespace eerie_leap::subsys::adc;
 using namespace eerie_leap::subsys::adc::models;
 using namespace eerie_leap::subsys::gpio;
 
+using namespace eerie_leap::domain::sensor_domain::services;
 using namespace eerie_leap::domain::sensor_domain::processors;
 using namespace eerie_leap::domain::sensor_domain::processors::sensor_reader;
 
@@ -197,8 +198,8 @@ sensors_reader_HelperInstances sensors_reader_GetReadingInstances() {
     const auto adc_configuration = sensors_reader_GetTestConfiguration();
 
     auto adc_configuration_service = std::make_shared<ConfigurationService<AdcConfig>>("adc_config", fs_service);
-    auto adc_configuration_controller = std::make_shared<AdcConfigurationController>(adc_configuration_service);
-    adc_configuration_controller->Update(adc_configuration);
+    auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(adc_configuration_service);
+    adc_configuration_manager->Update(adc_configuration);
 
     auto gpio = std::make_shared<GpioSimulator>();
     gpio->Initialize();
@@ -216,7 +217,7 @@ sensors_reader_HelperInstances sensors_reader_GetReadingInstances() {
                 guid_generator,
                 sensor_readings_frame,
                 sensors[i],
-                adc_configuration_controller);
+                adc_configuration_manager);
         } else if(sensors[i]->configuration.type == SensorType::VIRTUAL_ANALOG) {
             sensor_reader = make_shared_ext<SensorReaderVirtualAnalog>(
                 time_service,

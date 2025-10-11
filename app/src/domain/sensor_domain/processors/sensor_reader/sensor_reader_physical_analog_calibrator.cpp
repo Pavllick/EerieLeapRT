@@ -15,8 +15,8 @@ SensorReaderPhysicalAnalogCalibrator::SensorReaderPhysicalAnalogCalibrator(
     std::shared_ptr<GuidGenerator>& guid_generator,
     std::shared_ptr<SensorReadingsFrame>& readings_frame,
     std::shared_ptr<Sensor>& sensor,
-    std::shared_ptr<AdcConfigurationController>& adc_configuration_controller)
-    : SensorReaderPhysicalAnalog(time_service, guid_generator, readings_frame, sensor, adc_configuration_controller) { }
+    std::shared_ptr<AdcConfigurationManager>& adc_configuration_manager)
+    : SensorReaderPhysicalAnalog(time_service, guid_generator, readings_frame, sensor, adc_configuration_manager) { }
 
 void SensorReaderPhysicalAnalogCalibrator::Read() {
     auto reading = make_shared_ext<SensorReading>(guid_generator_->Generate(), sensor_);

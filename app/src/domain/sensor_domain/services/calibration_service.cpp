@@ -21,11 +21,11 @@ LOG_MODULE_REGISTER(calibration_logger);
 CalibrationService::CalibrationService(
     std::shared_ptr<ITimeService> time_service,
     std::shared_ptr<GuidGenerator> guid_generator,
-    std::shared_ptr<AdcConfigurationController> adc_configuration_controller,
+    std::shared_ptr<AdcConfigurationManager> adc_configuration_manager,
     std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service)
     : time_service_(std::move(time_service)),
     guid_generator_(std::move(guid_generator)),
-    adc_configuration_controller_(std::move(adc_configuration_controller)),
+    adc_configuration_manager_(std::move(adc_configuration_manager)),
     processing_scheduler_service_(std::move(processing_scheduler_service)) {
 
     k_sem_init(&processing_semaphore_, 1, 1);
@@ -76,7 +76,7 @@ std::shared_ptr<SensorTask> CalibrationService::CreateCalibrationTask(int channe
         guid_generator_,
         sensor_readings_frame,
         sensor,
-        adc_configuration_controller_);
+        adc_configuration_manager_);
     task->reader = sensor_reader;
 
     return task;
@@ -85,7 +85,7 @@ std::shared_ptr<SensorTask> CalibrationService::CreateCalibrationTask(int channe
 void CalibrationService::Start(int channel) {
     processing_scheduler_service_->Pause();
 
-    auto adc_manager = adc_configuration_controller_->Get();
+    auto adc_manager = adc_configuration_manager_->Get();
     adc_manager->UpdateSamplesCount(CONFIG_EERIE_LEAP_ADC_CALIBRATION_SAMPLES_COUNT);
 
     calibration_task_ = CreateCalibrationTask(channel);
@@ -113,7 +113,7 @@ void CalibrationService::Stop() {
 
     LOG_INF("Calibration Service stopped");
 
-    auto adc_manager = adc_configuration_controller_->Get();
+    auto adc_manager = adc_configuration_manager_->Get();
     adc_manager->ResetSamplesCount();
 
     processing_scheduler_service_->Resume();
