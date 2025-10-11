@@ -1,14 +1,14 @@
 #include "subsys/random/rng.h"
 
-#include "system_configuration_controller.h"
+#include "system_configuration_manager.h"
 
-namespace eerie_leap::controllers {
+namespace eerie_leap::domain::system_domain::configuration {
 
 using namespace eerie_leap::subsys::random;
 
 LOG_MODULE_REGISTER(system_config_ctrl_logger);
 
-SystemConfigurationController::SystemConfigurationController(std::shared_ptr<ConfigurationService<SystemConfig>> system_configuration_service) :
+SystemConfigurationManager::SystemConfigurationManager(std::shared_ptr<ConfigurationService<SystemConfig>> system_configuration_service) :
     system_configuration_service_(std::move(system_configuration_service)),
     system_config_(nullptr),
     system_configuration_(nullptr) {
@@ -36,7 +36,7 @@ SystemConfigurationController::SystemConfigurationController(std::shared_ptr<Con
     LOG_INF("Device ID: %llu", system_config->device_id);
 }
 
-bool SystemConfigurationController::UpdateBuildNumber(uint32_t build_number) {
+bool SystemConfigurationManager::UpdateBuildNumber(uint32_t build_number) {
     auto system_configuration = Get();
     if(system_configuration == nullptr)
         return false;
@@ -54,7 +54,7 @@ bool SystemConfigurationController::UpdateBuildNumber(uint32_t build_number) {
     return true;
 }
 
-bool SystemConfigurationController::UpdateComUsers(const std::vector<ComUserConfiguration>& com_users) {
+bool SystemConfigurationManager::UpdateComUsers(const std::vector<ComUserConfiguration>& com_users) {
     auto system_configuration = Get();
     if(system_configuration == nullptr)
         return false;
@@ -70,7 +70,7 @@ bool SystemConfigurationController::UpdateComUsers(const std::vector<ComUserConf
     return true;
 }
 
-bool SystemConfigurationController::UpdateHwVersion(uint32_t hw_version) {
+bool SystemConfigurationManager::UpdateHwVersion(uint32_t hw_version) {
     auto system_configuration = Get();
     if(system_configuration == nullptr)
         return false;
@@ -89,7 +89,7 @@ bool SystemConfigurationController::UpdateHwVersion(uint32_t hw_version) {
     return true;
 }
 
-bool SystemConfigurationController::UpdateSwVersion(uint32_t sw_version) {
+bool SystemConfigurationManager::UpdateSwVersion(uint32_t sw_version) {
     auto system_configuration = Get();
     if(system_configuration == nullptr)
         return false;
@@ -109,7 +109,7 @@ bool SystemConfigurationController::UpdateSwVersion(uint32_t sw_version) {
     return true;
 }
 
-bool SystemConfigurationController::CreateDefaultSystemConfiguration() {
+bool SystemConfigurationManager::CreateDefaultSystemConfiguration() {
     auto system_config = make_shared_ext<SystemConfiguration>();
     system_config->device_id = Rng::Get64(true);
     system_config->hw_version = 0;
@@ -119,7 +119,7 @@ bool SystemConfigurationController::CreateDefaultSystemConfiguration() {
     return Update(system_config);
 }
 
-bool SystemConfigurationController::Update(std::shared_ptr<SystemConfiguration> system_configuration) {
+bool SystemConfigurationManager::Update(std::shared_ptr<SystemConfiguration> system_configuration) {
     SystemConfig system_config {
         .device_id = system_configuration->device_id,
         .hw_version = system_configuration->hw_version,
@@ -146,7 +146,7 @@ bool SystemConfigurationController::Update(std::shared_ptr<SystemConfiguration> 
     return true;
 }
 
-std::shared_ptr<SystemConfiguration> SystemConfigurationController::Get(bool force_load) {
+std::shared_ptr<SystemConfiguration> SystemConfigurationManager::Get(bool force_load) {
     if (system_configuration_ != nullptr && !force_load) {
         return system_configuration_;
     }
@@ -178,4 +178,4 @@ std::shared_ptr<SystemConfiguration> SystemConfigurationController::Get(bool for
     return system_configuration_;
 }
 
-} // namespace eerie_leap::controllers
+} // namespace eerie_leap::domain::system_domain::configuration

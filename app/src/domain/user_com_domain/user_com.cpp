@@ -7,16 +7,16 @@ namespace eerie_leap::domain::user_com_domain {
 
 LOG_MODULE_REGISTER(interface_logger);
 
-UserCom::UserCom(std::shared_ptr<Modbus> modbus, std::shared_ptr<SystemConfigurationController> system_configuration_controller)
+UserCom::UserCom(std::shared_ptr<Modbus> modbus, std::shared_ptr<SystemConfigurationManager> system_configuration_manager)
     : modbus_(modbus),
-    system_configuration_controller_(system_configuration_controller) {
+    system_configuration_manager_(system_configuration_manager) {
 
     k_sem_init(&processing_semaphore_, 1, 1);
     k_sem_init(&com_semaphore_, 1, 1);
     k_sem_init(&availability_semaphore_, 1, 1);
 
     com_users_ = std::make_shared<std::vector<ComUserConfiguration>>(
-        system_configuration_controller_->Get()->com_users);
+        system_configuration_manager_->Get()->com_users);
 }
 
 int UserCom::Initialize() {
@@ -67,7 +67,7 @@ int UserCom::ResolveUserIds() {
         });
     }
 
-    system_configuration_controller_->UpdateComUsers(*com_users_);
+    system_configuration_manager_->UpdateComUsers(*com_users_);
 
     return 0;
 }

@@ -39,7 +39,7 @@
 #include "configuration/services/configuration_service.h"
 #include "controllers/sensors_configuration_controller.h"
 #include "controllers/adc_configuration_controller.h"
-#include "controllers/system_configuration_controller.h"
+#include "domain/system_domain/configuration/system_configuration_manager.h"
 #include "controllers/logging_controller.h"
 #include "controllers/com_polling_controller.h"
 
@@ -76,6 +76,8 @@ using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::subsys::modbus;
 using namespace eerie_leap::subsys::gpio;
 using namespace eerie_leap::subsys::cfb;
+
+using namespace eerie_leap::domain::system_domain::configuration;
 
 using namespace eerie_leap::domain::user_com_domain;
 using namespace eerie_leap::domain::user_com_domain::services::com_polling;
@@ -181,7 +183,7 @@ int main(void) {
     auto gpio = GpioFactory::Create();
     gpio->Initialize();
 
-    auto system_configuration_controller = make_shared_ext<SystemConfigurationController>(system_config_service);
+    auto system_configuration_manager = make_shared_ext<SystemConfigurationManager>(system_config_service);
     auto sensors_configuration_controller = make_shared_ext<SensorsConfigurationController>(
         math_parser_service,
         sensors_config_service,
@@ -203,7 +205,7 @@ int main(void) {
     std::shared_ptr<ComPollingController> com_polling_controller = nullptr;
     if(DtModbus::Get().has_value()) {
     auto modbus = make_shared_ext<Modbus>(DtModbus::Get().value());
-    auto user_com_interface = make_shared_ext<UserCom>(modbus, system_configuration_controller);
+        auto user_com_interface = make_shared_ext<UserCom>(modbus, system_configuration_manager);
     user_com_interface->Initialize();
 
     // user_com_interface->ResolveUserIds();
@@ -259,7 +261,7 @@ int main(void) {
 #ifdef CONFIG_NETWORKING
     http_server.Initialize(
         math_parser_service,
-        system_configuration_controller,
+        system_configuration_manager,
         adc_configuration_controller,
         sensors_configuration_controller,
         processing_scheduler_service);
