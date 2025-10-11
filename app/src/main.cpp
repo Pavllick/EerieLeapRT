@@ -51,6 +51,8 @@
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
 
+#include "views/main_view.h"
+
 using namespace eerie_leap::utilities::voltage_interpolator;
 using namespace eerie_leap::domain::sensor_domain::models;
 // End test sensors
@@ -88,6 +90,8 @@ using namespace eerie_leap::domain::logging_domain::processors;
 using namespace eerie_leap::configuration::services;
 
 using namespace eerie_leap::controllers;
+
+using namespace eerie_leap::views;
 
 #if defined(CONFIG_WIFI) || defined(CONFIG_NETWORKING)
 using namespace eerie_leap::domain::http_domain::services;
@@ -268,7 +272,16 @@ int main(void) {
     // k_msleep(10000);
     // calibration_service->Stop();
 
-    while (true) {
+    // cfb->PrintStringLine("123456", {0, 0});
+    // cfb->PrintStringLine("Test text", {-10, 16});
+    // cfb->DrawRectangle({0, 15}, {cfb->GetXRes(), 15});
+    // cfb->Flush();
+
+    auto main_view = make_shared_ext<MainView>();
+    main_view->Initialize();
+    main_view->Render();
+
+    while(true) {
         SystemInfo::print_heap_info();
         SystemInfo::print_stack_info();
         k_msleep(SLEEP_TIME_MS);
