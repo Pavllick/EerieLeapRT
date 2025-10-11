@@ -1,11 +1,13 @@
 #include <zephyr/logging/log.h>
 #include <zephyr/drivers/display.h>
 
+#include "dt_logger.h"
+
 #include "dt_display.h"
 
 namespace eerie_leap::subsys::device_tree {
 
-LOG_MODULE_REGISTER(dt_display_logger);
+LOG_MODULE_DECLARE(dt_logger);
 
 const struct device* DtDisplay::display_dev_ = nullptr;
 

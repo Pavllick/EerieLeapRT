@@ -4,11 +4,14 @@
 #ifdef CONFIG_SDMMC_SUBSYS
 #include <zephyr/sd/sd.h>
 #endif
+
+#include "dt_logger.h"
+
 #include "dt_fs.h"
 
 namespace eerie_leap::subsys::device_tree {
 
-LOG_MODULE_REGISTER(dt_fs_logger);
+LOG_MODULE_DECLARE(dt_logger);
 
 std::optional<fs_mount_t> DtFs::int_fs_mp_ = std::nullopt;
 std::optional<fs_mount_t> DtFs::sd_fs_mp_ = std::nullopt;
@@ -62,7 +65,7 @@ int DtFs::SdmmcRequestRca(const struct device* dev) {
 	do {
 		ret = sdhc_request(dev, &cmd, NULL);
 		if(ret) {
-			LOG_DBG("CMD3 failed");
+			LOG_DBG("SDHC CMD3 failed");
 			return ret;
 		}
 
@@ -70,7 +73,7 @@ int DtFs::SdmmcRequestRca(const struct device* dev) {
 		sd_relative_addr_ = ((cmd.response[0U] & 0xFFFF0000) >> 16U);
 	} while (sd_relative_addr_ == 0U);
 
-	LOG_DBG("Card relative addr: %d", sd_relative_addr_);
+	LOG_DBG("SDHC Card relative addr: %d", sd_relative_addr_);
 	return 0;
 }
 

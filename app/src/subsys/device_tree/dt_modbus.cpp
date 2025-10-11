@@ -1,10 +1,12 @@
 #include <zephyr/logging/log.h>
 
+#include "dt_logger.h"
+
 #include "dt_modbus.h"
 
 namespace eerie_leap::subsys::device_tree {
 
-LOG_MODULE_REGISTER(dt_modbus_logger);
+LOG_MODULE_DECLARE(dt_logger);
 
 std::optional<char*> DtModbus::iface_ = std::nullopt;
 

@@ -1,10 +1,12 @@
 #include <zephyr/logging/log.h>
 
+#include "dt_logger.h"
+
 #include "dt_gpio.h"
 
 namespace eerie_leap::subsys::device_tree {
 
-LOG_MODULE_REGISTER(dt_gpio_logger);
+LOG_MODULE_DECLARE(dt_logger);
 
 std::optional<std::vector<gpio_dt_spec>> DtGpio::gpio_specs_ = std::nullopt;
 
