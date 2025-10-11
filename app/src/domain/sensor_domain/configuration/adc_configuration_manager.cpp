@@ -19,7 +19,7 @@ using namespace eerie_leap::subsys::adc;
 
 LOG_MODULE_REGISTER(adc_config_ctrl_logger);
 
-AdcConfigurationManager::AdcConfigurationManager(std::shared_ptr<ConfigurationService<AdcConfig>> adc_configuration_service) :
+AdcConfigurationManager::AdcConfigurationManager(ext_unique_ptr<ConfigurationService<AdcConfig>> adc_configuration_service) :
     adc_configuration_service_(std::move(adc_configuration_service)),
     adc_manager_(AdcFactory::Create()),
     adc_config_(nullptr),
@@ -101,8 +101,8 @@ std::shared_ptr<IAdcManager> AdcConfigurationManager::Get(bool force_load) {
     if(!adc_config.has_value())
         return nullptr;
 
-    adc_config_raw_ = adc_config.value().config_raw;
-    adc_config_ = adc_config.value().config;
+    adc_config_raw_ = std::move(adc_config.value().config_raw);
+    adc_config_ = std::move(adc_config.value().config);
 
     adc_configuration->samples = static_cast<uint16_t>(adc_config_->samples);
     adc_configuration->channel_configurations = make_shared_ext<std::vector<std::shared_ptr<AdcChannelConfiguration>>>();

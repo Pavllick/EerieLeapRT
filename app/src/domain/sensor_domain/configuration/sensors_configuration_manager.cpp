@@ -18,12 +18,12 @@ using namespace eerie_leap::utilities::voltage_interpolator;
 
 SensorsConfigurationManager::SensorsConfigurationManager(
     std::shared_ptr<MathParserService> math_parser_service,
-    std::shared_ptr<ConfigurationService<SensorsConfig>> sensors_configuration_service,
+    ext_unique_ptr<ConfigurationService<SensorsConfig>> sensors_configuration_service,
     int adc_channel_count) :
 
     math_parser_service_(std::move(math_parser_service)),
     sensors_configuration_service_(std::move(sensors_configuration_service)),
-    sensors_config_(make_shared_ext<SensorsConfig>()),
+    sensors_config_(make_unique_ext<SensorsConfig>()),
     ordered_sensors_(make_shared_ext<std::vector<std::shared_ptr<Sensor>>>()),
     adc_channel_count_(adc_channel_count) {
 
@@ -129,8 +129,8 @@ const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfiguration
     if(!sensors_config.has_value())
         return nullptr;
 
-    sensors_config_raw_ = sensors_config.value().config_raw;
-    sensors_config_ = sensors_config.value().config;
+    sensors_config_raw_ = std::move(sensors_config.value().config_raw);
+    sensors_config_ = std::move(sensors_config.value().config);
     SensorsOrderResolver resolver;
 
     for(size_t i = 0; i < sensors_config_->SensorConfig_m_count; ++i) {

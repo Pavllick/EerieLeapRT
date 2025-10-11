@@ -172,11 +172,11 @@ int main(void) {
     auto guid_generator = make_shared_ext<GuidGenerator>();
     auto math_parser_service = make_shared_ext<MathParserService>();
 
-    auto system_config_service = make_shared_ext<ConfigurationService<SystemConfig>>("system_config", fs_service);
-    auto adc_config_service = make_shared_ext<ConfigurationService<AdcConfig>>("adc_config", fs_service);
-    auto sensors_config_service = make_shared_ext<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
+    auto system_config_service = make_unique_ext<ConfigurationService<SystemConfig>>("system_config", fs_service);
+    auto adc_config_service = make_unique_ext<ConfigurationService<AdcConfig>>("adc_config", fs_service);
+    auto sensors_config_service = make_unique_ext<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
 
-    auto adc_configuration_manager = make_shared_ext<AdcConfigurationManager>(adc_config_service);
+    auto adc_configuration_manager = make_shared_ext<AdcConfigurationManager>(std::move(adc_config_service));
 
     // TODO: For test purposes only
     // SetupAdcConfiguration(adc_configuration_manager);
@@ -184,10 +184,10 @@ int main(void) {
     auto gpio = GpioFactory::Create();
     gpio->Initialize();
 
-    auto system_configuration_manager = make_shared_ext<SystemConfigurationManager>(system_config_service);
+    auto system_configuration_manager = make_shared_ext<SystemConfigurationManager>(std::move(system_config_service));
     auto sensors_configuration_manager = make_shared_ext<SensorsConfigurationManager>(
         math_parser_service,
-        sensors_config_service,
+        std::move(sensors_config_service),
         adc_configuration_manager->Get()->GetChannelCount());
 
     std::shared_ptr<LoggingController> logging_controller = nullptr;
