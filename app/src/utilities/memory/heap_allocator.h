@@ -73,50 +73,33 @@ std::shared_ptr<T> make_shared_ext(Args&&... args) {
     return std::allocate_shared<T>(HeapAllocator<T>(), std::forward<Args>(args)...);
 }
 
-template<typename T>
-struct alloc_deleter {
-    alloc_deleter() = default;
-    alloc_deleter(const HeapAllocator<T>& obj) : obj_(obj) { }
-
-    using pointer = T*;
-
-    void operator()(pointer p) const {
+struct ext_deleter {
+    template<typename T>
+    void operator()(T* p) const {
         if (p) {
-            HeapAllocator<T> allocator(obj_);
-            std::allocator_traits<HeapAllocator<T>>::destroy(allocator, p);
-            std::allocator_traits<HeapAllocator<T>>::deallocate(allocator, p, 1);
+            p->~T();
+
+            HeapAllocator<T> allocator;
+            allocator.deallocate(p, 1);
         }
     }
-
-private:
-    HeapAllocator<T> obj_;
 };
 
-template<typename T, typename... Args>
-auto allocate_unique(const HeapAllocator<T>& obj, Args&&... args) {
-    using AT = std::allocator_traits<HeapAllocator<T>>;
-    static_assert(std::is_same<typename AT::value_type, std::remove_cv_t<T>>::value,
-                "Allocator has the wrong value_type");
+template<typename T>
+using ext_unique_ptr = std::unique_ptr<T, ext_deleter>;
 
-    HeapAllocator<T> allocator(obj);
+template <typename T, typename... Args>
+ext_unique_ptr<T> make_unique_ext(Args&&... args) {
+    HeapAllocator<T> allocator;
     auto p = allocator.allocate(1);
 
     try {
-        AT::construct(allocator, p, std::forward<Args>(args)...);
-        using D = alloc_deleter<T>;
-        return std::unique_ptr<T, D>(p, D(allocator));
+        new (p) T(std::forward<Args>(args)...);
+        return ext_unique_ptr<T>(p, ext_deleter{});
     } catch (...) {
         allocator.deallocate(p, 1);
         throw;
     }
-}
-
-template<typename T>
-using ext_unique_ptr = std::unique_ptr<T, alloc_deleter<T>>;
-
-template <typename T, typename... Args>
-ext_unique_ptr<T> make_unique_ext(Args&&... args) {
-    return allocate_unique<T>(HeapAllocator<T>(), std::forward<Args>(args)...);
 }
 
 using ExtVector = std::vector<uint8_t, HeapAllocator<uint8_t>>;

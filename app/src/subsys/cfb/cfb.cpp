@@ -5,6 +5,7 @@
 #include <zephyr/display/cfb.h>
 
 #include "subsys/device_tree/dt_display.h"
+#include "cfb_fonts.h"
 
 #include "cfb.h"
 
@@ -19,6 +20,11 @@ Cfb::Cfb() {
 }
 
 bool Cfb::Initialize() {
+    if(initialized_) {
+        LOG_INF("Cfb already initialized.");
+        return true;
+    }
+
     LOG_INF("Cfb initialization started.");
 
     if(!DtDisplay::Get()) {
@@ -53,6 +59,8 @@ bool Cfb::Initialize() {
     PrintScreenInfo();
 
     InitializeThread();
+
+    initialized_ = true;
 
     return true;
 }
@@ -203,6 +211,7 @@ void Cfb::StartAnimation() {
 }
 
 void Cfb::StopAnimation() {
+    k_work_cancel_sync(&task_.work, &work_sync_);
     atomic_set(&task_.is_animation_running_, 0);
 }
 

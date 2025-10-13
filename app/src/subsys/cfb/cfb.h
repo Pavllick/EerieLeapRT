@@ -14,6 +14,7 @@ class Cfb {
 private:
     uint16_t x_res_;
     uint16_t y_res_;
+    bool initialized_ = false;
 
     static constexpr int k_stack_size_ = 1024;
     static constexpr int k_priority_ = K_PRIO_PREEMPT(6);

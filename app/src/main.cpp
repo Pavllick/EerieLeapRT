@@ -42,6 +42,7 @@
 #include "domain/system_domain/configuration/system_configuration_manager.h"
 #include "controllers/logging_controller.h"
 #include "controllers/com_polling_controller.h"
+#include "controllers/display_controller.h"
 
 // Test sensors includes
 #include "utilities/math_parser/expression_evaluator.h"
@@ -50,8 +51,6 @@
 #include "utilities/voltage_interpolator/calibration_data.h"
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
-
-#include "views/main_view.h"
 
 using namespace eerie_leap::utilities::voltage_interpolator;
 using namespace eerie_leap::domain::sensor_domain::configuration;
@@ -94,8 +93,6 @@ using namespace eerie_leap::configuration::services;
 
 using namespace eerie_leap::controllers;
 
-using namespace eerie_leap::views;
-
 #if defined(CONFIG_WIFI) || defined(CONFIG_NETWORKING)
 using namespace eerie_leap::domain::http_domain::services;
 #endif // CONFIG_WIFI || CONFIG_NETWORKING
@@ -125,6 +122,8 @@ int main(void) {
         LOG_ERR("Failed to initialize CFB.");
         return -1;
     }
+    auto display_controller = make_shared_ext<DisplayController>(cfb);
+    display_controller->Initialize();
 
     std::shared_ptr<SdmmcService> sd_fs_service = nullptr;
     auto sd_fs_mp = DtFs::GetSdFsMp();
@@ -196,7 +195,10 @@ int main(void) {
         auto log_writer_service = make_shared_ext<LogWriterService>(sd_fs_service, time_service);
         log_writer_service->Initialize();
 
-        logging_controller = make_shared_ext<LoggingController>(log_writer_service, sensors_configuration_manager);
+        logging_controller = make_shared_ext<LoggingController>(
+            log_writer_service,
+            sensors_configuration_manager,
+            display_controller);
         log_reading_processor = make_shared_ext<LogReadingProcessor>(log_writer_service);
     }
 
@@ -274,15 +276,6 @@ int main(void) {
     // calibration_service->Start(1);
     // k_msleep(10000);
     // calibration_service->Stop();
-
-    // cfb->PrintStringLine("123456", {0, 0});
-    // cfb->PrintStringLine("Test text", {-10, 16});
-    // cfb->DrawRectangle({0, 15}, {cfb->GetXRes(), 15});
-    // cfb->Flush();
-
-    auto main_view = make_shared_ext<MainView>();
-    main_view->Initialize();
-    main_view->Render();
 
     while(true) {
         SystemInfo::print_heap_info();
