@@ -14,11 +14,11 @@ void TimeService::Initialize() {
 }
 
 system_clock::time_point TimeService::GetCurrentTime() {
-    return rtc_service_->GetTime();
+    return rtc_service_->GetCurrentTime();
 }
 
 system_clock::time_point TimeService::GetTimeSinceBoot() {
-    return boot_elapsed_time_service_->GetTime();
+    return boot_elapsed_time_service_->GetTimeSinceBoot();
 }
 
 } // namespace eerie_leap::utilities::time

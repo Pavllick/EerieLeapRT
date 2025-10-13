@@ -27,14 +27,9 @@ file(GLOB_RECURSE APP_SRC_CONFIGURATION
   ${APP_SRC_CONFIGURATION_DIR}/*.cpp
 )
 
-set(APP_SRC_CONTROLLERS_DIR ${APP_SRC_DIR}/controllers)
-file(GLOB_RECURSE APP_SRC_CONTROLLERS
-  ${APP_SRC_CONTROLLERS_DIR}/*.c
-  ${APP_SRC_CONTROLLERS_DIR}/*.cpp
-)
-
 set(APP_SRC_SUBSYS_DT_DIR ${APP_SRC_DIR}/subsys/device_tree)
 file(GLOB_RECURSE APP_SRC_SUBSYS_DT
+  ${APP_SRC_SUBSYS_DT_DIR}/dt_logger.cpp
   ${APP_SRC_SUBSYS_DT_DIR}/dt_fs.cpp
 )
 
@@ -62,6 +57,8 @@ file(GLOB_RECURSE APP_SRC_SUBSYS
 
 set(APP_SRC_SENSOR_DOMAIN_DIR ${APP_SRC_DIR}/domain/sensor_domain)
 file(GLOB_RECURSE APP_SRC_SENSOR_DOMAIN_MODELS
+  ${APP_SRC_SENSOR_DOMAIN_DIR}/configuration/*.c
+  ${APP_SRC_SENSOR_DOMAIN_DIR}/configuration/*.cpp
   ${APP_SRC_SENSOR_DOMAIN_DIR}/models/*.c
   ${APP_SRC_SENSOR_DOMAIN_DIR}/models/*.cpp
 )
@@ -82,7 +79,6 @@ file(GLOB_RECURSE TEST_SOURCES src/*.c src/*.cpp)
 # Add all source files to the app target
 target_sources(app PRIVATE
   ${APP_SRC_CONFIGURATION}
-  ${APP_SRC_CONTROLLERS}
   ${APP_SRC_SUBSYS_DT}
   ${APP_SRC_SYSTEM_DOMAIN}
   ${APP_SRC_ADC_SUBSYS}

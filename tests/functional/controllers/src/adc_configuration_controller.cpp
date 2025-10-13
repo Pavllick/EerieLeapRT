@@ -17,7 +17,7 @@ using namespace eerie_leap::domain::sensor_domain::configuration;
 
 ZTEST_SUITE(adc_configuration_manager, NULL, NULL, NULL, NULL, NULL);
 
-std::shared_ptr<AdcConfiguration> adc_configuration_manager_GetTestConfiguration() {
+AdcConfiguration adc_configuration_manager_GetTestConfiguration() {
     std::vector<CalibrationData> adc_calibration_data_samples {
         {0.0, 0.0},
         {5.0, 5.0}
@@ -33,9 +33,9 @@ std::shared_ptr<AdcConfiguration> adc_configuration_manager_GetTestConfiguration
     for(int i = 0; i < 8; i++)
         channel_configurations.push_back(adc_channel_configuration);
 
-    auto adc_configuration = make_shared_ext<AdcConfiguration>();
-    adc_configuration->samples = 40;
-    adc_configuration->channel_configurations =
+    AdcConfiguration adc_configuration;
+    adc_configuration.samples = 40;
+    adc_configuration.channel_configurations =
         make_shared_ext<std::vector<std::shared_ptr<AdcChannelConfiguration>>>(channel_configurations);
 
     return adc_configuration;
@@ -47,8 +47,8 @@ ZTEST(adc_configuration_manager, test_AdcConfigurationManager_Save_config_succes
 
     fs_service->Format();
 
-    auto adc_configuration_service = std::make_shared<ConfigurationService<AdcConfig>>("adc_config", fs_service);
-    auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(adc_configuration_service);
+    auto adc_configuration_service = make_unique_ext<ConfigurationService<AdcConfig>>("adc_config", fs_service);
+    auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(std::move(adc_configuration_service));
 
     auto adc_configuration = adc_configuration_manager_GetTestConfiguration();
 
@@ -78,16 +78,17 @@ ZTEST(adc_configuration_manager, test_AdcConfigurationManager_Save_config_and_Lo
 
     fs_service->Format();
 
-    auto adc_configuration_service = std::make_shared<ConfigurationService<AdcConfig>>("adc_config", fs_service);
-    auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(adc_configuration_service);
+    auto adc_configuration_service = make_unique_ext<ConfigurationService<AdcConfig>>("adc_config", fs_service);
+    auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(std::move(adc_configuration_service));
 
     auto adc_configuration = adc_configuration_manager_GetTestConfiguration();
 
     bool result = adc_configuration_manager->Update(adc_configuration);
     zassert_true(result);
 
+    adc_configuration_service = make_unique_ext<ConfigurationService<AdcConfig>>("adc_config", fs_service);
     adc_configuration_manager = nullptr;
-    adc_configuration_manager = std::make_shared<AdcConfigurationManager>(adc_configuration_service);
+    adc_configuration_manager = std::make_shared<AdcConfigurationManager>(std::move(adc_configuration_service));
 
     auto adc_manager = adc_configuration_manager->Get();
 

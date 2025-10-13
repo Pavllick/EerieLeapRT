@@ -25,15 +25,10 @@ file(GLOB_RECURSE APP_SRC_CONFIGURATION
   ${APP_SRC_CONFIGURATION_DIR}/*.cpp
 )
 
-set(APP_SRC_CONTROLLERS_DIR ${APP_SRC_DIR}/controllers)
-file(GLOB_RECURSE APP_SRC_CONTROLLERS
-  ${APP_SRC_CONTROLLERS_DIR}/*.c
-  ${APP_SRC_CONTROLLERS_DIR}/*.cpp
-)
-
 set(APP_SRC_SUBSYS_DIR ${APP_SRC_DIR}/subsys)
 file(GLOB_RECURSE APP_SRC_SUBSYS
   ${APP_SRC_SUBSYS_DIR}/device_tree/dt_fs.cpp
+  ${APP_SRC_SUBSYS_DIR}/device_tree/dt_logger.cpp
   ${APP_SRC_SUBSYS_DIR}/adc/*.c
   ${APP_SRC_SUBSYS_DIR}/adc/*.cpp
   ${APP_SRC_SUBSYS_DIR}/gpio/*.c
@@ -50,7 +45,6 @@ file(GLOB_RECURSE APP_SRC_DOMAIN
   ${APP_SRC_DOMAIN_DIR}/system_domain/*.cpp
 )
 
-# Collect all source files for the test
 set(APP_SRC_UTILITIES_DIR ${APP_SRC_DIR}/utilities)
 file(GLOB_RECURSE APP_SRC_UTILITIES
   ${APP_SRC_UTILITIES_DIR}/*.c
@@ -62,7 +56,6 @@ file(GLOB_RECURSE TEST_SOURCES src/*.c src/*.cpp)
 # Add all source files to the app target
 target_sources(app PRIVATE
   ${APP_SRC_CONFIGURATION}
-  ${APP_SRC_CONTROLLERS}
   ${APP_SRC_SUBSYS}
   ${APP_SRC_DOMAIN}
   ${APP_SRC_UTILITIES}

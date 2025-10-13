@@ -15,8 +15,6 @@ using namespace eerie_leap::subsys::device_tree;
 using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::domain::system_domain::configuration;
 
-using namespace eerie_leap::controllers;
-
 ZTEST_SUITE(system_configuration_manager, NULL, NULL, NULL, NULL, NULL);
 
 ZTEST(system_configuration_manager, test_SystemConfigurationManager_Save_config_successfully_saved) {
@@ -25,8 +23,8 @@ ZTEST(system_configuration_manager, test_SystemConfigurationManager_Save_config_
 
     fs_service->Format();
 
-    auto system_configuration_service = std::make_shared<ConfigurationService<SystemConfig>>("system_config", fs_service);
-    auto system_configuration_manager = std::make_shared<SystemConfigurationManager>(system_configuration_service);
+    auto system_configuration_service = make_unique_ext<ConfigurationService<SystemConfig>>("system_config", fs_service);
+    auto system_configuration_manager = std::make_shared<SystemConfigurationManager>(std::move(system_configuration_service));
 
     SystemConfiguration system_configuration {
         .hw_version = 23456,
@@ -49,8 +47,8 @@ ZTEST(system_configuration_manager, test_SystemConfigurationManager_Save_config_
 
     fs_service->Format();
 
-    auto system_configuration_service = std::make_shared<ConfigurationService<SystemConfig>>("system_config", fs_service);
-    auto system_configuration_manager = std::make_shared<SystemConfigurationManager>(system_configuration_service);
+    auto system_configuration_service = make_unique_ext<ConfigurationService<SystemConfig>>("system_config", fs_service);
+    auto system_configuration_manager = std::make_shared<SystemConfigurationManager>(std::move(system_configuration_service));
 
     SystemConfiguration system_configuration {
         .device_id = 14
@@ -60,8 +58,9 @@ ZTEST(system_configuration_manager, test_SystemConfigurationManager_Save_config_
     bool result = system_configuration_manager->Update(system_configuration_ptr);
     zassert_true(result);
 
+    system_configuration_service = make_unique_ext<ConfigurationService<SystemConfig>>("system_config", fs_service);
     system_configuration_manager = nullptr;
-    system_configuration_manager = std::make_shared<SystemConfigurationManager>(system_configuration_service);
+    system_configuration_manager = std::make_shared<SystemConfigurationManager>(std::move(system_configuration_service));
 
     auto saved_system_configuration = *system_configuration_manager->Get();
 

@@ -1,12 +1,12 @@
 #include <zephyr/ztest.h>
 
+#include "utilities/memory/heap_allocator.h"
 #include "utilities/guid/guid_generator.h"
 #include "utilities/time/boot_elapsed_time_service.h"
 #include "utilities/math_parser/math_parser_service.hpp"
 
 #include "configuration/adc_config/adc_config.h"
 #include "configuration/services/configuration_service.h"
-#include "domain/sensor_domain/services/adc_configuration_manager.h"
 
 #include "subsys/device_tree/dt_fs.h"
 #include "subsys/fs/services/fs_service.h"
@@ -16,6 +16,7 @@
 #include "subsys/gpio/i_gpio.h"
 #include "subsys/gpio/gpio_simulator.h"
 
+#include "domain/sensor_domain/configuration/adc_configuration_manager.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 #include "domain/sensor_domain/processors/sensor_reader/i_sensor_reader.h"
 #include "domain/sensor_domain/processors/sensor_reader/sensor_reader_physical_analog.h"
@@ -28,6 +29,7 @@
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
 
+using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::utilities::math_parser;
@@ -37,7 +39,7 @@ using namespace eerie_leap::subsys::adc;
 using namespace eerie_leap::subsys::adc::models;
 using namespace eerie_leap::subsys::gpio;
 
-using namespace eerie_leap::domain::sensor_domain::services;
+using namespace eerie_leap::domain::sensor_domain::configuration;
 using namespace eerie_leap::domain::sensor_domain::processors;
 using namespace eerie_leap::domain::sensor_domain::processors::sensor_reader;
 
@@ -155,7 +157,7 @@ std::vector<std::shared_ptr<Sensor>> sensors_reader_GetTestSensors(std::shared_p
     return sensors;
 }
 
-std::shared_ptr<AdcConfiguration> sensors_reader_GetTestConfiguration() {
+AdcConfiguration sensors_reader_GetTestConfiguration() {
     std::vector<CalibrationData> adc_calibration_data_samples {
         {0.0, 0.0},
         {5.0, 5.0}
@@ -171,9 +173,9 @@ std::shared_ptr<AdcConfiguration> sensors_reader_GetTestConfiguration() {
     for(int i = 0; i < 8; i++)
         channel_configurations.push_back(adc_channel_configuration);
 
-    auto adc_configuration = make_shared_ext<AdcConfiguration>();
-    adc_configuration->samples = 40;
-    adc_configuration->channel_configurations =
+    AdcConfiguration adc_configuration;
+    adc_configuration.samples = 40;
+    adc_configuration.channel_configurations =
         make_shared_ext<std::vector<std::shared_ptr<AdcChannelConfiguration>>>(channel_configurations);
 
     return adc_configuration;
@@ -190,15 +192,14 @@ sensors_reader_HelperInstances sensors_reader_GetReadingInstances() {
 
     fs_service->Format();
 
-    std::shared_ptr<ITimeService> time_service = std::make_shared<BootElapsedTimeService>();
-    time_service->Initialize();
+    auto time_service = std::make_shared<BootElapsedTimeService>();
     std::shared_ptr<GuidGenerator> guid_generator = std::make_shared<GuidGenerator>();
     std::shared_ptr<MathParserService> math_parser_service = std::make_shared<MathParserService>();
 
     const auto adc_configuration = sensors_reader_GetTestConfiguration();
 
-    auto adc_configuration_service = std::make_shared<ConfigurationService<AdcConfig>>("adc_config", fs_service);
-    auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(adc_configuration_service);
+    auto adc_configuration_service = make_unique_ext<ConfigurationService<AdcConfig>>("adc_config", fs_service);
+    auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(std::move(adc_configuration_service));
     adc_configuration_manager->Update(adc_configuration);
 
     auto gpio = std::make_shared<GpioSimulator>();

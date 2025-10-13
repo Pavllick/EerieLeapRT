@@ -1,5 +1,6 @@
 #include <zephyr/ztest.h>
 
+#include "utilities/memory/heap_allocator.h"
 #include "utilities/guid/guid_generator.h"
 #include "utilities/time/boot_elapsed_time_service.h"
 #include "utilities/math_parser/math_parser_service.hpp"
@@ -26,6 +27,7 @@
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
 
+using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::utilities::math_parser;
@@ -157,7 +159,7 @@ std::vector<std::shared_ptr<Sensor>> sensor_processor_GetTestSensors(std::shared
     return sensors_order_resolver.GetProcessingOrder();
 }
 
-std::shared_ptr<AdcConfiguration> sensor_processor_GetTestConfiguration() {
+AdcConfiguration sensor_processor_GetTestConfiguration() {
     std::vector<CalibrationData> adc_calibration_data_samples {
         {0.0, 0.0},
         {5.0, 5.0}
@@ -173,9 +175,9 @@ std::shared_ptr<AdcConfiguration> sensor_processor_GetTestConfiguration() {
     for(int i = 0; i < 8; i++)
         channel_configurations.push_back(adc_channel_configuration);
 
-    auto adc_configuration = make_shared_ext<AdcConfiguration>();
-    adc_configuration->samples = 40;
-    adc_configuration->channel_configurations =
+    AdcConfiguration adc_configuration;
+    adc_configuration.samples = 40;
+    adc_configuration.channel_configurations =
         make_shared_ext<std::vector<std::shared_ptr<AdcChannelConfiguration>>>(channel_configurations);
 
     return adc_configuration;
@@ -193,15 +195,14 @@ sensor_processor_HelperInstances sensor_processor_GetReadingInstances() {
 
     fs_service->Format();
 
-    std::shared_ptr<ITimeService> time_service = std::make_shared<BootElapsedTimeService>();
-    time_service->Initialize();
+    auto time_service = std::make_shared<BootElapsedTimeService>();
     std::shared_ptr<GuidGenerator> guid_generator = std::make_shared<GuidGenerator>();
     std::shared_ptr<MathParserService> math_parser_service = std::make_shared<MathParserService>();
 
-    const auto adc_configuration = sensor_processor_GetTestConfiguration();
+    auto adc_configuration_service = make_unique_ext<ConfigurationService<AdcConfig>>("adc_config", fs_service);
+    auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(std::move(adc_configuration_service));
 
-    auto adc_configuration_service = std::make_shared<ConfigurationService<AdcConfig>>("adc_config", fs_service);
-    auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(adc_configuration_service);
+    const auto adc_configuration = sensor_processor_GetTestConfiguration();
     adc_configuration_manager->Update(adc_configuration);
 
     auto gpio = std::make_shared<GpioSimulator>();

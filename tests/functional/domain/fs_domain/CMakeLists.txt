@@ -15,6 +15,7 @@ include_directories(${APP_SRC_DIR})
 
 set(APP_SRC_SUBSYS_DT_DIR ${APP_SRC_DIR}/subsys/device_tree)
 file(GLOB_RECURSE APP_SRC_SUBSYS_DT
+  ${APP_SRC_SUBSYS_DIR}/dt_logger.cpp
   ${APP_SRC_SUBSYS_DT_DIR}/dt_fs.cpp
 )
 
@@ -23,11 +24,18 @@ file(GLOB_RECURSE APP_SRC_SUBSYS_FS
   ${APP_SRC_SUBSYS_FS_DIR}/fs_service.cpp
 )
 
+set(APP_SRC_UTILITIES_DIR ${APP_SRC_DIR}/utilities/memory)
+file(GLOB_RECURSE APP_SRC_UTILITIES
+  ${APP_SRC_UTILITIES_DIR}/*.c
+  ${APP_SRC_UTILITIES_DIR}/*.cpp
+)
+
 file(GLOB_RECURSE TEST_SOURCES src/*.c src/*.cpp)
 
 # Add all source files to the app target
 target_sources(app PRIVATE
   ${APP_SRC_SUBSYS_DT}
   ${APP_SRC_SUBSYS_FS}
+  ${APP_SRC_UTILITIES}
   ${TEST_SOURCES}
 )
