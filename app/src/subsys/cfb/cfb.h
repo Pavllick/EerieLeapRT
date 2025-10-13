@@ -14,6 +14,8 @@ class Cfb {
 private:
     uint16_t x_res_;
     uint16_t y_res_;
+    uint8_t font_height_;
+    uint8_t font_width_;
     bool initialized_ = false;
 
     static constexpr int k_stack_size_ = 1024;
@@ -42,6 +44,10 @@ public:
     bool DrawLine(const Coordinate& start, const Coordinate& end);
     bool DrawRectangle(const Coordinate& start, const Coordinate& end);
     bool DrawCircle(const Coordinate& center, uint16_t radius);
+    bool InvertArea(const Coordinate& start, const Coordinate& end);
+
+    int GetFontHeight() const;
+    int GetFontWidth() const;
 
     bool Flush();
     bool Clear(bool clear_display = false);

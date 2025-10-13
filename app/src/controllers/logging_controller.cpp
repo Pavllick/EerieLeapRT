@@ -17,7 +17,7 @@ int LoggingController::LogWriterStart() {
         res = log_writer_service_->LogWriterStart();
 
     if(res == 0)
-        display_controller_->PrintStringLine("Logging in progress");
+        display_controller_->AddStatus("log");
 
     return res;
 }
@@ -26,7 +26,7 @@ int LoggingController::LogWriterStop() {
     int res = log_writer_service_->LogWriterStop();
 
     if(res == 0)
-        display_controller_->StartAnimation();
+        display_controller_->RemoveStatus("log");
 
     return res;
 }

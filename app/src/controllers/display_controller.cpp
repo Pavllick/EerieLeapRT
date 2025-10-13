@@ -8,13 +8,16 @@
 namespace eerie_leap::controllers {
 
 DisplayController::DisplayController(std::shared_ptr<Cfb> cfb)
-    : cfb_(std::move(cfb)), current_animation_index_(0) { }
+    : cfb_(std::move(cfb)), current_animation_index_(0) {
+
+    cfb_->SetFont(0);
+}
 
 void DisplayController::Initialize() {
     StartAnimation(0);
 }
 
-bool DisplayController::StartAnimation(int animation_index) {
+void DisplayController::StartAnimation(int animation_index) {
     if(animation_index < 0)
         animation_index = current_animation_index_;
 
@@ -32,7 +35,7 @@ bool DisplayController::StartAnimation(int animation_index) {
             animation_ = make_unique_ext<TaperedWaveAnimation>(cfb_);
             break;
         default:
-            return false;
+            return;
     }
 
     animation_->Initialize();
@@ -44,28 +47,79 @@ bool DisplayController::StartAnimation(int animation_index) {
 
     is_animation_in_progress_ = true;
     current_animation_index_ = animation_index;
-
-    return true;
 }
 
-bool DisplayController::StopAnimation() {
+void DisplayController::StopAnimation() {
+    if(!is_animation_in_progress_)
+        return;
+
     cfb_->StopAnimation();
 
     animation_.reset();
     is_animation_in_progress_ = false;
-
-    return true;
 }
 
-bool DisplayController::PrintStringLine(const std::string& str) {
-    if(is_animation_in_progress_)
-        StopAnimation();
+void DisplayController::PrintStringLine(const std::string& str) {
+    StopAnimation();
 
     cfb_->Clear();
     cfb_->PrintString(str.c_str(), {0, 0});
     cfb_->Flush();
+}
 
-    return true;
+void DisplayController::AddStatus(const std::string& status) {
+    statuses_.insert(status);
+    UpdateStatuses();
+}
+
+void DisplayController::RemoveStatus(const std::string& status) {
+    statuses_.erase(status);
+    UpdateStatuses();
+}
+
+void DisplayController::ClearStatuses() {
+    statuses_.clear();
+    UpdateStatuses();
+}
+
+void DisplayController::UpdateStatuses() {
+    if(statuses_.empty()) {
+        StartAnimation();
+
+        return;
+    }
+
+    int length_chars = 0;
+    for(const auto& s : statuses_)
+        length_chars += s.size();
+
+    int padding = 1;
+
+    int length_px = length_chars * cfb_->GetFontWidth() + statuses_.size() * padding * 2;
+
+    int start_x_px = cfb_->GetXRes() - length_px;
+    start_x_px = start_x_px < 0 ? 0 : start_x_px;
+    int y = cfb_->GetYRes() - cfb_->GetFontHeight() - padding;
+
+    StopAnimation();
+    cfb_->Clear();
+
+    int current_x_px = start_x_px;
+    int i = 0;
+    for(const auto& s : statuses_) {
+        cfb_->PrintStringLine(s.c_str(), {current_x_px + padding, y});
+        int current_length_px = s.size() * cfb_->GetFontWidth() + padding * 2;
+
+        if(i++ % 2 != 0) {
+            cfb_->InvertArea(
+                {current_x_px, y - padding},
+                {current_x_px + current_length_px, y + cfb_->GetFontHeight() + padding});
+        }
+
+        current_x_px += current_length_px;
+    }
+
+    cfb_->Flush();
 }
 
 } // namespace eerie_leap::controllers

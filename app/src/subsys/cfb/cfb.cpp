@@ -124,7 +124,20 @@ bool Cfb::SetFont(uint8_t font_idx) {
         return false;
     }
 
+    if(cfb_get_font_size(DtDisplay::Get(), font_idx, &font_width_, &font_height_) != 0) {
+        LOG_ERR("Failed to get font size");
+        return false;
+    }
+
     return true;
+}
+
+int Cfb::GetFontHeight() const {
+    return font_height_;
+}
+
+int Cfb::GetFontWidth() const {
+    return font_width_;
 }
 
 bool Cfb::PrintString(const char* str, const Coordinate& coordinate) {
@@ -185,6 +198,24 @@ bool Cfb::DrawCircle(const Coordinate& center, uint16_t radius) {
 
     if(cfb_draw_circle(DtDisplay::Get(), &cbf_center, radius) != 0) {
         LOG_ERR("Failed to draw a circle");
+        return false;
+    }
+
+    return true;
+}
+
+bool Cfb::InvertArea(const Coordinate& start, const Coordinate& end) {
+    uint16_t height = std::abs(end.y - start.y);
+    uint16_t width = std::abs(end.x - start.x);
+
+    if(cfb_invert_area(
+        DtDisplay::Get(),
+        start.x >= end.x ? end.x : start.x,
+        start.y >= end.y ? end.y : start.y,
+        width,
+        height) != 0) {
+
+        LOG_ERR("Failed to invert an area");
         return false;
     }
 
