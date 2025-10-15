@@ -4,9 +4,9 @@ import os
 import io
 import json
 
-from log_data_header import LogDataHeader
-from log_data_record import LogDataRecordAnalog
-from log_metadata_file import LogMetadata
+from src.log_data_header import LogDataHeader
+from src.log_data_record import LogDataRecordAnalog
+from src.log_metadata_file import LogMetadata
 
 class LogFile:
     def __init__(self, metadata: LogMetadata):
@@ -50,15 +50,16 @@ class LogFile:
                 header += ",\"" + sensors[i].metadata.name
                 header += " (" + sensors[i].metadata.unit + ")\""
 
-            output.write(header + "\n")
+            output.write(header)
         else:
-            output.write("\"Time (sec)\",\"Value\"\n")
+            output.write("\"Time (sec)\",\"Value\"")
 
         header = LogDataHeader.create(input)
         if not header:
             return False
 
         while record := LogDataRecordAnalog.create(input):
+            output.write("\n")
             record_line: str = str(record.time_delta_ms / 1000)
 
             if sensor_ids:
@@ -68,7 +69,7 @@ class LogFile:
             else:
                 record_line += "," + str(record.get_data())
 
-            output.write(record_line + "\n")
+            output.write(record_line)
 
         return True
 
@@ -116,7 +117,7 @@ class LogFile:
 def print_test_json():
     metadata = None
 
-    with open("logs_metadata/log_metadata_b67001c5.elm", "rb") as f:
+    with open("tests/logs_metadata/log_metadata_b67001c5.elm", "rb") as f:
         with open("cbor_schemas/sensor_config.cddl", "r") as cddl_file:
             cddl = cddl_file.read()
 
@@ -126,7 +127,7 @@ def print_test_json():
 
     log_file = LogFile(metadata)
 
-    with open("data_logs/log_data_6777_39439.ell", "rb") as f:
+    with open("tests/data_logs/log_data_6777_39439.ell", "rb") as f:
         with io.StringIO() as output_json_file:
             res = log_file.to_json(f, output_json_file)
 
@@ -141,7 +142,7 @@ def print_test_json():
 def print_test_csv():
     metadata = None
 
-    with open("logs_metadata/log_metadata_b67001c5.elm", "rb") as f:
+    with open("tests/logs_metadata/log_metadata_b67001c5.elm", "rb") as f:
         with open("cbor_schemas/sensor_config.cddl", "r") as cddl_file:
             cddl = cddl_file.read()
 
@@ -151,8 +152,8 @@ def print_test_csv():
 
     log_file = LogFile(metadata)
 
-    with open("data_logs/log_data_6777_39439.ell", "rb") as f:
-        with io.StringIO() as output_csv_file:
+    with open("tests/data_logs/log_data_6777_39439.ell", "rb") as f:
+        with open("output.csv", "w") as output_csv_file:
             res = log_file.to_csv(f, output_csv_file)
 
             if res:
@@ -162,5 +163,5 @@ def print_test_csv():
 
     return True
 
-# if __name__ == "__main__":
-#     print_test_csv()
+if __name__ == "__main__":
+    print_test_csv()

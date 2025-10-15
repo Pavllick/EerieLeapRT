@@ -2,25 +2,18 @@
 
 import io
 
-from cbor_parser import CborParser, DictWithAttrs
+from src.cbor_parser import CborParser, DictWithAttrs
 
 class LogMetadataSensors:
     def __init__(self):
         self.sensors: DictWithAttrs
 
     @staticmethod
-    def create(stream: io.IOBase, cddl: str):
+    def create(data: bytes, cddl: str):
         instance = LogMetadataSensors()
         cbor_parser = CborParser(cddl)
 
-        content = stream.read()
-        if not content or len(content) < 4:
-            return None
-
-        sensors = content[:-4]
-        crc = content[-4:]
-
-        sensors = cbor_parser.parse_cbor_hex(sensors, "SensorsConfig")
+        sensors = cbor_parser.parse_cbor_hex(data, "SensorsConfig")
         if not sensors:
             return None
 

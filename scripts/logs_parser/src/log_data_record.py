@@ -2,6 +2,7 @@
 
 import io
 import struct
+import zlib
 
 from datetime import datetime, timezone
 
@@ -14,7 +15,7 @@ class LogDataRecord:
         self.sensor_id: int                     # 4 bytes
         # self.data_length: bytes               # 1 byte
         self.data: bytes                        # data_length bytes
-        self.crc: bytes                         # 4 bytes
+        self.crc: int                           # 4 bytes
 
     def _read_data(self, stream: io.IOBase, data_length: int):
         data_bytes = bytes(stream.read(data_length))
@@ -28,9 +29,12 @@ class LogDataRecord:
 
     @classmethod
     def create(cls, stream: io.IOBase):
-        record_start_mark: bytes = bytes(stream.read(4))[::-1]
-        if not record_start_mark or record_start_mark != LogDataRecord.LOG_DATA_RECORD_START_MARK:
+        crc_validation = 0
+
+        record_start_mark: bytes = bytes(stream.read(4))
+        if not record_start_mark or record_start_mark[::-1] != LogDataRecord.LOG_DATA_RECORD_START_MARK:
             return None
+        crc_validation = zlib.crc32(record_start_mark, crc_validation)
 
         instance = cls()
 
@@ -38,23 +42,32 @@ class LogDataRecord:
         if not timestamp_delta:
             return None
         instance.time_delta_ms = struct.unpack('<I', timestamp_delta)[0]
+        crc_validation = zlib.crc32(timestamp_delta, crc_validation)
 
         sensor_id = bytes(stream.read(4))
         if not sensor_id:
             return None
         instance.sensor_id = struct.unpack('<I', sensor_id)[0]
+        crc_validation = zlib.crc32(sensor_id, crc_validation)
 
-        data_length: int = stream.read(1)[0]
+        data_length = bytes(stream.read(1))
         if not data_length:
             return None
+        crc_validation = zlib.crc32(data_length, crc_validation)
 
-        data_bytes = instance._read_data(stream, data_length)
+        data_bytes = instance._read_data(stream, data_length[0])
         if not data_bytes:
             return None
         instance.data = data_bytes
+        crc_validation = zlib.crc32(data_bytes, crc_validation)
 
-        instance.crc = bytes(stream.read(4))
-        if not instance.crc:
+        crc_bytes = bytes(stream.read(4))
+        crc = struct.unpack('<I', crc_bytes)[0]
+        if not crc:
+            return None
+        instance.crc = crc
+
+        if crc_validation != crc:
             return None
 
         return instance
@@ -64,7 +77,7 @@ class LogDataRecord:
             'timestamp_delta': self.time_delta_ms,
             'sensor_id': self.sensor_id,
             'data': self.get_data(),
-            'crc': self.crc.hex()
+            'crc': self.crc
         } # type: ignore
 
 class LogDataRecordAnalog(LogDataRecord):
