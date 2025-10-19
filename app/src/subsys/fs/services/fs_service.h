@@ -33,6 +33,7 @@ public:
     size_t GetTotalSpace() const override;
     size_t GetUsedSpace() const override;
     bool Format() override;
+    const fs_mount_t& GetMountpoint() const override;
 };
 
 } // namespace eerie_leap::subsys::fs::services

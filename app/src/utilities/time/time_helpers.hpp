@@ -4,6 +4,7 @@
 #include <string>
 #include <chrono>
 
+#include <zephyr/kernel.h>
 #include <zephyr/timing/timing.h>
 
 namespace eerie_leap::utilities::time {

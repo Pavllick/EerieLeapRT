@@ -302,4 +302,8 @@ bool FsService::IsMounted() const {
     return sys_dnode_is_linked(&mountpoint_.node);
 }
 
+const fs_mount_t& FsService::GetMountpoint() const {
+    return mountpoint_;
+}
+
 } // namespace eerie_leap::subsys::fs::services

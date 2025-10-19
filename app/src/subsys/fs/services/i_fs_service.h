@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "zephyr/fs/fs.h"
+
 namespace eerie_leap::subsys::fs::services {
 
 class IFsService {
@@ -20,6 +22,7 @@ public:
     virtual size_t GetTotalSpace() const = 0;
     virtual size_t GetUsedSpace() const = 0;
     virtual bool Format() = 0;
+    virtual const fs_mount_t& GetMountpoint() const = 0;
 };
 
 } // namespace eerie_leap::subsys::fs::services

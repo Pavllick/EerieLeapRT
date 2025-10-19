@@ -25,7 +25,7 @@ LOG_MODULE_REGISTER(sdmmc_service_logger);
 // K_KERNEL_STACK_MEMBER(SdmmcService::stack_area_, SdmmcService::k_stack_size_);
 // #endif
 
-SdmmcService::SdmmcService(fs_mount_t mountpoint) : FsService(mountpoint), monitor_running_(ATOMIC_INIT(0)) { }
+SdmmcService::SdmmcService(fs_mount_t mountpoint, const char* disk_name) : FsService(mountpoint), disk_name_(disk_name), monitor_running_(ATOMIC_INIT(0)) { }
 
 SdmmcService::~SdmmcService() {
     k_thread_join(thread_id_, K_FOREVER);
@@ -56,8 +56,7 @@ void SdmmcService::SdMonitorHandler() {
     bool card_detected = DtFs::IsSdCardPresent();
 
     if(!card_detected) {
-        const char* disk_name = DtFs::GetSdDiskName();
-        IsSdCardAttached(disk_name);
+        IsSdCardAttached(disk_name_);
     }
 
     if(card_detected != sd_card_present_) {
@@ -124,18 +123,17 @@ int SdmmcService::SdMonitorStop() {
 }
 
 int SdmmcService::PrintInfo() const {
-    const char* disk_name = DtFs::GetSdDiskName();
     uint64_t memory_size_mb = 0;
     uint32_t block_count = 0;
     uint32_t block_size = 0;
 
-    int ret = disk_access_ioctl(disk_name, DISK_IOCTL_GET_SECTOR_COUNT, &block_count);
+    int ret = disk_access_ioctl(disk_name_, DISK_IOCTL_GET_SECTOR_COUNT, &block_count);
     if(ret != 0) {
         LOG_ERR("Unable to get sector count (%d)", ret);
         return ret;
     }
 
-    ret = disk_access_ioctl(disk_name, DISK_IOCTL_GET_SECTOR_SIZE, &block_size);
+    ret = disk_access_ioctl(disk_name_, DISK_IOCTL_GET_SECTOR_SIZE, &block_size);
     if(ret != 0) {
         LOG_ERR("Unable to get sector size (%d)", ret);
         return ret;

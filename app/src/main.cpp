@@ -128,7 +128,7 @@ int main(void) {
     std::shared_ptr<SdmmcService> sd_fs_service = nullptr;
     auto sd_fs_mp = DtFs::GetSdFsMp();
     if(sd_fs_mp.has_value()) {
-        sd_fs_service = make_shared_ext<SdmmcService>(sd_fs_mp.value());
+        sd_fs_service = make_shared_ext<SdmmcService>(sd_fs_mp.value(), DtFs::GetSdDiskName());
         if(!sd_fs_service->Initialize()) {
             LOG_ERR("Failed to initialize SD File System.");
         }

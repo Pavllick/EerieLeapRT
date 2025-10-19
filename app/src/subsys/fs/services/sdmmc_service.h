@@ -11,6 +11,7 @@ namespace eerie_leap::subsys::fs::services {
 
 class SdmmcService : public FsService {
 private:
+    const char* disk_name_;
     bool sd_card_present_ = false;
     k_sem sd_monitor_stop_sem_;
     atomic_t monitor_running_;
@@ -29,7 +30,7 @@ private:
     int PrintInfo() const;
 
 public:
-    SdmmcService(fs_mount_t mountpoint);
+    SdmmcService(fs_mount_t mountpoint, const char* disk_name);
     ~SdmmcService();
 
     bool Initialize() override;

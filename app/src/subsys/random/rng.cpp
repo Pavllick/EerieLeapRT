@@ -1,5 +1,3 @@
-#pragma once
-
 #include <zephyr/random/random.h>
 
 #include "rng.h"
