@@ -1,0 +1,57 @@
+#pragma once
+
+#include <cstdint>
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "subsys/mdf/utilities/block_links.h"
+#include "metadata_block.h"
+#include "channel_block.h"
+#include "block_base.h"
+
+namespace eerie_leap::subsys::mdf::mdf4 {
+
+using namespace eerie_leap::subsys::mdf::utilities;
+
+class ChannelGroupBlock : public BlockBase {
+public:
+    enum class LinkType: int {
+        ChannelGroupNext = 0,
+        ChannelFirst,
+        TextAcquisitionName,
+        SourceInformationAcquisitionSource,
+        SampleReductionFirst,
+        MetadataComment
+    };
+
+private:
+    BlockLinks<LinkType, 6> links_;
+
+    uint64_t record_id_;                 // 8 bytes, Record ID
+    uint64_t cycle_count_;               // 8 bytes, Number of cycles
+    uint16_t flags_;                     // 2 bytes, Flags
+    uint16_t path_separator_;            // 2 bytes, Path separator
+    // uint8_t reserved_1_[4];           // 4 bytes, Reserved
+    uint32_t data_bytes_;                // 4 bytes, Number of bytes in record used for sample values
+    uint32_t invalidation_bytes_;        // 4 bytes, Number of bytes in record used for invalidation bits
+
+    std::shared_ptr<ChannelGroupBlock> channel_group_next_;
+    std::shared_ptr<ChannelBlock> channel_first_;
+
+public:
+    ChannelGroupBlock(uint64_t record_id);
+    virtual ~ChannelGroupBlock() = default;
+
+    uint64_t GetSize() const override;
+    std::unique_ptr<uint8_t[]> Serialize() const override;
+    const IBlockLinks* GetBlockLinks() const override { return &links_; }
+    std::vector<std::shared_ptr<ISerializableBlock>> GetChildren() const override {
+        return { channel_first_, channel_group_next_ };
+    }
+
+    void AddChannel(std::shared_ptr<ChannelBlock> channel);
+    void LinkBlock(std::shared_ptr<ChannelGroupBlock> next_block);
+};
+
+} // namespace eerie_leap::subsys::mdf::mdf4
