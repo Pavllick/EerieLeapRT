@@ -2,13 +2,13 @@
 
 namespace eerie_leap::subsys::mdf::mdf4 {
 
-ChannelBlock::ChannelBlock(Type type, SyncType sync_type, DataType data_type, std::string name, std::string unit, size_t bit_count): BlockBase("CN") {
+ChannelBlock::ChannelBlock(Type type, SyncType sync_type, DataType data_type, uint32_t bit_count, std::string name, std::string unit): BlockBase("CN") {
     type_ = type;
     sync_type_ = sync_type;
     data_type_ = data_type;
     bit_offset_ = 0;
     byte_offset_ = 0;
-    bit_count_ = bit_count > 0 ? bit_count : GetBitCountForType(data_type_);
+    bit_count_ = bit_count;
     flags_ = 0;
     invalidation_bit_pos_ = 0;
     precision_ = 0;
@@ -105,19 +105,6 @@ std::unique_ptr<uint8_t[]> ChannelBlock::Serialize() const {
     offset += sizeof(limit_ext_max_);
 
     return buffer;
-}
-
-size_t ChannelBlock::GetBitCountForType(DataType data_type) {
-    switch(data_type) {
-        case DataType::UnsignedIntegerLe:
-            return sizeof(uint32_t) * 8;
-        case DataType::SignedIntegerLe:
-            return sizeof(int32_t) * 8;
-        case DataType::FloatLe:
-            return sizeof(double) * 8;
-        default:
-            return 0;
-    }
 }
 
 } // namespace eerie_leap::subsys::mdf::mdf4

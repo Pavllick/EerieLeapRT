@@ -46,23 +46,23 @@ public:
 
     // NOTE: Only currently supported types uncommented
     enum class DataType: uint8_t {
-        UnsignedIntegerLe= 0,   // Unsigned integer, little endian.
-        // UnsignedIntegerBe = 1,  // Unsigned integer, big endian.
-        SignedIntegerLe = 2,    // Signed integer, little endian.
-        // SignedIntegerBe = 3,    // Signed integer, big endian.
-        FloatLe = 4,            // Float, little endian.
-        // FloatBe = 5,            // Float, big endian.
-        // StringAscii = 6,        // Text,  ISO-8859-1 coded
-        // StringUTF8 = 7,         // Text, UTF8 coded.
-        // StringUTF16Le = 8,      // Text, UTF16 coded little endian.
-        // StringUTF16Be = 9,      // Text, UTF16 coded big endian.
-        ByteArray = 10,         // Byte array.
-        // MimeSample = 11,        // MIME sample byte array.
-        // MimeStream = 12,        // MIME stream byte array.
-        // CanOpenDate = 13,       // 7-byte CANOpen date.
-        // CanOpenTime = 14,       // 6-byte CANOpen time.
-        // ComplexLe = 15,         // Complex value, little endian.
-        // ComplexBe = 16          // Complex value, big endian.
+        UnsignedIntegerLe= 0,       // Unsigned integer, little endian.
+        // UnsignedIntegerBe = 1,   // Unsigned integer, big endian.
+        SignedIntegerLe = 2,        // Signed integer, little endian.
+        // SignedIntegerBe = 3,     // Signed integer, big endian.
+        FloatLe = 4,                // Float, little endian.
+        // FloatBe = 5,             // Float, big endian.
+        // StringAscii = 6,         // Text,  ISO-8859-1 coded
+        // StringUTF8 = 7,          // Text, UTF8 coded.
+        // StringUTF16Le = 8,       // Text, UTF16 coded little endian.
+        // StringUTF16Be = 9,       // Text, UTF16 coded big endian.
+        ByteArray = 10,             // Byte array.
+        // MimeSample = 11,         // MIME sample byte array.
+        // MimeStream = 12,         // MIME stream byte array.
+        // CanOpenDate = 13,        // 7-byte CANOpen date.
+        // CanOpenTime = 14,        // 6-byte CANOpen time.
+        // ComplexLe = 15,          // Complex value, little endian.
+        // ComplexBe = 16           // Complex value, big endian.
     };
 
     enum class Flag: uint32_t {
@@ -109,10 +109,8 @@ private:
     std::shared_ptr<TextBlock> name_;
     std::shared_ptr<TextBlock> unit_;
 
-    static size_t GetBitCountForType(DataType data_type);
-
 public:
-    ChannelBlock(Type type, SyncType sync_type, DataType data_type, std::string name, std::string unit, size_t bit_count = 0);
+    ChannelBlock(Type type, SyncType sync_type, DataType data_type, uint32_t bit_count, std::string name, std::string unit);
     virtual ~ChannelBlock() = default;
 
     uint64_t GetSize() const override;

@@ -9,6 +9,7 @@
 #include "subsys/device_tree/dt_fs.h"
 #include "subsys/fs/services/fs_service.h"
 #include "subsys/fs/services/fs_service_stream_buf.h"
+#include "subsys/mdf/mdf_data_type.h"
 #include "subsys/mdf/mdf4_file.h"
 
 using namespace eerie_leap::utilities::time;
@@ -31,15 +32,15 @@ ZTEST(mdf_file, test_WriteToStream) {
     mdf_file.UpdateCurrentTime(rtc_service.GetCurrentTime());
     auto data_group = mdf_file.CreateDataGroup();
     auto channel_group = mdf_file.CreateChannelGroup(*data_group);
-    mdf_file.CreateDataChannel(*channel_group, mdf4::ChannelBlock::DataType::FloatLe, "engine_speed", "rpm");
-    mdf_file.CreateDataChannel(*channel_group, mdf4::ChannelBlock::DataType::FloatLe, "pressure", "bar");
-
+    mdf_file.CreateDataChannel(*channel_group, MdfDataType::Float32, "engine_speed", "rpm");
+    mdf_file.CreateDataChannel(*channel_group, MdfDataType::Float32, "pressure", "bar");
 
     // FsServiceStreamBuf fs_buf(fs_service.get(), "output/data.mf4");
     // auto bytes_written = mdf_file.WriteToStream(fs_buf);
     // fs_buf.close();
 
-    std::ofstream file("../../../../../../../../../test_file.mf4", std::ios::binary);
+    // Will create file in the twister-out directory
+    std::ofstream file("../../../../../../../../test_file.mf4", std::ios::binary);
     mdf_file.WriteToStream(*file.rdbuf());
     file.close();
 

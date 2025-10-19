@@ -3,6 +3,7 @@
 #include "subsys/mdf/mdf4/channel_block.h"
 #include "subsys/mdf/mdf4/channel_group_block.h"
 #include "subsys/mdf/mdf4/data_group_block.h"
+#include "mdf_helpers.h"
 
 #include "mdf4_file.h"
 
@@ -43,14 +44,28 @@ std::shared_ptr<mdf4::ChannelGroupBlock> Mdf4File::CreateChannelGroup(mdf4::Data
     auto channel_group = std::make_shared<mdf4::ChannelGroupBlock>(record_id_++);
     data_group.AddChannelGroup(channel_group);
 
-    auto channel_time = std::make_shared<mdf4::ChannelBlock>(mdf4::ChannelBlock::Type::Master, mdf4::ChannelBlock::SyncType::Time, mdf4::ChannelBlock::DataType::FloatLe, "Timestamp", "s");
+    auto channel_data_type = MdfHelpers::ToMdf4ChannelDataType(MdfDataType::Float32);
+    auto channel_time = std::make_shared<mdf4::ChannelBlock>(
+        mdf4::ChannelBlock::Type::Master,
+        mdf4::ChannelBlock::SyncType::Time,
+        channel_data_type.data_type,
+        channel_data_type.bit_count,
+        "Timestamp",
+        "s");
     channel_group->AddChannel(channel_time);
 
     return channel_group;
 }
 
-std::shared_ptr<mdf4::ChannelBlock> Mdf4File::CreateDataChannel(mdf4::ChannelGroupBlock& channel_group, mdf4::ChannelBlock::DataType data_type, std::string name, std::string unit) {
-    auto channel = std::make_shared<mdf4::ChannelBlock>(mdf4::ChannelBlock::Type::FixedLength, mdf4::ChannelBlock::SyncType::NoSync, data_type, name, unit);
+std::shared_ptr<mdf4::ChannelBlock> Mdf4File::CreateDataChannel(mdf4::ChannelGroupBlock& channel_group, MdfDataType data_type, std::string name, std::string unit) {
+    auto channel_data_type = MdfHelpers::ToMdf4ChannelDataType(data_type);
+    auto channel = std::make_shared<mdf4::ChannelBlock>(
+        mdf4::ChannelBlock::Type::FixedLength,
+        mdf4::ChannelBlock::SyncType::NoSync,
+        channel_data_type.data_type,
+        channel_data_type.bit_count,
+        name,
+        unit);
     channel_group.AddChannel(channel);
 
     return channel;

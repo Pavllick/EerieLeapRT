@@ -7,6 +7,7 @@
 #include "subsys/mdf/mdf4/channel_group_block.h"
 #include "subsys/mdf/mdf4/id_block.h"
 #include "subsys/mdf/mdf4/header_block.h"
+#include "mdf_data_type.h"
 
 namespace eerie_leap::subsys::mdf {
 
@@ -31,7 +32,7 @@ public:
     const std::vector<std::shared_ptr<mdf4::DataGroupBlock>>& GetDataGroups() const;
 
     std::shared_ptr<mdf4::ChannelGroupBlock> CreateChannelGroup(mdf4::DataGroupBlock& data_group);
-    std::shared_ptr<mdf4::ChannelBlock> CreateDataChannel(mdf4::ChannelGroupBlock& channel_group, mdf4::ChannelBlock::DataType data_type, std::string name, std::string unit);
+    std::shared_ptr<mdf4::ChannelBlock> CreateDataChannel(mdf4::ChannelGroupBlock& channel_group, MdfDataType data_type, std::string name, std::string unit);
 
     uint64_t WriteToStream(std::streambuf& stream) const;
 };
