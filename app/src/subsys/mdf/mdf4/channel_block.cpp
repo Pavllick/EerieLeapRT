@@ -29,6 +29,18 @@ ChannelBlock::ChannelBlock(Type type, SyncType sync_type, DataType data_type, ui
     links_.SetLink(LinkType::TextUnit, unit_);
 }
 
+uint32_t ChannelBlock::GetDataSizeBytes() const {
+    return bit_count_ / 8;
+}
+
+uint32_t ChannelBlock::GetDataOffsetBytes() const {
+    return byte_offset_;
+}
+
+std::shared_ptr<ChannelBlock> ChannelBlock::GetLinkedChannel() const {
+    return channel_next_;
+}
+
 uint32_t ChannelBlock::GetDataBytes() const {
     return bit_count_ / 8;
 }

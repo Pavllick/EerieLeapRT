@@ -26,7 +26,7 @@ public:
 private:
     BlockLinks<LinkType, 4> links_;
 
-    uint8_t record_id_size_;            // 1 byte, Length of record ID bytes
+    uint8_t record_id_size_bytes_;      // 1 byte, Length of record ID bytes
     // uint8_t reserved_1_[7];          // 7 bytes, Reserved
 
     std::shared_ptr<DataGroupBlock> data_group_next_;
@@ -34,8 +34,10 @@ private:
     std::shared_ptr<DataBlock> data_;
 
 public:
-    DataGroupBlock();
+    DataGroupBlock(uint8_t record_id_size_bytes);
     virtual ~DataGroupBlock() = default;
+
+    uint8_t GetRecordIdSizeBytes() const;
 
     uint64_t GetSize() const override;
     std::unique_ptr<uint8_t[]> Serialize() const override;

@@ -9,14 +9,14 @@ namespace eerie_leap::subsys::mdf::mdf4 {
 
 class DataBlock : public BlockBase {
 private:
-    size_t size_;
+    size_t size_bytes_;
 
 public:
-    DataBlock(size_t size = 0): BlockBase("DT"), size_(size) {}
+    DataBlock(size_t size_bytes = 0);
     virtual ~DataBlock() = default;
 
-    uint64_t GetSize() const override { return GetBaseSize() + size_; }
-    std::unique_ptr<uint8_t[]> Serialize() const override { return SerializeBase(); }
+    uint64_t GetSize() const override;
+    std::unique_ptr<uint8_t[]> Serialize() const override;
     std::vector<std::shared_ptr<ISerializableBlock>> GetChildren() const override { return {}; }
 };
 

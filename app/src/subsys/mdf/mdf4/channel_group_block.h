@@ -39,9 +39,16 @@ private:
     std::shared_ptr<ChannelGroupBlock> channel_group_next_;
     std::shared_ptr<ChannelBlock> channel_first_;
 
+    uint8_t record_id_size_bytes_;
+
 public:
-    ChannelGroupBlock(uint64_t record_id);
+    ChannelGroupBlock(uint8_t record_id_size_bytes, uint64_t record_id);
     virtual ~ChannelGroupBlock() = default;
+
+    uint64_t GetRecordId() const;
+    uint32_t GetDataSizeBytes() const;
+    uint8_t GetRecordIdSizeBytes() const;
+    std::vector<std::shared_ptr<ChannelBlock>> GetChannels() const;
 
     uint64_t GetSize() const override;
     std::unique_ptr<uint8_t[]> Serialize() const override;

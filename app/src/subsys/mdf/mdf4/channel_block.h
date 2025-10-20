@@ -113,6 +113,10 @@ public:
     ChannelBlock(Type type, SyncType sync_type, DataType data_type, uint32_t bit_count, std::string name, std::string unit);
     virtual ~ChannelBlock() = default;
 
+    uint32_t GetDataSizeBytes() const;
+    uint32_t GetDataOffsetBytes() const;
+    std::shared_ptr<ChannelBlock> GetLinkedChannel() const;
+
     uint64_t GetSize() const override;
     std::unique_ptr<uint8_t[]> Serialize() const override;
     const IBlockLinks* GetBlockLinks() const override { return &links_; }

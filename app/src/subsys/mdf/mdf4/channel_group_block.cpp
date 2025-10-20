@@ -1,14 +1,44 @@
+#include <set>
+
 #include "channel_group_block.h"
 
 namespace eerie_leap::subsys::mdf::mdf4 {
 
-ChannelGroupBlock::ChannelGroupBlock(uint64_t record_id): BlockBase("CG") {
-    record_id_ = record_id;
+ChannelGroupBlock::ChannelGroupBlock(uint8_t record_id_size_bytes, uint64_t record_id)
+    : BlockBase("CG"), record_id_size_bytes_(record_id_size_bytes), record_id_(record_id) {
+
+    if(std::set<uint8_t>{0, 1, 2, 4, 8}.count(record_id_size_bytes_) == 0)
+        throw std::runtime_error("Invalid record ID size bytes");
+
     cycle_count_ = 0;
     flags_ = 0;
     path_separator_ = 0;
     data_bytes_ = 0;
     invalidation_bytes_ = 0;
+}
+
+uint64_t ChannelGroupBlock::GetRecordId() const {
+    return record_id_;
+}
+
+uint32_t ChannelGroupBlock::GetDataSizeBytes() const {
+    return data_bytes_;
+}
+
+uint8_t ChannelGroupBlock::GetRecordIdSizeBytes() const {
+    return record_id_size_bytes_;
+}
+
+std::vector<std::shared_ptr<ChannelBlock>> ChannelGroupBlock::GetChannels() const {
+    std::vector<std::shared_ptr<ChannelBlock>> channels;
+
+    auto next_channel = channel_first_;
+    while(next_channel) {
+        channels.push_back(next_channel);
+        next_channel = next_channel->GetLinkedChannel();
+    }
+
+    return channels;
 }
 
 void ChannelGroupBlock::AddChannel(std::shared_ptr<ChannelBlock> channel) {
