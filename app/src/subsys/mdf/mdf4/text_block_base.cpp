@@ -12,7 +12,7 @@ size_t TextBlockBase::GetAllignedTextSize() const {
     return text_.size() + (8 - text_.size() % 8);
 }
 
-uint64_t TextBlockBase::GetSize() const {
+uint64_t TextBlockBase::GetBlockSize() const {
     return GetBaseSize() + GetAllignedTextSize();
 }
 

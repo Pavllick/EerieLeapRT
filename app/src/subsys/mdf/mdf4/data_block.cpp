@@ -7,7 +7,7 @@ namespace eerie_leap::subsys::mdf::mdf4 {
 
 DataBlock::DataBlock(size_t size_bytes): BlockBase("DT"), size_bytes_(size_bytes) {}
 
-uint64_t DataBlock::GetSize() const {
+uint64_t DataBlock::GetBlockSize() const {
     return GetBaseSize() + size_bytes_;
 }
 

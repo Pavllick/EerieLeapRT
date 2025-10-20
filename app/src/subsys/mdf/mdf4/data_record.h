@@ -18,7 +18,7 @@ public:
     DataRecord(std::shared_ptr<ChannelGroupBlock> channel_group);
     virtual ~DataRecord() = default;
 
-    uint64_t GetSize() const;
+    uint64_t GetRecordSize() const;
     uint64_t WriteToStream(std::streambuf& stream, const std::vector<void*>& values) const;
 };
 

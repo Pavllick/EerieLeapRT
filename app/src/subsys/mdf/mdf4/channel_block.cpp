@@ -58,7 +58,7 @@ void ChannelBlock::LinkBlock(std::shared_ptr<ChannelBlock> next_block) {
     }
 }
 
-uint64_t ChannelBlock::GetSize() const {
+uint64_t ChannelBlock::GetBlockSize() const {
     return GetBaseSize() + 1 + 1 + 1 + 1 + 4 + 4 + 4 + 4 + 1 + 1 + 2 + 8 + 8 + 8 + 8 + 8 + 8;
 }
 

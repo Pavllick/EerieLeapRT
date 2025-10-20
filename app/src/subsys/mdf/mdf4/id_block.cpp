@@ -21,12 +21,12 @@ IdBlock::IdBlock(bool is_finalized): is_finalized_(is_finalized) {
     custom_flags_ = 0;
 }
 
-uint64_t IdBlock::GetSize() const {
+uint64_t IdBlock::GetBlockSize() const {
     return 8 + 8 + 8 + 2 + 2 + 2 + 2 + 2 + 26 + 2 + 2; // = 64 bytes
 }
 
 std::unique_ptr<uint8_t[]> IdBlock::Serialize() const {
-    const uint64_t size = GetSize();
+    const uint64_t size = GetBlockSize();
     auto buffer = std::make_unique<uint8_t[]>(size);
     std::memset(buffer.get(), 0, size);
 

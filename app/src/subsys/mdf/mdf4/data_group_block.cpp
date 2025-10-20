@@ -31,7 +31,7 @@ void DataGroupBlock::LinkBlock(std::shared_ptr<DataGroupBlock> next_block) {
     }
 }
 
-uint64_t DataGroupBlock::GetSize() const {
+uint64_t DataGroupBlock::GetBlockSize() const {
     return GetBaseSize() + 1 + 7;
 }
 

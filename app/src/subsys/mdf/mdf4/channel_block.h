@@ -117,7 +117,7 @@ public:
     uint32_t GetDataOffsetBytes() const;
     std::shared_ptr<ChannelBlock> GetLinkedChannel() const;
 
-    uint64_t GetSize() const override;
+    uint64_t GetBlockSize() const override;
     std::unique_ptr<uint8_t[]> Serialize() const override;
     const IBlockLinks* GetBlockLinks() const override { return &links_; }
     std::vector<std::shared_ptr<ISerializableBlock>> GetChildren() const override {

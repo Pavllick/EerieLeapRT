@@ -34,7 +34,7 @@ void HeaderBlock::AddDataGroup(std::shared_ptr<DataGroupBlock> data_group) {
     }
 }
 
-uint64_t HeaderBlock::GetSize() const {
+uint64_t HeaderBlock::GetBlockSize() const {
     return GetBaseSize() + 8 + 2 + 2 + 1 + 1 + 1 + 1 + 8 + 8;
 }
 

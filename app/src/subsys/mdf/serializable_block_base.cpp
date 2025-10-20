@@ -9,9 +9,9 @@ uint64_t SerializableBlockBase::WriteToStream(std::streambuf& stream) const {
 
     auto ret = stream.sputn(
         reinterpret_cast<const char*>(block_data.get()),
-        static_cast<std::streamsize>(GetSize()));
+        static_cast<std::streamsize>(GetBlockSize()));
 
-    if(ret != GetSize())
+    if(ret != GetBlockSize())
         throw std::ios_base::failure("End of stream reached (EOF).");
 
     for(auto& child : GetChildren()) {
@@ -28,7 +28,7 @@ uint64_t SerializableBlockBase::GetAddress() const {
 
 uint64_t SerializableBlockBase::ResolveAddress(uint64_t parent_address) {
     address_ = parent_address;
-    uint64_t current_address = address_ + GetSize();
+    uint64_t current_address = address_ + GetBlockSize();
 
     for(auto& child : GetChildren()) {
         if(child)

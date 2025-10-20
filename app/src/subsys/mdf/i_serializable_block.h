@@ -10,7 +10,7 @@ class ISerializableBlock {
 public:
     virtual ~ISerializableBlock() = default;
 
-    virtual uint64_t GetSize() const = 0;
+    virtual uint64_t GetBlockSize() const = 0;
     virtual std::unique_ptr<uint8_t[]> Serialize() const = 0;
     virtual uint64_t WriteToStream(std::streambuf& stream) const = 0;
     virtual uint64_t GetAddress() const = 0;

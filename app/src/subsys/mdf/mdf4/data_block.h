@@ -15,7 +15,7 @@ public:
     DataBlock(size_t size_bytes = 0);
     virtual ~DataBlock() = default;
 
-    uint64_t GetSize() const override;
+    uint64_t GetBlockSize() const override;
     std::unique_ptr<uint8_t[]> Serialize() const override;
     std::vector<std::shared_ptr<ISerializableBlock>> GetChildren() const override { return {}; }
 };

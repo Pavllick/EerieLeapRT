@@ -19,7 +19,7 @@ uint64_t BlockBase::GetBaseSize() const {
 }
 
 std::unique_ptr<uint8_t[]> BlockBase::SerializeBase() const {
-    const uint64_t size = GetSize();
+    const uint64_t size = GetBlockSize();
     auto buffer = std::make_unique<uint8_t[]>(size);
     std::memset(buffer.get(), 0, size);
 
@@ -31,7 +31,7 @@ std::unique_ptr<uint8_t[]> BlockBase::SerializeBase() const {
 
     offset += 4; // reserved_0_
 
-    uint64_t length = GetSize();
+    uint64_t length = GetBlockSize();
     std::memcpy(buffer.get() + offset, &length, sizeof(length));
     offset += sizeof(length);
 

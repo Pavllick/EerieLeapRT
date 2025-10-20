@@ -8,12 +8,12 @@ namespace eerie_leap::subsys::mdf::mdf4 {
 DataRecord::DataRecord(std::shared_ptr<ChannelGroupBlock> channel_group)
     : channel_group_(std::move(channel_group)) { }
 
-uint64_t DataRecord::GetSize() const {
+uint64_t DataRecord::GetRecordSize() const {
     return channel_group_->GetRecordIdSizeBytes() + channel_group_->GetDataSizeBytes();
 }
 
 std::unique_ptr<uint8_t[]> DataRecord::Create(const std::vector<void*>& values) const {
-    auto size = GetSize();
+    auto size = GetRecordSize();
     auto buffer = std::make_unique<uint8_t[]>(size);
 
     uint8_t id_size_bytes = channel_group_->GetRecordIdSizeBytes();
@@ -53,9 +53,9 @@ uint64_t DataRecord::WriteToStream(std::streambuf& stream, const std::vector<voi
 
     auto ret = stream.sputn(
         reinterpret_cast<const char*>(record_data.get()),
-        static_cast<std::streamsize>(GetSize()));
+        static_cast<std::streamsize>(GetRecordSize()));
 
-    if(ret != GetSize())
+    if(ret != GetRecordSize())
         throw std::ios_base::failure("End of stream reached (EOF).");
 
     return ret;

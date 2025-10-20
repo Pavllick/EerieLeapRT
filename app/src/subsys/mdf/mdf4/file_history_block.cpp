@@ -31,7 +31,7 @@ void FileHistoryBlock::LinkBlock(std::shared_ptr<FileHistoryBlock> next_block) {
     }
 }
 
-uint64_t FileHistoryBlock::GetSize() const {
+uint64_t FileHistoryBlock::GetBlockSize() const {
     return GetBaseSize() + 8 + 2 + 2 + 1 + 3;
 }
 
