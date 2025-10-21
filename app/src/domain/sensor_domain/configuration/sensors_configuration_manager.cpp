@@ -121,7 +121,7 @@ bool SensorsConfigurationManager::Update(const std::vector<std::shared_ptr<Senso
     return true;
 }
 
-const std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfigurationManager::Get(bool force_load) {
+std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfigurationManager::Get(bool force_load) {
     if(ordered_sensors_ != nullptr && !force_load)
         return ordered_sensors_;
 

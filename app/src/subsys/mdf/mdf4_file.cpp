@@ -1,5 +1,6 @@
-#include "utilities/time/time_helpers.hpp"
+#include <algorithm>
 
+#include "utilities/time/time_helpers.hpp"
 #include "subsys/mdf/mdf4/channel_block.h"
 #include "subsys/mdf/mdf4/channel_group_block.h"
 #include "subsys/mdf/mdf4/data_group_block.h"

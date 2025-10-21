@@ -25,6 +25,8 @@ private:
     std::unordered_map<std::shared_ptr<mdf4::DataGroupBlock>, std::unordered_set<uint64_t>> data_groups_;
 
 public:
+    static constexpr char* LOG_DATA_FILE_EXTENSION = "mf4";
+
     Mdf4File(bool is_finalized = true);
     virtual ~Mdf4File() = default;
 

@@ -9,7 +9,7 @@
 #include "utilities/constants.h"
 #include "utilities/time/time_helpers.hpp"
 
-namespace eerie_leap::domain::logging_domain::models {
+namespace eerie_leap::domain::logging_domain::loggers::simple_logger_sensor_reading::models {
 
 using namespace std::chrono;
 using namespace eerie_leap::utilities::constants::logging;
@@ -36,4 +36,4 @@ struct LogDataHeader {
     }
 } __attribute__((packed, aligned(1))); // Ensure no padding
 
-} // namespace eerie_leap::domain::logging_domain::models
+} // namespace eerie_leap::domain::logging_domain::loggers::simple_logger_sensor_reading::models

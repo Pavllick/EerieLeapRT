@@ -5,37 +5,31 @@
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/crc.h>
 
+#include "utilities/time/time_helpers.hpp"
 #include "subsys/random/rng.h"
-
-#include "utilities/constants.h"
-#include "domain/logging_domain/models/log_metadata_header.h"
-#include "domain/logging_domain/models/log_data_header.h"
-#include "domain/logging_domain/models/log_data_record.h"
 
 #include "log_writer_service.h"
 
 namespace eerie_leap::domain::logging_domain::services {
 
+using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::subsys::random;
-using namespace eerie_leap::utilities::constants::logging;
-using namespace eerie_leap::domain::logging_domain::models;
 
 LOG_MODULE_REGISTER(log_writer_service_logger);
 
-// #ifdef CONFIG_SHARED_MULTI_HEAP
-// Z_KERNEL_STACK_DEFINE_IN(LogWriterService::stack_area_, LogWriterService::k_stack_size_, __attribute__((section(".ext_ram.bss"))));
-// #else
-// K_KERNEL_STACK_MEMBER(LogWriterService::stack_area_, LogWriterService::k_stack_size_);
-// #endif
-
 LogWriterService::LogWriterService(std::shared_ptr<IFsService> fs_service, std::shared_ptr<ITimeService> time_service)
     : fs_service_(std::move(fs_service)), time_service_(std::move(time_service)), logger_running_(ATOMIC_INIT(0)) {
+
     k_sem_init(&processing_semaphore_, 1, 1);
 }
 
 LogWriterService::~LogWriterService() {
     k_work_queue_stop(&work_q, K_FOREVER);
     k_thread_stack_free(stack_area_);
+}
+
+void LogWriterService::SetLogger(std::shared_ptr<ILogger<SensorReading>> logger) {
+    logger_ = std::move(logger);
 }
 
 int LogWriterService::LogReading(std::shared_ptr<SensorReading> reading) {
@@ -61,62 +55,10 @@ void LogWriterService::Initialize() {
 
     task_ = std::make_shared<LogWriterTask>();
     task_->processing_semaphore = &processing_semaphore_;
-    task_->fs_service = fs_service_;
     task_->time_service = time_service_;
     k_work_init(&task_->work, LogReadingWorkTask);
 
     LOG_INF("Log writer service initialized.");
-}
-
-int LogWriterService::SaveLogMetadata(const std::span<uint8_t> sensors_metadata) {
-    auto log_metadata_header = LogMetadataHeader::Create();
-
-    if(!fs_service_->Exists(CONFIG_EERIE_LEAP_LOG_METADATA_FILE_DIR))
-        if(!fs_service_->CreateDirectory(CONFIG_EERIE_LEAP_LOG_METADATA_FILE_DIR)) {
-            LOG_ERR("Failed to create %s directory", CONFIG_EERIE_LEAP_LOG_METADATA_FILE_DIR);
-            return -1;
-        }
-
-    uint32_t crc = crc32_ieee((uint8_t*)(&log_metadata_header), sizeof(log_metadata_header));
-    crc = crc32_ieee_update(crc, sensors_metadata.data(), sensors_metadata.size());
-    log_metadata_file_version_ = crc;
-
-    std::string version_str;
-    version_str.resize(sizeof(log_metadata_file_version_) * 2);
-    snprintf(version_str.data(), version_str.size() + 1, "%08x", log_metadata_file_version_);
-
-    std::string path = CONFIG_EERIE_LEAP_LOG_METADATA_FILE_DIR;
-    path += "/";
-    path += CONFIG_EERIE_LEAP_LOG_METADATA_FILE_NAME;
-    path += "_";
-    path += version_str;
-    path += ".";
-    path += LOG_METADATA_FILE_EXTENSION;
-
-    if(fs_service_->Exists(path))
-        return 0;
-
-    bool success = fs_service_->WriteFile(path, &log_metadata_header, sizeof(log_metadata_header));
-    if(!success) {
-        LOG_ERR("Failed to save log metadata header.");
-        return -1;
-    }
-
-    success = fs_service_->WriteFile(path, sensors_metadata.data(), sensors_metadata.size(), true);
-    if(!success) {
-        LOG_ERR("Failed to save log metadata.");
-        return -1;
-    }
-
-    success = fs_service_->WriteFile(path, &crc, sizeof(crc), true);
-    if(!success) {
-        LOG_ERR("Failed to save log metadata CRC.");
-        return -1;
-    }
-
-    LOG_INF("Log metadata saved successfully, %s", path.c_str());
-
-    return 0;
 }
 
 std::string LogWriterService::GetNewLogDataFileName(const system_clock::time_point& tp) {
@@ -130,8 +72,6 @@ std::string LogWriterService::GetNewLogDataFileName(const system_clock::time_poi
     path += std::to_string(TimeHelpers::ToUint32(tp));
     path += "_";
     path += std::to_string(Rng::Get16());
-    path += ".";
-    path += LOG_DATA_FILE_EXTENSION;
 
     return path;
 }
@@ -140,18 +80,15 @@ int LogWriterService::LogWriterStart() {
     if(atomic_get(&logger_running_))
         return -1;
 
+    if(!logger_) {
+        LOG_ERR("Logger is not available.");
+        return -1;
+    }
+
     if(!fs_service_->IsAvailable()) {
         LOG_ERR("SD card is not available.");
         return -1;
     }
-
-    if(log_metadata_file_version_ == 0) {
-        LOG_ERR("Log metadata file version is not set.");
-        return -1;
-    }
-
-    auto start_time = time_service_->GetCurrentTime();
-    auto log_header = LogDataHeader::Create(start_time, log_metadata_file_version_);
 
     if(!fs_service_->Exists(CONFIG_EERIE_LEAP_LOG_DATA_FILES_DIR)) {}
         if(!fs_service_->CreateDirectory(CONFIG_EERIE_LEAP_LOG_DATA_FILES_DIR)) {
@@ -159,9 +96,10 @@ int LogWriterService::LogWriterStart() {
             return -1;
         }
 
+    auto start_time = time_service_->GetCurrentTime();
     std::string file_name;
     for(int i = 0; i < 10; i++) {
-        auto new_file_name = GetNewLogDataFileName(start_time);
+        auto new_file_name = GetNewLogDataFileName(start_time) + "." + logger_->GetFileExtension();
         if(!fs_service_->Exists(new_file_name)) {
             file_name = new_file_name;
             break;
@@ -169,19 +107,17 @@ int LogWriterService::LogWriterStart() {
     }
 
     if(file_name.empty()) {
-        LOG_ERR("Failed to create log file");
+        LOG_ERR("Failed to create log file name");
         return -1;
     }
 
-    if(!fs_service_->WriteFile(file_name, &log_header, sizeof(log_header))) {
-        LOG_ERR("Failed to create log file");
-        return -1;
-    }
+    fs_stream_buf_ = std::make_unique<FsServiceStreamBuf>(fs_service_.get(), file_name);
+    logger_->StartLogging(*fs_stream_buf_, start_time);
 
     LOG_INF("Logging started. Log file created: %s", file_name.c_str());
 
     task_->start_time = start_time;
-    task_->file_name = file_name;
+    task_->logger = logger_;
 
     atomic_set(&logger_running_, 1);
 
@@ -194,7 +130,10 @@ int LogWriterService::LogWriterStop() {
 
     atomic_set(&logger_running_, 0);
 
-    LOG_INF("Logging stopped. Saved file: %s", task_->file_name.c_str());
+    logger_->StopLogging();
+    fs_stream_buf_->close();
+
+    LOG_INF("Logging stopped.");
 
     return 0;
 }
@@ -204,21 +143,11 @@ void LogWriterService::LogReadingWorkTask(k_work* work) {
 
     if(k_sem_take(task->processing_semaphore, SEMAPHORE_TIMEOUT) != 0) {
         LOG_ERR("Log writer lock timed out for sensor: %s", task->reading->sensor->id.c_str());
-
         return;
     }
 
-    uint32_t value = 0;
-    float float_value = task->reading->value.value_or(0.0f);
-    memcpy(&value, &float_value, sizeof(value));
-
-    auto log_record = LogDataRecord<uint32_t>::Create(
-        task->reading->timestamp.value() - task->start_time,
-        task->reading->sensor->id_hash,
-        value);
-
-    if(!task->fs_service->WriteFile(task->file_name, &log_record, sizeof(log_record), true))
-        LOG_ERR("Failed to write log record");
+    if(!task->logger->LogReading(task->reading->timestamp.value(), *task->reading))
+        LOG_ERR("Failed to log reading for sensor: %s", task->reading->sensor->id.c_str());
 
     k_sem_give(task->processing_semaphore);
 }

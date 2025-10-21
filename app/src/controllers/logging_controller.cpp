@@ -8,13 +8,14 @@ LoggingController::LoggingController(
     std::shared_ptr<DisplayController> display_controller)
         : log_writer_service_(std::move(log_writer_service)),
         sensors_configuration_manager_(std::move(sensors_configuration_manager)),
-        display_controller_(std::move(display_controller)) { }
+        display_controller_(std::move(display_controller)) {
+
+    logger_ = std::make_shared<Mdf4LoggerSensorReading>(sensors_configuration_manager_->Get());
+    log_writer_service_->SetLogger(logger_);
+}
 
 int LoggingController::LogWriterStart() {
-    int res = log_writer_service_->SaveLogMetadata(sensors_configuration_manager_->GetRaw());
-
-    if(res == 0)
-        res = log_writer_service_->LogWriterStart();
+    int res = log_writer_service_->LogWriterStart();
 
     if(res == 0)
         display_controller_->AddStatus("log");
