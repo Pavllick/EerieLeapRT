@@ -8,6 +8,7 @@
 #include "subsys/mdf/utilities/block_links.h"
 #include "metadata_block.h"
 #include "channel_block.h"
+#include "source_information_block.h"
 #include "block_base.h"
 
 namespace eerie_leap::subsys::mdf::mdf4 {
@@ -16,16 +17,25 @@ using namespace eerie_leap::subsys::mdf::utilities;
 
 class ChannelGroupBlock : public BlockBase {
 public:
+    enum class Flag: uint16_t {
+        Default = 0x0000,
+        VlsdChannel = 0x0001,
+        BusEvent = 0x0002,
+        PlainBusEvent = 0x0004,
+        RemoteMaster = 0x0008,
+        EventSignal = 0x00010
+    };
+
+private:
     enum class LinkType: int {
         ChannelGroupNext = 0,
         ChannelFirst,
         TextAcquisitionName,
-        SourceInformationAcquisitionSource,
+        SourceInformation,
         SampleReductionFirst,
         MetadataComment
     };
 
-private:
     BlockLinks<LinkType, 6> links_;
 
     uint64_t record_id_;                 // 8 bytes, Record ID
@@ -38,6 +48,7 @@ private:
 
     std::shared_ptr<ChannelGroupBlock> channel_group_next_;
     std::shared_ptr<ChannelBlock> channel_first_;
+    std::shared_ptr<SourceInformationBlock> source_information_;
 
     uint8_t record_id_size_bytes_;
 
@@ -54,11 +65,12 @@ public:
     std::unique_ptr<uint8_t[]> Serialize() const override;
     const IBlockLinks* GetBlockLinks() const override { return &links_; }
     std::vector<std::shared_ptr<ISerializableBlock>> GetChildren() const override {
-        return { channel_first_, channel_group_next_ };
+        return { channel_first_, channel_group_next_, source_information_ };
     }
 
     void AddChannel(std::shared_ptr<ChannelBlock> channel);
     void LinkBlock(std::shared_ptr<ChannelGroupBlock> next_block);
+    void AddSourceInformation(std::shared_ptr<SourceInformationBlock> source_information);
 };
 
 } // namespace eerie_leap::subsys::mdf::mdf4

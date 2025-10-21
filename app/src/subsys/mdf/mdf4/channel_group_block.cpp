@@ -62,6 +62,11 @@ void ChannelGroupBlock::LinkBlock(std::shared_ptr<ChannelGroupBlock> next_block)
     }
 }
 
+void ChannelGroupBlock::AddSourceInformation(std::shared_ptr<SourceInformationBlock> source_information) {
+    source_information_ = std::move(source_information);
+    links_.SetLink(LinkType::SourceInformation, source_information_);
+}
+
 uint64_t ChannelGroupBlock::GetBlockSize() const {
     return GetBaseSize() + 8 + 8 + 2 + 2 + 4 + 4 + 4;
 }

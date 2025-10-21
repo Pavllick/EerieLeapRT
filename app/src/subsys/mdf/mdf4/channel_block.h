@@ -15,17 +15,6 @@ using namespace eerie_leap::subsys::mdf::utilities;
 
 class ChannelBlock : public BlockBase {
 public:
-    enum class LinkType: int {
-        ChannelNext = 0,
-        ChannelArray,
-        TextName,
-        SourceInformationSource,
-        ChannelConversion,
-        Data,
-        TextUnit,
-        MetadataComment
-    };
-
     enum class Type: uint8_t {
         FixedLength = 0,     // Fixed length data (default type)
         VariableLength = 1,  // Variable length data
@@ -85,6 +74,17 @@ public:
     };
 
 private:
+    enum class LinkType: int {
+        ChannelNext = 0,
+        ChannelArray,
+        TextName,
+        SourceInformationSource,
+        ChannelConversion,
+        Data,
+        TextUnit,
+        MetadataComment
+    };
+
     BlockLinks<LinkType, 8> links_;
 
     Type type_;                         // 1 byte, Channel type

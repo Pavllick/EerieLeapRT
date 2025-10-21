@@ -14,13 +14,12 @@ namespace eerie_leap::subsys::mdf::mdf4 {
 using namespace eerie_leap::subsys::mdf::utilities;
 
 class FileHistoryBlock : public BlockBase {
-public:
+private:
     enum class LinkType: int {
         FileHistoryNext = 0,
         MetadataComment
     };
 
-private:
     BlockLinks<LinkType, 2> links_;
 
     uint64_t time_ns_;                  // 8 bytes, Absolute time in ns since midnight Jan 1st, 1970

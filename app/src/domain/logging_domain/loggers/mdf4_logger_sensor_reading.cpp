@@ -2,6 +2,8 @@
 #include <chrono>
 
 #include "utilities/time/time_helpers.hpp"
+#include "subsys/mdf/mdf4/source_information_block.h"
+
 #include "mdf4_logger_sensor_reading.h"
 
 namespace eerie_leap::domain::logging_domain::loggers {
@@ -16,6 +18,12 @@ Mdf4LoggerSensorReading::Mdf4LoggerSensorReading(std::shared_ptr<std::vector<std
 
     for(auto& sensor : *sensors_) {
         auto channel_group = mdf4_file_->CreateChannelGroup(*data_group, sensor->id_hash);
+        auto source_information = std::make_shared<mdf4::SourceInformationBlock>(
+            mdf4::SourceInformationBlock::SourceType::IoDevice,
+            mdf4::SourceInformationBlock::BusType::None,
+            "Eerie Leap Sensor");
+        channel_group->AddSourceInformation(source_information);
+
         mdf4_file_->CreateDataChannel(*channel_group, MdfDataType::Float32, sensor->id, sensor->metadata.unit);
         records_.emplace(
             sensor->id_hash,

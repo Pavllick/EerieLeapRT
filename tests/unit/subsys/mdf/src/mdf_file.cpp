@@ -10,6 +10,8 @@
 #include "subsys/device_tree/dt_fs.h"
 #include "subsys/fs/services/fs_service.h"
 #include "subsys/fs/services/fs_service_stream_buf.h"
+#include "subsys/mdf/mdf4/channel_group_block.h"
+#include "subsys/mdf/mdf4/source_information_block.h"
 #include "subsys/mdf/mdf_data_type.h"
 #include "subsys/mdf/mdf4_file.h"
 
@@ -31,6 +33,12 @@ ZTEST(mdf_file, test_WriteToStream) {
     mdf_file.UpdateCurrentTime(rtc_service.GetCurrentTime());
     auto data_group = mdf_file.CreateDataGroup(1);
     auto channel_group = mdf_file.CreateChannelGroup(*data_group, 1);
+    auto source_information = std::make_shared<mdf4::SourceInformationBlock>(
+        mdf4::SourceInformationBlock::SourceType::IoDevice,
+        mdf4::SourceInformationBlock::BusType::None,
+        "Eerie Leap Sensor");
+    channel_group->AddSourceInformation(source_information);
+
     // mdf_file.CreateDataChannel(*channel_group, MdfDataType::Float32, "engine_speed", "rpm");
     mdf_file.CreateDataChannel(*channel_group, MdfDataType::Uint64, "pressure", "bar");
 

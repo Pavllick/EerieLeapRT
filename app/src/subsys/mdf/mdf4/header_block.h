@@ -15,7 +15,7 @@ namespace eerie_leap::subsys::mdf::mdf4 {
 using namespace eerie_leap::subsys::mdf::utilities;
 
 class HeaderBlock : public BlockBase {
-public:
+private:
     enum class LinkType: int {
         DataGroupFirst = 0,
         FileHistoryFirst,
@@ -25,7 +25,6 @@ public:
         MetadataComment
     };
 
-private:
     BlockLinks<LinkType, 6> links_;
 
     uint64_t start_time_ns_;                // 8 bytes, Start time in ns
