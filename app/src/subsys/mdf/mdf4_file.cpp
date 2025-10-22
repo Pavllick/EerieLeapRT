@@ -1,6 +1,6 @@
 #include <algorithm>
 
-#include "utilities/time/time_helpers.hpp"
+#include "subsys/time/time_helpers.hpp"
 #include "subsys/mdf/mdf4/channel_block.h"
 #include "subsys/mdf/mdf4/channel_group_block.h"
 #include "subsys/mdf/mdf4/data_group_block.h"
@@ -10,7 +10,7 @@
 
 namespace eerie_leap::subsys::mdf {
 
-using namespace eerie_leap::utilities::time;
+using namespace eerie_leap::subsys::time;
 
 Mdf4File::Mdf4File(bool is_finalized): is_finalized_(is_finalized) {
     id_block_ = std::make_unique<mdf4::IdBlock>(is_finalized);

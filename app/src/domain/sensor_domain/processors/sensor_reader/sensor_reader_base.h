@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "utilities/time/i_time_service.h"
+#include "subsys/time/i_time_service.h"
 #include "utilities/guid/guid_generator.h"
 #include "domain/sensor_domain/models/sensor.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
@@ -10,7 +10,7 @@
 
 namespace eerie_leap::domain::sensor_domain::processors::sensor_reader {
 
-using namespace eerie_leap::utilities::time;
+using namespace eerie_leap::subsys::time;
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 

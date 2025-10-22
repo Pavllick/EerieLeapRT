@@ -1,7 +1,7 @@
 #include <cstdint>
 #include <chrono>
 
-#include "utilities/time/time_helpers.hpp"
+#include "subsys/time/time_helpers.hpp"
 #include "subsys/mdf/mdf4/source_information_block.h"
 #include "subsys/mdf/mdf4/channel_conversion_block.h"
 
@@ -9,7 +9,7 @@
 
 namespace eerie_leap::domain::logging_domain::loggers {
 
-using namespace eerie_leap::utilities::time;
+using namespace eerie_leap::subsys::time;
 
 Mdf4LoggerSensorReading::Mdf4LoggerSensorReading(std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> sensors)
     : sensors_(std::move(sensors)), stream_(nullptr) {

@@ -2,7 +2,7 @@
 #include <zephyr/sys/util.h>
 #include <zephyr/kernel.h>
 
-#include "utilities/time/time_helpers.hpp"
+#include "subsys/time/time_helpers.hpp"
 #include "utilities/memory/heap_allocator.h"
 #include "subsys/adc/utilities/adc_calibrator.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"

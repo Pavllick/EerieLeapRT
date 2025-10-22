@@ -7,13 +7,13 @@
 #include <zephyr/sys/crc.h>
 
 #include "utilities/constants.h"
-#include "utilities/time/time_helpers.hpp"
+#include "subsys/time/time_helpers.hpp"
 
 namespace eerie_leap::domain::logging_domain::loggers::simple_logger_sensor_reading::models {
 
 using namespace std::chrono;
+using namespace eerie_leap::subsys::time;
 using namespace eerie_leap::utilities::constants::logging;
-using namespace eerie_leap::utilities::time;
 
 struct LogDataHeader {
     uint32_t file_type;

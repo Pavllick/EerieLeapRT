@@ -21,7 +21,10 @@ include_directories(${MUPARSER_INCLUDE_DIR})
 
 # Collect all source files for the test
 set(APP_SRC_SUBSYS_DIR ${APP_SRC_DIR}/subsys)
-file(GLOB_RECURSE APP_SRC_SUBSYS_RANDOM ${APP_SRC_SUBSYS_DIR}/random/*.cpp)
+file(GLOB_RECURSE APP_SRC_SUBSYS_RANDOM
+  ${APP_SRC_SUBSYS_DIR}/random/*.cpp
+  ${APP_SRC_SUBSYS_DIR}/time/*.cpp
+)
 
 set(APP_SRC_UTILITIES_DIR ${APP_SRC_DIR}/utilities)
 file(GLOB_RECURSE APP_SRC_UTILITIES

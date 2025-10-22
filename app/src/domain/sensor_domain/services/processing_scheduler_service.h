@@ -5,8 +5,8 @@
 
 #include <zephyr/kernel.h>
 
-#include "utilities/time/i_time_service.h"
 #include "utilities/guid/guid_generator.h"
+#include "subsys/time/i_time_service.h"
 #include "domain/sensor_domain/configuration/sensors_configuration_manager.h"
 #include "domain/sensor_domain/configuration/adc_configuration_manager.h"
 #include "subsys/gpio/i_gpio.h"
@@ -18,10 +18,10 @@
 
 namespace eerie_leap::domain::sensor_domain::services {
 
-using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::subsys::gpio;
 using namespace eerie_leap::subsys::adc;
+using namespace eerie_leap::subsys::time;
 using namespace eerie_leap::domain::sensor_domain::configuration;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 using namespace eerie_leap::domain::sensor_domain::processors;

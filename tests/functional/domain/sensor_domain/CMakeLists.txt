@@ -35,6 +35,7 @@ file(GLOB_RECURSE APP_SRC_SUBSYS
   ${APP_SRC_SUBSYS_DIR}/gpio/*.cpp
   ${APP_SRC_SUBSYS_DIR}/fs/fs_service.cpp
   ${APP_SRC_SUBSYS_DIR}/random/*.cpp
+  ${APP_SRC_SUBSYS_DIR}/time/*.cpp
 )
 
 set(APP_SRC_DOMAIN_DIR ${APP_SRC_DIR}/domain)

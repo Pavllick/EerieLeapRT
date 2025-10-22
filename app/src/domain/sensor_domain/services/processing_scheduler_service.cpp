@@ -2,8 +2,8 @@
 #include <zephyr/sys/util.h>
 #include <zephyr/kernel.h>
 
-#include "utilities/time/time_helpers.hpp"
 #include "utilities/memory/heap_allocator.h"
+#include "subsys/time/time_helpers.hpp"
 #include "domain/sensor_domain/models/sensor_type.h"
 #include "domain/sensor_domain/processors/sensor_reader/i_sensor_reader.h"
 #include "domain/sensor_domain/processors/sensor_reader/sensor_reader_physical_analog.h"

@@ -5,14 +5,14 @@
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/crc.h>
 
-#include "utilities/time/time_helpers.hpp"
+#include "subsys/time/time_helpers.hpp"
 #include "subsys/random/rng.h"
 
 #include "log_writer_service.h"
 
 namespace eerie_leap::domain::logging_domain::services {
 
-using namespace eerie_leap::utilities::time;
+using namespace eerie_leap::subsys::time;
 using namespace eerie_leap::subsys::random;
 
 LOG_MODULE_REGISTER(log_writer_service_logger);

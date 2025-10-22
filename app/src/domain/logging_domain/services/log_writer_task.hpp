@@ -6,13 +6,13 @@
 
 #include <zephyr/kernel.h>
 
-#include "utilities/time/i_time_service.h"
+#include "subsys/time/i_time_service.h"
 #include "domain/sensor_domain/models/sensor_reading.h"
 #include "domain/logging_domain/loggers/i_logger.h"
 
 namespace eerie_leap::domain::logging_domain::services {
 
-using namespace eerie_leap::utilities::time;
+using namespace eerie_leap::subsys::time;
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::domain::logging_domain::loggers;
 

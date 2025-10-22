@@ -7,7 +7,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/timing/timing.h>
 
-namespace eerie_leap::utilities::time {
+namespace eerie_leap::subsys::time {
 
 using namespace std::chrono;
 
@@ -85,4 +85,4 @@ public:
     }
 };
 
-} // namespace eerie_leap::utilities::time
+} // namespace eerie_leap::subsys::time

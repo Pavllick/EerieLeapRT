@@ -2,7 +2,6 @@
 
 #include "utilities/memory/heap_allocator.h"
 #include "utilities/guid/guid_generator.h"
-#include "utilities/time/boot_elapsed_time_service.h"
 #include "utilities/math_parser/math_parser_service.hpp"
 
 #include "configuration/adc_config/adc_config.h"
@@ -15,6 +14,9 @@
 #include "subsys/adc/adc_simulator.h"
 #include "subsys/gpio/i_gpio.h"
 #include "subsys/gpio/gpio_simulator.h"
+#include "subsys/time/rtc_provider.h"
+#include "subsys/time/boot_elapsed_time_provider.h"
+#include "subsys/time/time_service.h"
 
 #include "domain/sensor_domain/configuration/adc_configuration_manager.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
@@ -30,7 +32,6 @@
 #include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
 
 using namespace eerie_leap::utilities::memory;
-using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::utilities::math_parser;
 
@@ -38,6 +39,7 @@ using namespace eerie_leap::subsys::device_tree;
 using namespace eerie_leap::subsys::adc;
 using namespace eerie_leap::subsys::adc::models;
 using namespace eerie_leap::subsys::gpio;
+using namespace eerie_leap::subsys::time;
 
 using namespace eerie_leap::domain::sensor_domain::configuration;
 using namespace eerie_leap::domain::sensor_domain::processors;
@@ -192,7 +194,10 @@ sensors_reader_HelperInstances sensors_reader_GetReadingInstances() {
 
     fs_service->Format();
 
-    auto time_service = std::make_shared<BootElapsedTimeService>();
+    auto time_provider = std::make_shared<BootElapsedTimeProvider>();
+    auto rtc_provider = std::make_shared<RtcProvider>();
+    auto time_service = std::make_shared<TimeService>(time_provider, rtc_provider);
+
     std::shared_ptr<GuidGenerator> guid_generator = std::make_shared<GuidGenerator>();
     std::shared_ptr<MathParserService> math_parser_service = std::make_shared<MathParserService>();
 

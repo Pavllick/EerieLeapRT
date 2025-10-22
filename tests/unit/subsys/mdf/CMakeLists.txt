@@ -18,6 +18,7 @@ file(GLOB_RECURSE APP_SRC_SUBSYS
   ${APP_SRC_SUBSYS_DIR}/device_tree/dt_fs.cpp
   ${APP_SRC_SUBSYS_DIR}/random/*.c
   ${APP_SRC_SUBSYS_DIR}/random/*.cpp
+  ${APP_SRC_SUBSYS_DIR}/time/*.cpp
   ${APP_SRC_SUBSYS_DIR}/fs/*.c
   ${APP_SRC_SUBSYS_DIR}/fs/*.cpp
   ${APP_SRC_SUBSYS_DIR}/mdf/*.c

@@ -9,7 +9,7 @@
 
 #include "subsys/fs/services/i_fs_service.h"
 #include "subsys/fs/services/fs_service_stream_buf.h"
-#include "utilities/time/i_time_service.h"
+#include "subsys/time/i_time_service.h"
 #include "domain/logging_domain/loggers/i_logger.h"
 
 #include "log_writer_task.hpp"
@@ -18,8 +18,8 @@ namespace eerie_leap::domain::logging_domain::services {
 
 using namespace std::chrono;
 using namespace eerie_leap::subsys::fs::services;
+using namespace eerie_leap::subsys::time;
 using namespace eerie_leap::domain::logging_domain::loggers;
-using namespace eerie_leap::utilities::time;
 
 class LogWriterService {
 private:

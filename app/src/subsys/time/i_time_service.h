@@ -2,7 +2,7 @@
 
 #include <chrono>
 
-namespace eerie_leap::utilities::time {
+namespace eerie_leap::subsys::time {
 
 using namespace std::chrono;
 
@@ -12,4 +12,4 @@ public:
     system_clock::time_point virtual GetTimeSinceBoot() = 0;
 };
 
-} // namespace eerie_leap::utilities::time
+} // namespace eerie_leap::subsys::time
