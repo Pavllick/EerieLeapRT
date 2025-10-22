@@ -35,7 +35,7 @@ public:
     std::shared_ptr<mdf4::DataGroupBlock> CreateDataGroup(uint8_t record_id_size_bytes);
     const std::vector<std::shared_ptr<mdf4::DataGroupBlock>> GetDataGroups() const;
 
-    std::shared_ptr<mdf4::ChannelGroupBlock> CreateChannelGroup(mdf4::DataGroupBlock& data_group, uint64_t record_id);
+    std::shared_ptr<mdf4::ChannelGroupBlock> CreateChannelGroup(mdf4::DataGroupBlock& data_group, uint64_t record_id, const std::string& name);
     std::shared_ptr<mdf4::ChannelBlock> CreateDataChannel(
         mdf4::ChannelGroupBlock& channel_group, MdfDataType data_type, std::string name, std::string unit);
     mdf4::DataRecord CreateDataRecord(std::shared_ptr<mdf4::ChannelGroupBlock> channel_group);

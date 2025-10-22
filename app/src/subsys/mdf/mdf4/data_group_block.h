@@ -28,10 +28,6 @@ private:
     uint8_t record_id_size_bytes_;      // 1 byte, Length of record ID bytes
     // uint8_t reserved_1_[7];          // 7 bytes, Reserved
 
-    std::shared_ptr<DataGroupBlock> data_group_next_;
-    std::shared_ptr<ChannelGroupBlock> channel_group_;
-    std::shared_ptr<DataBlock> data_;
-
 public:
     DataGroupBlock(uint8_t record_id_size_bytes);
     virtual ~DataGroupBlock() = default;
@@ -42,7 +38,11 @@ public:
     std::unique_ptr<uint8_t[]> Serialize() const override;
     const IBlockLinks* GetBlockLinks() const override { return &links_; }
     std::vector<std::shared_ptr<ISerializableBlock>> GetChildren() const override {
-        return { channel_group_, data_, data_group_next_ };
+        return {
+            links_.GetLink(LinkType::MetadataComment),
+            links_.GetLink(LinkType::ChannelGroupFirst),
+            links_.GetLink(LinkType::Data),
+            links_.GetLink(LinkType::DataGroupNext) };
     }
 
     void AddChannelGroup(std::shared_ptr<ChannelGroupBlock> channel_group);

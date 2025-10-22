@@ -41,6 +41,8 @@ void SensorReaderPhysicalAnalog::Read() {
     reading->value = voltage_calibrated;
     reading->status = ReadingStatus::RAW;
 
+    reading->metadata.AddTag<float>(ReadingMetadataTag::VOLTAGE, voltage_calibrated);
+
     readings_frame_->AddOrUpdateReading(reading);
 }
 

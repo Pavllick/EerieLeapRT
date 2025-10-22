@@ -17,7 +17,9 @@ public:
 
     uint64_t GetBlockSize() const override;
     std::unique_ptr<uint8_t[]> Serialize() const override;
-    std::vector<std::shared_ptr<ISerializableBlock>> GetChildren() const override { return {}; }
+    std::vector<std::shared_ptr<ISerializableBlock>> GetChildren() const override {
+        return {};
+    }
 };
 
 } // namespace eerie_leap::subsys::mdf::mdf4

@@ -33,6 +33,9 @@ void SensorReaderPhysicalAnalogCalibrator::Read() {
     reading->value = voltage_interpolated;
     reading->status = ReadingStatus::CALIBRATION;
 
+    reading->metadata.AddTag<float>(ReadingMetadataTag::VOLTAGE, voltage);
+    reading->metadata.AddTag<float>(ReadingMetadataTag::RAW_VALUE, voltage_interpolated);
+
     readings_frame_->AddOrUpdateReading(reading);
 }
 

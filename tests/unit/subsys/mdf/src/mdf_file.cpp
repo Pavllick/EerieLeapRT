@@ -12,6 +12,7 @@
 #include "subsys/fs/services/fs_service_stream_buf.h"
 #include "subsys/mdf/mdf4/channel_group_block.h"
 #include "subsys/mdf/mdf4/source_information_block.h"
+#include "subsys/mdf/mdf4/channel_conversion_block.h"
 #include "subsys/mdf/mdf_data_type.h"
 #include "subsys/mdf/mdf4_file.h"
 
@@ -32,7 +33,7 @@ ZTEST(mdf_file, test_WriteToStream) {
     Mdf4File mdf_file(false);
     mdf_file.UpdateCurrentTime(rtc_service.GetCurrentTime());
     auto data_group = mdf_file.CreateDataGroup(1);
-    auto channel_group = mdf_file.CreateChannelGroup(*data_group, 1);
+    auto channel_group = mdf_file.CreateChannelGroup(*data_group, 1, "pressure");
     auto source_information = std::make_shared<mdf4::SourceInformationBlock>(
         mdf4::SourceInformationBlock::SourceType::IoDevice,
         mdf4::SourceInformationBlock::BusType::None,
@@ -40,7 +41,9 @@ ZTEST(mdf_file, test_WriteToStream) {
     channel_group->AddSourceInformation(source_information);
 
     // mdf_file.CreateDataChannel(*channel_group, MdfDataType::Float32, "engine_speed", "rpm");
-    mdf_file.CreateDataChannel(*channel_group, MdfDataType::Uint64, "pressure", "bar");
+    auto channel = mdf_file.CreateDataChannel(*channel_group, MdfDataType::Uint64, "value", "bar");
+    auto conversion = mdf4::ChannelConversionBlock::CreateAlgebraicConversion("x * 0.1");
+    channel->SetConversion(std::make_shared<mdf4::ChannelConversionBlock>(conversion));
 
     // FsServiceStreamBuf fs_buf(fs_service.get(), "output/data.mf4");
     // auto bytes_written = mdf_file.WriteFileToStream(fs_buf);

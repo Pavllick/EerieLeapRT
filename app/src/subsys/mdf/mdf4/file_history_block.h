@@ -28,9 +28,6 @@ private:
     uint8_t time_flags_;                // 1 bytes, Time flags
     // uint8_t reserved_1_[3];          // 3 bytes, Reserved
 
-    std::shared_ptr<FileHistoryBlock> file_history_next_;
-    std::shared_ptr<MetadataBlock> metadata_comment_;
-
 public:
     FileHistoryBlock();
     virtual ~FileHistoryBlock() = default;
@@ -41,7 +38,9 @@ public:
     std::unique_ptr<uint8_t[]> Serialize() const override;
     const IBlockLinks* GetBlockLinks() const override { return &links_; }
     std::vector<std::shared_ptr<ISerializableBlock>> GetChildren() const override {
-        return { metadata_comment_, file_history_next_ };
+        return {
+            links_.GetLink(LinkType::MetadataComment),
+            links_.GetLink(LinkType::FileHistoryNext) };
     }
 
     void LinkBlock(std::shared_ptr<FileHistoryBlock> next_block);

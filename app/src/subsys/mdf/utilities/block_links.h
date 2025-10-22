@@ -1,9 +1,10 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <memory>
-#include <array>
+#include <vector>
 #include <utility>
 #include <concepts>
 #include <type_traits>
@@ -21,26 +22,43 @@ concept IntEnum =
 template<IntEnum LinkType, int N>
 class BlockLinks : public IBlockLinks {
 private:
-    std::array<std::shared_ptr<IBlock>, N> links_;
+    std::vector<std::shared_ptr<IBlock>> links_;
     static const int LINK_SIZE_BYTES = 8;
+    size_t extra_links_count_ = 0;
 
 public:
-    BlockLinks() = default;
+    BlockLinks() {
+        links_.resize(N);
+    }
 
     int Count() const override {
-        return N;
+        return N + extra_links_count_;
     }
 
     void SetLink(LinkType type, std::shared_ptr<IBlock> link) {
         links_[std::to_underlying(type)] = link;
     }
 
+    void AddExtraLink(std::shared_ptr<IBlock> link) {
+        links_.push_back(link);
+        extra_links_count_++;
+    }
+
     uint64_t GetLinksSizeBytes() const override {
-        return N * LINK_SIZE_BYTES;
+        return (N + extra_links_count_) * LINK_SIZE_BYTES;
     }
 
     std::shared_ptr<IBlock> GetLink(LinkType type) const {
         return links_[std::to_underlying(type)];
+    }
+
+    const std::vector<std::shared_ptr<ISerializableBlock>> GetLinks() const override {
+        std::vector<std::shared_ptr<ISerializableBlock>> links;
+        links.reserve(Count());
+        for(auto& link : links_)
+            links.push_back(link);
+
+        return links;
     }
 
     std::unique_ptr<uint8_t[]> Serialize() const override {

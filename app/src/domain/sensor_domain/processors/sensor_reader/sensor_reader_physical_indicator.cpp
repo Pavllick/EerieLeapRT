@@ -33,6 +33,8 @@ void SensorReaderPhysicalIndicator::Read() {
     reading->value = static_cast<float>(gpio_->ReadChannel(sensor_->configuration.channel.value()));
     reading->status = ReadingStatus::RAW;
 
+    reading->metadata.AddTag<bool>(ReadingMetadataTag::RAW_VALUE, reading->value.value() > 0);
+
     readings_frame_->AddOrUpdateReading(reading);
 }
 

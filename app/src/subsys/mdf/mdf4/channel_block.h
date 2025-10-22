@@ -7,6 +7,7 @@
 
 #include "subsys/mdf/utilities/block_links.h"
 #include "text_block.h"
+#include "channel_conversion_block.h"
 #include "block_base.h"
 
 namespace eerie_leap::subsys::mdf::mdf4 {
@@ -78,7 +79,7 @@ private:
         ChannelNext = 0,
         ChannelArray,
         TextName,
-        SourceInformationSource,
+        SourceInformation,
         ChannelConversion,
         Data,
         TextUnit,
@@ -105,10 +106,6 @@ private:
     float limit_ext_min_;               // 8 bytes, Lower extended limit
     float limit_ext_max_;               // 8 bytes, Upper extended limit
 
-    std::shared_ptr<ChannelBlock> channel_next_;
-    std::shared_ptr<TextBlock> name_;
-    std::shared_ptr<TextBlock> unit_;
-
 public:
     ChannelBlock(Type type, SyncType sync_type, DataType data_type, uint32_t bit_count, std::string name, std::string unit);
     virtual ~ChannelBlock() = default;
@@ -116,12 +113,21 @@ public:
     uint32_t GetDataSizeBytes() const;
     uint32_t GetDataOffsetBytes() const;
     std::shared_ptr<ChannelBlock> GetLinkedChannel() const;
+    void SetConversion(std::shared_ptr<ChannelConversionBlock> conversion);
 
     uint64_t GetBlockSize() const override;
     std::unique_ptr<uint8_t[]> Serialize() const override;
     const IBlockLinks* GetBlockLinks() const override { return &links_; }
     std::vector<std::shared_ptr<ISerializableBlock>> GetChildren() const override {
-        return { name_, unit_, channel_next_ };
+        return {
+            links_.GetLink(LinkType::MetadataComment),
+            links_.GetLink(LinkType::TextName),
+            links_.GetLink(LinkType::TextUnit),
+            links_.GetLink(LinkType::SourceInformation),
+            links_.GetLink(LinkType::ChannelConversion),
+            links_.GetLink(LinkType::ChannelArray),
+            links_.GetLink(LinkType::Data),
+            links_.GetLink(LinkType::ChannelNext) };
     }
 
     uint32_t GetDataBytes() const;

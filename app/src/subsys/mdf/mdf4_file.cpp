@@ -47,7 +47,7 @@ const std::vector<std::shared_ptr<mdf4::DataGroupBlock>> Mdf4File::GetDataGroups
     return data_groups;
 }
 
-std::shared_ptr<mdf4::ChannelGroupBlock> Mdf4File::CreateChannelGroup(mdf4::DataGroupBlock& data_group, uint64_t record_id) {
+std::shared_ptr<mdf4::ChannelGroupBlock> Mdf4File::CreateChannelGroup(mdf4::DataGroupBlock& data_group, uint64_t record_id, const std::string& name) {
     auto data_group_it = std::find_if(
         data_groups_.begin(), data_groups_.end(),
         [&data_group](const auto& pair) {
@@ -62,7 +62,7 @@ std::shared_ptr<mdf4::ChannelGroupBlock> Mdf4File::CreateChannelGroup(mdf4::Data
 
     data_group_it->second.insert(record_id);
 
-    auto channel_group = std::make_shared<mdf4::ChannelGroupBlock>(data_group.GetRecordIdSizeBytes(), record_id);
+    auto channel_group = std::make_shared<mdf4::ChannelGroupBlock>(data_group.GetRecordIdSizeBytes(), record_id, name);
     data_group.AddChannelGroup(channel_group);
 
     auto channel_data_type = MdfHelpers::ToMdf4ChannelDataType(MdfDataType::Float32);

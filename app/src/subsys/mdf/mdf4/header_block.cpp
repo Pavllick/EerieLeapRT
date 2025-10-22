@@ -12,25 +12,30 @@ HeaderBlock::HeaderBlock(): BlockBase("HD") {
     hd_start_angle_rad_ = 0.0;
     hd_distance_m_ = 0.0;
 
-    file_history_ = std::make_shared<FileHistoryBlock>();
-    links_.SetLink(LinkType::FileHistoryFirst, file_history_);
+    links_.SetLink(LinkType::FileHistoryFirst, std::make_shared<FileHistoryBlock>());
 }
 
 void HeaderBlock::SetCurrentTimeNs(uint64_t time_ns) {
     start_time_ns_ = time_ns;
-    file_history_->SetTimeNs(time_ns);
+    if(links_.GetLink(LinkType::FileHistoryFirst)) {
+        auto file_history = std::dynamic_pointer_cast<FileHistoryBlock>(links_.GetLink(LinkType::FileHistoryFirst));
+        file_history->SetTimeNs(time_ns);
+    }
 }
 
 void HeaderBlock::AddFileHistory(std::shared_ptr<FileHistoryBlock> file_history) {
-    file_history_->LinkBlock(std::move(file_history));
+    if(links_.GetLink(LinkType::FileHistoryFirst)) {
+        auto linked_file_history = std::dynamic_pointer_cast<FileHistoryBlock>(links_.GetLink(LinkType::FileHistoryFirst));
+        linked_file_history->LinkBlock(std::move(file_history));
+    }
 }
 
 void HeaderBlock::AddDataGroup(std::shared_ptr<DataGroupBlock> data_group) {
-    if(data_group_) {
-        data_group_->LinkBlock(std::move(data_group));
+    if(links_.GetLink(LinkType::DataGroupFirst)) {
+        auto linked_data_group = std::dynamic_pointer_cast<DataGroupBlock>(links_.GetLink(LinkType::DataGroupFirst));
+        linked_data_group->LinkBlock(std::move(data_group));
     } else {
-        data_group_ = std::move(data_group);
-        links_.SetLink(LinkType::DataGroupFirst, data_group_);
+        links_.SetLink(LinkType::DataGroupFirst, std::move(data_group));
     }
 }
 

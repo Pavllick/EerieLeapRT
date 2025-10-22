@@ -20,13 +20,17 @@ ChannelBlock::ChannelBlock(Type type, SyncType sync_type, DataType data_type, ui
     limit_ext_min_ = 0;
     limit_ext_max_ = 0;
 
-    name_ = std::make_shared<TextBlock>();
-    name_->SetText(name);
-    links_.SetLink(LinkType::TextName, name_);
+    if(!name.empty()) {
+        auto name_block = std::make_shared<TextBlock>();
+        name_block->SetText(name);
+        links_.SetLink(LinkType::TextName, std::move(name_block));
+    }
 
-    unit_ = std::make_shared<TextBlock>();
-    unit_->SetText(unit);
-    links_.SetLink(LinkType::TextUnit, unit_);
+    if(!unit.empty()) {
+        auto unit_block = std::make_shared<TextBlock>();
+        unit_block->SetText(unit);
+        links_.SetLink(LinkType::TextUnit, std::move(unit_block));
+    }
 }
 
 uint32_t ChannelBlock::GetDataSizeBytes() const {
@@ -38,7 +42,11 @@ uint32_t ChannelBlock::GetDataOffsetBytes() const {
 }
 
 std::shared_ptr<ChannelBlock> ChannelBlock::GetLinkedChannel() const {
-    return channel_next_;
+    return std::dynamic_pointer_cast<ChannelBlock>(links_.GetLink(LinkType::ChannelNext));
+}
+
+void ChannelBlock::SetConversion(std::shared_ptr<ChannelConversionBlock> conversion) {
+    links_.SetLink(LinkType::ChannelConversion, std::move(conversion));
 }
 
 uint32_t ChannelBlock::GetDataBytes() const {
@@ -50,11 +58,11 @@ void ChannelBlock::SetOffsetBytes(uint32_t offset_bytes) {
 }
 
 void ChannelBlock::LinkBlock(std::shared_ptr<ChannelBlock> next_block) {
-    if(channel_next_) {
-        channel_next_->LinkBlock(std::move(next_block));
+    if(links_.GetLink(LinkType::ChannelNext)) {
+        auto linked_channel = std::dynamic_pointer_cast<ChannelBlock>(links_.GetLink(LinkType::ChannelNext));
+        linked_channel->LinkBlock(std::move(next_block));
     } else {
-        channel_next_ = std::move(next_block);
-        links_.SetLink(LinkType::ChannelNext, channel_next_);
+        links_.SetLink(LinkType::ChannelNext, std::move(next_block));
     }
 }
 

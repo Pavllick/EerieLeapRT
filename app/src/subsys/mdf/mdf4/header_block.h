@@ -37,9 +37,6 @@ private:
     double hd_start_angle_rad_;             // 8 bytes, Start angle in radians at start of measurement
     double hd_distance_m_;                  // 8 bytes, Start angle in radians at start of measurement
 
-    std::shared_ptr<DataGroupBlock> data_group_;
-    std::shared_ptr<FileHistoryBlock> file_history_;
-
 public:
     HeaderBlock();
     virtual ~HeaderBlock() = default;
@@ -50,7 +47,13 @@ public:
     std::unique_ptr<uint8_t[]> Serialize() const override;
     const IBlockLinks* GetBlockLinks() const override { return &links_; }
     std::vector<std::shared_ptr<ISerializableBlock>> GetChildren() const override {
-        return { file_history_, data_group_ };
+        return {
+            links_.GetLink(LinkType::MetadataComment),
+            links_.GetLink(LinkType::FileHistoryFirst),
+            links_.GetLink(LinkType::ChannelHierarchyFirst),
+            links_.GetLink(LinkType::AttachmentFirst),
+            links_.GetLink(LinkType::EventFirst),
+            links_.GetLink(LinkType::DataGroupFirst) };
     }
 
     void AddFileHistory(std::shared_ptr<FileHistoryBlock> file_history);

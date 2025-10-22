@@ -10,9 +10,9 @@ SourceInformationBlock::SourceInformationBlock(SourceType source_type, BusType b
     flags_ = 0;
 
     if(!name.empty()) {
-        name_ = std::make_shared<TextBlock>();
-        name_->SetText(name);
-        links_.SetLink(LinkType::TextName, name_);
+        auto name_block = std::make_shared<TextBlock>();
+        name_block->SetText(name);
+        links_.SetLink(LinkType::TextName, name_block);
     }
 }
 

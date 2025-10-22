@@ -54,8 +54,6 @@ private:
     uint8_t flags_;                 // 1 bytes, Flags
     // uint8_t reserved_1_[5];      // 5 bytes, Reserved
 
-    std::shared_ptr<TextBlock> name_;
-
 public:
     SourceInformationBlock(SourceType source_type, BusType bus_type, const std::string& name = "");
     virtual ~SourceInformationBlock() = default;
@@ -64,7 +62,10 @@ public:
     std::unique_ptr<uint8_t[]> Serialize() const override;
     const IBlockLinks* GetBlockLinks() const override { return &links_; }
     std::vector<std::shared_ptr<ISerializableBlock>> GetChildren() const override {
-        return { name_ };
+        return {
+            links_.GetLink(LinkType::TextName),
+            links_.GetLink(LinkType::TextPath),
+            links_.GetLink(LinkType::MetadataComment) };
     }
 };
 

@@ -8,14 +8,14 @@ FileHistoryBlock::FileHistoryBlock(): BlockBase("FH") {
     dst_offset_min_ = 0;
     time_flags_ = 0;
 
-    metadata_comment_ = std::make_shared<MetadataBlock>();
-    metadata_comment_->SetText(GetId(),
+    auto metadata_comment_block = std::make_shared<MetadataBlock>();
+    metadata_comment_block->SetText(GetId(),
         "<TX>created</TX>"
         "<tool_id>none</tool_id>"
         "<tool_vendor>Eerie Leap</tool_vendor>"
         "<tool_version>0.0.0</tool_version>"
     );
-    links_.SetLink(LinkType::MetadataComment, metadata_comment_);
+    links_.SetLink(LinkType::MetadataComment, std::move(metadata_comment_block));
 }
 
 void FileHistoryBlock::SetTimeNs(uint64_t time_ns) {
@@ -23,11 +23,11 @@ void FileHistoryBlock::SetTimeNs(uint64_t time_ns) {
 }
 
 void FileHistoryBlock::LinkBlock(std::shared_ptr<FileHistoryBlock> next_block) {
-    if(file_history_next_) {
-        file_history_next_->LinkBlock(std::move(next_block));
+    if(links_.GetLink(LinkType::FileHistoryNext)) {
+        auto linked_file_history = std::dynamic_pointer_cast<FileHistoryBlock>(links_.GetLink(LinkType::FileHistoryNext));
+        linked_file_history->LinkBlock(std::move(next_block));
     } else {
-        file_history_next_ = std::move(next_block);
-        links_.SetLink(LinkType::FileHistoryNext, file_history_next_);
+        links_.SetLink(LinkType::FileHistoryNext, std::move(next_block));
     }
 }
 

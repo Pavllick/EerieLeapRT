@@ -3,6 +3,7 @@
 
 #include "utilities/memory/heap_allocator.h"
 #include "domain/sensor_domain/models/reading_status.h"
+#include "domain/sensor_domain/models/reading_metadata.h"
 
 #include "sensor_processor.h"
 
@@ -23,6 +24,8 @@ void SensorProcessor::ProcessReading(std::shared_ptr<SensorReading> reading) {
             float voltage = reading->value.value();
             float raw_value = reading->sensor->configuration.voltage_interpolator->Interpolate(voltage, true);
             float value = raw_value;
+
+            reading->metadata.AddTag<float>(ReadingMetadataTag::RAW_VALUE, raw_value);
 
             if(reading->sensor->configuration.expression_evaluator != nullptr) {
                 value = reading->sensor->configuration.expression_evaluator->Evaluate(

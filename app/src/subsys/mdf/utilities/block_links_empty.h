@@ -21,6 +21,10 @@ public:
         return 0;
     }
 
+    const std::vector<std::shared_ptr<ISerializableBlock>> GetLinks() const override {
+        return {};
+    }
+
     std::unique_ptr<uint8_t[]> Serialize() const override {
         return {};
     }

@@ -46,14 +46,10 @@ private:
     uint32_t data_bytes_;                // 4 bytes, Number of bytes in record used for sample values
     uint32_t invalidation_bytes_;        // 4 bytes, Number of bytes in record used for invalidation bits
 
-    std::shared_ptr<ChannelGroupBlock> channel_group_next_;
-    std::shared_ptr<ChannelBlock> channel_first_;
-    std::shared_ptr<SourceInformationBlock> source_information_;
-
     uint8_t record_id_size_bytes_;
 
 public:
-    ChannelGroupBlock(uint8_t record_id_size_bytes, uint64_t record_id);
+    ChannelGroupBlock(uint8_t record_id_size_bytes, uint64_t record_id, const std::string& name = "");
     virtual ~ChannelGroupBlock() = default;
 
     uint64_t GetRecordId() const;
@@ -65,7 +61,13 @@ public:
     std::unique_ptr<uint8_t[]> Serialize() const override;
     const IBlockLinks* GetBlockLinks() const override { return &links_; }
     std::vector<std::shared_ptr<ISerializableBlock>> GetChildren() const override {
-        return { channel_first_, channel_group_next_, source_information_ };
+        return {
+            links_.GetLink(LinkType::MetadataComment),
+            links_.GetLink(LinkType::TextAcquisitionName),
+            links_.GetLink(LinkType::SourceInformation),
+            links_.GetLink(LinkType::SampleReductionFirst),
+            links_.GetLink(LinkType::ChannelFirst),
+            links_.GetLink(LinkType::ChannelGroupNext) };
     }
 
     void AddChannel(std::shared_ptr<ChannelBlock> channel);
