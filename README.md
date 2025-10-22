@@ -4,6 +4,11 @@ EerieLeap is an open-source sensor monitoring system built with [Zephyr RTOS](ht
 
 ## Getting Started
 
+Project uses submodules for external dependencies. To initialize submodules, run:
+```shell
+git submodule update --init --recursive
+```
+
 Development environment is based on [Docker](https://www.docker.com/). Use `example.docker-compose.yml` as an example. Rename to `docker-compose.yml` to use it.
 
 ### Hardware Access From Container

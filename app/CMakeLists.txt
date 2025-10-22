@@ -1,5 +1,38 @@
 cmake_minimum_required(VERSION 3.20)
 
+# Bootstrap and build Boost
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/../modules/boost/b2")
+    message(STATUS "Bootstrapping Boost...")
+    execute_process(
+        COMMAND ${CMAKE_SOURCE_DIR}/../modules/boost/bootstrap.sh
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/../modules/boost
+        RESULT_VARIABLE BOOTSTRAP_RESULT
+    )
+    if(NOT BOOTSTRAP_RESULT EQUAL 0)
+        message(FATAL_ERROR "Failed to bootstrap Boost")
+    endif()
+
+    message(STATUS "Building Boost headers and tools...")
+    execute_process(
+        COMMAND ${CMAKE_SOURCE_DIR}/../modules/boost/b2 headers tools/bcp
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/../modules/boost
+        RESULT_VARIABLE B2_HEADERS_RESULT
+    )
+    if(NOT B2_HEADERS_RESULT EQUAL 0)
+        message(FATAL_ERROR "Failed to build Boost headers and tools")
+    endif()
+
+    message(STATUS "Extracting Boost.Spirit.X3 headers...")
+    execute_process(
+        COMMAND ${CMAKE_SOURCE_DIR}/../modules/boost/dist/bin/bcp boost/spirit/home/x3.hpp ${CMAKE_SOURCE_DIR}/include
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/../modules/boost
+        RESULT_VARIABLE BCP_RESULT
+    )
+    if(NOT BCP_RESULT EQUAL 0)
+        message(FATAL_ERROR "Failed to extract Boost.Spirit.X3 headers")
+    endif()
+endif()
+
 # Apply patches before build
 function(apply_patches patch_dir target_dir)
     file(GLOB_RECURSE files RELATIVE ${CMAKE_SOURCE_DIR} "${patch_dir}/*.patch")
@@ -49,11 +82,12 @@ file(GLOB_RECURSE APP_SOURCES
   src/*.c
 )
 
-# Add sources to the app target
-target_sources(app PRIVATE ${APP_SOURCES})
-
 # Include headers
 target_include_directories(app PRIVATE
   src
   src/libs/muparser/include
+  include
 )
+
+# Add sources to the app target
+target_sources(app PRIVATE ${APP_SOURCES})

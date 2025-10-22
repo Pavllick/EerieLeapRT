@@ -15,9 +15,9 @@ void DisplayController::Initialize() {
         return;
 
     cfb_->SetFont(0);
-    StartAnimation(0);
-
     is_initialized_ = true;
+
+    StartAnimation(0);
 }
 
 void DisplayController::StartAnimation(int animation_index) {
