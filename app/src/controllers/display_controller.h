@@ -21,6 +21,7 @@ private:
     int current_animation_index_ = 0;
     bool is_animation_in_progress_ = false;
     std::set<std::string> statuses_;
+    bool is_initialized_ = false;
 
     void UpdateStatuses();
 

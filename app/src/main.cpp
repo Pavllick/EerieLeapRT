@@ -6,20 +6,21 @@
 #include "utilities/memory/heap_allocator.h"
 #include "utilities/dev_tools/system_info.h"
 #include "utilities/guid/guid_generator.h"
-#include "utilities/time/time_service.h"
-#include "utilities/time/rtc_service.h"
-#include "utilities/time/boot_elapsed_time_service.h"
 #include "utilities/math_parser/math_parser_service.hpp"
 
 #include "subsys/device_tree/dt_configurator.h"
 #include "subsys/device_tree/dt_fs.h"
 #include "subsys/device_tree/dt_modbus.h"
+#include "subsys/device_tree/dt_display.h"
 
 #include "subsys/fs/services/fs_service.h"
 #include "subsys/fs/services/sdmmc_service.h"
 #include "subsys/gpio/gpio_factory.hpp"
 #include "subsys/modbus/modbus.h"
 #include "subsys/cfb/cfb.h"
+#include "subsys/time/time_service.h"
+#include "subsys/time/rtc_provider.h"
+#include "subsys/time/boot_elapsed_time_provider.h"
 
 #include "domain/user_com_domain/user_com.h"
 #include "domain/user_com_domain/services/com_polling/com_polling_interface_service.h"
@@ -67,7 +68,6 @@ using namespace eerie_leap::domain::sensor_domain::models;
 
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::dev_tools;
-using namespace eerie_leap::utilities::time;
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::utilities::math_parser;
 
@@ -76,6 +76,7 @@ using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::subsys::modbus;
 using namespace eerie_leap::subsys::gpio;
 using namespace eerie_leap::subsys::cfb;
+using namespace eerie_leap::subsys::time;
 
 using namespace eerie_leap::domain::system_domain::configuration;
 
@@ -117,11 +118,17 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
 int main(void) {
     DtConfigurator::Initialize();
 
-    auto cfb = make_shared_ext<Cfb>();
+    std::shared_ptr<Cfb> cfb = nullptr;
+
+    if(DtDisplay::Get() != nullptr) {
+        cfb = make_shared_ext<Cfb>();
+
     if(!cfb->Initialize()) {
         LOG_ERR("Failed to initialize CFB.");
         return -1;
     }
+    }
+
     auto display_controller = make_shared_ext<DisplayController>(cfb);
     display_controller->Initialize();
 
@@ -163,9 +170,9 @@ int main(void) {
         return -1;
     }
 
-    auto rtc_service = make_shared_ext<RtcService>();
-    auto boot_elapsed_time_service = make_shared_ext<BootElapsedTimeService>();
-    auto time_service = make_shared_ext<TimeService>(rtc_service, boot_elapsed_time_service);
+    auto rtc_provider = make_shared_ext<RtcProvider>();
+    auto boot_elapsed_time_provider = make_shared_ext<BootElapsedTimeProvider>();
+    auto time_service = make_shared_ext<TimeService>(rtc_provider, boot_elapsed_time_provider);
     time_service->Initialize();
 
     auto guid_generator = make_shared_ext<GuidGenerator>();

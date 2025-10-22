@@ -12,7 +12,7 @@ LOG_MODULE_DECLARE(dt_logger);
 const struct device* DtDisplay::display_dev_ = nullptr;
 
 void DtDisplay::Initialize() {
-#if DT_HAS_CHOSEN(zephyr_display)
+#if defined(CONFIG_DISPLAY) && DT_HAS_CHOSEN(zephyr_display)
     display_dev_ = DEVICE_DT_GET(DISPLAY_NODE);
     LOG_INF("Display initialized.");
 #endif

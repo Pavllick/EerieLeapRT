@@ -8,16 +8,22 @@
 namespace eerie_leap::controllers {
 
 DisplayController::DisplayController(std::shared_ptr<Cfb> cfb)
-    : cfb_(std::move(cfb)), current_animation_index_(0) {
-
-    cfb_->SetFont(0);
-}
+    : cfb_(std::move(cfb)), current_animation_index_(0) { }
 
 void DisplayController::Initialize() {
+    if(!cfb_ || is_initialized_)
+        return;
+
+    cfb_->SetFont(0);
     StartAnimation(0);
+
+    is_initialized_ = true;
 }
 
 void DisplayController::StartAnimation(int animation_index) {
+    if(!is_initialized_)
+        return;
+
     if(animation_index < 0)
         animation_index = current_animation_index_;
 
@@ -50,6 +56,9 @@ void DisplayController::StartAnimation(int animation_index) {
 }
 
 void DisplayController::StopAnimation() {
+    if(!is_initialized_)
+        return;
+
     if(!is_animation_in_progress_)
         return;
 
@@ -60,6 +69,9 @@ void DisplayController::StopAnimation() {
 }
 
 void DisplayController::PrintStringLine(const std::string& str) {
+    if(!is_initialized_)
+        return;
+
     StopAnimation();
 
     cfb_->Clear();
@@ -68,21 +80,33 @@ void DisplayController::PrintStringLine(const std::string& str) {
 }
 
 void DisplayController::AddStatus(const std::string& status) {
+    if(!is_initialized_)
+        return;
+
     statuses_.insert(status);
     UpdateStatuses();
 }
 
 void DisplayController::RemoveStatus(const std::string& status) {
+    if(!is_initialized_)
+        return;
+
     statuses_.erase(status);
     UpdateStatuses();
 }
 
 void DisplayController::ClearStatuses() {
+    if(!is_initialized_)
+        return;
+
     statuses_.clear();
     UpdateStatuses();
 }
 
 void DisplayController::UpdateStatuses() {
+    if(!is_initialized_)
+        return;
+
     if(statuses_.empty()) {
         StartAnimation();
 
