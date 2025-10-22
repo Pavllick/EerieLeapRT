@@ -23,6 +23,7 @@ private:
     std::unique_ptr<Mdf4File> mdf4_file_;
     std::unordered_map<uint32_t, std::unique_ptr<DataRecord>> records_;
     std::streambuf* stream_;
+    system_clock::time_point start_time_;
 
 public:
     Mdf4LoggerSensorReading(std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> sensors);

@@ -49,6 +49,7 @@ const char* Mdf4LoggerSensorReading::GetFileExtension() const {
 
 bool Mdf4LoggerSensorReading::StartLogging(std::streambuf& stream, const system_clock::time_point& start_time) {
     stream_ = &stream;
+    start_time_ = start_time;
 
     mdf4_file_->UpdateCurrentTime(start_time);
     mdf4_file_->WriteFileToStream(*stream_);
@@ -70,7 +71,7 @@ bool Mdf4LoggerSensorReading::LogReading(const system_clock::time_point& time, c
         return false;
 
     auto record = records_[reading.sensor->id_hash].get();
-    uint32_t time_ms = TimeHelpers::ToUint32(time);
+    float time_delta_s = (TimeHelpers::ToUint32(time) - TimeHelpers::ToUint32(start_time_)) / 1000.0F;
     float value = reading.value.value();
 
     if(reading.sensor->configuration.expression_evaluator != nullptr
@@ -89,9 +90,9 @@ bool Mdf4LoggerSensorReading::LogReading(const system_clock::time_point& time, c
                 raw_value = raw_value_data.value() ? 1.0F : 0.0F;
         }
 
-        record->WriteToStream(*stream_, {&time_ms, &value, &raw_value});
+        record->WriteToStream(*stream_, {&time_delta_s, &value, &raw_value});
     } else {
-        record->WriteToStream(*stream_, {&time_ms, &value});
+        record->WriteToStream(*stream_, {&time_delta_s, &value});
     }
 
     return true;
