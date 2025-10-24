@@ -22,14 +22,14 @@ if(NOT EXISTS "${CMAKE_SOURCE_DIR}/../modules/boost/b2")
         message(FATAL_ERROR "Failed to build Boost headers and tools")
     endif()
 
-    message(STATUS "Extracting Boost.Spirit.X3 headers...")
+    message(STATUS "Extracting Boost.Spirit.X3 and Boost.Fusion headers...")
     execute_process(
-        COMMAND ${CMAKE_SOURCE_DIR}/../modules/boost/dist/bin/bcp boost/spirit/home/x3.hpp ${CMAKE_SOURCE_DIR}/include
+        COMMAND ${CMAKE_SOURCE_DIR}/../modules/boost/dist/bin/bcp boost/spirit boost/fusion ${CMAKE_SOURCE_DIR}/include/boost
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/../modules/boost
         RESULT_VARIABLE BCP_RESULT
     )
     if(NOT BCP_RESULT EQUAL 0)
-        message(FATAL_ERROR "Failed to extract Boost.Spirit.X3 headers")
+        message(FATAL_ERROR "Failed to extract Boost.Spirit.X3 and Boost.Fusion headers")
     endif()
 endif()
 
@@ -84,9 +84,10 @@ file(GLOB_RECURSE APP_SOURCES
 
 # Include headers
 target_include_directories(app PRIVATE
+  include/boost
   src
   src/libs/muparser/include
-  include
+  src/libs/dbcppp/include
 )
 
 # Add sources to the app target

@@ -1,5 +1,4 @@
 #include <memory>
-#include <ctime>
 #include <zephyr/arch/cpu.h>
 #include <zephyr/logging/log.h>
 

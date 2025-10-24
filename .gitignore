@@ -29,7 +29,7 @@ __pycache__/
 /tools
 
 #libs
-/models
+/modules
 /app/include
 
 # boost
