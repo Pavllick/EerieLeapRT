@@ -6,6 +6,8 @@
 #include <boost/fusion/include/io.hpp>
 #include <boost/variant/apply_visitor.hpp>
 
+#include "dbc_logger.h"
+
 #include "NetworkImpl.h"
 #include "DBCX3.h"
 
@@ -461,8 +463,11 @@ namespace dbcppp::DBCX3::Grammar
     struct TagNetworkContainer              : error_handler, annotate_on_success {};
 }
 
-struct NetworkBuilder : boost::static_visitor<>
-{
+namespace dbcppp::DBCX3 {
+
+LOG_MODULE_DECLARE(dbc_logger);
+
+struct NetworkBuilder : boost::static_visitor<> {
     dbcppp::DBCX3::AST::G_Network& net;
 
     NetworkBuilder(dbcppp::DBCX3::AST::G_Network& n) : net(n) {}
@@ -487,19 +492,34 @@ struct NetworkBuilder : boost::static_visitor<>
     void operator()(const dbcppp::DBCX3::AST::G_SignalMultiplexerValue& smv) { net.signal_multiplexer_values.push_back(smv); }
 };
 
-std::optional<dbcppp::DBCX3::AST::G_Network> dbcppp::DBCX3::ParseFromMemory(const char* begin, const char* end)
-{
+class error_streambuf : public std::streambuf {
+public:
+    int overflow(int c) override {
+        if(c != EOF) {
+            buffer += static_cast<char>(c);
+            if(c == '\n') {
+                LOG_DBG("DBC Parser: %s", buffer.c_str());
+                buffer.clear();
+            }
+        }
+
+        return c;
+    }
+
+private:
+    std::string buffer;
+};
+
+std::optional<AST::G_Network> ParseFromMemory(const char* begin, const char* end) {
     using boost::spirit::x3::with;
     using boost::spirit::x3::error_handler_tag;
     using boost::spirit::x3::phrase_parse;
     using error_handler_type = boost::spirit::x3::error_handler<const char*>;
-    class nullbuf : public std::streambuf {
-        int overflow(int c) { return c; }
-    };
-    static nullbuf null_buffer;
-    static std::ostream null_stream(&null_buffer);
 
-    error_handler_type error_handler(begin, end, null_stream);
+    static error_streambuf error_buffer;
+    static std::ostream error_stream(&error_buffer);
+
+    error_handler_type error_handler(begin, end, error_stream);
 
     auto const parser =
         with<error_handler_tag>(std::ref(error_handler))
@@ -507,18 +527,17 @@ std::optional<dbcppp::DBCX3::AST::G_Network> dbcppp::DBCX3::ParseFromMemory(cons
             Grammar::network_container
         ];
 
-    AST::G_NetworkContainer temp;
+    AST::G_NetworkContainer network_container;
     auto iter = begin;
 
-    if (phrase_parse(iter, end, parser, Grammar::skipper, temp) && iter == end)
-    {
+    if(phrase_parse(iter, end, parser, Grammar::skipper, network_container) && iter == end) {
         // Build the final network structure
         AST::G_Network gnet;
-        gnet.version = temp.version;
-        gnet.new_symbols = temp.new_symbols;
+        gnet.version = network_container.version;
+        gnet.new_symbols = network_container.new_symbols;
 
         NetworkBuilder builder(gnet);
-        for (auto& elem : temp.elements) {
+        for(auto& elem : network_container.elements) {
             boost::apply_visitor(builder, elem);
         }
 
@@ -527,3 +546,5 @@ std::optional<dbcppp::DBCX3::AST::G_Network> dbcppp::DBCX3::ParseFromMemory(cons
 
     return std::nullopt;
 }
+
+} // namespace dbcppp::DBCX3

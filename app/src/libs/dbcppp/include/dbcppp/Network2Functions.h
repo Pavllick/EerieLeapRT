@@ -11,10 +11,6 @@
 
 namespace dbcppp
 {
-    namespace Network2C
-    {
-        DBCPPP_API std::ostream& operator<<(std::ostream& os, const INetwork& net);
-    }
     namespace Network2DBC
     {
         using na_t = std::tuple<const INetwork&, const IAttribute&>;

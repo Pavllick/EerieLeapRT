@@ -7,7 +7,6 @@
 #include <boost/variant.hpp>
 
 #include "dbcppp/Network.h"
-#include "dbcppp/CApi.h"
 
 #include "dbc_logger.h"
 
@@ -889,13 +888,4 @@ std::unique_ptr<INetwork> INetwork::LoadDBCFromIs(std::istream& is)
         network = DBCAST2Network(*gnet);
     }
     return network;
-}
-extern "C"
-{
-    DBCPPP_API const dbcppp_Network* dbcppp_NetworkLoadDBCFromMemory(const char* data)
-    {
-        std::istringstream iss(data);
-        auto net = INetwork::LoadDBCFromIs(iss);
-        return reinterpret_cast<const dbcppp_Network*>(net.release());
-    }
 }
