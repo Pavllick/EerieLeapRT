@@ -61,13 +61,13 @@ ZTEST(expression_evaluator, test_Evaluate_empty_expression_throws_exception) {
 
 ZTEST(expression_evaluator, test_multiple_ExpressionEvaluator_eval_correctly) {
     auto math_parser_service = std::make_shared<MathParserService>();
-    ExpressionEvaluator expression_evaluator1(math_parser_service, "({x} + {y}) * 4");
-    ExpressionEvaluator expression_evaluator2(math_parser_service, "({x} - 8 * {var_d}) / {f}");
+    ExpressionEvaluator expression_evaluator_1(math_parser_service, "({x} + {y}) * 4");
+    ExpressionEvaluator expression_evaluator_2(math_parser_service, "({x} - 8 * {var_d}) / {f}");
 
     std::unordered_map<std::string, float*> vars1;
     float y = 2.0;
     vars1["y"] = &y;
-    float res1 = expression_evaluator1.Evaluate(vars1, 8.0);
+    float res1 = expression_evaluator_1.Evaluate(vars1, 8.0);
     zassert_equal(res1, 40.0);
 
     std::unordered_map<std::string, float*> vars2;
@@ -75,47 +75,47 @@ ZTEST(expression_evaluator, test_multiple_ExpressionEvaluator_eval_correctly) {
     vars2["var_d"] = &var_d;
     float f = 2.0;
     vars2["f"] = &f;
-    float res2 = expression_evaluator2.Evaluate(vars2, 80.0);
+    float res2 = expression_evaluator_2.Evaluate(vars2, 80.0);
     zassert_equal(res2, 32.0);
 }
 
 ZTEST(expression_evaluator, test_GetExpression_returns_sanitized_expression) {
     auto math_parser_service = std::make_shared<MathParserService>();
-    ExpressionEvaluator expression_evaluator1(math_parser_service, "(x + {y}) * 4");
-    ExpressionEvaluator expression_evaluator2(math_parser_service, "({x} - 8 * {var_d}) / {f}");
+    ExpressionEvaluator expression_evaluator_1(math_parser_service, "(x + {y}) * 4");
+    ExpressionEvaluator expression_evaluator_2(math_parser_service, "({x} - 8 * {var_d}) / {f}");
 
-    zassert_equal(*expression_evaluator1.GetExpression(), "(x+y)*4");
-    zassert_equal(*expression_evaluator2.GetExpression(), "(x-8*var_d)/f");
+    zassert_equal(expression_evaluator_1.GetExpression(), "(x+y)*4");
+    zassert_equal(expression_evaluator_2.GetExpression(), "(x-8*var_d)/f");
 }
 
 ZTEST(expression_evaluator, test_GetRawExpression_returns_original_expression) {
     auto math_parser_service = std::make_shared<MathParserService>();
-    ExpressionEvaluator expression_evaluator1(math_parser_service, "(x + {y}) * 4");
-    ExpressionEvaluator expression_evaluator2(math_parser_service, "({x} - 8 * {var_d}) / {f}");
+    ExpressionEvaluator expression_evaluator_1(math_parser_service, "(x + {y}) * 4");
+    ExpressionEvaluator expression_evaluator_2(math_parser_service, "({x} - 8 * {var_d}) / {f}");
 
-    zassert_equal(*expression_evaluator1.GetRawExpression(), "(x + {y}) * 4");
-    zassert_equal(*expression_evaluator2.GetRawExpression(), "({x} - 8 * {var_d}) / {f}");
+    zassert_equal(expression_evaluator_1.GetRawExpression(), "(x + {y}) * 4");
+    zassert_equal(expression_evaluator_2.GetRawExpression(), "({x} - 8 * {var_d}) / {f}");
 }
 
 ZTEST(expression_evaluator, test_ExtractVariables_returns_list_of_vars) {
     auto math_parser_service = std::make_shared<MathParserService>();
-    ExpressionEvaluator expression_evaluator1(math_parser_service, "");
-    ExpressionEvaluator expression_evaluator2(math_parser_service, "x - 16");
-    ExpressionEvaluator expression_evaluator3(math_parser_service, "(x + {y}) * 4");
-    ExpressionEvaluator expression_evaluator4(math_parser_service, "({x} - 8 * {var_d}) / {f}");
+    ExpressionEvaluator expression_evaluator_1(math_parser_service, "");
+    ExpressionEvaluator expression_evaluator_2(math_parser_service, "x - 16");
+    ExpressionEvaluator expression_evaluator_3(math_parser_service, "(x + {y}) * 4");
+    ExpressionEvaluator expression_evaluator_4(math_parser_service, "({x} - 8 * {var_d}) / {f}");
 
-    auto vars1 = expression_evaluator2.ExtractVariables();
+    auto vars1 = expression_evaluator_1.GetVariables();
     zassert_equal(vars1.size(), 0);
 
-    auto vars2 = expression_evaluator2.ExtractVariables();
+    auto vars2 = expression_evaluator_2.GetVariables();
     zassert_equal(vars2.size(), 0);
 
-    auto vars3 = expression_evaluator3.ExtractVariables();
+    auto vars3 = expression_evaluator_3.GetVariables();
     zassert_equal(vars3.size(), 1);
     zassert_equal(vars3.count("x"), 0);
     zassert_equal(vars3.count("y"), 1);
 
-    auto vars4 = expression_evaluator4.ExtractVariables();
+    auto vars4 = expression_evaluator_4.GetVariables();
     zassert_equal(vars4.size(), 2);
     zassert_equal(vars4.count("x"), 0);
     zassert_equal(vars4.count("var_d"), 1);

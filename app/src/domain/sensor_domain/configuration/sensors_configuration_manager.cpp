@@ -99,7 +99,7 @@ bool SensorsConfigurationManager::Update(const std::vector<std::shared_ptr<Senso
 
         if(sensor->configuration.expression_evaluator != nullptr) {
             sensor_config->configuration.expression_present = true;
-            sensor_config->configuration.expression = CborHelpers::ToZcborString(sensor->configuration.expression_evaluator->GetRawExpression());
+            sensor_config->configuration.expression = CborHelpers::ToZcborString(&sensor->configuration.expression_evaluator->GetRawExpression());
         } else {
             sensor_config->configuration.expression_present = false;
         }

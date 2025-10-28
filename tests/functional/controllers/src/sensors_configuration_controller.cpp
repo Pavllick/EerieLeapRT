@@ -168,7 +168,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
         if(saved_sensor->configuration.voltage_interpolator != nullptr || sensors[i]->configuration.voltage_interpolator != nullptr)
             zassert_true(saved_sensor->configuration.voltage_interpolator->GetInterpolationMethod() == sensors[i]->configuration.voltage_interpolator->GetInterpolationMethod());
         if(saved_sensor->configuration.expression_evaluator != nullptr || sensors[i]->configuration.expression_evaluator != nullptr)
-            zassert_true(*saved_sensor->configuration.expression_evaluator->GetExpression() == *sensors[i]->configuration.expression_evaluator->GetExpression());
+            zassert_true(saved_sensor->configuration.expression_evaluator->GetExpression() == sensors[i]->configuration.expression_evaluator->GetExpression());
     }
 }
 
@@ -218,7 +218,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
         if(saved_sensor->configuration.voltage_interpolator != nullptr || sensors[i]->configuration.voltage_interpolator != nullptr)
             zassert_true(saved_sensor->configuration.voltage_interpolator->GetInterpolationMethod() == sensors[i]->configuration.voltage_interpolator->GetInterpolationMethod());
         if(saved_sensor->configuration.expression_evaluator != nullptr || sensors[i]->configuration.expression_evaluator != nullptr)
-            zassert_true(*saved_sensor->configuration.expression_evaluator->GetExpression() == *sensors[i]->configuration.expression_evaluator->GetExpression());
+            zassert_true(saved_sensor->configuration.expression_evaluator->GetExpression() == sensors[i]->configuration.expression_evaluator->GetExpression());
     }
 }
 

@@ -15,7 +15,9 @@ using namespace mu;
 
 ExpressionEvaluator::ExpressionEvaluator(std::shared_ptr<MathParserService> math_parser_service, const std::string& expression_raw)
     : math_parser_service_(std::move(math_parser_service)), expression_raw_(expression_raw) {
+
     expression_ = UnwrapVariables();
+    variables_ = ExtractVariables();
 }
 
 float ExpressionEvaluator::Evaluate(const std::unordered_map<std::string, float*>& variables, std::optional<float> x) const {
@@ -27,8 +29,12 @@ float ExpressionEvaluator::Evaluate(const std::unordered_map<std::string, float*
     if(x.has_value())
         math_parser_service_->DefineVariable("x", &x.value());
 
-    for(const auto& [key, value]: variables)
-        math_parser_service_->DefineVariable(key, value);
+    for(const auto& variable : variables_) {
+        if(!variables.contains(variable))
+            throw std::runtime_error("Variable '" + variable + "' required for evaluation not found.");
+
+        math_parser_service_->DefineVariable(variable, variables.at(variable));
+    }
 
     float res = math_parser_service_->Evaluate();
 

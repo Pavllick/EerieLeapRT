@@ -70,7 +70,7 @@ int SensorsApiController::sensors_config_get_handler(http_client_ctx *client, en
                     .interpolation_method = GetInterpolationMethodName(interpolation_method),
                     .calibration_table_len = calibration_table.size(),
                     .expression = sensor->configuration.expression_evaluator != nullptr
-                        ? sensor->configuration.expression_evaluator->GetRawExpression()->c_str()
+                        ? sensor->configuration.expression_evaluator->GetRawExpression().c_str()
                         : ""
                 }
             };

@@ -31,7 +31,7 @@ Mdf4LoggerSensorReading::Mdf4LoggerSensorReading(std::shared_ptr<std::vector<std
             && (sensor->configuration.type == SensorType::PHYSICAL_ANALOG
                 || sensor->configuration.type == SensorType::PHYSICAL_INDICATOR)) {
 
-            auto conversion = mdf4::ChannelConversionBlock::CreateAlgebraicConversion(*sensor->configuration.expression_evaluator->GetExpression());
+            auto conversion = mdf4::ChannelConversionBlock::CreateAlgebraicConversion(sensor->configuration.expression_evaluator->GetExpression());
 
             auto channel_raw = mdf4_file_->CreateDataChannel(*channel_group, MdfDataType::Float32, "raw_value", "");
             channel_raw->SetConversion(std::make_shared<mdf4::ChannelConversionBlock>(conversion));
