@@ -101,60 +101,76 @@ std::vector<std::shared_ptr<Sensor>> SetupTestSensors(std::shared_ptr<MathParser
         }
     };
 
+    Sensor sensor_4 {
+        .id = "sensor_4",
+        .metadata = {
+            .name = "Sensor 4",
+            .unit = "km/h",
+            .description = "Test Sensor 4"
+        },
+        .configuration = {
+            .type = SensorType::PHYSICAL_ANALOG,
+            .channel = 2,
+            .sampling_rate_ms = 2000,
+            .voltage_interpolator = std::make_shared<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
+        }
+    };
+
     std::vector<std::shared_ptr<Sensor>> sensors = {
         std::make_shared<Sensor>(sensor_1),
         std::make_shared<Sensor>(sensor_2),
-        std::make_shared<Sensor>(sensor_3)
+        std::make_shared<Sensor>(sensor_3),
+        std::make_shared<Sensor>(sensor_4)
     };
 
     return sensors;
 }
 
-// ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_config_successfully_saved) {
-//     DtFs::InitInternalFs();
-//     auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
+ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_config_successfully_saved) {
+    DtFs::InitInternalFs();
+    auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
 
-//     fs_service->Format();
+    fs_service->Format();
 
-//     auto sensors_configuration_service = make_unique_ext<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
+    auto sensors_configuration_service = make_unique_ext<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
 
-//     auto math_parser_service = std::make_shared<MathParserService>();
-//     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(math_parser_service, std::move(sensors_configuration_service), 16);
+    auto math_parser_service = std::make_shared<MathParserService>();
+    auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(math_parser_service, std::move(sensors_configuration_service), 16);
 
-//     auto sensors = SetupTestSensors(math_parser_service);
-//     sensors_configuration_manager->Update(sensors);
+    auto sensors = SetupTestSensors(math_parser_service);
+    sensors_configuration_manager->Update(sensors);
 
-//     auto saved_sensors = *sensors_configuration_manager->Get();
+    auto saved_sensors = *sensors_configuration_manager->Get();
 
-//     zassert_equal(saved_sensors.size(), sensors.size());
+    zassert_equal(saved_sensors.size(), sensors.size());
 
-//     for(size_t i = 0; i < sensors.size(); ++i) {
-//         std::shared_ptr<Sensor> saved_sensor = nullptr;
-//         for(size_t j = 0; j < saved_sensors.size(); ++j) {
-//             if(strcmp(saved_sensors[j]->id.c_str(), sensors[i]->id.c_str()) == 0) {
-//                 saved_sensor = saved_sensors[j];
-//                 break;
-//             }
-//         }
-//         zassert_true(saved_sensor != nullptr);
+    for(size_t i = 0; i < sensors.size(); ++i) {
+        std::shared_ptr<Sensor> saved_sensor = nullptr;
+        for(size_t j = 0; j < saved_sensors.size(); ++j) {
+            if(strcmp(saved_sensors[j]->id.c_str(), sensors[i]->id.c_str()) == 0) {
+                saved_sensor = saved_sensors[j];
+                break;
+            }
+        }
+        zassert_true(saved_sensor != nullptr);
 
-//         zassert_true(saved_sensor->metadata.name == sensors[i]->metadata.name);
-//         zassert_true(saved_sensor->metadata.unit == sensors[i]->metadata.unit);
-//         zassert_true(saved_sensor->metadata.description == sensors[i]->metadata.description);
+        zassert_true(saved_sensor->metadata.name == sensors[i]->metadata.name);
+        zassert_true(saved_sensor->metadata.unit == sensors[i]->metadata.unit);
+        zassert_true(saved_sensor->metadata.description == sensors[i]->metadata.description);
 
-//         zassert_true(saved_sensor->configuration.type == sensors[i]->configuration.type);
-//         if(saved_sensor->configuration.channel.has_value() && sensors[i]->configuration.channel.has_value()) {
-//             zassert_true(saved_sensor->configuration.channel.value() == sensors[i]->configuration.channel.value());
-//         } else {
-//             zassert_true(!saved_sensor->configuration.channel.has_value() && !sensors[i]->configuration.channel.has_value());
-//         }
-//         zassert_true(saved_sensor->configuration.sampling_rate_ms == sensors[i]->configuration.sampling_rate_ms);
-//         if(saved_sensor->configuration.voltage_interpolator != nullptr || sensors[i]->configuration.voltage_interpolator != nullptr)
-//             zassert_true(saved_sensor->configuration.voltage_interpolator->GetInterpolationMethod() == sensors[i]->configuration.voltage_interpolator->GetInterpolationMethod());
-//         if(saved_sensor->configuration.expression_evaluator != nullptr || sensors[i]->configuration.expression_evaluator != nullptr)
-//             zassert_true(*saved_sensor->configuration.expression_evaluator->GetExpression() == *sensors[i]->configuration.expression_evaluator->GetExpression());
-//     }
-// }
+        zassert_true(saved_sensor->configuration.type == sensors[i]->configuration.type);
+        if(saved_sensor->configuration.channel.has_value() && sensors[i]->configuration.channel.has_value()) {
+            zassert_true(saved_sensor->configuration.channel.value() == sensors[i]->configuration.channel.value());
+        } else {
+            zassert_true(!saved_sensor->configuration.channel.has_value() && !sensors[i]->configuration.channel.has_value());
+        }
+        zassert_true(saved_sensor->configuration.sampling_rate_ms == sensors[i]->configuration.sampling_rate_ms);
+        if(saved_sensor->configuration.voltage_interpolator != nullptr || sensors[i]->configuration.voltage_interpolator != nullptr)
+            zassert_true(saved_sensor->configuration.voltage_interpolator->GetInterpolationMethod() == sensors[i]->configuration.voltage_interpolator->GetInterpolationMethod());
+        if(saved_sensor->configuration.expression_evaluator != nullptr || sensors[i]->configuration.expression_evaluator != nullptr)
+            zassert_true(*saved_sensor->configuration.expression_evaluator->GetExpression() == *sensors[i]->configuration.expression_evaluator->GetExpression());
+    }
+}
 
 ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_config_and_Load) {
     DtFs::InitInternalFs();
@@ -170,38 +186,189 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
     auto sensors = SetupTestSensors(math_parser_service);
     sensors_configuration_manager->Update(sensors);
 
-    // sensors_configuration_service = make_unique_ext<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
-    // sensors_configuration_manager = nullptr;
-    // sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(math_parser_service, std::move(sensors_configuration_service), 16);
+    sensors_configuration_service = make_unique_ext<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
+    sensors_configuration_manager = nullptr;
+    sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(math_parser_service, std::move(sensors_configuration_service), 16);
 
-    // auto saved_sensors = *sensors_configuration_manager->Get();
+    auto saved_sensors = *sensors_configuration_manager->Get();
 
-    // zassert_equal(saved_sensors.size(), sensors.size());
+    zassert_equal(saved_sensors.size(), sensors.size());
 
-    // for(size_t i = 0; i < sensors.size(); ++i) {
-    //     std::shared_ptr<Sensor> saved_sensor = nullptr;
-    //     for(size_t j = 0; j < saved_sensors.size(); ++j) {
-    //         if(strcmp(saved_sensors[j]->id.c_str(), sensors[i]->id.c_str()) == 0) {
-    //             saved_sensor = saved_sensors[j];
-    //             break;
-    //         }
-    //     }
-    //     zassert_true(saved_sensor != nullptr);
+    for(size_t i = 0; i < sensors.size(); ++i) {
+        std::shared_ptr<Sensor> saved_sensor = nullptr;
+        for(size_t j = 0; j < saved_sensors.size(); ++j) {
+            if(strcmp(saved_sensors[j]->id.c_str(), sensors[i]->id.c_str()) == 0) {
+                saved_sensor = saved_sensors[j];
+                break;
+            }
+        }
+        zassert_true(saved_sensor != nullptr);
 
-    //     zassert_true(saved_sensor->metadata.name == sensors[i]->metadata.name);
-    //     zassert_true(saved_sensor->metadata.unit == sensors[i]->metadata.unit);
-    //     zassert_true(saved_sensor->metadata.description == sensors[i]->metadata.description);
+        zassert_true(saved_sensor->metadata.name == sensors[i]->metadata.name);
+        zassert_true(saved_sensor->metadata.unit == sensors[i]->metadata.unit);
+        zassert_true(saved_sensor->metadata.description == sensors[i]->metadata.description);
 
-    //     zassert_true(saved_sensor->configuration.type == sensors[i]->configuration.type);
-    //     if(saved_sensor->configuration.channel.has_value() && sensors[i]->configuration.channel.has_value()) {
-    //         zassert_true(saved_sensor->configuration.channel.value() == sensors[i]->configuration.channel.value());
-    //     } else {
-    //         zassert_true(!saved_sensor->configuration.channel.has_value() && !sensors[i]->configuration.channel.has_value());
-    //     }
-    //     zassert_true(saved_sensor->configuration.sampling_rate_ms == sensors[i]->configuration.sampling_rate_ms);
-    //     if(saved_sensor->configuration.voltage_interpolator != nullptr || sensors[i]->configuration.voltage_interpolator != nullptr)
-    //         zassert_true(saved_sensor->configuration.voltage_interpolator->GetInterpolationMethod() == sensors[i]->configuration.voltage_interpolator->GetInterpolationMethod());
-    //     if(saved_sensor->configuration.expression_evaluator != nullptr || sensors[i]->configuration.expression_evaluator != nullptr)
-    //         zassert_true(*saved_sensor->configuration.expression_evaluator->GetExpression() == *sensors[i]->configuration.expression_evaluator->GetExpression());
-    // }
+        zassert_true(saved_sensor->configuration.type == sensors[i]->configuration.type);
+        if(saved_sensor->configuration.channel.has_value() && sensors[i]->configuration.channel.has_value()) {
+            zassert_true(saved_sensor->configuration.channel.value() == sensors[i]->configuration.channel.value());
+        } else {
+            zassert_true(!saved_sensor->configuration.channel.has_value() && !sensors[i]->configuration.channel.has_value());
+        }
+        zassert_true(saved_sensor->configuration.sampling_rate_ms == sensors[i]->configuration.sampling_rate_ms);
+        if(saved_sensor->configuration.voltage_interpolator != nullptr || sensors[i]->configuration.voltage_interpolator != nullptr)
+            zassert_true(saved_sensor->configuration.voltage_interpolator->GetInterpolationMethod() == sensors[i]->configuration.voltage_interpolator->GetInterpolationMethod());
+        if(saved_sensor->configuration.expression_evaluator != nullptr || sensors[i]->configuration.expression_evaluator != nullptr)
+            zassert_true(*saved_sensor->configuration.expression_evaluator->GetExpression() == *sensors[i]->configuration.expression_evaluator->GetExpression());
+    }
+}
+
+ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_config_valid_sensor_id) {
+    DtFs::InitInternalFs();
+    auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
+
+    fs_service->Format();
+
+    auto sensors_configuration_service = make_unique_ext<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
+
+    auto math_parser_service = std::make_shared<MathParserService>();
+    auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(math_parser_service, std::move(sensors_configuration_service), 16);
+
+    std::vector<CalibrationData> calibration_data_1 {
+        {0.0, 0.0},
+        {3.3, 100.0}
+    };
+    auto calibration_data_1_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_1);
+
+    auto sensor_1 = std::make_shared<Sensor>(Sensor {
+        .id = "sensor_1",
+        .metadata = {
+            .name = "Sensor 1",
+            .unit = "km/h",
+            .description = "Test Sensor 1"
+        },
+        .configuration = {
+            .type = SensorType::PHYSICAL_ANALOG,
+            .channel = 0,
+            .sampling_rate_ms = 100,
+            .voltage_interpolator = std::make_shared<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
+        }
+    });
+
+    auto sensor_2 = std::make_shared<Sensor>(Sensor {
+        .id = "_sensor_2",
+        .metadata = {
+            .name = "Sensor 2",
+            .unit = "km/h",
+            .description = "Test Sensor 2"
+        },
+        .configuration = {
+            .type = SensorType::PHYSICAL_ANALOG,
+            .channel = 0,
+            .sampling_rate_ms = 100,
+            .voltage_interpolator = std::make_shared<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
+        }
+    });
+
+    auto sensor_3 = std::make_shared<Sensor>(Sensor {
+        .id = "_",
+        .metadata = {
+            .name = "Sensor 3",
+            .unit = "km/h",
+            .description = "Test Sensor 3"
+        },
+        .configuration = {
+            .type = SensorType::PHYSICAL_ANALOG,
+            .channel = 0,
+            .sampling_rate_ms = 100,
+            .voltage_interpolator = std::make_shared<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
+        }
+    });
+
+    std::vector<std::shared_ptr<Sensor>> sensors {
+        sensor_1,
+        sensor_2,
+        sensor_3
+    };
+
+    for(auto sensor : sensors)
+        sensors_configuration_manager->Update({sensor});
+}
+
+ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_config_invalid_sensor_id) {
+    DtFs::InitInternalFs();
+    auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
+
+    fs_service->Format();
+
+    auto sensors_configuration_service = make_unique_ext<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
+
+    auto math_parser_service = std::make_shared<MathParserService>();
+    auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(math_parser_service, std::move(sensors_configuration_service), 16);
+
+    std::vector<CalibrationData> calibration_data_1 {
+        {0.0, 0.0},
+        {3.3, 100.0}
+    };
+    auto calibration_data_1_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_1);
+
+    auto sensor_1 = std::make_shared<Sensor>(Sensor {
+        .id = "1_sensor_1",
+        .metadata = {
+            .name = "Sensor 1",
+            .unit = "km/h",
+            .description = "Test Sensor 1"
+        },
+        .configuration = {
+            .type = SensorType::PHYSICAL_ANALOG,
+            .channel = 0,
+            .sampling_rate_ms = 100,
+            .voltage_interpolator = std::make_shared<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
+        }
+    });
+
+    auto sensor_2 = std::make_shared<Sensor>(Sensor {
+        .id = "#sensor_2",
+        .metadata = {
+            .name = "Sensor 2",
+            .unit = "km/h",
+            .description = "Test Sensor 2"
+        },
+        .configuration = {
+            .type = SensorType::PHYSICAL_ANALOG,
+            .channel = 0,
+            .sampling_rate_ms = 100,
+            .voltage_interpolator = std::make_shared<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
+        }
+    });
+
+    auto sensor_3 = std::make_shared<Sensor>(Sensor {
+        .id = "3",
+        .metadata = {
+            .name = "Sensor 3",
+            .unit = "km/h",
+            .description = "Test Sensor 3"
+        },
+        .configuration = {
+            .type = SensorType::PHYSICAL_ANALOG,
+            .channel = 0,
+            .sampling_rate_ms = 100,
+            .voltage_interpolator = std::make_shared<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
+        }
+    });
+
+    std::vector<std::shared_ptr<Sensor>> sensors {
+        sensor_1,
+        sensor_2,
+        sensor_3
+    };
+
+    for(auto sensor : sensors) {
+        try {
+            sensors_configuration_manager->Update({sensor});
+
+            zassert_true(false, "Save config expected to fail, but it didn't.");
+        } catch(...) {
+            zassert_true(true, "Save config failed as expected due to invalid sensor id.");
+        }
+    }
 }

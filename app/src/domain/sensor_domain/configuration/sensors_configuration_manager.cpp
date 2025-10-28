@@ -4,9 +4,10 @@
 
 #include "sensors_configuration_manager.h"
 #include "utilities/cbor/cbor_helpers.hpp"
-#include "domain/sensor_domain/utilities/sensors_order_resolver.h"
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
+#include "domain/sensor_domain/utilities/sensors_order_resolver.h"
+#include "domain/sensor_domain/utilities/sensor_helpers.h"
 
 namespace eerie_leap::domain::sensor_domain::configuration {
 
@@ -45,6 +46,9 @@ bool SensorsConfigurationManager::Update(const std::vector<std::shared_ptr<Senso
 
         auto sensor_config = make_shared_ext<SensorConfig>();
         memset(sensor_config.get(), 0, sizeof(SensorConfig));
+
+        if(!SensorHelpers::IsIdValid(sensor->id))
+            throw std::runtime_error("Invalid sensor ID.");
 
         sensor_config->id = CborHelpers::ToZcborString(&sensor->id);
         sensor_config->id_hash = static_cast<uint32_t>(string_hasher(sensor->id));

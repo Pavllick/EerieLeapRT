@@ -20,7 +20,7 @@ private:
 
     std::string SanitizeExpression(const std::string& expression) const;
     std::string UnwrapVariables() const;
-    bool isValidVariableName(const std::string& str) const;
+    bool IsValidVariableName(const std::string& str) const;
 
 public:
     ExpressionEvaluator(std::shared_ptr<MathParserService> math_parser_service, const std::string& expression);

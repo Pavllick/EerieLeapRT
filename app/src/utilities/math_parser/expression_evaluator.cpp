@@ -61,7 +61,13 @@ std::string ExpressionEvaluator::UnwrapVariables() const {
     return result;
 }
 
-bool ExpressionEvaluator::isValidVariableName(const std::string& str) const {
+bool ExpressionEvaluator::IsValidVariableName(const std::string& str) const {
+    if(str.empty())
+        return false;
+
+    if(!std::isalpha(str[0]) && str[0] != '_')
+        return false;
+
     return std::ranges::all_of(str, [](char c) {
         return std::isalnum(c) || c == '_';
     });
@@ -90,7 +96,7 @@ std::unordered_set<std::string> ExpressionEvaluator::ExtractVariables() const {
         if(var.empty() || var == "x")
             continue;
 
-        if(!isValidVariableName(var))
+        if(!IsValidVariableName(var))
             throw std::runtime_error("Invalid variable name");
 
         vars.insert(var);
