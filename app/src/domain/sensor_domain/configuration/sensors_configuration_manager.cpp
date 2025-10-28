@@ -115,6 +115,9 @@ bool SensorsConfigurationManager::Update(const std::vector<std::shared_ptr<Senso
         resolver.AddSensor(sensor);
     }
 
+    // Validate dependencies
+    resolver.GetProcessingOrder();
+
     LOG_INF("Saving sensors configuration.");
     bool res = sensors_configuration_service_->Save(sensors_config.get());
     if(!res)

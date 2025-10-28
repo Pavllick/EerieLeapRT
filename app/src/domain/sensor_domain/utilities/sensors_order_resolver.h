@@ -17,15 +17,15 @@ private:
     std::unordered_map<std::string, std::shared_ptr<Sensor>> sensors_;
 
     bool HasCyclicDependency(
-        const std::string& sensorId,
+        const std::string& sensor_id,
         std::unordered_set<std::string>& visited,
         std::unordered_set<std::string>& temp);
 
     void ResolveDependencies(
-        const std::string& sensorId,
+        const std::string& sensor_id,
         std::unordered_set<std::string>& visited,
         std::vector<std::shared_ptr<Sensor>>& ordered_sensors);
-    
+
 public:
     void AddSensor(std::shared_ptr<Sensor> sensor);
     std::vector<std::shared_ptr<Sensor>> GetProcessingOrder();

@@ -28,8 +28,8 @@ public:
             readings_values_[sensor_id] = &readings_[sensor_id]->value.value();
     }
 
-    std::shared_ptr<SensorReading> GetReading(const std::string& sensorId) const {
-        auto it = readings_.find(sensorId);
+    std::shared_ptr<SensorReading> GetReading(const std::string& sensor_id) const {
+        auto it = readings_.find(sensor_id);
         if (it != readings_.end())
             return it->second;
 
