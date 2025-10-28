@@ -19,14 +19,13 @@ class Mdf4LoggerSensorReading : public ILogger<SensorReading> {
 private:
     static constexpr uint8_t RECORD_ID_SIZE = 4;
 
-    std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> sensors_;
     std::unique_ptr<Mdf4File> mdf4_file_;
     std::unordered_map<uint32_t, std::unique_ptr<DataRecord>> records_;
     std::streambuf* stream_;
     system_clock::time_point start_time_;
 
 public:
-    Mdf4LoggerSensorReading(std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> sensors);
+    explicit Mdf4LoggerSensorReading(const std::vector<std::shared_ptr<Sensor>>& sensors);
     virtual ~Mdf4LoggerSensorReading() = default;
 
     const char* GetFileExtension() const override;

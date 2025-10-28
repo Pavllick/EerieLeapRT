@@ -10,7 +10,7 @@ LoggingController::LoggingController(
         sensors_configuration_manager_(std::move(sensors_configuration_manager)),
         display_controller_(std::move(display_controller)) {
 
-    logger_ = std::make_shared<Mdf4LoggerSensorReading>(sensors_configuration_manager_->Get());
+    logger_ = std::make_shared<Mdf4LoggerSensorReading>(*sensors_configuration_manager_->Get());
     log_writer_service_->SetLogger(logger_);
 }
 

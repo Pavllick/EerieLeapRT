@@ -25,7 +25,6 @@ SensorsConfigurationManager::SensorsConfigurationManager(
     math_parser_service_(std::move(math_parser_service)),
     sensors_configuration_service_(std::move(sensors_configuration_service)),
     sensors_config_(make_unique_ext<SensorsConfig>()),
-    ordered_sensors_(make_shared_ext<std::vector<std::shared_ptr<Sensor>>>()),
     adc_channel_count_(adc_channel_count) {
 
     if(Get(true) == nullptr)
@@ -128,9 +127,9 @@ bool SensorsConfigurationManager::Update(const std::vector<std::shared_ptr<Senso
     return true;
 }
 
-std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfigurationManager::Get(bool force_load) {
-    if(ordered_sensors_ != nullptr && !force_load)
-        return ordered_sensors_;
+const std::vector<std::shared_ptr<Sensor>>* SensorsConfigurationManager::Get(bool force_load) {
+    if(!sensors_.empty() && !force_load)
+        return &sensors_;
 
     auto sensors_config = sensors_configuration_service_->Load();
     if(!sensors_config.has_value())
@@ -138,7 +137,7 @@ std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfigurationManage
 
     sensors_config_raw_ = std::move(sensors_config.value().config_raw);
     sensors_config_ = std::move(sensors_config.value().config);
-    SensorsOrderResolver resolver;
+    std::vector<std::shared_ptr<Sensor>> sensors;
 
     for(size_t i = 0; i < sensors_config_->SensorConfig_m_count; ++i) {
         const auto& sensor_config = sensors_config_->SensorConfig_m[i];
@@ -197,12 +196,12 @@ std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> SensorsConfigurationManage
 
         sensor->metadata.description = CborHelpers::ToStdString(sensor_config.metadata.description);
 
-        resolver.AddSensor(sensor);
+        sensors.push_back(sensor);
     }
 
-    ordered_sensors_ = make_shared_ext<std::vector<std::shared_ptr<Sensor>>>(resolver.GetProcessingOrder());
+    sensors_ = sensors;
 
-    return ordered_sensors_;
+    return &sensors_;
 }
 
 const std::span<uint8_t> SensorsConfigurationManager::GetRaw() {

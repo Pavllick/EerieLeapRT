@@ -26,7 +26,6 @@
 #include "domain/user_com_domain/services/com_reading/com_reading_interface_service.h"
 #include "domain/user_com_domain/processors/com_reading_processor.h"
 
-#include "domain/sensor_domain/processors/sensor_processor.h"
 #include "domain/sensor_domain/services/processing_scheduler_service.h"
 #include "domain/sensor_domain/services/calibration_service.h"
 
@@ -244,8 +243,6 @@ int main(void) {
 
     auto sensor_readings_frame = make_shared_ext<SensorReadingsFrame>();
 
-    auto sensor_processor = make_shared_ext<SensorProcessor>(sensor_readings_frame);
-
     auto processing_scheduler_service = make_shared_ext<ProcessingSchedulerService>(
         time_service,
         guid_generator,
@@ -255,7 +252,6 @@ int main(void) {
         sensor_readings_frame);
     processing_scheduler_service->Initialize();
 
-    processing_scheduler_service->RegisterReadingProcessor(sensor_processor);
     if(com_reading_processor != nullptr)
     processing_scheduler_service->RegisterReadingProcessor(com_reading_processor);
     if(log_reading_processor != nullptr)

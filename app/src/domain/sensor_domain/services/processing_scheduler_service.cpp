@@ -5,6 +5,7 @@
 #include "utilities/memory/heap_allocator.h"
 #include "subsys/time/time_helpers.hpp"
 #include "domain/sensor_domain/models/sensor_type.h"
+#include "domain/sensor_domain/processors/sensor_processor.h"
 #include "domain/sensor_domain/processors/sensor_reader/i_sensor_reader.h"
 #include "domain/sensor_domain/processors/sensor_reader/sensor_reader_physical_analog.h"
 #include "domain/sensor_domain/processors/sensor_reader/sensor_reader_physical_indicator.h"
@@ -36,6 +37,7 @@ ProcessingSchedulerService::ProcessingSchedulerService(
     sensor_readings_frame_(std::move(sensor_readings_frame)),
     reading_processors_(std::make_shared<std::vector<std::shared_ptr<IReadingProcessor>>>()) {
 
+    reading_processors_->push_back(make_shared_ext<SensorProcessor>(sensor_readings_frame_));
     k_sem_init(&processing_semaphore_, 1, 1);
 };
 
@@ -141,7 +143,7 @@ void ProcessingSchedulerService::RegisterReadingProcessor(std::shared_ptr<IReadi
 }
 
 void ProcessingSchedulerService::Start() {
-    auto sensors = sensors_configuration_manager_->Get();
+    const auto* sensors = sensors_configuration_manager_->Get();
 
     for(const auto& sensor : *sensors) {
         LOG_INF("Creating task for sensor: %s", sensor->id.c_str());

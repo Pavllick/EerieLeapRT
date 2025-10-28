@@ -23,14 +23,14 @@ private:
     ext_unique_ptr<ConfigurationService<SensorsConfig>> sensors_configuration_service_;
     ext_unique_ptr<ExtVector> sensors_config_raw_;
     ext_unique_ptr<SensorsConfig> sensors_config_;
-    std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> ordered_sensors_;
+    std::vector<std::shared_ptr<Sensor>> sensors_;
     int adc_channel_count_;
 
 public:
     SensorsConfigurationManager(std::shared_ptr<MathParserService> math_parser_service, ext_unique_ptr<ConfigurationService<SensorsConfig>> sensors_configuration_service, int adc_channel_count);
 
     bool Update(const std::vector<std::shared_ptr<Sensor>>& sensors);
-    std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> Get(bool force_load = false);
+    const std::vector<std::shared_ptr<Sensor>>* Get(bool force_load = false);
     const std::span<uint8_t> GetRaw();
 };
 

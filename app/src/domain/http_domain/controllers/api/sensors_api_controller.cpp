@@ -38,7 +38,7 @@ int SensorsApiController::sensors_config_get_handler(http_client_ctx *client, en
     }
 
     if (status == HTTP_SERVER_DATA_FINAL) {
-        auto sensors_configuration = sensors_configuration_manager_->Get();
+        const auto* sensors_configuration = sensors_configuration_manager_->Get();
 
         std::vector<SensorJsonDto> sensors;
         for(const auto& sensor : *sensors_configuration) {

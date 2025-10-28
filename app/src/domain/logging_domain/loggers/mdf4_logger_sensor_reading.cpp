@@ -11,13 +11,13 @@ namespace eerie_leap::domain::logging_domain::loggers {
 
 using namespace eerie_leap::subsys::time;
 
-Mdf4LoggerSensorReading::Mdf4LoggerSensorReading(std::shared_ptr<std::vector<std::shared_ptr<Sensor>>> sensors)
-    : sensors_(std::move(sensors)), stream_(nullptr) {
+Mdf4LoggerSensorReading::Mdf4LoggerSensorReading(const std::vector<std::shared_ptr<Sensor>>& sensors)
+    : stream_(nullptr) {
 
     mdf4_file_ = std::make_unique<Mdf4File>(false);
     auto data_group = mdf4_file_->CreateDataGroup(RECORD_ID_SIZE);
 
-    for(auto& sensor : *sensors_) {
+    for(auto& sensor : sensors) {
         auto channel_group = mdf4_file_->CreateChannelGroup(*data_group, sensor->id_hash, sensor->id);
         auto source_information = std::make_shared<mdf4::SourceInformationBlock>(
             mdf4::SourceInformationBlock::SourceType::IoDevice,
