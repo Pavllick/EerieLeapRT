@@ -30,7 +30,6 @@
 #include "domain/sensor_domain/services/calibration_service.h"
 
 #include "domain/logging_domain/services/log_writer_service.h"
-#include "domain/logging_domain/processors/log_reading_processor.h"
 
 #include "configuration/system_config/system_config.h"
 #include "configuration/adc_config/adc_config.h"
@@ -86,7 +85,6 @@ using namespace eerie_leap::domain::sensor_domain::processors;
 using namespace eerie_leap::domain::sensor_domain::services;
 
 using namespace eerie_leap::domain::logging_domain::services;
-using namespace eerie_leap::domain::logging_domain::processors;
 
 using namespace eerie_leap::configuration::services;
 
@@ -194,17 +192,20 @@ int main(void) {
         std::move(sensors_config_service),
         adc_configuration_manager->Get()->GetChannelCount());
 
+    auto sensor_readings_frame = make_shared_ext<SensorReadingsFrame>();
+
     std::shared_ptr<LoggingController> logging_controller = nullptr;
-    std::shared_ptr<LogReadingProcessor> log_reading_processor = nullptr;
     if(sd_fs_service != nullptr) {
-        auto log_writer_service = make_shared_ext<LogWriterService>(sd_fs_service, time_service);
+        auto log_writer_service = make_shared_ext<LogWriterService>(
+            sd_fs_service,
+            time_service,
+            sensor_readings_frame);
         log_writer_service->Initialize();
 
         logging_controller = make_shared_ext<LoggingController>(
             log_writer_service,
             sensors_configuration_manager,
             display_controller);
-        log_reading_processor = make_shared_ext<LogReadingProcessor>(log_writer_service);
     }
 
     std::shared_ptr<ComPollingInterfaceService> com_polling_interface_service = nullptr;
@@ -241,8 +242,6 @@ int main(void) {
     // TODO: For test purposes only
     SetupTestSensors(math_parser_service, sensors_configuration_manager);
 
-    auto sensor_readings_frame = make_shared_ext<SensorReadingsFrame>();
-
     auto processing_scheduler_service = make_shared_ext<ProcessingSchedulerService>(
         time_service,
         guid_generator,
@@ -254,8 +253,6 @@ int main(void) {
 
     if(com_reading_processor != nullptr)
     processing_scheduler_service->RegisterReadingProcessor(com_reading_processor);
-    if(log_reading_processor != nullptr)
-        processing_scheduler_service->RegisterReadingProcessor(log_reading_processor);
 
     auto calibration_service = make_shared_ext<CalibrationService>(
         time_service,

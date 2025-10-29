@@ -57,24 +57,25 @@ void ProcessingSchedulerService::Initialize() {
 void ProcessingSchedulerService::ProcessSensorWorkTask(k_work* work) {
     SensorTask* task = CONTAINER_OF(work, SensorTask, work);
 
-    if(k_sem_take(task->processing_semaphore, PROCESSING_TIMEOUT) == 0) {
-        try {
-            task->reader->Read();
-            auto reading = task->readings_frame->GetReading(task->sensor->id);
-
-            for(auto processor : *task->reading_processors)
-                processor->ProcessReading(reading);
-
-            LOG_DBG("Sensor Reading - ID: %s, Guid: %llu, Value: %.3f, Time: %s",
-                task->sensor->id.c_str(),
-                reading->id.AsUint64(),
-                reading->value.value_or(0.0f),
-                TimeHelpers::GetFormattedString(*reading->timestamp).c_str());
-        } catch (const std::exception& e) {
-            LOG_ERR("Error processing sensor: %s, Error: %s", task->sensor->id.c_str(), e.what());
-        }
-    } else {
+    if(k_sem_take(task->processing_semaphore, PROCESSING_TIMEOUT) != 0) {
         LOG_ERR("Lock take timed out for sensor: %s", task->sensor->id.c_str());
+        return;
+    }
+
+    try {
+        task->reader->Read();
+        auto reading = task->readings_frame->GetReading(task->sensor->id);
+
+        for(auto processor : *task->reading_processors)
+            processor->ProcessReading(reading);
+
+        LOG_DBG("Sensor Reading - ID: %s, Guid: %llu, Value: %.3f, Time: %s",
+            task->sensor->id.c_str(),
+            reading->id.AsUint64(),
+            reading->value.value_or(0.0f),
+            TimeHelpers::GetFormattedString(*reading->timestamp).c_str());
+    } catch (const std::exception& e) {
+        LOG_ERR("Error processing sensor: %s, Error: %s", task->sensor->id.c_str(), e.what());
     }
 
     k_sem_give(task->processing_semaphore);

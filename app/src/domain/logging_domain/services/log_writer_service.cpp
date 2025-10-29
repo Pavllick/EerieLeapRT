@@ -17,8 +17,14 @@ using namespace eerie_leap::subsys::random;
 
 LOG_MODULE_REGISTER(log_writer_service_logger);
 
-LogWriterService::LogWriterService(std::shared_ptr<IFsService> fs_service, std::shared_ptr<ITimeService> time_service)
-    : fs_service_(std::move(fs_service)), time_service_(std::move(time_service)), logger_running_(ATOMIC_INIT(0)) {
+LogWriterService::LogWriterService(
+    std::shared_ptr<IFsService> fs_service,
+    std::shared_ptr<ITimeService> time_service,
+    std::shared_ptr<SensorReadingsFrame> sensor_readings_frame)
+        : fs_service_(std::move(fs_service)),
+        time_service_(std::move(time_service)),
+        sensor_readings_frame_(std::move(sensor_readings_frame)),
+        logger_running_(ATOMIC_INIT(0)) {
 
     k_sem_init(&processing_semaphore_, 1, 1);
 }
@@ -32,20 +38,6 @@ void LogWriterService::SetLogger(std::shared_ptr<ILogger<SensorReading>> logger)
     logger_ = std::move(logger);
 }
 
-int LogWriterService::LogReading(std::shared_ptr<SensorReading> reading) {
-    if(!atomic_get(&logger_running_))
-        return -1;
-
-    if(k_sem_count_get(&processing_semaphore_) == 0)
-        return -1;
-
-    task_->reading = std::move(reading);
-
-    k_work_submit_to_queue(&work_q, &task_->work);
-
-    return 0;
-}
-
 void LogWriterService::Initialize() {
     stack_area_ = k_thread_stack_alloc(k_stack_size_, 0);
     k_work_queue_init(&work_q);
@@ -54,9 +46,11 @@ void LogWriterService::Initialize() {
     k_thread_name_set(&work_q.thread, "log_writer_service");
 
     task_ = std::make_shared<LogWriterTask>();
+    task_->work_q = &work_q;
     task_->processing_semaphore = &processing_semaphore_;
     task_->time_service = time_service_;
-    k_work_init(&task_->work, LogReadingWorkTask);
+    task_->sensor_readings_frame = sensor_readings_frame_;
+    k_work_init_delayable(&task_->work, LogReadingWorkTask);
 
     LOG_INF("Log writer service initialized.");
 }
@@ -116,18 +110,19 @@ int LogWriterService::LogWriterStart() {
 
     LOG_INF("Logging started. Log file created: %s", file_name.c_str());
 
+    task_->logging_interval_ms = K_MSEC(LOGGING_INTERVAL_MS);
     task_->start_time = start_time;
     task_->logger = logger_;
 
     atomic_set(&logger_running_, 1);
+    k_work_schedule_for_queue(&work_q, &task_->work, K_NO_WAIT);
 
     return 0;
 }
 
 int LogWriterService::LogWriterStop() {
-    if(!atomic_get(&logger_running_))
-        return 0;
-
+    k_work_sync sync;
+    k_work_cancel_delayable_sync(&task_->work, &sync);
     atomic_set(&logger_running_, 0);
 
     logger_->StopLogging();
@@ -142,14 +137,20 @@ void LogWriterService::LogReadingWorkTask(k_work* work) {
     LogWriterTask* task = CONTAINER_OF(work, LogWriterTask, work);
 
     if(k_sem_take(task->processing_semaphore, SEMAPHORE_TIMEOUT) != 0) {
-        LOG_ERR("Log writer lock timed out for sensor: %s", task->reading->sensor->id.c_str());
+        LOG_ERR("Log writer lock timed out.");
         return;
     }
 
-    if(!task->logger->LogReading(task->reading->timestamp.value(), *task->reading))
-        LOG_ERR("Failed to log reading for sensor: %s", task->reading->sensor->id.c_str());
+    auto time_now = task->time_service->GetCurrentTime();
+    for(const auto& [sensor_id, reading] : task->sensor_readings_frame->GetReadings()) {
+        if(reading->status != ReadingStatus::PROCESSED)
+            continue;
+
+        task->logger->LogReading(time_now, *reading);
+    }
 
     k_sem_give(task->processing_semaphore);
+    k_work_reschedule_for_queue(task->work_q, &task->work, task->logging_interval_ms);
 }
 
 } // namespace eerie_leap::domain::logging_domain::services
