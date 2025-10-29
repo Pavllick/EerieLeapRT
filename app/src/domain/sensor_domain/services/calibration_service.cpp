@@ -6,7 +6,7 @@
 #include "utilities/memory/heap_allocator.h"
 #include "subsys/adc/utilities/adc_calibrator.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
-#include "domain/sensor_domain/processors/sensor_reader/sensor_reader_physical_analog_calibrator.h"
+#include "domain/sensor_domain/sensor_readers/sensor_reader_physical_analog_calibrator.h"
 #include "calibration_service.h"
 
 namespace eerie_leap::domain::sensor_domain::services {
@@ -14,7 +14,7 @@ namespace eerie_leap::domain::sensor_domain::services {
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::subsys::adc::utilities;
 using namespace eerie_leap::domain::sensor_domain::models;
-using namespace eerie_leap::domain::sensor_domain::processors::sensor_reader;
+using namespace eerie_leap::domain::sensor_domain::sensor_readers;
 
 LOG_MODULE_REGISTER(calibration_logger);
 
@@ -71,13 +71,12 @@ std::shared_ptr<SensorTask> CalibrationService::CreateCalibrationTask(int channe
     task->sensor = sensor;
     task->readings_frame = sensor_readings_frame;
 
-    auto sensor_reader = make_shared_ext<SensorReaderPhysicalAnalogCalibrator>(
+    task->reader = std::make_unique<SensorReaderPhysicalAnalogCalibrator>(
         time_service_,
         guid_generator_,
         sensor_readings_frame,
         sensor,
         adc_configuration_manager_);
-    task->reader = sensor_reader;
 
     return task;
 }

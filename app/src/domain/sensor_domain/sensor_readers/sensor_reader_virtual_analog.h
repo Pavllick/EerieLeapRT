@@ -9,7 +9,7 @@
 #include "domain/sensor_domain/models/sensor.h"
 #include "sensor_reader_base.h"
 
-namespace eerie_leap::domain::sensor_domain::processors::sensor_reader {
+namespace eerie_leap::domain::sensor_domain::sensor_readers {
 
 using namespace eerie_leap::subsys::adc;
 using namespace eerie_leap::domain::sensor_domain::configuration;
@@ -27,4 +27,4 @@ public:
     void Read() override;
 };
 
-} // namespace eerie_leap::domain::sensor_domain::processors::sensor_reader
+} // namespace eerie_leap::domain::sensor_domain::sensor_readers

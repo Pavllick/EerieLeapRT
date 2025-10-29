@@ -17,11 +17,11 @@
 #include "subsys/device_tree/dt_fs.h"
 #include "domain/sensor_domain/utilities/sensors_order_resolver.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
-#include "domain/sensor_domain/processors/sensor_reader/i_sensor_reader.h"
-#include "domain/sensor_domain/processors/sensor_reader/sensor_reader_physical_analog.h"
-#include "domain/sensor_domain/processors/sensor_reader/sensor_reader_physical_indicator.h"
-#include "domain/sensor_domain/processors/sensor_reader/sensor_reader_virtual_analog.h"
-#include "domain/sensor_domain/processors/sensor_reader/sensor_reader_virtual_indicator.h"
+#include "domain/sensor_domain/sensor_readers/i_sensor_reader.h"
+#include "domain/sensor_domain/sensor_readers/sensor_reader_physical_analog.h"
+#include "domain/sensor_domain/sensor_readers/sensor_reader_physical_indicator.h"
+#include "domain/sensor_domain/sensor_readers/sensor_reader_virtual_analog.h"
+#include "domain/sensor_domain/sensor_readers/sensor_reader_virtual_indicator.h"
 #include "domain/sensor_domain/processors/sensor_processor.h"
 
 #include "domain/sensor_domain/models/sensor.h"
@@ -40,7 +40,7 @@ using namespace eerie_leap::subsys::gpio;
 using namespace eerie_leap::subsys::time;
 
 using namespace eerie_leap::domain::sensor_domain::processors;
-using namespace eerie_leap::domain::sensor_domain::processors::sensor_reader;
+using namespace eerie_leap::domain::sensor_domain::sensor_readers;
 
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::domain::sensor_domain::utilities;

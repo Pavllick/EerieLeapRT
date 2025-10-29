@@ -21,22 +21,23 @@
 #include "subsys/time/rtc_provider.h"
 #include "subsys/time/boot_elapsed_time_provider.h"
 
-#include "domain/user_com_domain/user_com.h"
-#include "domain/user_com_domain/services/com_polling/com_polling_interface_service.h"
-#include "domain/user_com_domain/services/com_reading/com_reading_interface_service.h"
-
+#include "configuration/system_config/system_config.h"
+#include "configuration/adc_config/adc_config.h"
+#include "configuration/sensor_config/sensor_config.h"
+#include "configuration/services/configuration_service.h"
+#include "domain/system_domain/configuration/system_configuration_manager.h"
+#include "domain/sensor_domain/configuration/adc_configuration_manager.h"
+#include "domain/sensor_domain/configuration/sensors_configuration_manager.h"
+#include "domain/sensor_domain/sensor_readers/sensor_reader_factory.h"
 #include "domain/sensor_domain/services/processing_scheduler_service.h"
 #include "domain/sensor_domain/services/calibration_service.h"
 
 #include "domain/logging_domain/services/log_writer_service.h"
 
-#include "configuration/system_config/system_config.h"
-#include "configuration/adc_config/adc_config.h"
-#include "configuration/sensor_config/sensor_config.h"
-#include "configuration/services/configuration_service.h"
-#include "domain/sensor_domain/configuration/sensors_configuration_manager.h"
-#include "domain/sensor_domain/configuration/adc_configuration_manager.h"
-#include "domain/system_domain/configuration/system_configuration_manager.h"
+#include "domain/user_com_domain/user_com.h"
+#include "domain/user_com_domain/services/com_polling/com_polling_interface_service.h"
+#include "domain/user_com_domain/services/com_reading/com_reading_interface_service.h"
+
 #include "controllers/logging_controller.h"
 #include "controllers/com_polling_controller.h"
 #include "controllers/display_controller.h"
@@ -78,6 +79,7 @@ using namespace eerie_leap::configuration::services;
 
 using namespace eerie_leap::domain::system_domain::configuration;
 using namespace eerie_leap::domain::sensor_domain::services;
+using namespace eerie_leap::domain::sensor_domain::sensor_readers;
 using namespace eerie_leap::domain::user_com_domain;
 using namespace eerie_leap::domain::user_com_domain::services::com_reading;
 using namespace eerie_leap::domain::user_com_domain::services::com_polling;
@@ -234,13 +236,18 @@ int main(void) {
     // TODO: For test purposes only
     SetupTestSensors(math_parser_service, sensors_configuration_manager);
 
-    auto processing_scheduler_service = make_shared_ext<ProcessingSchedulerService>(
+    auto sensor_reader_factory = make_shared_ext<SensorReaderFactory>(
         time_service,
         guid_generator,
         gpio,
         adc_configuration_manager,
         sensors_configuration_manager,
         sensor_readings_frame);
+
+    auto processing_scheduler_service = make_shared_ext<ProcessingSchedulerService>(
+        sensors_configuration_manager,
+        sensor_readings_frame,
+        sensor_reader_factory);
     processing_scheduler_service->Initialize();
 
     auto calibration_service = make_shared_ext<CalibrationService>(

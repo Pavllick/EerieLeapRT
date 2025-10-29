@@ -1,16 +1,6 @@
-#include <vector>
-#include <zephyr/sys/util.h>
-#include <zephyr/kernel.h>
-
 #include "utilities/memory/heap_allocator.h"
 #include "subsys/time/time_helpers.hpp"
-#include "domain/sensor_domain/models/sensor_type.h"
 #include "domain/sensor_domain/processors/sensor_processor.h"
-#include "domain/sensor_domain/processors/sensor_reader/i_sensor_reader.h"
-#include "domain/sensor_domain/processors/sensor_reader/sensor_reader_physical_analog.h"
-#include "domain/sensor_domain/processors/sensor_reader/sensor_reader_physical_indicator.h"
-#include "domain/sensor_domain/processors/sensor_reader/sensor_reader_virtual_analog.h"
-#include "domain/sensor_domain/processors/sensor_reader/sensor_reader_virtual_indicator.h"
 
 #include "processing_scheduler_service.h"
 
@@ -18,24 +8,17 @@ namespace eerie_leap::domain::sensor_domain::services {
 
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::domain::sensor_domain::models;
-using namespace eerie_leap::domain::sensor_domain::processors::sensor_reader;
 
 LOG_MODULE_REGISTER(processing_scheduler_logger);
 
 ProcessingSchedulerService::ProcessingSchedulerService(
-    std::shared_ptr<ITimeService> time_service,
-    std::shared_ptr<GuidGenerator> guid_generator,
-    std::shared_ptr<IGpio> gpio,
-    std::shared_ptr<AdcConfigurationManager> adc_configuration_manager,
     std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager,
-    std::shared_ptr<SensorReadingsFrame> sensor_readings_frame)
-    : time_service_(std::move(time_service)),
-    guid_generator_(std::move(guid_generator)),
-    gpio_(std::move(gpio)),
-    adc_configuration_manager_(std::move(adc_configuration_manager)),
-    sensors_configuration_manager_(std::move(sensors_configuration_manager)),
-    sensor_readings_frame_(std::move(sensor_readings_frame)),
-    reading_processors_(std::make_shared<std::vector<std::shared_ptr<IReadingProcessor>>>()) {
+    std::shared_ptr<SensorReadingsFrame> sensor_readings_frame,
+    std::shared_ptr<SensorReaderFactory> sensor_reader_factory)
+        : sensors_configuration_manager_(std::move(sensors_configuration_manager)),
+        sensor_readings_frame_(std::move(sensor_readings_frame)),
+        sensor_reader_factory_(std::move(sensor_reader_factory)),
+        reading_processors_(std::make_shared<std::vector<std::shared_ptr<IReadingProcessor>>>()) {
 
     reading_processors_->push_back(make_shared_ext<SensorProcessor>(sensor_readings_frame_));
     k_sem_init(&processing_semaphore_, 1, 1);
@@ -91,39 +74,7 @@ std::shared_ptr<SensorTask> ProcessingSchedulerService::CreateSensorTask(std::sh
     task->readings_frame = sensor_readings_frame_;
     task->reading_processors = reading_processors_;
 
-    std::shared_ptr<ISensorReader> sensor_reader;
-
-    if(sensor->configuration.type == SensorType::PHYSICAL_ANALOG) {
-        sensor_reader = make_shared_ext<SensorReaderPhysicalAnalog>(
-            time_service_,
-            guid_generator_,
-            sensor_readings_frame_,
-            sensor,
-            adc_configuration_manager_);
-    } else if(sensor->configuration.type == SensorType::VIRTUAL_ANALOG) {
-        sensor_reader = make_shared_ext<SensorReaderVirtualAnalog>(
-            time_service_,
-            guid_generator_,
-            sensor_readings_frame_,
-            sensor);
-    } else if(sensor->configuration.type == SensorType::PHYSICAL_INDICATOR) {
-        sensor_reader = make_shared_ext<SensorReaderPhysicalIndicator>(
-            time_service_,
-            guid_generator_,
-            sensor_readings_frame_,
-            sensor,
-            gpio_);
-    } else if(sensor->configuration.type == SensorType::VIRTUAL_INDICATOR) {
-        sensor_reader = make_shared_ext<SensorReaderVirtualIndicator>(
-            time_service_,
-            guid_generator_,
-            sensor_readings_frame_,
-            sensor);
-    } else {
-        throw std::runtime_error("Unsupported sensor type");
-    }
-
-    task->reader = sensor_reader;
+    task->reader = sensor_reader_factory_->Create(sensor);
 
     return task;
 }
