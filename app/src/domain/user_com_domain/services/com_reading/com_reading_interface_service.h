@@ -2,14 +2,14 @@
 
 #include <memory>
 
-#include "domain/sensor_domain/models/sensor_reading.h"
+#include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 #include "domain/user_com_domain/user_com.h"
 
 #include "com_reading_task.hpp"
 
 namespace eerie_leap::domain::user_com_domain::services::com_reading {
 
-using namespace eerie_leap::domain::sensor_domain::models;
+using namespace eerie_leap::domain::sensor_domain::utilities;
 
 class ComReadingInterfaceService {
 private:
@@ -26,14 +26,16 @@ private:
     static void SendReadingWorkTask(k_work* work);
 
     std::shared_ptr<UserCom> user_com_;
+    std::shared_ptr<SensorReadingsFrame> sensor_readings_frame_;
+
+    // TODO: Make configurable
+    static constexpr int SENDING_INTERVAL_MS = 20;
 
 public:
-    explicit ComReadingInterfaceService(std::shared_ptr<UserCom> user_com);
+    explicit ComReadingInterfaceService(std::shared_ptr<UserCom> user_com, std::shared_ptr<SensorReadingsFrame> sensor_readings_frame);
     ~ComReadingInterfaceService();
 
     void Initialize();
-
-    int SendReading(std::shared_ptr<SensorReading> reading, uint8_t user_id = Modbus::SERVER_ID_ALL);
 };
 
 } // namespace eerie_leap::domain::user_com_domain::services::com_reading

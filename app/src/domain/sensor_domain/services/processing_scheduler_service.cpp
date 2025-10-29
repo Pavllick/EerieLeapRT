@@ -158,7 +158,7 @@ void ProcessingSchedulerService::Start() {
 }
 
 void ProcessingSchedulerService::Restart() {
-    struct k_work_sync sync;
+    k_work_sync sync;
 
     while(sensor_tasks_.size() > 0) {
         for(int i = 0; i < sensor_tasks_.size(); i++) {
@@ -179,7 +179,7 @@ void ProcessingSchedulerService::Restart() {
 }
 
 void ProcessingSchedulerService::Pause() {
-    struct k_work_sync sync;
+    k_work_sync sync;
     std::vector<std::shared_ptr<SensorTask>> sensor_tasks_temp;
     for(auto task : sensor_tasks_)
         sensor_tasks_temp.push_back(task);

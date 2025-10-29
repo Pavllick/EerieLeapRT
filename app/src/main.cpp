@@ -24,7 +24,6 @@
 #include "domain/user_com_domain/user_com.h"
 #include "domain/user_com_domain/services/com_polling/com_polling_interface_service.h"
 #include "domain/user_com_domain/services/com_reading/com_reading_interface_service.h"
-#include "domain/user_com_domain/processors/com_reading_processor.h"
 
 #include "domain/sensor_domain/services/processing_scheduler_service.h"
 #include "domain/sensor_domain/services/calibration_service.h"
@@ -75,18 +74,14 @@ using namespace eerie_leap::subsys::gpio;
 using namespace eerie_leap::subsys::cfb;
 using namespace eerie_leap::subsys::time;
 
-using namespace eerie_leap::domain::system_domain::configuration;
-
-using namespace eerie_leap::domain::user_com_domain;
-using namespace eerie_leap::domain::user_com_domain::services::com_polling;
-using namespace eerie_leap::domain::user_com_domain::processors;
-
-using namespace eerie_leap::domain::sensor_domain::processors;
-using namespace eerie_leap::domain::sensor_domain::services;
-
-using namespace eerie_leap::domain::logging_domain::services;
-
 using namespace eerie_leap::configuration::services;
+
+using namespace eerie_leap::domain::system_domain::configuration;
+using namespace eerie_leap::domain::sensor_domain::services;
+using namespace eerie_leap::domain::user_com_domain;
+using namespace eerie_leap::domain::user_com_domain::services::com_reading;
+using namespace eerie_leap::domain::user_com_domain::services::com_polling;
+using namespace eerie_leap::domain::logging_domain::services;
 
 using namespace eerie_leap::controllers;
 
@@ -210,7 +205,6 @@ int main(void) {
 
     std::shared_ptr<ComPollingInterfaceService> com_polling_interface_service = nullptr;
     std::shared_ptr<ComReadingInterfaceService> com_reading_interface_service = nullptr;
-    std::shared_ptr<ComReadingProcessor> com_reading_processor = nullptr;
     std::shared_ptr<ComPollingController> com_polling_controller = nullptr;
     if(DtModbus::Get() != nullptr) {
         auto modbus = make_shared_ext<Modbus>(DtModbus::Get());
@@ -228,10 +222,8 @@ int main(void) {
         com_polling_interface_service = make_shared_ext<ComPollingInterfaceService>(user_com_interface);
         com_polling_interface_service->Initialize();
 
-        com_reading_interface_service = make_shared_ext<ComReadingInterfaceService>(user_com_interface);
+        com_reading_interface_service = make_shared_ext<ComReadingInterfaceService>(user_com_interface, sensor_readings_frame);
         com_reading_interface_service->Initialize();
-
-        com_reading_processor = make_shared_ext<ComReadingProcessor>(com_reading_interface_service);
     
         if(logging_controller != nullptr) {
             com_polling_controller = make_shared_ext<ComPollingController>(user_com_interface, com_polling_interface_service, logging_controller);
@@ -250,9 +242,6 @@ int main(void) {
         sensors_configuration_manager,
         sensor_readings_frame);
     processing_scheduler_service->Initialize();
-
-    if(com_reading_processor != nullptr)
-    processing_scheduler_service->RegisterReadingProcessor(com_reading_processor);
 
     auto calibration_service = make_shared_ext<CalibrationService>(
         time_service,

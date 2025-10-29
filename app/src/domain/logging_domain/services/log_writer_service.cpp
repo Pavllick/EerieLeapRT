@@ -110,7 +110,7 @@ int LogWriterService::LogWriterStart() {
 
     LOG_INF("Logging started. Log file created: %s", file_name.c_str());
 
-    task_->logging_interval_ms = K_MSEC(LOGGING_INTERVAL_MS);
+    task_->logging_interval_ms = LOGGING_INTERVAL_MS;
     task_->start_time = start_time;
     task_->logger = logger_;
 
@@ -121,6 +121,9 @@ int LogWriterService::LogWriterStart() {
 }
 
 int LogWriterService::LogWriterStop() {
+    if(!atomic_get(&logger_running_))
+        return -1;
+
     k_work_sync sync;
     k_work_cancel_delayable_sync(&task_->work, &sync);
     atomic_set(&logger_running_, 0);
@@ -150,7 +153,7 @@ void LogWriterService::LogReadingWorkTask(k_work* work) {
     }
 
     k_sem_give(task->processing_semaphore);
-    k_work_reschedule_for_queue(task->work_q, &task->work, task->logging_interval_ms);
+    k_work_reschedule_for_queue(task->work_q, &task->work, K_MSEC(task->logging_interval_ms));
 }
 
 } // namespace eerie_leap::domain::logging_domain::services

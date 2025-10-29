@@ -101,7 +101,7 @@ void CalibrationService::Start(int channel) {
 }
 
 void CalibrationService::Stop() {
-    struct k_work_sync sync;
+    k_work_sync sync;
 
     while(calibration_task_ != nullptr) {
         bool res = k_work_cancel_delayable_sync(&calibration_task_->work, &sync);

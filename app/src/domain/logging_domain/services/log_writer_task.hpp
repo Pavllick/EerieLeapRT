@@ -22,7 +22,7 @@ struct LogWriterTask {
     k_work_q* work_q;
     k_work_delayable work;
     k_sem* processing_semaphore;
-    k_timeout_t logging_interval_ms;
+    int logging_interval_ms;
     std::shared_ptr<ITimeService> time_service;
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame;
     std::shared_ptr<ILogger<SensorReading>> logger;
