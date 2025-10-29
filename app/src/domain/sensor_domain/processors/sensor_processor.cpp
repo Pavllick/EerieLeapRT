@@ -29,7 +29,7 @@ void SensorProcessor::ProcessReading(std::shared_ptr<SensorReading> reading) {
 
             if(reading->sensor->configuration.expression_evaluator != nullptr) {
                 value = reading->sensor->configuration.expression_evaluator->Evaluate(
-                    readings_frame_->GetReadingsValues(),
+                    readings_frame_->GetReadingValues(),
                     value);
             }
 
@@ -37,7 +37,7 @@ void SensorProcessor::ProcessReading(std::shared_ptr<SensorReading> reading) {
             reading->status = ReadingStatus::PROCESSED;
         } else if(reading->sensor->configuration.type == SensorType::VIRTUAL_ANALOG) {
             reading->value = reading->sensor->configuration.expression_evaluator->Evaluate(
-                readings_frame_->GetReadingsValues());
+                readings_frame_->GetReadingValues());
             reading->status = ReadingStatus::PROCESSED;
         } else if(reading->sensor->configuration.type == SensorType::PHYSICAL_INDICATOR) {
             bool raw_value = reading->value.value();
@@ -45,7 +45,7 @@ void SensorProcessor::ProcessReading(std::shared_ptr<SensorReading> reading) {
 
             if(reading->sensor->configuration.expression_evaluator != nullptr) {
                 value = reading->sensor->configuration.expression_evaluator->Evaluate(
-                    readings_frame_->GetReadingsValues(),
+                    readings_frame_->GetReadingValues(),
                     value);
             }
 
@@ -53,7 +53,7 @@ void SensorProcessor::ProcessReading(std::shared_ptr<SensorReading> reading) {
             reading->status = ReadingStatus::PROCESSED;
         } else if(reading->sensor->configuration.type == SensorType::VIRTUAL_INDICATOR) {
             reading->value = reading->sensor->configuration.expression_evaluator->Evaluate(
-                readings_frame_->GetReadingsValues());
+                readings_frame_->GetReadingValues());
             reading->status = ReadingStatus::PROCESSED;
         } else {
             throw std::runtime_error("Unsupported sensor type");

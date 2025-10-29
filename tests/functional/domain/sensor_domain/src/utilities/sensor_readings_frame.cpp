@@ -237,7 +237,7 @@ ZTEST(sensor_readings_frame, test_GetReadings) {
     zassert_str_equal(fr_reading2->sensor->id.c_str(), "sensor_3");
 }
 
-ZTEST(sensor_readings_frame, test_GetReadingsValues) {
+ZTEST(sensor_readings_frame, test_GetReadingValues) {
     auto helper = sensor_readings_frame_GetHelperInstances();
 
     auto guid_generator = helper.guid_generator;
@@ -247,14 +247,17 @@ ZTEST(sensor_readings_frame, test_GetReadingsValues) {
 
     auto reading1 = std::make_shared<SensorReading>(guid_generator->Generate(), sensors[0]);
     reading1->value = 2.4;
+    reading1->status = ReadingStatus::PROCESSED;
     sensor_readings_frame->AddOrUpdateReading(reading1);
     auto reading2 = std::make_shared<SensorReading>(guid_generator->Generate(), sensors[1]);
+    reading2->status = ReadingStatus::ERROR;
     sensor_readings_frame->AddOrUpdateReading(reading2);
     auto reading3 = std::make_shared<SensorReading>(guid_generator->Generate(), sensors[2]);
     reading3->value = 2.6;
+    reading3->status = ReadingStatus::PROCESSED;
     sensor_readings_frame->AddOrUpdateReading(reading3);
 
-    auto readings = sensor_readings_frame->GetReadingsValues();
+    auto readings = sensor_readings_frame->GetReadingValues();
     zassert_equal(readings.size(), 2);
 
     float fr_reading1 = *readings.at("sensor_1");
@@ -273,27 +276,30 @@ ZTEST(sensor_readings_frame, test_ClearReadings) {
 
     auto readings = sensor_readings_frame->GetReadings();
     zassert_equal(readings.size(), 0);
-    auto reading_values = sensor_readings_frame->GetReadingsValues();
+    auto reading_values = sensor_readings_frame->GetReadingValues();
     zassert_equal(reading_values.size(), 0);
 
     auto reading1 = std::make_shared<SensorReading>(guid_generator->Generate(), sensors[0]);
     reading1->value = 2.4;
+    reading1->status = ReadingStatus::PROCESSED;
     sensor_readings_frame->AddOrUpdateReading(reading1);
     auto reading2 = std::make_shared<SensorReading>(guid_generator->Generate(), sensors[1]);
+    reading2->status = ReadingStatus::ERROR;
     sensor_readings_frame->AddOrUpdateReading(reading2);
     auto reading3 = std::make_shared<SensorReading>(guid_generator->Generate(), sensors[2]);
     reading3->value = 2.6;
+    reading3->status = ReadingStatus::PROCESSED;
     sensor_readings_frame->AddOrUpdateReading(reading3);
 
     readings = sensor_readings_frame->GetReadings();
     zassert_equal(readings.size(), 3);
-    reading_values = sensor_readings_frame->GetReadingsValues();
+    reading_values = sensor_readings_frame->GetReadingValues();
     zassert_equal(reading_values.size(), 2);
 
     sensor_readings_frame->ClearReadings();
 
     readings = sensor_readings_frame->GetReadings();
     zassert_equal(readings.size(), 0);
-    reading_values = sensor_readings_frame->GetReadingsValues();
+    reading_values = sensor_readings_frame->GetReadingValues();
     zassert_equal(reading_values.size(), 0);
 }
