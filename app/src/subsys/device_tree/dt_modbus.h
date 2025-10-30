@@ -1,7 +1,5 @@
 #pragma once
 
-#include <optional>
-
 #include <zephyr/devicetree.h>
 #include <zephyr/device.h>
 

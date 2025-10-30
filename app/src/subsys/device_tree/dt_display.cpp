@@ -1,5 +1,4 @@
 #include <zephyr/logging/log.h>
-#include <zephyr/drivers/display.h>
 
 #include "dt_logger.h"
 
@@ -9,7 +8,7 @@ namespace eerie_leap::subsys::device_tree {
 
 LOG_MODULE_DECLARE(dt_logger);
 
-const struct device* DtDisplay::display_dev_ = nullptr;
+const device* DtDisplay::display_dev_ = nullptr;
 
 void DtDisplay::Initialize() {
 #if defined(CONFIG_DISPLAY) && DT_HAS_CHOSEN(zephyr_display)

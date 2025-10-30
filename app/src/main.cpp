@@ -10,6 +10,7 @@
 #include "subsys/device_tree/dt_configurator.h"
 #include "subsys/device_tree/dt_fs.h"
 #include "subsys/device_tree/dt_modbus.h"
+#include "subsys/device_tree/dt_canbus.h"
 #include "subsys/device_tree/dt_display.h"
 
 #include "subsys/fs/services/fs_service.h"
@@ -17,6 +18,7 @@
 #include "subsys/gpio/gpio_factory.hpp"
 #include "subsys/modbus/modbus.h"
 #include "subsys/cfb/cfb.h"
+#include "subsys/canbus/canbus.h"
 #include "subsys/time/time_service.h"
 #include "subsys/time/rtc_provider.h"
 #include "subsys/time/boot_elapsed_time_provider.h"
@@ -70,9 +72,10 @@ using namespace eerie_leap::utilities::math_parser;
 
 using namespace eerie_leap::subsys::device_tree;
 using namespace eerie_leap::subsys::fs::services;
-using namespace eerie_leap::subsys::modbus;
 using namespace eerie_leap::subsys::gpio;
 using namespace eerie_leap::subsys::cfb;
+using namespace eerie_leap::subsys::modbus;
+using namespace eerie_leap::subsys::canbus;
 using namespace eerie_leap::subsys::time;
 
 using namespace eerie_leap::configuration::services;
@@ -183,6 +186,15 @@ int main(void) {
     auto gpio = GpioFactory::Create();
     gpio->Initialize();
 
+    std::shared_ptr<Canbus> canbus = nullptr;
+    if(DtCanbus::Get() != nullptr) {
+        canbus = make_shared_ext<Canbus>(DtCanbus::Get());
+        if(!canbus->Initialize()) {
+            LOG_ERR("Failed to initialize CANBus.");
+            return -1;
+        }
+    }
+
     auto system_configuration_manager = make_shared_ext<SystemConfigurationManager>(std::move(system_config_service));
     auto sensors_configuration_manager = make_shared_ext<SensorsConfigurationManager>(
         math_parser_service,
@@ -241,7 +253,6 @@ int main(void) {
         guid_generator,
         gpio,
         adc_configuration_manager,
-        sensors_configuration_manager,
         sensor_readings_frame);
 
     auto processing_scheduler_service = make_shared_ext<ProcessingSchedulerService>(

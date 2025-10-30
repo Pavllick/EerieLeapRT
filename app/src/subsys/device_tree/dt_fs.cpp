@@ -29,7 +29,7 @@ void DtFs::InitInternalFs() {
 }
 
 void DtFs::InitSdFs() {
-#if DT_HAS_ALIAS(sdhc0) && DT_HAS_ALIAS(sdfs0) && CONFIG_SDMMC_SUBSYS
+#if DT_HAS_CHOSEN(zephyr_sdhc) && DT_HAS_ALIAS(sdfs0) && CONFIG_SDMMC_SUBSYS
     sd_fs_mp_ = std::make_optional<fs_mount_t>(FS_FSTAB_ENTRY(SD_FS_NODE));
     sd_fs_mp_.value().storage_dev = (void *)SD_DEV;
 
@@ -52,7 +52,7 @@ void DtFs::InitSdFs() {
  * Requests card to publish a new relative card address, and move from
  * identification to data mode
  */
-int DtFs::SdmmcRequestRca(const struct device* dev) {
+int DtFs::SdmmcRequestRca(const device* dev) {
 	struct sdhc_command cmd;
 	int ret;
 
@@ -77,7 +77,7 @@ int DtFs::SdmmcRequestRca(const struct device* dev) {
 	return 0;
 }
 
-bool DtFs::SdmmcReadStatus(const struct device* dev) {
+bool DtFs::SdmmcReadStatus(const device* dev) {
 	struct sdhc_command cmd;
 	int ret;
 
@@ -106,7 +106,7 @@ bool DtFs::SdmmcReadStatus(const struct device* dev) {
 #endif
 
 bool DtFs::IsSdCardPresent() {
-#if DT_HAS_ALIAS(sdhc0) && DT_HAS_ALIAS(sdfs0) && CONFIG_SDMMC_SUBSYS
+#if DT_HAS_CHOSEN(zephyr_sdhc) && DT_HAS_ALIAS(sdfs0) && CONFIG_SDMMC_SUBSYS
     // NOTE: SPI SDHC driver does not support card detection.
     if(sd_host_props_.is_spi)
         return SdmmcReadStatus(SD_DEV);

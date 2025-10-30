@@ -19,53 +19,53 @@
 		gpioc = &gpioc;
 		adc0 = &adc0;
 		uart0 = &uart0;
-		sdhc0 = &spi_sdhc0;
 	};
 
 	chosen {
 		zephyr,sram = &sram1;
 		zephyr,console = &usb_serial;
-        zephyr,shell-uart = &usb_serial;
+		zephyr,shell-uart = &usb_serial;
 		zephyr,flash = &flash0;
 		zephyr,code-partition = &slot0_partition;
 		zephyr,sdhc = &spi_sdhc0;
 		zephyr,bt-hci = &esp32_bt_hci;
 		zephyr,display = &ssd1306_ssd1306_128x32;
+		zephyr,canbus = &twai;
 	};
 
 	gpioc: gpioc {
 		compatible = "gpio-keys";
 
 		di_0: di_0 {
-			gpios = < &gpio0 3 GPIO_PULL_UP >;
+			gpios = <&gpio0 3 GPIO_PULL_UP>;
 		};
 
 		di_1: di_1 {
-			gpios = < &gpio1 14 GPIO_PULL_UP >;
+			gpios = <&gpio1 14 GPIO_PULL_UP>;
 		};
 
 		di_2: di_2 {
-			gpios = < &gpio0 9 GPIO_PULL_UP >;
+			gpios = <&gpio0 9 GPIO_PULL_UP>;
 		};
 
 		di_3: di_3 {
-			gpios = < &gpio0 10 GPIO_PULL_UP >;
+			gpios = <&gpio0 10 GPIO_PULL_UP>;
 		};
 
 		di_4: di_4 {
-			gpios = < &gpio0 14 GPIO_PULL_UP >;
+			gpios = <&gpio0 14 GPIO_PULL_UP>;
 		};
 
 		di_5: di_5 {
-			gpios = < &gpio0 13 GPIO_PULL_UP >;
+			gpios = <&gpio0 13 GPIO_PULL_UP>;
 		};
 
 		di_6: di_6 {
-			gpios = < &gpio0 12 GPIO_PULL_UP >;
+			gpios = <&gpio0 12 GPIO_PULL_UP>;
 		};
 
 		di_7: di_7 {
-			gpios = < &gpio0 11 GPIO_PULL_UP >;
+			gpios = <&gpio0 11 GPIO_PULL_UP>;
 		};
 	};
 };
@@ -96,7 +96,7 @@
 	};
 
 	// IN6
-    channel@7 {
+	channel@7 {
 		reg = <7>;
 		zephyr,gain = "ADC_GAIN_1_4";
 		zephyr,reference = "ADC_REF_INTERNAL";
@@ -128,17 +128,17 @@
 	pinctrl-names = "default";
 
 	spi_sdhc0: sdhc@0 {
-        compatible = "zephyr,sdhc-spi-slot";
-        reg = <0>;
-        status = "okay";
-        spi-max-frequency = <24000000>;
+		compatible = "zephyr,sdhc-spi-slot";
+		reg = <0>;
+		status = "okay";
+		spi-max-frequency = <24000000>;
 
-        mmc {
-            compatible = "zephyr,sdmmc-disk";
-            disk-name = "SD";
-            status = "okay";
-        };
-    };
+		mmc {
+			compatible = "zephyr,sdmmc-disk";
+			disk-name = "SD";
+			status = "okay";
+		};
+	};
 };
 
 &i2c0 {
@@ -164,12 +164,17 @@
 };
 
 &usb_serial {
-    status = "okay";
+	status = "okay";
 };
 
 &twai {
+	status = "okay";
 	pinctrl-0 = <&twai_default>;
 	pinctrl-names = "default";
+
+	can-transceiver {
+		max-bitrate = <5000000>;
+	};
 };
 
 &wdt0 {

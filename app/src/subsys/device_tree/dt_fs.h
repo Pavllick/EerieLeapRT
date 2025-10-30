@@ -17,8 +17,8 @@ FS_FSTAB_DECLARE_ENTRY(INT_FS_NODE);
 #endif
 
 // SD File System
-#if DT_HAS_ALIAS(sdhc0) && DT_HAS_ALIAS(sdfs0)
-#define SDHC_NODE DT_ALIAS(sdhc0)
+#if DT_HAS_CHOSEN(zephyr_sdhc) && DT_HAS_ALIAS(sdfs0)
+#define SDHC_NODE DT_CHOSEN(zephyr_sdhc)
 #define SD_DEV DEVICE_DT_GET(SDHC_NODE)
 #define SD_FS_NODE DT_ALIAS(sdfs0)
 FS_FSTAB_DECLARE_ENTRY(SD_FS_NODE);
@@ -42,8 +42,8 @@ private:
     DtFs() = default;
 
 #ifdef CONFIG_SDMMC_SUBSYS
-    static int SdmmcRequestRca(const struct device* dev);
-    static bool SdmmcReadStatus(const struct device* dev);
+    static int SdmmcRequestRca(const device* dev);
+    static bool SdmmcReadStatus(const device* dev);
 #endif
 
 public:
