@@ -69,10 +69,10 @@ void Canbus::CanFrameReceivedCallback(const device *dev, can_frame *frame, void 
     Canbus *canbus = static_cast<Canbus*>(user_data);
 
     CanFrame can_frame = {
-        .id = frame->id,
-        .size = frame->dlc
+        .id = frame->id
     };
 
+    can_frame.data.resize(frame->dlc);
     std::copy(frame->data, frame->data + frame->dlc, can_frame.data.begin());
 
     for(const auto& handler : canbus->handlers_.at(frame->id))

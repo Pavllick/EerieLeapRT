@@ -25,20 +25,19 @@ std::vector<std::shared_ptr<Sensor>> sensor_readings_frame_GetTestSensors(std::s
 
     ExpressionEvaluator expression_evaluator_1(math_parser_service, "{x} * 2 + {sensor_2} + 1");
 
-    Sensor sensor_1 {
-        .id = "sensor_1",
-        .metadata = {
-            .name = "Sensor 1",
-            .unit = "km/h",
-            .description = "Test Sensor 1"
-        },
-        .configuration = {
-            .type = SensorType::PHYSICAL_ANALOG,
-            .channel = 0,
-            .sampling_rate_ms = 1000,
-            .voltage_interpolator = std::make_shared<LinearVoltageInterpolator>(calibration_data_1_ptr),
-            .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_1)
-        }
+    auto sensor_1 = std::make_shared<Sensor>();
+    sensor_1->id = "sensor_1";
+    sensor_1->metadata = {
+        .name = "Sensor 1",
+        .unit = "km/h",
+        .description = "Test Sensor 1"
+    };
+    sensor_1->configuration = {
+        .type = SensorType::PHYSICAL_ANALOG,
+        .channel = 0,
+        .sampling_rate_ms = 1000,
+        .voltage_interpolator = make_unique_ext<LinearVoltageInterpolator>(calibration_data_1_ptr),
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_1)
     };
 
     std::vector<CalibrationData> calibration_data_2 {
@@ -52,43 +51,38 @@ std::vector<std::shared_ptr<Sensor>> sensor_readings_frame_GetTestSensors(std::s
 
     ExpressionEvaluator expression_evaluator_2(math_parser_service, "x * 4 + 1.6");
 
-    Sensor sensor_2 {
-        .id = "sensor_2",
-        .metadata = {
-            .name = "Sensor 2",
-            .unit = "km/h",
-            .description = "Test Sensor 2"
-        },
-        .configuration = {
-            .type = SensorType::PHYSICAL_ANALOG,
-            .channel = 1,
-            .sampling_rate_ms = 500,
-            .voltage_interpolator = std::make_shared<LinearVoltageInterpolator>(calibration_data_2_ptr),
-            .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_2)
-        }
+    auto sensor_2 = std::make_shared<Sensor>();
+    sensor_2->id = "sensor_2";
+    sensor_2->metadata = {
+        .name = "Sensor 2",
+        .unit = "km/h",
+        .description = "Test Sensor 2"
+    };
+    sensor_2->configuration = {
+        .type = SensorType::PHYSICAL_ANALOG,
+        .channel = 1,
+        .sampling_rate_ms = 500,
+        .voltage_interpolator = make_unique_ext<LinearVoltageInterpolator>(calibration_data_2_ptr),
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_2)
     };
 
     ExpressionEvaluator expression_evaluator_3(math_parser_service, "{sensor_1} + 8.34");
 
-    Sensor sensor_3 {
-        .id = "sensor_3",
-        .metadata = {
-            .name = "Sensor 3",
-            .unit = "km/h",
-            .description = "Test Sensor 3"
-        },
-        .configuration = {
-            .type = SensorType::VIRTUAL_ANALOG,
-            .sampling_rate_ms = 2000,
-            .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_3)
-        }
+    auto sensor_3 = std::make_shared<Sensor>();
+    sensor_3->id = "sensor_3";
+    sensor_3->metadata = {
+        .name = "Sensor 3",
+        .unit = "km/h",
+        .description = "Test Sensor 3"
+    };
+    sensor_3->configuration = {
+        .type = SensorType::VIRTUAL_ANALOG,
+        .sampling_rate_ms = 2000,
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_3)
     };
 
     std::vector<std::shared_ptr<Sensor>> sensors = {
-        std::make_shared<Sensor>(sensor_1),
-        std::make_shared<Sensor>(sensor_2),
-        std::make_shared<Sensor>(sensor_3)
-    };
+        sensor_1, sensor_2, sensor_3 };
 
     return sensors;
 }

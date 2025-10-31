@@ -17,7 +17,7 @@ static const std::vector<CalibrationData> adc_inverse_base_range_data {
 #endif
 };
 static const auto adc_inverse_base_range_data_ptr = make_shared_ext<std::vector<CalibrationData>>(adc_inverse_base_range_data);
-static const auto adc_inverse_base_range_voltage_interpolator = make_shared_ext<LinearVoltageInterpolator>(adc_inverse_base_range_data_ptr);
+static const auto adc_inverse_base_range_voltage_interpolator = make_unique_ext<LinearVoltageInterpolator>(adc_inverse_base_range_data_ptr);
 
 AdcCalibrator::AdcCalibrator(
     InterpolationMethod interpolation_method,
@@ -36,11 +36,11 @@ AdcCalibrator::AdcCalibrator(
 
     switch (interpolation_method) {
     case InterpolationMethod::LINEAR:
-        calibrated_voltage_interpolator_ = make_shared_ext<LinearVoltageInterpolator>(adc_calibration_data_normalized_ptr);
+        calibrated_voltage_interpolator_ = make_unique_ext<LinearVoltageInterpolator>(adc_calibration_data_normalized_ptr);
         break;
 
     case InterpolationMethod::CUBIC_SPLINE:
-        calibrated_voltage_interpolator_ = make_shared_ext<CubicSplineVoltageInterpolator>(adc_calibration_data_normalized_ptr);
+        calibrated_voltage_interpolator_ = make_unique_ext<CubicSplineVoltageInterpolator>(adc_calibration_data_normalized_ptr);
         break;
 
     default:

@@ -41,20 +41,19 @@ std::vector<std::shared_ptr<Sensor>> SetupTestSensors(std::shared_ptr<MathParser
 
     ExpressionEvaluator expression_evaluator_1(math_parser_service, "{x} * 2 + {sensor_2} + 1");
 
-    Sensor sensor_1 {
-        .id = "sensor_1",
-        .metadata = {
-            .name = "Sensor 1",
-            .unit = "km/h",
-            .description = "Test Sensor 1"
-        },
-        .configuration = {
-            .type = SensorType::PHYSICAL_ANALOG,
-            .channel = 0,
-            .sampling_rate_ms = 1000,
-            .voltage_interpolator = std::make_shared<LinearVoltageInterpolator>(calibration_data_1_ptr),
-            .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_1)
-        }
+    auto sensor_1 = std::make_shared<Sensor>();
+    sensor_1->id = "sensor_1";
+    sensor_1->metadata = {
+        .name = "Sensor 1",
+        .unit = "km/h",
+        .description = "Test Sensor 1"
+    };
+    sensor_1->configuration = {
+        .type = SensorType::PHYSICAL_ANALOG,
+        .channel = 0,
+        .sampling_rate_ms = 1000,
+        .voltage_interpolator = make_unique_ext<LinearVoltageInterpolator>(calibration_data_1_ptr),
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_1)
     };
 
     std::vector<CalibrationData> calibration_data_2 {
@@ -68,60 +67,53 @@ std::vector<std::shared_ptr<Sensor>> SetupTestSensors(std::shared_ptr<MathParser
 
     ExpressionEvaluator expression_evaluator_2(math_parser_service, "x * 4 + 1.6");
 
-    Sensor sensor_2 {
-        .id = "sensor_2",
-        .metadata = {
-            .name = "Sensor 2",
-            .unit = "km/h",
-            .description = "Test Sensor 2"
-        },
-        .configuration = {
-            .type = SensorType::PHYSICAL_ANALOG,
-            .channel = 1,
-            .sampling_rate_ms = 500,
-            .voltage_interpolator = std::make_shared<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
-            .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_2)
-        }
+    auto sensor_2 = std::make_shared<Sensor>();
+    sensor_2->id = "sensor_2";
+    sensor_2->metadata = {
+        .name = "Sensor 2",
+        .unit = "km/h",
+        .description = "Test Sensor 2"
+    };
+    sensor_2->configuration = {
+        .type = SensorType::PHYSICAL_ANALOG,
+        .channel = 1,
+        .sampling_rate_ms = 500,
+        .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_2)
     };
 
     ExpressionEvaluator expression_evaluator_3(math_parser_service, "{sensor_1} + 8.34");
 
-    Sensor sensor_3 {
-        .id = "sensor_3",
-        .metadata = {
-            .name = "Sensor 3",
-            .unit = "km/h",
-            .description = "Test Sensor 3"
-        },
-        .configuration = {
-            .type = SensorType::VIRTUAL_ANALOG,
-            .channel = std::nullopt,
-            .sampling_rate_ms = 2000,
-            .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_3)
-        }
+    auto sensor_3 = std::make_shared<Sensor>();
+    sensor_3->id = "sensor_3";
+    sensor_3->metadata = {
+        .name = "Sensor 3",
+        .unit = "km/h",
+        .description = "Test Sensor 3"
+    };
+    sensor_3->configuration = {
+        .type = SensorType::VIRTUAL_ANALOG,
+        .channel = std::nullopt,
+        .sampling_rate_ms = 2000,
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_3)
     };
 
-    Sensor sensor_4 {
-        .id = "sensor_4",
-        .metadata = {
-            .name = "Sensor 4",
-            .unit = "km/h",
-            .description = "Test Sensor 4"
-        },
-        .configuration = {
-            .type = SensorType::PHYSICAL_ANALOG,
-            .channel = 2,
-            .sampling_rate_ms = 2000,
-            .voltage_interpolator = std::make_shared<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
-        }
+    auto sensor_4 = std::make_shared<Sensor>();
+    sensor_4->id = "sensor_4";
+    sensor_4->metadata = {
+        .name = "Sensor 4",
+        .unit = "km/h",
+        .description = "Test Sensor 4"
+    };
+    sensor_4->configuration = {
+        .type = SensorType::PHYSICAL_ANALOG,
+        .channel = 2,
+        .sampling_rate_ms = 2000,
+        .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_2_ptr)
     };
 
     std::vector<std::shared_ptr<Sensor>> sensors = {
-        std::make_shared<Sensor>(sensor_1),
-        std::make_shared<Sensor>(sensor_2),
-        std::make_shared<Sensor>(sensor_3),
-        std::make_shared<Sensor>(sensor_4)
-    };
+        sensor_1, sensor_2, sensor_3, sensor_4 };
 
     return sensors;
 }
@@ -239,56 +231,50 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
     };
     auto calibration_data_1_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_1);
 
-    auto sensor_1 = std::make_shared<Sensor>(Sensor {
-        .id = "sensor_1",
-        .metadata = {
-            .name = "Sensor 1",
-            .unit = "km/h",
-            .description = "Test Sensor 1"
-        },
-        .configuration = {
-            .type = SensorType::PHYSICAL_ANALOG,
-            .channel = 0,
-            .sampling_rate_ms = 100,
-            .voltage_interpolator = std::make_shared<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
-        }
-    });
+    auto sensor_1 = std::make_shared<Sensor>();
+    sensor_1->id = "sensor_1";
+    sensor_1->metadata = {
+        .name = "Sensor 1",
+        .unit = "km/h",
+        .description = "Test Sensor 1"
+    };
+    sensor_1->configuration = {
+        .type = SensorType::PHYSICAL_ANALOG,
+        .channel = 0,
+        .sampling_rate_ms = 100,
+        .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
+    };
 
-    auto sensor_2 = std::make_shared<Sensor>(Sensor {
-        .id = "_sensor_2",
-        .metadata = {
-            .name = "Sensor 2",
-            .unit = "km/h",
-            .description = "Test Sensor 2"
-        },
-        .configuration = {
-            .type = SensorType::PHYSICAL_ANALOG,
-            .channel = 0,
-            .sampling_rate_ms = 100,
-            .voltage_interpolator = std::make_shared<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
-        }
-    });
+    auto sensor_2 = std::make_shared<Sensor>();
+    sensor_2->id = "_sensor_2";
+    sensor_2->metadata = {
+        .name = "Sensor 2",
+        .unit = "km/h",
+        .description = "Test Sensor 2"
+    };
+    sensor_2->configuration = {
+        .type = SensorType::PHYSICAL_ANALOG,
+        .channel = 0,
+        .sampling_rate_ms = 100,
+        .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
+    };
 
-    auto sensor_3 = std::make_shared<Sensor>(Sensor {
-        .id = "_",
-        .metadata = {
-            .name = "Sensor 3",
-            .unit = "km/h",
-            .description = "Test Sensor 3"
-        },
-        .configuration = {
-            .type = SensorType::PHYSICAL_ANALOG,
-            .channel = 0,
-            .sampling_rate_ms = 100,
-            .voltage_interpolator = std::make_shared<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
-        }
-    });
+    auto sensor_3 = std::make_shared<Sensor>();
+    sensor_3->id = "_";
+    sensor_3->metadata = {
+        .name = "Sensor 3",
+        .unit = "km/h",
+        .description = "Test Sensor 3"
+    };
+    sensor_3->configuration = {
+        .type = SensorType::PHYSICAL_ANALOG,
+        .channel = 0,
+        .sampling_rate_ms = 100,
+        .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
+    };
 
     std::vector<std::shared_ptr<Sensor>> sensors {
-        sensor_1,
-        sensor_2,
-        sensor_3
-    };
+        sensor_1, sensor_2, sensor_3 };
 
     for(auto sensor : sensors)
         sensors_configuration_manager->Update({sensor});
@@ -311,56 +297,50 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
     };
     auto calibration_data_1_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_1);
 
-    auto sensor_1 = std::make_shared<Sensor>(Sensor {
-        .id = "1_sensor_1",
-        .metadata = {
-            .name = "Sensor 1",
-            .unit = "km/h",
-            .description = "Test Sensor 1"
-        },
-        .configuration = {
-            .type = SensorType::PHYSICAL_ANALOG,
-            .channel = 0,
-            .sampling_rate_ms = 100,
-            .voltage_interpolator = std::make_shared<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
-        }
-    });
+    auto sensor_1 = std::make_shared<Sensor>();
+    sensor_1->id = "1_sensor_1";
+    sensor_1->metadata = {
+        .name = "Sensor 1",
+        .unit = "km/h",
+        .description = "Test Sensor 1"
+    };
+    sensor_1->configuration = {
+        .type = SensorType::PHYSICAL_ANALOG,
+        .channel = 0,
+        .sampling_rate_ms = 100,
+        .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
+    };
 
-    auto sensor_2 = std::make_shared<Sensor>(Sensor {
-        .id = "#sensor_2",
-        .metadata = {
-            .name = "Sensor 2",
-            .unit = "km/h",
-            .description = "Test Sensor 2"
-        },
-        .configuration = {
-            .type = SensorType::PHYSICAL_ANALOG,
-            .channel = 0,
-            .sampling_rate_ms = 100,
-            .voltage_interpolator = std::make_shared<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
-        }
-    });
+    auto sensor_2 = std::make_shared<Sensor>();
+    sensor_2->id = "#sensor_2";
+    sensor_2->metadata = {
+        .name = "Sensor 2",
+        .unit = "km/h",
+        .description = "Test Sensor 2"
+    };
+    sensor_2->configuration = {
+        .type = SensorType::PHYSICAL_ANALOG,
+        .channel = 0,
+        .sampling_rate_ms = 100,
+        .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
+    };
 
-    auto sensor_3 = std::make_shared<Sensor>(Sensor {
-        .id = "3",
-        .metadata = {
-            .name = "Sensor 3",
-            .unit = "km/h",
-            .description = "Test Sensor 3"
-        },
-        .configuration = {
-            .type = SensorType::PHYSICAL_ANALOG,
-            .channel = 0,
-            .sampling_rate_ms = 100,
-            .voltage_interpolator = std::make_shared<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
-        }
-    });
+    auto sensor_3 = std::make_shared<Sensor>();
+    sensor_3->id = "3";
+    sensor_3->metadata = {
+        .name = "Sensor 3",
+        .unit = "km/h",
+        .description = "Test Sensor 3"
+    };
+    sensor_3->configuration = {
+        .type = SensorType::PHYSICAL_ANALOG,
+        .channel = 0,
+        .sampling_rate_ms = 100,
+        .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
+    };
 
     std::vector<std::shared_ptr<Sensor>> sensors {
-        sensor_1,
-        sensor_2,
-        sensor_3
-    };
+        sensor_1, sensor_2, sensor_3 };
 
     for(auto sensor : sensors) {
         try {

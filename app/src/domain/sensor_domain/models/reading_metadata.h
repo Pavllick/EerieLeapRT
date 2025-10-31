@@ -3,6 +3,7 @@
 #include <optional>
 #include <unordered_map>
 #include <variant>
+#include <vector>
 
 #include "reading_metadata_tag.h"
 
@@ -13,7 +14,8 @@ using ReadingMetadataValue = std::variant<
     int,
     float,
     std::string,
-    bool
+    bool,
+    std::vector<uint8_t>
 >;
 
 struct ReadingMetadata {

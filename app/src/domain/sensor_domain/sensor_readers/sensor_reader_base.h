@@ -27,10 +27,10 @@ public:
         std::shared_ptr<GuidGenerator> guid_generator,
         std::shared_ptr<SensorReadingsFrame> sensor_readings_frame,
         std::shared_ptr<Sensor> sensor)
-        : time_service_(std::move(time_service)),
-        guid_generator_(std::move(guid_generator)),
-        sensor_readings_frame_(std::move(sensor_readings_frame)),
-        sensor_(std::move(sensor)) {}
+            : time_service_(std::move(time_service)),
+            guid_generator_(std::move(guid_generator)),
+            sensor_readings_frame_(std::move(sensor_readings_frame)),
+            sensor_(std::move(sensor)) {}
 
     virtual ~SensorReaderBase() = default;
 };

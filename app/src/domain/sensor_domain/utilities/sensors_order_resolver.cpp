@@ -10,12 +10,10 @@ using namespace eerie_leap::domain::sensor_domain::models;
 
 void SensorsOrderResolver::AddSensor(std::shared_ptr<Sensor> sensor) {
     std::string sensor_id = sensor->id;
-    auto expression_evaluator = sensor->configuration.expression_evaluator;
-
     sensors_.emplace(sensor_id, sensor);
 
-    if(expression_evaluator != nullptr) {
-        auto sensor_ids = expression_evaluator->GetVariables();
+    if(sensor->configuration.expression_evaluator != nullptr) {
+        auto sensor_ids = sensor->configuration.expression_evaluator->GetVariables();
         dependencies_.emplace(sensor_id, std::unordered_set<std::string>(sensor_ids.begin(), sensor_ids.end()));
     } else {
         dependencies_.emplace(sensor_id, std::unordered_set<std::string>());

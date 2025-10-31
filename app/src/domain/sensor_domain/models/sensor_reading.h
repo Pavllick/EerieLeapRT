@@ -28,3 +28,5 @@ struct SensorReading {
 };
 
 }
+
+// namespace eerie_leap::domain::sensor_domain::models

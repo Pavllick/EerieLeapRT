@@ -57,20 +57,19 @@ std::vector<std::shared_ptr<Sensor>> sensor_processor_GetTestSensors(std::shared
 
     ExpressionEvaluator expression_evaluator_1(math_parser_service, "{x} * 2 + {sensor_2} + 1");
 
-    Sensor sensor_1 {
-        .id = "sensor_1",
-        .metadata = {
-            .name = "Sensor 1",
-            .unit = "km/h",
-            .description = "Test Sensor 1"
-        },
-        .configuration = {
-            .type = SensorType::PHYSICAL_ANALOG,
-            .channel = 0,
-            .sampling_rate_ms = 1000,
-            .voltage_interpolator = std::make_shared<LinearVoltageInterpolator>(calibration_data_1_ptr),
-            .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_1)
-        }
+    auto sensor_1 = std::make_shared<Sensor>();
+    sensor_1->id = "sensor_1";
+    sensor_1->metadata = {
+        .name = "Sensor 1",
+        .unit = "km/h",
+        .description = "Test Sensor 1"
+    };
+    sensor_1->configuration = {
+        .type = SensorType::PHYSICAL_ANALOG,
+        .channel = 0,
+        .sampling_rate_ms = 1000,
+        .voltage_interpolator = make_unique_ext<LinearVoltageInterpolator>(calibration_data_1_ptr),
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_1)
     };
 
     std::vector<CalibrationData> calibration_data_2 {
@@ -84,75 +83,66 @@ std::vector<std::shared_ptr<Sensor>> sensor_processor_GetTestSensors(std::shared
 
     ExpressionEvaluator expression_evaluator_2(math_parser_service, "x * 4 + 1.6");
 
-    Sensor sensor_2 {
-        .id = "sensor_2",
-        .metadata = {
-            .name = "Sensor 2",
-            .unit = "km/h",
-            .description = "Test Sensor 2"
-        },
-        .configuration = {
-            .type = SensorType::PHYSICAL_ANALOG,
-            .channel = 1,
-            .sampling_rate_ms = 500,
-            .voltage_interpolator = std::make_shared<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
-            .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_2)
-        }
+    auto sensor_2 = std::make_shared<Sensor>();
+    sensor_2->id = "sensor_2";
+    sensor_2->metadata = {
+        .name = "Sensor 2",
+        .unit = "km/h",
+        .description = "Test Sensor 2"
+    };
+    sensor_2->configuration = {
+        .type = SensorType::PHYSICAL_ANALOG,
+        .channel = 1,
+        .sampling_rate_ms = 500,
+        .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_2)
     };
 
     ExpressionEvaluator expression_evaluator_3(math_parser_service, "{sensor_1} + 8.34");
 
-    Sensor sensor_3 {
-        .id = "sensor_3",
-        .metadata = {
-            .name = "Sensor 3",
-            .unit = "km/h",
-            .description = "Test Sensor 3"
-        },
-        .configuration = {
-            .type = SensorType::VIRTUAL_ANALOG,
-            .sampling_rate_ms = 2000,
-            .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_3)
-        }
+    auto sensor_3 = std::make_shared<Sensor>();
+    sensor_3->id = "sensor_3";
+    sensor_3->metadata = {
+        .name = "Sensor 3",
+        .unit = "km/h",
+        .description = "Test Sensor 3"
+    };
+    sensor_3->configuration = {
+        .type = SensorType::VIRTUAL_ANALOG,
+        .sampling_rate_ms = 2000,
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_3)
     };
 
-    Sensor sensor_4 {
-        .id = "sensor_4",
-        .metadata = {
-            .name = "Sensor 4",
-            .unit = "",
-            .description = "Test Sensor 4"
-        },
-        .configuration = {
-            .type = SensorType::PHYSICAL_INDICATOR,
-            .channel = 1,
-            .sampling_rate_ms = 1000
-        }
+    auto sensor_4 = std::make_shared<Sensor>();
+    sensor_4->id = "sensor_4";
+    sensor_4->metadata = {
+        .name = "Sensor 4",
+        .unit = "",
+        .description = "Test Sensor 4"
+    };
+    sensor_4->configuration = {
+        .type = SensorType::PHYSICAL_INDICATOR,
+        .channel = 1,
+        .sampling_rate_ms = 1000
     };
 
     ExpressionEvaluator expression_evaluator_5(math_parser_service, "{sensor_1} < 400");
 
-    Sensor sensor_5 {
-        .id = "sensor_5",
-        .metadata = {
-            .name = "Sensor 5",
-            .unit = "",
-            .description = "Test Sensor 5"
-        },
-        .configuration = {
-            .type = SensorType::VIRTUAL_INDICATOR,
-            .sampling_rate_ms = 1000,
-            .expression_evaluator = std::make_shared<ExpressionEvaluator>(expression_evaluator_5)
-        }
+    auto sensor_5 = std::make_shared<Sensor>();
+    sensor_5->id = "sensor_5";
+    sensor_5->metadata = {
+        .name = "Sensor 5",
+        .unit = "",
+        .description = "Test Sensor 5"
+    };
+    sensor_5->configuration = {
+        .type = SensorType::VIRTUAL_INDICATOR,
+        .sampling_rate_ms = 1000,
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_5)
     };
 
     std::vector<std::shared_ptr<Sensor>> sensors = {
-        std::make_shared<Sensor>(sensor_1),
-        std::make_shared<Sensor>(sensor_2),
-        std::make_shared<Sensor>(sensor_3),
-        std::make_shared<Sensor>(sensor_4),
-        std::make_shared<Sensor>(sensor_5)
-    };
+        sensor_1, sensor_2, sensor_3, sensor_4, sensor_5 };
 
     SensorsOrderResolver sensors_order_resolver;
     for(auto& sensor : sensors)
@@ -294,10 +284,8 @@ ZTEST(sensor_processor, test_ProcessReading) {
 
     auto sensors = sensor_processor_GetTestSensors(helper.math_parser_service);
 
-    auto sensor_1_voltage_interpolator = sensors[1]->configuration.voltage_interpolator;
-    float reading_1_value = sensor_1_voltage_interpolator->Interpolate(reading_1->value.value());
-    auto sensor_2_voltage_interpolator = sensors[0]->configuration.voltage_interpolator;
-    float reading_2_value = sensor_2_voltage_interpolator->Interpolate(reading_2->value.value());
+    float reading_1_value = sensors[1]->configuration.voltage_interpolator->Interpolate(reading_1->value.value());
+    float reading_2_value = sensors[0]->configuration.voltage_interpolator->Interpolate(reading_2->value.value());
 
     SensorProcessor sensor_processor(sensor_readings_frame);
     for(auto& sensor : sensors)

@@ -1,4 +1,5 @@
 #include <functional>
+#include <utility>
 
 #include <zephyr/logging/log.h>
 
@@ -43,6 +44,8 @@ bool SensorsConfigurationManager::Update(const std::vector<std::shared_ptr<Senso
     for(size_t i = 0; i < sensors.size(); ++i) {
         const auto& sensor = sensors.at(i);
 
+        ValidateSensorType(sensor->configuration);
+
         auto sensor_config = make_shared_ext<SensorConfig>();
         memset(sensor_config.get(), 0, sizeof(SensorConfig));
 
@@ -51,7 +54,7 @@ bool SensorsConfigurationManager::Update(const std::vector<std::shared_ptr<Senso
 
         sensor_config->id = CborHelpers::ToZcborString(&sensor->id);
         sensor_config->id_hash = static_cast<uint32_t>(string_hasher(sensor->id));
-        sensor_config->configuration.type = static_cast<uint32_t>(sensor->configuration.type);
+        sensor_config->configuration.type = std::to_underlying(sensor->configuration.type);
 
         if(sensor->configuration.channel.has_value()) {
             if(sensor->configuration.channel.value() < 0 || sensor->configuration.channel.value() > adc_channel_count_)
@@ -63,13 +66,14 @@ bool SensorsConfigurationManager::Update(const std::vector<std::shared_ptr<Senso
             sensor_config->configuration.channel_present = false;
         }
 
+        sensor->configuration.UpdateConnectionString();
+        sensor_config->configuration.connection_string = CborHelpers::ToZcborString(&sensor->configuration.connection_string);
+
         sensor_config->configuration.sampling_rate_ms = sensor->configuration.sampling_rate_ms;
 
         auto interpolation_method = sensor->configuration.voltage_interpolator != nullptr
             ? sensor->configuration.voltage_interpolator->GetInterpolationMethod()
             : InterpolationMethod::NONE;
-        if(sensor->configuration.type == SensorType::PHYSICAL_ANALOG && interpolation_method == InterpolationMethod::NONE)
-            throw std::runtime_error("Physical analog sensor must have interpolation method.");
 
         sensor_config->configuration.interpolation_method = static_cast<uint32_t>(interpolation_method);
         if(interpolation_method != InterpolationMethod::NONE) {
@@ -152,6 +156,9 @@ const std::vector<std::shared_ptr<Sensor>>* SensorsConfigurationManager::Get(boo
         else
             sensor->configuration.channel = std::nullopt;
 
+        sensor->configuration.connection_string = CborHelpers::ToStdString(sensor_config.configuration.connection_string);
+        sensor->configuration.UnwrapConnectionString();
+
         sensor->configuration.sampling_rate_ms = sensor_config.configuration.sampling_rate_ms;
 
         auto interpolation_method = static_cast<InterpolationMethod>(sensor_config.configuration.interpolation_method);
@@ -169,11 +176,11 @@ const std::vector<std::shared_ptr<Sensor>>* SensorsConfigurationManager::Get(boo
 
             switch (interpolation_method) {
             case InterpolationMethod::LINEAR:
-                sensor->configuration.voltage_interpolator = make_shared_ext<LinearVoltageInterpolator>(calibration_table_ptr);
+                sensor->configuration.voltage_interpolator = make_unique_ext<LinearVoltageInterpolator>(calibration_table_ptr);
                 break;
 
             case InterpolationMethod::CUBIC_SPLINE:
-                sensor->configuration.voltage_interpolator = make_shared_ext<CubicSplineVoltageInterpolator>(calibration_table_ptr);
+                sensor->configuration.voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_table_ptr);
                 break;
 
             default:
@@ -185,7 +192,7 @@ const std::vector<std::shared_ptr<Sensor>>* SensorsConfigurationManager::Get(boo
         }
 
         if(sensor_config.configuration.expression_present)
-            sensor->configuration.expression_evaluator = make_shared_ext<ExpressionEvaluator>(
+            sensor->configuration.expression_evaluator = make_unique_ext<ExpressionEvaluator>(
                 math_parser_service_,
                 CborHelpers::ToStdString(sensor_config.configuration.expression));
         else
@@ -206,6 +213,31 @@ const std::vector<std::shared_ptr<Sensor>>* SensorsConfigurationManager::Get(boo
 
 const std::span<uint8_t> SensorsConfigurationManager::GetRaw() {
     return *sensors_config_raw_.get();
+}
+
+void SensorsConfigurationManager::ValidateSensorType(const SensorConfiguration& sensor_configuration) {
+    if(sensor_configuration.type == SensorType::PHYSICAL_ANALOG) {
+        if(!sensor_configuration.channel.has_value())
+            throw std::runtime_error("Physical Analog sensor must have channel.");
+
+        if(sensor_configuration.voltage_interpolator == nullptr)
+            throw std::runtime_error("Physical Analog sensor must have interpolation method.");
+    } else if(sensor_configuration.type == SensorType::PHYSICAL_INDICATOR) {
+        if(!sensor_configuration.channel.has_value())
+            throw std::runtime_error("Physical Indicator sensor must have channel.");
+    } else if(sensor_configuration.type == SensorType::CANBUS_RAW) {
+        if(sensor_configuration.canbus_source == nullptr)
+            throw std::runtime_error("Canbus Raw sensor must have source.");
+    } else if(sensor_configuration.type == SensorType::CANBUS_ANALOG || sensor_configuration.type == SensorType::CANBUS_INDICATOR) {
+        if(sensor_configuration.canbus_source == nullptr)
+            throw std::runtime_error("Canbus sensor must have source.");
+
+        if(sensor_configuration.canbus_source->signal_name.empty())
+            throw std::runtime_error("Canbus sensor must have signal name.");
+    } else if(sensor_configuration.type == SensorType::VIRTUAL_ANALOG || sensor_configuration.type == SensorType::VIRTUAL_INDICATOR) {
+        if(sensor_configuration.expression_evaluator == nullptr)
+            throw std::runtime_error("Virtual sensor must have expression evaluator.");
+    }
 }
 
 } // namespace eerie_leap::domain::sensor_domain::configuration

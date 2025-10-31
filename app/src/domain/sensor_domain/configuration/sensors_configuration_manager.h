@@ -26,6 +26,8 @@ private:
     std::vector<std::shared_ptr<Sensor>> sensors_;
     int adc_channel_count_;
 
+    void ValidateSensorType(const SensorConfiguration& sensor_configuration);
+
 public:
     SensorsConfigurationManager(std::shared_ptr<MathParserService> math_parser_service, ext_unique_ptr<ConfigurationService<SensorsConfig>> sensors_configuration_service, int adc_channel_count);
 

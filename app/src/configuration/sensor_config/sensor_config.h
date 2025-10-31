@@ -47,6 +47,7 @@ struct SensorConfigurationConfig {
 	uint32_t interpolation_method;
 	uint32_t channel;
 	bool channel_present;
+	struct zcbor_string connection_string;
 	struct SensorCalibrationDataMap calibration_table;
 	bool calibration_table_present;
 	struct zcbor_string expression;

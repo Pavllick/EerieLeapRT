@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <array>
 #include <vector>
 #include <unordered_map>
 #include <functional>
@@ -14,8 +13,7 @@ namespace eerie_leap::subsys::canbus {
 
 struct CanFrame {
     uint32_t id;
-    uint8_t size;
-    std::array<uint8_t, CAN_MAX_DLEN> data;
+    std::vector<uint8_t> data;
 };
 
 using CanFrameHandler = std::function<void (const CanFrame&)>;
@@ -27,7 +25,7 @@ private:
     std::unordered_map<uint32_t, std::vector<CanFrameHandler>> handlers_;
     bool is_initialized_ = false;
 
-    // NOTE: Make bitrate configurable
+    // TODO: Make bitrate configurable
     uint32_t bitrate_ = 500000;
     // 87.5% sampling point is recommended by CiA
     uint32_t sampling_point_percent_ = 875;

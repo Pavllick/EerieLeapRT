@@ -149,11 +149,11 @@ void SensorsApiController::ParseSensorsConfigJson(uint8_t *buffer, size_t len)
 
             switch (interpolation_method) {
             case InterpolationMethod::LINEAR:
-                sensor->configuration.voltage_interpolator = make_shared_ext<LinearVoltageInterpolator>(calibration_table_ptr);
+                sensor->configuration.voltage_interpolator = make_unique_ext<LinearVoltageInterpolator>(calibration_table_ptr);
                 break;
 
             case InterpolationMethod::CUBIC_SPLINE:
-                sensor->configuration.voltage_interpolator = make_shared_ext<CubicSplineVoltageInterpolator>(calibration_table_ptr);
+                sensor->configuration.voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_table_ptr);
                 break;
 
             default:
@@ -165,7 +165,7 @@ void SensorsApiController::ParseSensorsConfigJson(uint8_t *buffer, size_t len)
         }
 
         if(data.sensors[i].configuration.expression != nullptr && strcmp(data.sensors[i].configuration.expression, "") != 0) {
-            sensor->configuration.expression_evaluator = make_shared_ext<ExpressionEvaluator>(
+            sensor->configuration.expression_evaluator = make_unique_ext<ExpressionEvaluator>(
                 math_parser_service_,
                 std::string(data.sensors[i].configuration.expression));
         } else {

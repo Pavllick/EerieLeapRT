@@ -3,27 +3,34 @@
 #include <cstdint>
 #include <array>
 #include <stdexcept>
+#include <utility>
 
 namespace eerie_leap::domain::sensor_domain::models {
 
 using namespace std::string_view_literals;
 
-enum class SensorType : std::uint8_t {
+enum class SensorType : std::uint32_t {
     PHYSICAL_ANALOG,
     VIRTUAL_ANALOG,
     PHYSICAL_INDICATOR,
-    VIRTUAL_INDICATOR
+    VIRTUAL_INDICATOR,
+    CANBUS_RAW,
+    CANBUS_ANALOG,
+    CANBUS_INDICATOR
 };
 
 constexpr const std::array SensorTypeNames = {
     "PHYSICAL_ANALOG"sv,
     "VIRTUAL_ANALOG"sv,
     "PHYSICAL_INDICATOR"sv,
-    "VIRTUAL_INDICATOR"sv
+    "VIRTUAL_INDICATOR"sv,
+    "CANBUS_RAW"sv,
+    "CANBUS_ANALOG"sv,
+    "CANBUS_INDICATOR"sv
 };
 
 inline const char* GetSensorTypeName(SensorType type) {
-    return SensorTypeNames[static_cast<std::uint8_t>(type)].data();
+    return SensorTypeNames[std::to_underlying(type)].data();
 }
 
 inline SensorType GetSensorType(const std::string& name) {

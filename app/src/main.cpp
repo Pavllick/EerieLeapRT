@@ -19,6 +19,7 @@
 #include "subsys/modbus/modbus.h"
 #include "subsys/cfb/cfb.h"
 #include "subsys/canbus/canbus.h"
+#include "subsys/dbc/dbc.h"
 #include "subsys/time/time_service.h"
 #include "subsys/time/rtc_provider.h"
 #include "subsys/time/boot_elapsed_time_provider.h"
@@ -76,6 +77,7 @@ using namespace eerie_leap::subsys::gpio;
 using namespace eerie_leap::subsys::cfb;
 using namespace eerie_leap::subsys::modbus;
 using namespace eerie_leap::subsys::canbus;
+using namespace eerie_leap::subsys::dbc;
 using namespace eerie_leap::subsys::time;
 
 using namespace eerie_leap::configuration::services;
@@ -195,11 +197,16 @@ int main(void) {
         }
     }
 
+    auto dbc = make_shared_ext<Dbc>();
+
     auto system_configuration_manager = make_shared_ext<SystemConfigurationManager>(std::move(system_config_service));
     auto sensors_configuration_manager = make_shared_ext<SensorsConfigurationManager>(
         math_parser_service,
         std::move(sensors_config_service),
         adc_configuration_manager->Get()->GetChannelCount());
+
+    // TODO: For test purposes only
+    SetupTestSensors(math_parser_service, sensors_configuration_manager);
 
     auto sensor_readings_frame = make_shared_ext<SensorReadingsFrame>();
 
@@ -245,15 +252,14 @@ int main(void) {
         }
     }
 
-    // TODO: For test purposes only
-    SetupTestSensors(math_parser_service, sensors_configuration_manager);
-
     auto sensor_reader_factory = make_shared_ext<SensorReaderFactory>(
         time_service,
         guid_generator,
         gpio,
         adc_configuration_manager,
-        sensor_readings_frame);
+        sensor_readings_frame,
+        canbus,
+        dbc);
 
     auto processing_scheduler_service = make_shared_ext<ProcessingSchedulerService>(
         sensors_configuration_manager,
@@ -336,20 +342,19 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
 
     // ExpressionEvaluator expression_evaluator_1(math_parser_service, "{x} * 2 + {sensor_2} + 1");
 
-    Sensor sensor_1 {
-        .id = "sensor_1",
-        .metadata = {
+    auto sensor_1 = make_shared_ext<Sensor>();
+    sensor_1->id = "sensor_1";
+    sensor_1->metadata = {
             .name = "Sensor 1",
             .unit = "km/h",
             .description = "Test Sensor 1"
-        },
-        .configuration = {
+    };
+    sensor_1->configuration = {
             .type = SensorType::PHYSICAL_ANALOG,
             .channel = 0,
             .sampling_rate_ms = 10,
-            .voltage_interpolator = make_shared_ext<LinearVoltageInterpolator>(calibration_data_1_ptr),
-            // .expression_evaluator = make_shared_ext<ExpressionEvaluator>(expression_evaluator_1)
-        }
+        .voltage_interpolator = make_unique_ext<LinearVoltageInterpolator>(calibration_data_1_ptr),
+        // .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_1)
     };
 
     std::vector<CalibrationData> calibration_data_2 {
@@ -363,74 +368,87 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
 
     ExpressionEvaluator expression_evaluator_2(math_parser_service, "x * 4 + 1.6");
 
-    Sensor sensor_2 {
-        .id = "sensor_2",
-        .metadata = {
+    auto sensor_2 = make_shared_ext<Sensor>();
+    sensor_2->id = "sensor_2";
+    sensor_2->metadata = {
             .name = "Sensor 2",
             .unit = "km/h",
             .description = "Test Sensor 2"
-        },
-        .configuration = {
+    };
+    sensor_2->configuration = {
             .type = SensorType::PHYSICAL_ANALOG,
             .channel = 1,
-            .sampling_rate_ms = 500,
-            .voltage_interpolator = make_shared_ext<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
-            .expression_evaluator = make_shared_ext<ExpressionEvaluator>(expression_evaluator_2)
-        }
+        .sampling_rate_ms = 1000,
+        .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_2)
     };
 
     ExpressionEvaluator expression_evaluator_3(math_parser_service, "{sensor_1} + 8.34");
 
-    Sensor sensor_3 {
-        .id = "sensor_3",
-        .metadata = {
+    auto sensor_3 = make_shared_ext<Sensor>();
+    sensor_3->id = "sensor_3";
+    sensor_3->metadata = {
             .name = "Sensor 3",
             .unit = "km/h",
             .description = "Test Sensor 3"
-        },
-        .configuration = {
+    };
+    sensor_3->configuration = {
             .type = SensorType::VIRTUAL_ANALOG,
             .sampling_rate_ms = 2000,
-            .expression_evaluator = make_shared_ext<ExpressionEvaluator>(expression_evaluator_3)
-        }
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_3)
     };
 
-    Sensor sensor_4 {
-        .id = "sensor_4",
-        .metadata = {
+    auto sensor_4 = make_shared_ext<Sensor>();
+    sensor_4->id = "sensor_4";
+    sensor_4->metadata = {
             .name = "Sensor 4",
             .unit = "",
             .description = "Test Sensor 4"
-        },
-        .configuration = {
+    };
+    sensor_4->configuration = {
             .type = SensorType::PHYSICAL_INDICATOR,
             .channel = 1,
             .sampling_rate_ms = 1000
-        }
     };
 
     ExpressionEvaluator expression_evaluator_5(math_parser_service, "{sensor_1} < 400");
 
-    Sensor sensor_5 {
-        .id = "sensor_5",
-        .metadata = {
+    auto sensor_5 = make_shared_ext<Sensor>();
+    sensor_5->id = "sensor_5";
+    sensor_5->metadata = {
             .name = "Sensor 5",
             .unit = "",
             .description = "Test Sensor 5"
-        },
-        .configuration = {
+    };
+    sensor_5->configuration = {
             .type = SensorType::VIRTUAL_INDICATOR,
             .sampling_rate_ms = 1000,
-            .expression_evaluator = make_shared_ext<ExpressionEvaluator>(expression_evaluator_5)
-        }
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_5)
+    };
+
+    auto sensor_6 = make_shared_ext<Sensor>();
+    sensor_6->id = "sensor_6";
+    sensor_6->metadata = {
+        .name = "Sensor 6",
+        .unit = "",
+        .description = "Test Sensor 6"
+    };
+    sensor_6->configuration = {
+        .type = SensorType::CANBUS_ANALOG,
+        .sampling_rate_ms = 1000,
+        .canbus_source = make_unique_ext<CanbusSource>(
+            790,
+            "RPM"
+        )
     };
 
     std::vector<std::shared_ptr<Sensor>> sensors = {
-        make_shared_ext<Sensor>(sensor_1),
-        make_shared_ext<Sensor>(sensor_2),
-        make_shared_ext<Sensor>(sensor_3),
-        // make_shared_ext<Sensor>(sensor_4),
-        // make_shared_ext<Sensor>(sensor_5)
+        sensor_1,
+        sensor_2,
+        sensor_3,
+        // sensor_4,
+        // sensor_5,
+        sensor_6
     };
 
     auto res = sensors_configuration_manager->Update(sensors);
