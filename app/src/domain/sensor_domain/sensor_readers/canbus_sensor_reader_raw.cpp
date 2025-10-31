@@ -24,8 +24,10 @@ CanbusSensorReaderRaw::CanbusSensorReaderRaw(
 
     canbus_->RegisterHandler(
         sensor_->configuration.canbus_source->frame_id,
-        [&canbus_frame = canbus_frame_](const CanFrame& frame) {
-            canbus_frame = frame;
+        [&can_frame = can_frame_, &can_frame_lock = can_frame_lock_](const CanFrame& frame) {
+            auto lock_key = k_spin_lock(&can_frame_lock);
+            can_frame = frame;
+            k_spin_unlock(&can_frame_lock, lock_key);
         });
 }
 
@@ -36,9 +38,13 @@ void CanbusSensorReaderRaw::Read() {
     reading->value = 0;
     reading->status = ReadingStatus::RAW;
 
+    auto lock_key = k_spin_lock(&can_frame_lock_);
+    auto can_frame = can_frame_;
+    k_spin_unlock(&can_frame_lock_, lock_key);
+
     reading->metadata.AddTag<std::vector<uint8_t>>(
         ReadingMetadataTag::CANBUS_DATA,
-        canbus_frame_.data);
+        can_frame.data);
 
     sensor_readings_frame_->AddOrUpdateReading(reading);
 }

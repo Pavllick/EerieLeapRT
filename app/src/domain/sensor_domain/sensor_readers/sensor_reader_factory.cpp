@@ -4,7 +4,7 @@
 #include "domain/sensor_domain/sensor_readers/sensor_reader_virtual_analog.h"
 #include "domain/sensor_domain/sensor_readers/sensor_reader_virtual_indicator.h"
 #include "domain/sensor_domain/sensor_readers/canbus_sensor_reader_raw.h"
-#include "domain/sensor_domain/sensor_readers/canbus_sensor_reader_analog.h"
+#include "domain/sensor_domain/sensor_readers/canbus_sensor_reader.h"
 
 #include "sensor_reader_factory.h"
 
@@ -62,8 +62,8 @@ std::unique_ptr<ISensorReader> SensorReaderFactory::Create(std::shared_ptr<Senso
             sensor_readings_frame_,
             sensor,
             canbus_);
-    } else if(sensor->configuration.type == SensorType::CANBUS_ANALOG) {
-        sensor_reader = make_unique<CanbusSensorReaderAnalog>(
+    } else if(sensor->configuration.type == SensorType::CANBUS_ANALOG || sensor->configuration.type == SensorType::CANBUS_INDICATOR) {
+        sensor_reader = make_unique<CanbusSensorReader>(
             time_service_,
             guid_generator_,
             sensor_readings_frame_,

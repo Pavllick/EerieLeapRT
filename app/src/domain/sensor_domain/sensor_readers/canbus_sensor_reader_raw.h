@@ -3,6 +3,7 @@
 #include <memory>
 
 #include <zephyr/kernel.h>
+#include <zephyr/spinlock.h>
 #include <zephyr/sys/atomic.h>
 
 #include "subsys/canbus/canbus.h"
@@ -15,7 +16,8 @@ using namespace eerie_leap::subsys::canbus;
 class CanbusSensorReaderRaw : public SensorReaderBase {
 private:
     std::shared_ptr<Canbus> canbus_;
-    CanFrame canbus_frame_;
+    CanFrame can_frame_;
+    k_spinlock can_frame_lock_;
 
 public:
     CanbusSensorReaderRaw(

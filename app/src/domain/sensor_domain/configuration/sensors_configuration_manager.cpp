@@ -225,18 +225,33 @@ void SensorsConfigurationManager::ValidateSensorType(const SensorConfiguration& 
     } else if(sensor_configuration.type == SensorType::PHYSICAL_INDICATOR) {
         if(!sensor_configuration.channel.has_value())
             throw std::runtime_error("Physical Indicator sensor must have channel.");
+
+        if(sensor_configuration.voltage_interpolator != nullptr)
+            throw std::runtime_error("Physical Indicator sensor must not have interpolation method.");
     } else if(sensor_configuration.type == SensorType::CANBUS_RAW) {
         if(sensor_configuration.canbus_source == nullptr)
-            throw std::runtime_error("Canbus Raw sensor must have source.");
+            throw std::runtime_error("Canbus sensor must have source.");
+
+        if(sensor_configuration.voltage_interpolator != nullptr)
+            throw std::runtime_error("Canbus sensor must not have interpolation method.");
+
+        if(sensor_configuration.expression_evaluator != nullptr)
+            throw std::runtime_error("Canbus Raw sensor must not have math expression.");
     } else if(sensor_configuration.type == SensorType::CANBUS_ANALOG || sensor_configuration.type == SensorType::CANBUS_INDICATOR) {
         if(sensor_configuration.canbus_source == nullptr)
             throw std::runtime_error("Canbus sensor must have source.");
 
         if(sensor_configuration.canbus_source->signal_name.empty())
             throw std::runtime_error("Canbus sensor must have signal name.");
+
+        if(sensor_configuration.voltage_interpolator != nullptr)
+            throw std::runtime_error("Canbus sensor must not have interpolation method.");
     } else if(sensor_configuration.type == SensorType::VIRTUAL_ANALOG || sensor_configuration.type == SensorType::VIRTUAL_INDICATOR) {
         if(sensor_configuration.expression_evaluator == nullptr)
             throw std::runtime_error("Virtual sensor must have expression evaluator.");
+
+        if(sensor_configuration.voltage_interpolator != nullptr)
+            throw std::runtime_error("Virtual sensor must not have interpolation method.");
     }
 }
 

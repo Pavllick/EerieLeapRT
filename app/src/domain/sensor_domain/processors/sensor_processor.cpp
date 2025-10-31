@@ -43,6 +43,8 @@ void SensorProcessor::ProcessReading(std::shared_ptr<SensorReading> reading) {
             bool raw_value = reading->value.value();
             bool value = raw_value;
 
+            reading->metadata.AddTag<bool>(ReadingMetadataTag::RAW_VALUE, raw_value > 0);
+
             if(reading->sensor->configuration.expression_evaluator != nullptr) {
                 value = reading->sensor->configuration.expression_evaluator->Evaluate(
                     sensor_readings_frame_->GetReadingValues(),
@@ -62,6 +64,20 @@ void SensorProcessor::ProcessReading(std::shared_ptr<SensorReading> reading) {
             float value = raw_value;
 
             reading->metadata.AddTag<float>(ReadingMetadataTag::RAW_VALUE, raw_value);
+
+            if(reading->sensor->configuration.expression_evaluator != nullptr) {
+                value = reading->sensor->configuration.expression_evaluator->Evaluate(
+                    sensor_readings_frame_->GetReadingValues(),
+                    value);
+            }
+
+            reading->value = value;
+            reading->status = ReadingStatus::PROCESSED;
+        } else if(reading->sensor->configuration.type == SensorType::CANBUS_INDICATOR) {
+            bool raw_value = reading->value.value();
+            bool value = raw_value;
+
+            reading->metadata.AddTag<bool>(ReadingMetadataTag::RAW_VALUE, raw_value > 0);
 
             if(reading->sensor->configuration.expression_evaluator != nullptr) {
                 value = reading->sensor->configuration.expression_evaluator->Evaluate(
