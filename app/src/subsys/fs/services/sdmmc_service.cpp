@@ -19,12 +19,6 @@ using namespace eerie_leap::subsys::device_tree;
 
 LOG_MODULE_REGISTER(sdmmc_service_logger);
 
-// #ifdef CONFIG_SHARED_MULTI_HEAP
-// Z_KERNEL_STACK_DEFINE_IN(SdmmcService::stack_area_, SdmmcService::k_stack_size_, __attribute__((section(".ext_ram.bss"))));
-// #else
-// K_KERNEL_STACK_MEMBER(SdmmcService::stack_area_, SdmmcService::k_stack_size_);
-// #endif
-
 SdmmcService::SdmmcService(fs_mount_t mountpoint, const char* disk_name) : FsService(mountpoint), disk_name_(disk_name), monitor_running_(ATOMIC_INIT(0)) { }
 
 SdmmcService::~SdmmcService() {
@@ -81,7 +75,7 @@ void SdmmcService::SdMonitorHandler() {
 }
 
 void SdmmcService::SdMonitorThreadEntry() {
-    while(monitor_running_) {
+    while(atomic_get(&monitor_running_)) {
         SdMonitorHandler();
 
         if(k_sem_take(&sd_monitor_stop_sem_, K_MSEC(CONFIG_EERIE_LEAP_SD_CHECK_INTERVAL_MS)) == 0)

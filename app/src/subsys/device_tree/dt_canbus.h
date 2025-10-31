@@ -3,7 +3,7 @@
 #include <zephyr/devicetree.h>
 #include <zephyr/device.h>
 
-#if defined(CONFIG_CANBUS) && DT_HAS_CHOSEN(zephyr_canbus)
+#if defined(CONFIG_CAN) && DT_HAS_CHOSEN(zephyr_canbus)
 #define CANBUS_NODE DT_CHOSEN(zephyr_canbus)
 #endif
 
