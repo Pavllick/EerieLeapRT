@@ -42,9 +42,9 @@ void CanbusSensorReaderRaw::Read() {
     auto can_frame = can_frame_;
     k_spin_unlock(&can_frame_lock_, lock_key);
 
-    reading->metadata.AddTag<std::vector<uint8_t>>(
+    reading->metadata.AddTag<CanFrame>(
         ReadingMetadataTag::CANBUS_DATA,
-        can_frame.data);
+        can_frame);
 
     sensor_readings_frame_->AddOrUpdateReading(reading);
 }

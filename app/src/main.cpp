@@ -436,10 +436,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
     sensor_6->configuration = {
         .type = SensorType::CANBUS_ANALOG,
         .sampling_rate_ms = 1000,
-        .canbus_source = make_unique_ext<CanbusSource>(
-            790,
-            "RPM"
-        )
+        .canbus_source = make_unique_ext<CanbusSource>(790, "RPM")
     };
 
     std::vector<std::shared_ptr<Sensor>> sensors = {

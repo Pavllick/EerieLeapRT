@@ -2,18 +2,20 @@
 
 namespace eerie_leap::subsys::mdf::mdf4 {
 
-SourceInformationBlock::SourceInformationBlock(SourceType source_type, BusType bus_type, const std::string& name)
+SourceInformationBlock::SourceInformationBlock(SourceType source_type, BusType bus_type)
     : BlockBase("SI") {
 
     source_type_ = source_type;
     bus_type_ = bus_type;
     flags_ = 0;
+}
 
-    if(!name.empty()) {
-        auto name_block = std::make_shared<TextBlock>();
-        name_block->SetText(name);
-        links_.SetLink(LinkType::TextName, name_block);
-    }
+void SourceInformationBlock::SetName(std::shared_ptr<TextBlock> name) {
+    links_.SetLink(LinkType::TextName, name);
+}
+
+void SourceInformationBlock::SetPath(std::shared_ptr<TextBlock> path) {
+    links_.SetLink(LinkType::TextPath, path);
 }
 
 uint64_t SourceInformationBlock::GetBlockSize() const {

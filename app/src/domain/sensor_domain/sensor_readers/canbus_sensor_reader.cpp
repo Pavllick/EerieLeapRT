@@ -50,9 +50,9 @@ void CanbusSensorReader::Read() {
         can_frame.data.data());
     reading->status = ReadingStatus::RAW;
 
-    reading->metadata.AddTag<std::vector<uint8_t>>(
+    reading->metadata.AddTag<CanFrame>(
         ReadingMetadataTag::CANBUS_DATA,
-        can_frame.data);
+        can_frame);
 
     sensor_readings_frame_->AddOrUpdateReading(reading);
 }

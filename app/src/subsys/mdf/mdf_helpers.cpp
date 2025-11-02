@@ -16,6 +16,8 @@ MdfHelpers::ChannelDataType MdfHelpers::ToMdf4ChannelDataType(MdfDataType data_t
             return { mdf4::ChannelBlock::DataType::FloatLe, sizeof(float) * 8 };
         case MdfDataType::Float64:
             return { mdf4::ChannelBlock::DataType::FloatLe, sizeof(double) * 8 };
+        case MdfDataType::ByteArray:
+            return { mdf4::ChannelBlock::DataType::ByteArray, 0 };
         default:
             throw std::runtime_error("Unsupported data type");
     }

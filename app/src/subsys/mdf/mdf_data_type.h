@@ -11,7 +11,8 @@ enum class MdfDataType : uint8_t {
     Uint32,
     Uint64,
     Float32,
-    Float64
+    Float64,
+    ByteArray
 };
 
 } // namespace eerie_leap::subsys::mdf

@@ -49,12 +49,14 @@ private:
     uint8_t record_id_size_bytes_;
 
 public:
-    ChannelGroupBlock(uint8_t record_id_size_bytes, uint64_t record_id, const std::string& name = "");
+    ChannelGroupBlock(uint8_t record_id_size_bytes, uint64_t record_id);
     virtual ~ChannelGroupBlock() = default;
 
+    uint16_t GetFlags() const;
     uint64_t GetRecordId() const;
-    uint32_t GetDataSizeBytes() const;
     uint8_t GetRecordIdSizeBytes() const;
+    std::vector<uint8_t> GetRecordIdData() const;
+    uint32_t GetDataSizeBytes() const;
     std::vector<std::shared_ptr<ChannelBlock>> GetChannels() const;
 
     uint64_t GetBlockSize() const override;
@@ -73,6 +75,9 @@ public:
     void AddChannel(std::shared_ptr<ChannelBlock> channel);
     void LinkBlock(std::shared_ptr<ChannelGroupBlock> next_block);
     void AddSourceInformation(std::shared_ptr<SourceInformationBlock> source_information);
+    void SetFlags(uint16_t flags);
+    void SetPathSeparator(uint16_t path_separator);
+    void SetName(std::shared_ptr<TextBlock> name);
 };
 
 } // namespace eerie_leap::subsys::mdf::mdf4

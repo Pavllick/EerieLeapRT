@@ -81,7 +81,7 @@ private:
         TextName,
         SourceInformation,
         ChannelConversion,
-        Data,
+        SignalData,
         TextUnit,
         MetadataComment
     };
@@ -107,7 +107,7 @@ private:
     float limit_ext_max_;               // 8 bytes, Upper extended limit
 
 public:
-    ChannelBlock(Type type, SyncType sync_type, DataType data_type, uint32_t bit_count, std::string name, std::string unit);
+    ChannelBlock(Type type, SyncType sync_type, DataType data_type, uint32_t bit_count);
     virtual ~ChannelBlock() = default;
 
     uint32_t GetDataSizeBytes() const;
@@ -126,13 +126,20 @@ public:
             links_.GetLink(LinkType::SourceInformation),
             links_.GetLink(LinkType::ChannelConversion),
             links_.GetLink(LinkType::ChannelArray),
-            links_.GetLink(LinkType::Data),
+            links_.GetLink(LinkType::SignalData),
             links_.GetLink(LinkType::ChannelNext) };
     }
 
-    uint32_t GetDataBytes() const;
-    void SetOffsetBytes(uint32_t offset_bytes);
     void LinkBlock(std::shared_ptr<ChannelBlock> next_block);
+    void SetType(Type type);
+    void SetFlags(uint32_t flags);
+    void SetName(std::shared_ptr<TextBlock> name);
+    void SetUnit(std::shared_ptr<TextBlock> unit);
+    void SetArrayBlock(std::shared_ptr<IBlock> array_block);
+    void SetOffsetBytes(uint32_t offset_bytes);
+    void SetOffsetBits(uint8_t offset_bits);
+    void SetBitCount(uint32_t bit_count);
+    void SetSignalDataBlock(std::shared_ptr<IBlock> block);
 };
 
 } // namespace eerie_leap::subsys::mdf::mdf4

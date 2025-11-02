@@ -5,9 +5,13 @@
 #include <variant>
 #include <vector>
 
+#include "subsys/canbus/can_frame.h"
+
 #include "reading_metadata_tag.h"
 
 namespace eerie_leap::domain::sensor_domain::models {
+
+using namespace eerie_leap::subsys::canbus;
 
 using ReadingMetadataValue = std::variant<
     std::monostate,
@@ -15,7 +19,7 @@ using ReadingMetadataValue = std::variant<
     float,
     std::string,
     bool,
-    std::vector<uint8_t>
+    CanFrame
 >;
 
 struct ReadingMetadata {

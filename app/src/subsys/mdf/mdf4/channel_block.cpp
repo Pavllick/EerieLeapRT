@@ -2,7 +2,7 @@
 
 namespace eerie_leap::subsys::mdf::mdf4 {
 
-ChannelBlock::ChannelBlock(Type type, SyncType sync_type, DataType data_type, uint32_t bit_count, std::string name, std::string unit): BlockBase("CN") {
+ChannelBlock::ChannelBlock(Type type, SyncType sync_type, DataType data_type, uint32_t bit_count): BlockBase("CN") {
     type_ = type;
     sync_type_ = sync_type;
     data_type_ = data_type;
@@ -19,18 +19,6 @@ ChannelBlock::ChannelBlock(Type type, SyncType sync_type, DataType data_type, ui
     limit_max_ = 0;
     limit_ext_min_ = 0;
     limit_ext_max_ = 0;
-
-    if(!name.empty()) {
-        auto name_block = std::make_shared<TextBlock>();
-        name_block->SetText(name);
-        links_.SetLink(LinkType::TextName, std::move(name_block));
-    }
-
-    if(!unit.empty()) {
-        auto unit_block = std::make_shared<TextBlock>();
-        unit_block->SetText(unit);
-        links_.SetLink(LinkType::TextUnit, std::move(unit_block));
-    }
 }
 
 uint32_t ChannelBlock::GetDataSizeBytes() const {
@@ -49,14 +37,6 @@ void ChannelBlock::SetConversion(std::shared_ptr<ChannelConversionBlock> convers
     links_.SetLink(LinkType::ChannelConversion, std::move(conversion));
 }
 
-uint32_t ChannelBlock::GetDataBytes() const {
-    return bit_count_ / 8;
-}
-
-void ChannelBlock::SetOffsetBytes(uint32_t offset_bytes) {
-    byte_offset_ = offset_bytes;
-}
-
 void ChannelBlock::LinkBlock(std::shared_ptr<ChannelBlock> next_block) {
     if(links_.GetLink(LinkType::ChannelNext)) {
         auto linked_channel = std::dynamic_pointer_cast<ChannelBlock>(links_.GetLink(LinkType::ChannelNext));
@@ -64,6 +44,42 @@ void ChannelBlock::LinkBlock(std::shared_ptr<ChannelBlock> next_block) {
     } else {
         links_.SetLink(LinkType::ChannelNext, std::move(next_block));
     }
+}
+
+void ChannelBlock::SetType(Type type) {
+    type_ = type;
+}
+
+void ChannelBlock::SetFlags(uint32_t flags) {
+    flags_ = flags;
+}
+
+void ChannelBlock::SetName(std::shared_ptr<TextBlock> name) {
+    links_.SetLink(LinkType::TextName, name);
+}
+
+void ChannelBlock::SetUnit(std::shared_ptr<TextBlock> unit) {
+    links_.SetLink(LinkType::TextUnit, unit);
+}
+
+void ChannelBlock::SetArrayBlock(std::shared_ptr<IBlock> array_block) {
+    links_.SetLink(LinkType::ChannelArray, array_block);
+}
+
+void ChannelBlock::SetOffsetBytes(uint32_t offset_bytes) {
+    byte_offset_ = offset_bytes;
+}
+
+void ChannelBlock::SetOffsetBits(uint8_t offset_bits) {
+    bit_offset_ = offset_bits;
+}
+
+void ChannelBlock::SetBitCount(uint32_t bit_count) {
+    bit_count_ = bit_count;
+}
+
+void ChannelBlock::SetSignalDataBlock(std::shared_ptr<IBlock> block) {
+    links_.SetLink(LinkType::SignalData, block);
 }
 
 uint64_t ChannelBlock::GetBlockSize() const {

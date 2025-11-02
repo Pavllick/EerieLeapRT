@@ -9,12 +9,9 @@
 #include <zephyr/device.h>
 #include <zephyr/drivers/can.h>
 
-namespace eerie_leap::subsys::canbus {
+#include "can_frame.h"
 
-struct CanFrame {
-    uint32_t id;
-    std::vector<uint8_t> data;
-};
+namespace eerie_leap::subsys::canbus {
 
 using CanFrameHandler = std::function<void (const CanFrame&)>;
 

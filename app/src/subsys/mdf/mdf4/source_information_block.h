@@ -55,7 +55,7 @@ private:
     // uint8_t reserved_1_[5];      // 5 bytes, Reserved
 
 public:
-    SourceInformationBlock(SourceType source_type, BusType bus_type, const std::string& name = "");
+    SourceInformationBlock(SourceType source_type, BusType bus_type);
     virtual ~SourceInformationBlock() = default;
 
     uint64_t GetBlockSize() const override;
@@ -67,6 +67,9 @@ public:
             links_.GetLink(LinkType::TextPath),
             links_.GetLink(LinkType::MetadataComment) };
     }
+
+    void SetName(std::shared_ptr<TextBlock> name);
+    void SetPath(std::shared_ptr<TextBlock> path);
 };
 
 } // namespace eerie_leap::subsys::mdf::mdf4

@@ -146,7 +146,7 @@ void LogWriterService::LogReadingWorkTask(k_work* work) {
 
     auto time_now = task->time_service->GetCurrentTime();
     for(const auto& [sensor_id, reading] : task->sensor_readings_frame->GetReadings()) {
-        if(reading->status != ReadingStatus::PROCESSED)
+        if(reading->status != ReadingStatus::PROCESSED && reading->sensor->configuration.type != SensorType::CANBUS_RAW)
             continue;
 
         task->logger->LogReading(time_now, *reading);

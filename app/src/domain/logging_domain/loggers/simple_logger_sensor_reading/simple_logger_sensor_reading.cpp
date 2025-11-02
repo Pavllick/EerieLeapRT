@@ -104,6 +104,9 @@ bool SimpleLoggerSensorReading::LogReading(const system_clock::time_point& time,
     if(!reading.value.has_value())
         return false;
 
+    if(reading.status != ReadingStatus::PROCESSED)
+        return false;
+
     uint32_t value = 0;
     float float_value = reading.value.value();
     memcpy(&value, &float_value, sizeof(value));
