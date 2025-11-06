@@ -9,6 +9,7 @@
 #include "subsys/mdf/mdf4/data_record.h"
 #include "domain/sensor_domain/models/sensor.h"
 #include "domain/sensor_domain/models/sensor_reading.h"
+#include "domain/logging_domain/configuration/logging_configuration_manager.h"
 #include "i_logger.h"
 
 namespace eerie_leap::domain::logging_domain::loggers {
@@ -17,10 +18,13 @@ using namespace std::chrono;
 using namespace eerie_leap::subsys::mdf;
 using namespace eerie_leap::subsys::mdf::mdf4;
 using namespace eerie_leap::domain::sensor_domain::models;
+using namespace eerie_leap::domain::logging_domain::configuration;
 
 class Mdf4LoggerSensorReading : public ILogger<SensorReading> {
 private:
     static constexpr uint8_t RECORD_ID_SIZE = 4;
+
+    std::shared_ptr<LoggingConfigurationManager> logging_configuration_manager_;
 
     std::unique_ptr<Mdf4File> mdf4_file_;
     std::unordered_map<uint32_t, std::unique_ptr<DataRecord>> records_;
@@ -30,13 +34,13 @@ private:
 
     uint32_t vlsd_channel_group_id_ = 0;
     uint64_t current_file_size_bytes_;
-    system_clock::time_point last_can_reading_time_;
+    std::unordered_map<uint32_t, system_clock::time_point> last_reading_time_;
 
     bool LogValueReading(float time_delta_s, const SensorReading& reading);
     bool LogCanbusRawReading(float time_delta_s, const SensorReading& reading);
 
 public:
-    explicit Mdf4LoggerSensorReading(const std::vector<std::shared_ptr<Sensor>>& sensors);
+    explicit Mdf4LoggerSensorReading(std::shared_ptr<LoggingConfigurationManager> logging_configuration_manager, const std::vector<std::shared_ptr<Sensor>>& sensors);
     virtual ~Mdf4LoggerSensorReading() = default;
 
     const char* GetFileExtension() const override;

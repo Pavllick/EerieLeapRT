@@ -31,6 +31,7 @@
 #include "domain/system_domain/configuration/system_configuration_manager.h"
 #include "domain/sensor_domain/configuration/adc_configuration_manager.h"
 #include "domain/sensor_domain/configuration/sensors_configuration_manager.h"
+#include "domain/logging_domain/configuration/logging_configuration_manager.h"
 #include "domain/sensor_domain/sensor_readers/sensor_reader_factory.h"
 #include "domain/sensor_domain/services/processing_scheduler_service.h"
 #include "domain/sensor_domain/services/calibration_service.h"
@@ -89,6 +90,7 @@ using namespace eerie_leap::domain::user_com_domain;
 using namespace eerie_leap::domain::user_com_domain::services::com_reading;
 using namespace eerie_leap::domain::user_com_domain::services::com_polling;
 using namespace eerie_leap::domain::logging_domain::services;
+using namespace eerie_leap::domain::logging_domain::configuration;
 
 using namespace eerie_leap::controllers;
 
@@ -102,6 +104,8 @@ constexpr uint32_t SLEEP_TIME_MS = 10000;
 
 void SetupAdcConfiguration(std::shared_ptr<AdcConfigurationManager> adc_configuration_manager);
 void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager);
+void SetupLoggingConfiguration(std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager,
+    std::shared_ptr<LoggingConfigurationManager> logging_configuration_manager);
 
 // NOTE: ADC reading timing for ESP32S3:
 // Each sample adds up to about 25us to the reading time
@@ -212,8 +216,14 @@ int main(void) {
 
     std::shared_ptr<LoggingController> logging_controller = nullptr;
     if(sd_fs_service != nullptr) {
+        auto logging_configuration_manager = make_shared_ext<LoggingConfigurationManager>();
+
+        // TODO: For test purposes only
+        SetupLoggingConfiguration(sensors_configuration_manager, logging_configuration_manager);
+
         auto log_writer_service = make_shared_ext<LogWriterService>(
             sd_fs_service,
+            logging_configuration_manager,
             time_service,
             sensor_readings_frame);
         log_writer_service->Initialize();
@@ -221,6 +231,7 @@ int main(void) {
         logging_controller = make_shared_ext<LoggingController>(
             log_writer_service,
             sensors_configuration_manager,
+            logging_configuration_manager,
             display_controller);
     }
 
@@ -465,4 +476,43 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
     auto res = sensors_configuration_manager->Update(sensors);
     if(!res)
         throw std::runtime_error("Cannot save Sensors config");
+}
+
+void SetupLoggingConfiguration(std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager,
+    std::shared_ptr<LoggingConfigurationManager> logging_configuration_manager) {
+
+    auto sensors = sensors_configuration_manager->Get();
+
+    auto logging_configuration = make_shared_ext<LoggingConfiguration>();
+    logging_configuration->logging_interval_ms = 100;
+
+    SensorLoggingConfiguration sensor_logging_config_1 = {
+        .is_enabled = true,
+        .log_raw_value = false,
+        .log_only_new_data = false
+    };
+    logging_configuration->sensor_configurations.insert({sensors->at(0)->id_hash, sensor_logging_config_1});
+
+    SensorLoggingConfiguration sensor_logging_config_2 = {
+        .is_enabled = true,
+        .log_raw_value = true,
+        .log_only_new_data = false
+    };
+    logging_configuration->sensor_configurations.insert({sensors->at(1)->id_hash, sensor_logging_config_2});
+
+    SensorLoggingConfiguration sensor_logging_config_6 = {
+        .is_enabled = true,
+        .log_raw_value = true,
+        .log_only_new_data = false
+    };
+    logging_configuration->sensor_configurations.insert({sensors->at(3)->id_hash, sensor_logging_config_6});
+
+    SensorLoggingConfiguration sensor_logging_config_7 = {
+        .is_enabled = true,
+        .log_raw_value = true,
+        .log_only_new_data = true
+    };
+    logging_configuration->sensor_configurations.insert({sensors->at(4)->id_hash, sensor_logging_config_7});
+
+    logging_configuration_manager->Update(logging_configuration);
 }

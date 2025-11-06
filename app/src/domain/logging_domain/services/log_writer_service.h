@@ -11,6 +11,7 @@
 #include "subsys/fs/services/fs_service_stream_buf.h"
 #include "subsys/time/i_time_service.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
+#include "domain/logging_domain/configuration/logging_configuration_manager.h"
 #include "domain/logging_domain/loggers/i_logger.h"
 
 #include "log_writer_task.hpp"
@@ -21,11 +22,13 @@ using namespace std::chrono;
 using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::subsys::time;
 using namespace eerie_leap::domain::sensor_domain::utilities;
+using namespace eerie_leap::domain::logging_domain::configuration;
 using namespace eerie_leap::domain::logging_domain::loggers;
 
 class LogWriterService {
 private:
     std::shared_ptr<IFsService> fs_service_;
+    std::shared_ptr<LoggingConfigurationManager> logging_configuration_manager_;
     std::unique_ptr<FsServiceStreamBuf> fs_stream_buf_;
     std::shared_ptr<ITimeService> time_service_;
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame_;
@@ -43,15 +46,13 @@ private:
     k_sem processing_semaphore_;
     static constexpr k_timeout_t SEMAPHORE_TIMEOUT = K_MSEC(200);
 
-    // TODO: Make configurable
-    static constexpr int LOGGING_INTERVAL_MS = 100;
-
     static void LogReadingWorkTask(k_work* work);
     static std::string GetNewLogDataFileName(const system_clock::time_point& tp);
 
 public:
     LogWriterService(
         std::shared_ptr<IFsService> fs_service,
+        std::shared_ptr<LoggingConfigurationManager> logging_configuration_manager,
         std::shared_ptr<ITimeService> time_service,
         std::shared_ptr<SensorReadingsFrame> sensor_readings_frame);
     ~LogWriterService();

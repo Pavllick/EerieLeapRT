@@ -19,9 +19,11 @@ LOG_MODULE_REGISTER(log_writer_service_logger);
 
 LogWriterService::LogWriterService(
     std::shared_ptr<IFsService> fs_service,
+    std::shared_ptr<LoggingConfigurationManager> logging_configuration_manager,
     std::shared_ptr<ITimeService> time_service,
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame)
         : fs_service_(std::move(fs_service)),
+        logging_configuration_manager_(std::move(logging_configuration_manager)),
         time_service_(std::move(time_service)),
         sensor_readings_frame_(std::move(sensor_readings_frame)),
         logger_running_(ATOMIC_INIT(0)) {
@@ -110,7 +112,7 @@ int LogWriterService::LogWriterStart() {
 
     LOG_INF("Logging started. Log file created: %s", file_name.c_str());
 
-    task_->logging_interval_ms = LOGGING_INTERVAL_MS;
+    task_->logging_interval_ms = logging_configuration_manager_->Get()->logging_interval_ms;
     task_->start_time = start_time;
     task_->logger = logger_;
 

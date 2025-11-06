@@ -10,8 +10,13 @@ namespace eerie_leap::domain::logging_domain::loggers {
 
 using namespace eerie_leap::subsys::time;
 
-Mdf4LoggerSensorReading::Mdf4LoggerSensorReading(const std::vector<std::shared_ptr<Sensor>>& sensors)
-    : stream_(nullptr), last_can_reading_time_(system_clock::time_point::min()) {
+Mdf4LoggerSensorReading::Mdf4LoggerSensorReading(
+    std::shared_ptr<LoggingConfigurationManager> logging_configuration_manager,
+    const std::vector<std::shared_ptr<Sensor>>& sensors)
+        : logging_configuration_manager_(logging_configuration_manager),
+        stream_(nullptr) {
+
+    auto logging_configuration = logging_configuration_manager_->Get();
 
     mdf4_file_ = std::make_unique<Mdf4File>(false);
     auto data_group = mdf4_file_->CreateDataGroup(RECORD_ID_SIZE);
@@ -22,6 +27,12 @@ Mdf4LoggerSensorReading::Mdf4LoggerSensorReading(const std::vector<std::shared_p
     source_information->SetName(mdf4_file_->GetOrCreateTextBlock("Eerie Leap Sensor"));
 
     for(auto& sensor : sensors) {
+        if(!logging_configuration->sensor_configurations.contains(sensor->id_hash)
+            || !logging_configuration->sensor_configurations.at(sensor->id_hash).is_enabled) {
+
+            continue;
+        }
+
         if(sensor->configuration.type == SensorType::CANBUS_RAW) {
             auto vlsd_channel_group = mdf4_file_->CreateVLSDChannelGroup(data_group, vlsd_channel_group_id_++);
             auto channel_group = mdf4_file_->CreateCanDataFrameChannelGroup(data_group, vlsd_channel_group, sensor->id_hash, "Raw CAN Frame");
@@ -34,6 +45,7 @@ Mdf4LoggerSensorReading::Mdf4LoggerSensorReading(const std::vector<std::shared_p
             mdf4_file_->CreateDataChannel(channel_group, MdfDataType::Float32, "value", sensor->metadata.unit);
 
             if(sensor->configuration.expression_evaluator != nullptr
+                && logging_configuration->sensor_configurations.at(sensor->id_hash).log_raw_value
                 && (sensor->configuration.type == SensorType::PHYSICAL_ANALOG
                     || sensor->configuration.type == SensorType::PHYSICAL_INDICATOR)) {
 
@@ -110,11 +122,6 @@ bool Mdf4LoggerSensorReading::LogCanbusRawReading(float time_delta_s, const Sens
     if(!can_frame.has_value())
         return false;
 
-    if(last_can_reading_time_ == reading.timestamp.value())
-        return false;
-
-    last_can_reading_time_ = reading.timestamp.value();
-
     auto channel_group = can_raw_channel_groups_[reading.sensor->id_hash];
     current_file_size_bytes_ += mdf4_file_->WriteCanbusDataRecordToStream(channel_group, *stream_, can_frame.value(), time_delta_s);
 
@@ -125,12 +132,31 @@ bool Mdf4LoggerSensorReading::LogReading(const system_clock::time_point& time, c
     if(stream_ == nullptr)
         return false;
 
+    if(!logging_configuration_manager_->Get()->sensor_configurations.contains(reading.sensor->id_hash)
+        || !logging_configuration_manager_->Get()->sensor_configurations.at(reading.sensor->id_hash).is_enabled) {
+
+        return false;
+    }
+
+    if(logging_configuration_manager_->Get()->sensor_configurations.at(reading.sensor->id_hash).log_only_new_data
+        && last_reading_time_.contains(reading.sensor->id_hash)
+        && last_reading_time_[reading.sensor->id_hash] == reading.timestamp.value()) {
+
+        return false;
+    }
+
     float time_delta_s = (TimeHelpers::ToUint32(time) - TimeHelpers::ToUint32(start_time_)) / 1000.0F;
 
+    bool result = false;
     if(reading.sensor->configuration.type == SensorType::CANBUS_RAW)
-        return LogCanbusRawReading(time_delta_s, reading);
+        result = LogCanbusRawReading(time_delta_s, reading);
+    else
+        result = LogValueReading(time_delta_s, reading);
 
-    return LogValueReading(time_delta_s, reading);
+    if(result)
+        last_reading_time_[reading.sensor->id_hash] = reading.timestamp.value();
+
+    return result;
 }
 
 } // namespace eerie_leap::domain::logging_domain::loggers
