@@ -58,7 +58,7 @@ void ProcessingSchedulerService::ProcessSensorWorkTask(k_work* work) {
             reading->value.value_or(0.0f),
             TimeHelpers::GetFormattedString(*reading->timestamp).c_str());
     } catch (const std::exception& e) {
-        LOG_ERR("Error processing sensor: %s, Error: %s", task->sensor->id.c_str(), e.what());
+        LOG_DBG("Error processing sensor: %s, Error: %s", task->sensor->id.c_str(), e.what());
     }
 
     k_sem_give(task->processing_semaphore);

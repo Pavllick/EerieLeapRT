@@ -439,13 +439,27 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
         .canbus_source = make_unique_ext<CanbusSource>(790, "RPM")
     };
 
+    auto sensor_7 = make_shared_ext<Sensor>();
+    sensor_7->id = "sensor_7";
+    sensor_7->metadata = {
+        .name = "Sensor 7",
+        .unit = "",
+        .description = "Test Sensor 7"
+    };
+    sensor_7->configuration = {
+        .type = SensorType::CANBUS_RAW,
+        .sampling_rate_ms = 300,
+        .canbus_source = make_unique_ext<CanbusSource>(790)
+    };
+
     std::vector<std::shared_ptr<Sensor>> sensors = {
         sensor_1,
         sensor_2,
         sensor_3,
         // sensor_4,
         // sensor_5,
-        sensor_6
+        sensor_6,
+        sensor_7
     };
 
     auto res = sensors_configuration_manager->Update(sensors);

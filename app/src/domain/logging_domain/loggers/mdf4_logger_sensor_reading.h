@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <chrono>
 
 #include "subsys/mdf/mdf4_file.h"
 #include "subsys/mdf/mdf4/channel_group_block.h"
@@ -12,6 +13,7 @@
 
 namespace eerie_leap::domain::logging_domain::loggers {
 
+using namespace std::chrono;
 using namespace eerie_leap::subsys::mdf;
 using namespace eerie_leap::subsys::mdf::mdf4;
 using namespace eerie_leap::domain::sensor_domain::models;
@@ -28,6 +30,7 @@ private:
 
     uint32_t vlsd_channel_group_id_ = 0;
     uint64_t current_file_size_bytes_;
+    system_clock::time_point last_can_reading_time_;
 
     bool LogValueReading(float time_delta_s, const SensorReading& reading);
     bool LogCanbusRawReading(float time_delta_s, const SensorReading& reading);

@@ -1,5 +1,4 @@
 #include <cstdint>
-#include <chrono>
 
 #include "subsys/time/time_helpers.hpp"
 #include "subsys/mdf/mdf4/source_information_block.h"
@@ -12,7 +11,7 @@ namespace eerie_leap::domain::logging_domain::loggers {
 using namespace eerie_leap::subsys::time;
 
 Mdf4LoggerSensorReading::Mdf4LoggerSensorReading(const std::vector<std::shared_ptr<Sensor>>& sensors)
-    : stream_(nullptr) {
+    : stream_(nullptr), last_can_reading_time_(system_clock::time_point::min()) {
 
     mdf4_file_ = std::make_unique<Mdf4File>(false);
     auto data_group = mdf4_file_->CreateDataGroup(RECORD_ID_SIZE);
@@ -110,6 +109,11 @@ bool Mdf4LoggerSensorReading::LogCanbusRawReading(float time_delta_s, const Sens
     auto can_frame = reading.metadata.GetTag<CanFrame>(ReadingMetadataTag::CANBUS_DATA);
     if(!can_frame.has_value())
         return false;
+
+    if(last_can_reading_time_ == reading.timestamp.value())
+        return false;
+
+    last_can_reading_time_ = reading.timestamp.value();
 
     auto channel_group = can_raw_channel_groups_[reading.sensor->id_hash];
     current_file_size_bytes_ += mdf4_file_->WriteCanbusDataRecordToStream(channel_group, *stream_, can_frame.value(), time_delta_s);

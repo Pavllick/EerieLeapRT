@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <chrono>
 
 #include <zephyr/kernel.h>
 #include <zephyr/spinlock.h>
@@ -11,12 +12,14 @@
 
 namespace eerie_leap::domain::sensor_domain::sensor_readers {
 
+using namespace std::chrono;
 using namespace eerie_leap::subsys::canbus;
 
 class CanbusSensorReaderRaw : public SensorReaderBase {
 private:
     std::shared_ptr<Canbus> canbus_;
     CanFrame can_frame_;
+    system_clock::time_point can_frame_timestamp_;
     k_spinlock can_frame_lock_;
 
 public:

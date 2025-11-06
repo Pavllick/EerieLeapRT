@@ -24,22 +24,23 @@ CanbusSensorReaderRaw::CanbusSensorReaderRaw(
 
     canbus_->RegisterHandler(
         sensor_->configuration.canbus_source->frame_id,
-        [&can_frame = can_frame_, &can_frame_lock = can_frame_lock_](const CanFrame& frame) {
-            auto lock_key = k_spin_lock(&can_frame_lock);
-            can_frame = frame;
-            k_spin_unlock(&can_frame_lock, lock_key);
+        [this](const CanFrame& frame) {
+            auto lock_key = k_spin_lock(&can_frame_lock_);
+            can_frame_ = frame;
+            can_frame_timestamp_ = time_service_->GetCurrentTime();
+            k_spin_unlock(&can_frame_lock_, lock_key);
         });
 }
 
 void CanbusSensorReaderRaw::Read() {
     auto reading = make_shared_ext<SensorReading>(guid_generator_->Generate(), sensor_);
-    reading->timestamp = time_service_->GetCurrentTime();
 
-    reading->value = 0;
+    reading->value = std::nullopt;
     reading->status = ReadingStatus::RAW;
 
     auto lock_key = k_spin_lock(&can_frame_lock_);
     auto can_frame = can_frame_;
+    reading->timestamp = can_frame_timestamp_;
     k_spin_unlock(&can_frame_lock_, lock_key);
 
     reading->metadata.AddTag<CanFrame>(
