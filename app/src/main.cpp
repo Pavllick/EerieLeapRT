@@ -27,6 +27,7 @@
 #include "configuration/system_config/system_config.h"
 #include "configuration/adc_config/adc_config.h"
 #include "configuration/sensor_config/sensor_config.h"
+#include "configuration/logging_config/logging_config.h"
 #include "configuration/services/configuration_service.h"
 #include "domain/system_domain/configuration/system_configuration_manager.h"
 #include "domain/sensor_domain/configuration/adc_configuration_manager.h"
@@ -216,7 +217,8 @@ int main(void) {
 
     std::shared_ptr<LoggingController> logging_controller = nullptr;
     if(sd_fs_service != nullptr) {
-        auto logging_configuration_manager = make_shared_ext<LoggingConfigurationManager>();
+        auto logging_config_service = make_unique_ext<ConfigurationService<LoggingConfig>>("logging_config", fs_service);
+        auto logging_configuration_manager = make_shared_ext<LoggingConfigurationManager>(std::move(logging_config_service));
 
         // TODO: For test purposes only
         SetupLoggingConfiguration(sensors_configuration_manager, logging_configuration_manager);

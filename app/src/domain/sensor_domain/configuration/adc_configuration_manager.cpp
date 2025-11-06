@@ -30,11 +30,11 @@ AdcConfigurationManager::AdcConfigurationManager(ext_unique_ptr<ConfigurationSer
     if(Get(true) == nullptr) {
         LOG_ERR("Failed to load ADC configuration.");
 
-        SetDefaultConfiguration();
+        CreateDefaultConfiguration();
 
         LOG_INF("Default ADC configuration loaded successfully.");
     } else {
-        LOG_INF("ADC Configuration Controller initialized successfully.");
+        LOG_INF("ADC Configuration Manager initialized successfully.");
     }
 }
 
@@ -137,7 +137,8 @@ std::shared_ptr<IAdcManager> AdcConfigurationManager::Get(bool force_load) {
     return adc_manager_;
 }
 
-void AdcConfigurationManager::SetDefaultConfiguration() {
+// TODO: Refine default configuration
+void AdcConfigurationManager::CreateDefaultConfiguration() {
     std::vector<CalibrationData> adc_calibration_data_samples {
         {0.501, 0.469},
         {1.0, 0.968},

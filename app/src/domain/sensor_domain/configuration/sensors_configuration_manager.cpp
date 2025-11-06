@@ -31,7 +31,7 @@ SensorsConfigurationManager::SensorsConfigurationManager(
     if(Get(true) == nullptr)
         LOG_ERR("Failed to load sensors configuration.");
     else
-        LOG_INF("Sensors Configuration Controller initialized successfully.");
+        LOG_INF("Sensors Configuration Manager initialized successfully.");
 }
 
 bool SensorsConfigurationManager::Update(const std::vector<std::shared_ptr<Sensor>>& sensors) {

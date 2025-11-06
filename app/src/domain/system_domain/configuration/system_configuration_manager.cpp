@@ -16,7 +16,7 @@ SystemConfigurationManager::SystemConfigurationManager(ext_unique_ptr<Configurat
     auto system_config = Get(true);
 
     if(system_config == nullptr) {
-        if(!CreateDefaultSystemConfiguration()) {
+        if(!CreateDefaultConfiguration()) {
             LOG_ERR("Failed to create default System configuration.");
             return;
         }
@@ -29,7 +29,7 @@ SystemConfigurationManager::SystemConfigurationManager(ext_unique_ptr<Configurat
 
     system_config = Get();
 
-    LOG_INF("System Configuration Controller initialized successfully.");
+    LOG_INF("System Configuration Manager initialized successfully.");
 
     LOG_INF("HW Version: %s, SW Version: %s",
         system_config->GetFormattedHwVersion().c_str(), system_config->GetFormattedSwVersion().c_str());
@@ -109,7 +109,7 @@ bool SystemConfigurationManager::UpdateSwVersion(uint32_t sw_version) {
     return true;
 }
 
-bool SystemConfigurationManager::CreateDefaultSystemConfiguration() {
+bool SystemConfigurationManager::CreateDefaultConfiguration() {
     auto system_config = make_shared_ext<SystemConfiguration>();
     system_config->device_id = Rng::Get64(true);
     system_config->hw_version = 0;

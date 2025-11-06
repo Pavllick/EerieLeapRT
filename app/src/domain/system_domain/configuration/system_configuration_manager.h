@@ -22,7 +22,7 @@ private:
 
     bool UpdateHwVersion(uint32_t hw_version);
     bool UpdateSwVersion(uint32_t sw_version);
-    bool CreateDefaultSystemConfiguration();
+    bool CreateDefaultConfiguration();
 
 public:
     explicit SystemConfigurationManager(ext_unique_ptr<ConfigurationService<SystemConfig>> system_configuration_service);

@@ -23,7 +23,7 @@ private:
     ext_unique_ptr<AdcConfig> adc_config_;
     std::shared_ptr<AdcConfiguration> adc_configuration_;
 
-    void SetDefaultConfiguration();
+    void CreateDefaultConfiguration();
 
 public:
     AdcConfigurationManager(ext_unique_ptr<ConfigurationService<AdcConfig>> adc_configuration_service);
