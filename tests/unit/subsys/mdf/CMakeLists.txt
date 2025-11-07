@@ -12,6 +12,16 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(APP_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../app/src)
 include_directories(${APP_SRC_DIR})
 
+# Path to boost include directory
+set(BOOST_INCLUDE_DIR ${APP_SRC_DIR}/../include/boost)
+include_directories(${BOOST_INCLUDE_DIR})
+
+# Path to dbcppp source and header
+set(DBCPPP_SRC_DIR ${APP_SRC_DIR}/libs/dbcppp/src)
+set(DBCPPP_INCLUDE_DIR ${APP_SRC_DIR}/libs/dbcppp/include)
+file(GLOB_RECURSE DBCPPP_SOURCES ${DBCPPP_SRC_DIR}/*.cpp)
+include_directories(${DBCPPP_INCLUDE_DIR})
+
 set(APP_SRC_SUBSYS_DIR ${APP_SRC_DIR}/subsys)
 file(GLOB_RECURSE APP_SRC_SUBSYS
   ${APP_SRC_SUBSYS_DIR}/device_tree/dt_logger.cpp
@@ -42,4 +52,5 @@ target_sources(app PRIVATE
   ${APP_SRC_SUBSYS}
   ${APP_SRC_UTILITIES}
   ${TEST_SOURCES}
+  ${DBCPPP_SOURCES}
 )
