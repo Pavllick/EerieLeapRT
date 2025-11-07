@@ -16,11 +16,13 @@ using namespace std::chrono;
 using namespace eerie_leap::subsys::canbus;
 
 class CanbusSensorReaderRaw : public SensorReaderBase {
-private:
+protected:
     std::shared_ptr<Canbus> canbus_;
     CanFrame can_frame_;
     system_clock::time_point can_frame_timestamp_;
     k_spinlock can_frame_lock_;
+
+    std::shared_ptr<SensorReading> CreateRawReading();
 
 public:
     CanbusSensorReaderRaw(

@@ -9,18 +9,16 @@
 #include "subsys/canbus/canbus.h"
 #include "subsys/dbc/dbc.h"
 #include "domain/sensor_domain/sensor_readers/sensor_reader_base.h"
+#include "domain/sensor_domain/sensor_readers/canbus_sensor_reader_raw.h"
 
 namespace eerie_leap::domain::sensor_domain::sensor_readers {
 
 using namespace eerie_leap::subsys::canbus;
 using namespace eerie_leap::subsys::dbc;
 
-class CanbusSensorReader : public SensorReaderBase {
+class CanbusSensorReader : public CanbusSensorReaderRaw {
 private:
-    std::shared_ptr<Canbus> canbus_;
     std::shared_ptr<Dbc> dbc_;
-    CanFrame can_frame_;
-    k_spinlock can_frame_lock_;
 
 public:
     CanbusSensorReader(

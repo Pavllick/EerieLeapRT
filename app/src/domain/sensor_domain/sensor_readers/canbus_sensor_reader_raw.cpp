@@ -32,7 +32,10 @@ CanbusSensorReaderRaw::CanbusSensorReaderRaw(
         });
 }
 
-void CanbusSensorReaderRaw::Read() {
+std::shared_ptr<SensorReading> CanbusSensorReaderRaw::CreateRawReading() {
+    if(can_frame_.data.empty())
+        return nullptr;
+
     auto reading = make_shared_ext<SensorReading>(guid_generator_->Generate(), sensor_);
 
     reading->value = std::nullopt;
@@ -46,6 +49,14 @@ void CanbusSensorReaderRaw::Read() {
     reading->metadata.AddTag<CanFrame>(
         ReadingMetadataTag::CANBUS_DATA,
         can_frame);
+
+    return reading;
+}
+
+void CanbusSensorReaderRaw::Read() {
+    auto reading = CreateRawReading();
+    if(reading == nullptr)
+        return;
 
     sensor_readings_frame_->AddOrUpdateReading(reading);
 }
