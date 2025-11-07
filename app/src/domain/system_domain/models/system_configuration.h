@@ -13,6 +13,8 @@ struct SystemConfiguration {
     uint32_t hw_version;
     uint32_t sw_version;
     uint32_t build_number;
+
+    uint32_t com_user_refresh_rate_ms;
     std::vector<ComUserConfiguration> com_user_configurations;
     std::vector<CanbusConfiguration> canbus_configurations;
 

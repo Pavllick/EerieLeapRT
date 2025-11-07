@@ -25,14 +25,16 @@ private:
 
     static void SendReadingWorkTask(k_work* work);
 
+    uint32_t refresh_rate_ms_;
+
     std::shared_ptr<UserCom> user_com_;
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame_;
 
-    // TODO: Make configurable
-    static constexpr int SENDING_INTERVAL_MS = 20;
-
 public:
-    explicit ComReadingInterfaceService(std::shared_ptr<UserCom> user_com, std::shared_ptr<SensorReadingsFrame> sensor_readings_frame);
+    explicit ComReadingInterfaceService(
+        std::shared_ptr<UserCom> user_com,
+        std::shared_ptr<SensorReadingsFrame> sensor_readings_frame,
+        uint32_t refresh_rate_ms);
     ~ComReadingInterfaceService();
 
     void Initialize();

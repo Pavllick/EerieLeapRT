@@ -248,7 +248,10 @@ int main(void) {
         com_polling_interface_service = make_shared_ext<ComPollingInterfaceService>(user_com_interface);
         com_polling_interface_service->Initialize();
 
-        com_reading_interface_service = make_shared_ext<ComReadingInterfaceService>(user_com_interface, sensor_readings_frame);
+        com_reading_interface_service = make_shared_ext<ComReadingInterfaceService>(
+            user_com_interface,
+            sensor_readings_frame,
+            system_configuration_manager->Get()->com_user_refresh_rate_ms);
         com_reading_interface_service->Initialize();
     
         if(logging_controller != nullptr) {
@@ -305,6 +308,8 @@ int main(void) {
 
 void SetupSystemConfiguration(std::shared_ptr<SystemConfigurationManager> system_configuration_manager) {
     auto system_configuration = system_configuration_manager->Get();
+
+    system_configuration->com_user_refresh_rate_ms = 20;
 
     system_configuration->canbus_configurations.clear();
 

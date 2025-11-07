@@ -11,8 +11,13 @@ using namespace eerie_leap::domain::user_com_domain::types;
 
 LOG_MODULE_REGISTER(com_reading_interface_logger);
 
-ComReadingInterfaceService::ComReadingInterfaceService(std::shared_ptr<UserCom> user_com, std::shared_ptr<SensorReadingsFrame> sensor_readings_frame)
-    : user_com_(std::move(user_com)), sensor_readings_frame_(std::move(sensor_readings_frame)) {
+ComReadingInterfaceService::ComReadingInterfaceService(
+    std::shared_ptr<UserCom> user_com,
+    std::shared_ptr<SensorReadingsFrame> sensor_readings_frame,
+    uint32_t refresh_rate_ms)
+    : user_com_(std::move(user_com)),
+    sensor_readings_frame_(std::move(sensor_readings_frame)),
+    refresh_rate_ms_(refresh_rate_ms) {
 
     k_sem_init(&processing_semaphore_, 1, 1);
 }
@@ -35,7 +40,7 @@ void ComReadingInterfaceService::Initialize() {
     task_ = std::make_shared<ComReadingTask>();
     task_->work_q = &work_q;
     task_->processing_semaphore = &processing_semaphore_;
-    task_->sending_interval_ms = SENDING_INTERVAL_MS;
+    task_->refresh_rate_ms = refresh_rate_ms_;
     task_->user_id = Modbus::SERVER_ID_ALL;
     task_->user_com = user_com_;
     task_->sensor_readings_frame = sensor_readings_frame_;
@@ -55,7 +60,7 @@ void ComReadingInterfaceService::SendReadingWorkTask(k_work* work) {
 
     int retry_count = 0;
     int retry_interval_ms = 2;
-    const int max_retries = task->sending_interval_ms / retry_interval_ms;
+    const int max_retries = task->refresh_rate_ms / retry_interval_ms;
     while(!task->user_com->IsAvailable() && retry_count < max_retries) {
         k_msleep(retry_interval_ms);
         retry_count++;
@@ -72,7 +77,7 @@ void ComReadingInterfaceService::SendReadingWorkTask(k_work* work) {
     }
 
     k_sem_give(task->processing_semaphore);
-    k_work_reschedule_for_queue(task->work_q, &task->work, K_MSEC(task->sending_interval_ms));
+    k_work_reschedule_for_queue(task->work_q, &task->work, K_MSEC(task->refresh_rate_ms));
 }
 
 } // namespace eerie_leap::domain::user_com_domain::services::com_reading

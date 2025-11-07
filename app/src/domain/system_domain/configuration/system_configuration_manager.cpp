@@ -124,7 +124,8 @@ bool SystemConfigurationManager::Update(std::shared_ptr<SystemConfiguration> sys
         .device_id = system_configuration->device_id,
         .hw_version = system_configuration->hw_version,
         .sw_version = system_configuration->sw_version,
-        .build_number = system_configuration->build_number
+        .build_number = system_configuration->build_number,
+        .com_user_refresh_rate_ms = system_configuration->com_user_refresh_rate_ms
     };
 
     system_config.ComUserConfig_m_count = 0;
@@ -136,7 +137,6 @@ bool SystemConfigurationManager::Update(std::shared_ptr<SystemConfiguration> sys
     for(size_t i = 0; i < system_configuration->com_user_configurations.size() && i < 24; i++) {
         system_config.ComUserConfig_m[i].device_id = system_configuration->com_user_configurations[i].device_id;
         system_config.ComUserConfig_m[i].server_id = system_configuration->com_user_configurations[i].server_id;
-        system_config.ComUserConfig_m[i].refresh_rate_ms = system_configuration->com_user_configurations[i].refresh_rate_ms;
 
         system_config.ComUserConfig_m_count++;
     }
@@ -174,14 +174,14 @@ std::shared_ptr<SystemConfiguration> SystemConfigurationManager::Get(bool force_
         .device_id = system_config_->device_id,
         .hw_version = system_config_->hw_version,
         .sw_version = system_config_->sw_version,
-        .build_number = system_config_->build_number
+        .build_number = system_config_->build_number,
+        .com_user_refresh_rate_ms = system_config_->com_user_refresh_rate_ms
     };
 
     for(size_t i = 0; i < system_config_->ComUserConfig_m_count; i++) {
         ComUserConfiguration com_user_configuration {
             .device_id = system_config_->ComUserConfig_m[i].device_id,
-            .server_id = system_config_->ComUserConfig_m[i].server_id,
-            .refresh_rate_ms = system_config_->ComUserConfig_m[i].refresh_rate_ms
+            .server_id = system_config_->ComUserConfig_m[i].server_id
         };
         system_configuration.com_user_configurations.push_back(com_user_configuration);
     }

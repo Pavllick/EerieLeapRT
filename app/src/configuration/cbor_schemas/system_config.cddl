@@ -1,7 +1,6 @@
 ComUserConfig = [
   device_id: uint .size 8,
   server_id: uint,
-  refresh_rate_ms: uint
 ]
 
 CanbusConfig = [
@@ -15,6 +14,8 @@ SystemConfig = [
   hw_version: uint,
   sw_version: uint,
   build_number: uint,
+
+  com_user_refresh_rate_ms: uint,
   com_users: [0*8 ComUserConfig],
   canbus_configs: [0*8 CanbusConfig]
 ]

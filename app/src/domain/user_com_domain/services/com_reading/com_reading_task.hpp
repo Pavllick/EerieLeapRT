@@ -16,7 +16,7 @@ struct ComReadingTask {
     k_work_q* work_q;
     k_work_delayable work;
     k_sem* processing_semaphore;
-    int sending_interval_ms;
+    uint32_t refresh_rate_ms;
     uint8_t user_id;
     std::shared_ptr<UserCom> user_com;
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame;

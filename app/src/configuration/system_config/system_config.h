@@ -28,7 +28,6 @@ extern "C" {
 struct ComUserConfig {
 	uint64_t device_id;
 	uint32_t server_id;
-	uint32_t refresh_rate_ms;
 };
 
 struct CanbusConfig {
@@ -42,6 +41,7 @@ struct SystemConfig {
 	uint32_t hw_version;
 	uint32_t sw_version;
 	uint32_t build_number;
+	uint32_t com_user_refresh_rate_ms;
 	struct ComUserConfig ComUserConfig_m[8];
 	size_t ComUserConfig_m_count;
 	struct CanbusConfig CanbusConfig_m[8];
