@@ -13,6 +13,7 @@
 using namespace eerie_leap::configuration::services;
 using namespace eerie_leap::subsys::device_tree;
 using namespace eerie_leap::subsys::fs::services;
+using namespace eerie_leap::domain::system_domain::models;
 using namespace eerie_leap::domain::system_domain::configuration;
 
 ZTEST_SUITE(system_configuration_manager, NULL, NULL, NULL, NULL, NULL);

@@ -2,17 +2,31 @@
 
 #include "utilities/memory/heap_allocator.h"
 #include "subsys/fs/services/fs_service_stream_buf.h"
+#include "subsys/device_tree/dt_canbus.h"
 
 #include "canbus_controller.h"
 
 namespace eerie_leap::controllers {
 
 using namespace eerie_leap::utilities::memory;
+using namespace eerie_leap::subsys::device_tree;
 
 LOG_MODULE_REGISTER(canbus_controller_logger);
 
-CanbusController::CanbusController(std::shared_ptr<IFsService> fs_service)
-    : fs_service_(std::move(fs_service)) {
+CanbusController::CanbusController(std::shared_ptr<IFsService> fs_service, std::shared_ptr<SystemConfigurationManager> system_configuration_manager)
+    : fs_service_(std::move(fs_service)), system_configuration_manager_(std::move(system_configuration_manager)) {
+
+    for(const auto& canbus_configuration : system_configuration_manager_->Get()->canbus_configurations) {
+        auto canbus = make_shared_ext<Canbus>(
+                DtCanbus::Get(canbus_configuration.bus_channel),
+                canbus_configuration.bitrate,
+                canbus_configuration.sampling_point_percent);
+
+        if(!canbus->Initialize())
+            throw std::runtime_error("Failed to initialize CANBus.");
+
+        canbus_.insert({canbus_configuration.bus_channel, canbus});
+    }
 
     dbc_ = make_shared_ext<Dbc>();
 
@@ -35,6 +49,13 @@ bool CanbusController::LoadDbcFile(std::streambuf& dbc_content) {
         LOG_ERR("Failed to load DBC file.");
 
     return res;
+}
+
+std::shared_ptr<Canbus> CanbusController::GetCanbus(uint8_t bus_channel) const {
+    if(!canbus_.contains(bus_channel))
+        return nullptr;
+
+    return canbus_.at(bus_channel);
 }
 
 std::shared_ptr<Dbc> CanbusController::GetDbc() const {

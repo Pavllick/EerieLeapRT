@@ -1,5 +1,4 @@
 #include <memory>
-#include <zephyr/arch/cpu.h>
 #include <zephyr/logging/log.h>
 
 #include "utilities/memory/heap_allocator.h"
@@ -10,7 +9,6 @@
 #include "subsys/device_tree/dt_configurator.h"
 #include "subsys/device_tree/dt_fs.h"
 #include "subsys/device_tree/dt_modbus.h"
-#include "subsys/device_tree/dt_canbus.h"
 #include "subsys/device_tree/dt_display.h"
 
 #include "subsys/fs/services/fs_service.h"
@@ -18,7 +16,6 @@
 #include "subsys/gpio/gpio_factory.hpp"
 #include "subsys/modbus/modbus.h"
 #include "subsys/cfb/cfb.h"
-#include "subsys/canbus/canbus.h"
 #include "subsys/time/time_service.h"
 #include "subsys/time/rtc_provider.h"
 #include "subsys/time/boot_elapsed_time_provider.h"
@@ -78,7 +75,6 @@ using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::subsys::gpio;
 using namespace eerie_leap::subsys::cfb;
 using namespace eerie_leap::subsys::modbus;
-using namespace eerie_leap::subsys::canbus;
 using namespace eerie_leap::subsys::time;
 
 using namespace eerie_leap::configuration::services;
@@ -102,6 +98,7 @@ LOG_MODULE_REGISTER(main_logger);
 
 constexpr uint32_t SLEEP_TIME_MS = 10000;
 
+void SetupSystemConfiguration(std::shared_ptr<SystemConfigurationManager> system_configuration_manager);
 void SetupAdcConfiguration(std::shared_ptr<AdcConfigurationManager> adc_configuration_manager);
 void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager);
 void SetupLoggingConfiguration(std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager,
@@ -192,23 +189,18 @@ int main(void) {
     auto gpio = GpioFactory::Create();
     gpio->Initialize();
 
-    std::shared_ptr<Canbus> canbus = nullptr;
-    if(DtCanbus::Get() != nullptr) {
-        canbus = make_shared_ext<Canbus>(DtCanbus::Get());
-        if(!canbus->Initialize()) {
-            LOG_ERR("Failed to initialize CANBus.");
-            return -1;
-        }
-    }
-
-    auto canbus_controller = make_shared_ext<CanbusController>(sd_fs_service);
-    auto dbc = canbus_controller->GetDbc();
-
     auto system_configuration_manager = make_shared_ext<SystemConfigurationManager>(std::move(system_config_service));
+
+    // TODO: For test purposes only
+    SetupSystemConfiguration(system_configuration_manager);
+
     auto sensors_configuration_manager = make_shared_ext<SensorsConfigurationManager>(
         math_parser_service,
         std::move(sensors_config_service),
         adc_configuration_manager->Get()->GetChannelCount());
+
+    auto canbus_controller = make_shared_ext<CanbusController>(sd_fs_service, system_configuration_manager);
+    auto dbc = canbus_controller->GetDbc();
 
     // TODO: For test purposes only
     SetupTestSensors(math_parser_service, sensors_configuration_manager);
@@ -247,10 +239,10 @@ int main(void) {
 
     // user_com_interface->ResolveUserIds();
 
-    auto com_users = user_com_interface->GetUsers();
-    LOG_INF("User IDs count: %zu", com_users->size());
-    for(auto com_user : *com_users) {
-        LOG_INF("Com User Device ID: %llu, Server ID: %hu", com_user.device_id, com_user.server_id);
+        auto com_user_configurations = user_com_interface->GetUsers();
+        LOG_INF("User IDs count: %zu", com_user_configurations->size());
+        for(auto com_user_configuration : *com_user_configurations) {
+            LOG_INF("Com User Device ID: %llu, Server ID: %hu", com_user_configuration.device_id, com_user_configuration.server_id);
     }
 
         com_polling_interface_service = make_shared_ext<ComPollingInterfaceService>(user_com_interface);
@@ -271,7 +263,7 @@ int main(void) {
         gpio,
         adc_configuration_manager,
         sensor_readings_frame,
-        canbus,
+        canbus_controller->GetCanbus(0),
         dbc);
 
     auto processing_scheduler_service = make_shared_ext<ProcessingSchedulerService>(
@@ -309,6 +301,21 @@ int main(void) {
     }
 
     return 0;
+}
+
+void SetupSystemConfiguration(std::shared_ptr<SystemConfigurationManager> system_configuration_manager) {
+    auto system_configuration = system_configuration_manager->Get();
+
+    system_configuration->canbus_configurations.clear();
+
+    CanbusConfiguration canbus_configuration_0 = {
+        .bus_channel = 0,
+        .bitrate = 500000,
+    };
+    system_configuration->canbus_configurations.push_back(canbus_configuration_0);
+
+    if(!system_configuration_manager->Update(system_configuration))
+        throw std::runtime_error("Cannot save System config");
 }
 
 void SetupAdcConfiguration(std::shared_ptr<AdcConfigurationManager> adc_configuration_manager) {

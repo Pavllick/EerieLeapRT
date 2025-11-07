@@ -5,13 +5,13 @@
 #include "utilities/memory/heap_allocator.h"
 #include "configuration/system_config/system_config.h"
 #include "configuration/services/configuration_service.h"
-#include "domain/system_domain/system_configuration.h"
+#include "domain/system_domain/models/system_configuration.h"
 
 namespace eerie_leap::domain::system_domain::configuration {
 
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::configuration::services;
-using namespace eerie_leap::domain::system_domain;
+using namespace eerie_leap::domain::system_domain::models;
 
 class SystemConfigurationManager {
 private:
@@ -28,7 +28,7 @@ public:
     explicit SystemConfigurationManager(ext_unique_ptr<ConfigurationService<SystemConfig>> system_configuration_service);
 
     bool UpdateBuildNumber(uint32_t build_number);
-    bool UpdateComUsers(const std::vector<ComUserConfiguration>& com_users);
+    bool UpdateComUsers(const std::vector<ComUserConfiguration>& com_user_configurations);
 
     bool Update(std::shared_ptr<SystemConfiguration> system_configuration);
     std::shared_ptr<SystemConfiguration> Get(bool force_load = false);

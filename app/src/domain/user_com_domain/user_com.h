@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "subsys/modbus/modbus.h"
-#include "domain/system_domain/system_configuration.h"
+#include "domain/system_domain/models/system_configuration.h"
 #include "domain/user_com_domain/types/com_user_status.h"
 #include "domain/user_com_domain/types/com_request_type.h"
 #include "domain/system_domain/configuration/system_configuration_manager.h"
@@ -15,7 +15,7 @@ namespace eerie_leap::domain::user_com_domain {
 using namespace eerie_leap::subsys::modbus;
 
 using namespace eerie_leap::domain::user_com_domain::types;
-using namespace eerie_leap::domain::system_domain;
+using namespace eerie_leap::domain::system_domain::models;
 using namespace eerie_leap::domain::system_domain::configuration;
 
 class UserCom {
@@ -34,7 +34,7 @@ private:
     std::shared_ptr<Modbus> modbus_;
     std::shared_ptr<SystemConfigurationManager> system_configuration_manager_;
 
-    std::shared_ptr<std::vector<ComUserConfiguration>> com_users_;
+    std::shared_ptr<std::vector<ComUserConfiguration>> com_user_configurations_;
     k_sem com_semaphore_;
     k_sem availability_semaphore_;
 
@@ -53,7 +53,7 @@ public:
     int Get(uint8_t user_id, ComRequestType com_request_type, void* data, size_t size_bytes, k_timeout_t timeout = K_NO_WAIT);
     int Send(uint8_t user_id, ComRequestType com_request_type, void* data, size_t size_bytes, k_timeout_t timeout = K_NO_WAIT);
 
-    std::shared_ptr<std::vector<ComUserConfiguration>> GetUsers() { return com_users_; }
+    std::shared_ptr<std::vector<ComUserConfiguration>> GetUsers() { return com_user_configurations_; }
 };
 
 } // namespace eerie_leap::domain::user_com_domain

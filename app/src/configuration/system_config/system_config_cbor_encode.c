@@ -26,6 +26,7 @@
 } while(0)
 
 static bool encode_ComUserConfig(zcbor_state_t *state, const struct ComUserConfig *input);
+static bool encode_CanbusConfig(zcbor_state_t *state, const struct CanbusConfig *input);
 static bool encode_SystemConfig(zcbor_state_t *state, const struct SystemConfig *input);
 
 
@@ -34,8 +35,22 @@ static bool encode_ComUserConfig(
 {
 	zcbor_log("%s\r\n", __func__);
 
-	bool res = (((zcbor_list_start_encode(state, 2) && ((((zcbor_uint64_encode(state, (&(*input).device_id))))
-	&& ((zcbor_uint32_encode(state, (&(*input).server_id))))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 2))));
+	bool res = (((zcbor_list_start_encode(state, 3) && ((((zcbor_uint64_encode(state, (&(*input).device_id))))
+	&& ((zcbor_uint32_encode(state, (&(*input).server_id))))
+	&& ((zcbor_uint32_encode(state, (&(*input).refresh_rate_ms))))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 3))));
+
+	log_result(state, res, __func__);
+	return res;
+}
+
+static bool encode_CanbusConfig(
+		zcbor_state_t *state, const struct CanbusConfig *input)
+{
+	zcbor_log("%s\r\n", __func__);
+
+	bool res = (((zcbor_list_start_encode(state, 3) && ((((zcbor_uint32_encode(state, (&(*input).bus_channel))))
+	&& ((zcbor_uint32_encode(state, (&(*input).bitrate))))
+	&& ((zcbor_uint32_encode(state, (&(*input).sampling_point_percent))))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 3))));
 
 	log_result(state, res, __func__);
 	return res;
@@ -46,11 +61,12 @@ static bool encode_SystemConfig(
 {
 	zcbor_log("%s\r\n", __func__);
 
-	bool res = (((zcbor_list_start_encode(state, 5) && ((((zcbor_uint64_encode(state, (&(*input).device_id))))
+	bool res = (((zcbor_list_start_encode(state, 6) && ((((zcbor_uint64_encode(state, (&(*input).device_id))))
 	&& ((zcbor_uint32_encode(state, (&(*input).hw_version))))
 	&& ((zcbor_uint32_encode(state, (&(*input).sw_version))))
 	&& ((zcbor_uint32_encode(state, (&(*input).build_number))))
-	&& ((zcbor_list_start_encode(state, 24) && ((zcbor_multi_encode_minmax(0, 24, &(*input).ComUserConfig_m_count, (zcbor_encoder_t *)encode_ComUserConfig, state, (*&(*input).ComUserConfig_m), sizeof(struct ComUserConfig))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 24)))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 5))));
+	&& ((zcbor_list_start_encode(state, 8) && ((zcbor_multi_encode_minmax(0, 8, &(*input).ComUserConfig_m_count, (zcbor_encoder_t *)encode_ComUserConfig, state, (*&(*input).ComUserConfig_m), sizeof(struct ComUserConfig))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 8)))
+	&& ((zcbor_list_start_encode(state, 8) && ((zcbor_multi_encode_minmax(0, 8, &(*input).CanbusConfig_m_count, (zcbor_encoder_t *)encode_CanbusConfig, state, (*&(*input).CanbusConfig_m), sizeof(struct CanbusConfig))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 8)))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 6))));
 
 	log_result(state, res, __func__);
 	return res;

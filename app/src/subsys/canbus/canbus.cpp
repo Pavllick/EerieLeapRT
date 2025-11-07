@@ -6,7 +6,8 @@ LOG_MODULE_REGISTER(canbus_logger);
 
 namespace eerie_leap::subsys::canbus {
 
-Canbus::Canbus(const device *canbus_dev) : canbus_dev_(canbus_dev) {}
+Canbus::Canbus(const device *canbus_dev, uint32_t bitrate, uint32_t sampling_point_percent)
+    : canbus_dev_(canbus_dev), bitrate_(bitrate), sampling_point_percent_(sampling_point_percent) {}
 
 Canbus::~Canbus() {
     can_stop(canbus_dev_);

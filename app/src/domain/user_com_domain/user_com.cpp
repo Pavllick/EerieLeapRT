@@ -15,8 +15,8 @@ UserCom::UserCom(std::shared_ptr<Modbus> modbus, std::shared_ptr<SystemConfigura
     k_sem_init(&com_semaphore_, 1, 1);
     k_sem_init(&availability_semaphore_, 1, 1);
 
-    com_users_ = std::make_shared<std::vector<ComUserConfiguration>>(
-        system_configuration_manager_->Get()->com_users);
+    com_user_configurations_ = std::make_shared<std::vector<ComUserConfiguration>>(
+        system_configuration_manager_->Get()->com_user_configurations);
 }
 
 int UserCom::Initialize() {
@@ -38,7 +38,7 @@ int UserCom::ResolveUserIds() {
 
     uint64_t server_device_id_ = 0;
 
-    com_users_->clear();
+    com_user_configurations_->clear();
 
     for(int i = 1; i < 10; i++) {
         int res = Get(i,
@@ -61,20 +61,20 @@ int UserCom::ResolveUserIds() {
             return res;
         }
 
-        com_users_->push_back({
+        com_user_configurations_->push_back({
             .device_id = server_device_id_,
             .server_id = static_cast<uint16_t>(i)
         });
     }
 
-    system_configuration_manager_->UpdateComUsers(*com_users_);
+    system_configuration_manager_->UpdateComUsers(*com_user_configurations_);
 
     return 0;
 }
 
 bool UserCom::IsUserAvailable(uint8_t user_id) {
-    for(auto user : *com_users_) {
-        if(user.server_id == user_id)
+    for(auto user_configuration : *com_user_configurations_) {
+        if(user_configuration.server_id == user_id)
             return true;
     }
 

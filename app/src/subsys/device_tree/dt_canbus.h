@@ -1,5 +1,7 @@
 #pragma once
 
+#include <unordered_map>
+
 #include <zephyr/devicetree.h>
 #include <zephyr/device.h>
 
@@ -11,14 +13,14 @@ namespace eerie_leap::subsys::device_tree {
 
 class DtCanbus {
 private:
-    static const device *canbus_dev_;
+    static std::unordered_map<uint8_t, const device*> canbus_devs_;
 
     DtCanbus() = default;
 
 public:
     static void Initialize();
 
-    static const device* Get() { return canbus_dev_; }
+    static const device* Get(uint8_t bus_channel);
 };
 
 } // namespace eerie_leap::subsys::device_tree

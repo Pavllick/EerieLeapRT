@@ -3,19 +3,18 @@
 #include <cstdint>
 #include <vector>
 
-namespace eerie_leap::domain::system_domain {
+#include "com_user_configuration.h"
+#include "canbus_configuration.h"
 
-struct ComUserConfiguration {
-    uint64_t device_id;
-    uint16_t server_id;
-};
+namespace eerie_leap::domain::system_domain::models {
 
 struct SystemConfiguration {
     uint64_t device_id;
     uint32_t hw_version;
     uint32_t sw_version;
     uint32_t build_number;
-    std::vector<ComUserConfiguration> com_users;
+    std::vector<ComUserConfiguration> com_user_configurations;
+    std::vector<CanbusConfiguration> canbus_configurations;
 
     std::string GetFormattedHwVersion() const {
         uint8_t hw_version_major = (hw_version >> 24) & 0xFF;
@@ -54,4 +53,4 @@ struct SystemConfiguration {
     }
 };
 
-} // namespace eerie_leap::domain::system_domain
+} // namespace eerie_leap::domain::system_domain::models

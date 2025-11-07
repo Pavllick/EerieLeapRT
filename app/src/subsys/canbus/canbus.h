@@ -22,15 +22,13 @@ private:
     std::unordered_map<uint32_t, std::vector<CanFrameHandler>> handlers_;
     bool is_initialized_ = false;
 
-    // TODO: Make bitrate configurable
-    uint32_t bitrate_ = 500000;
-    // 87.5% sampling point is recommended by CiA
-    uint32_t sampling_point_percent_ = 875;
+    uint32_t bitrate_;
+    uint32_t sampling_point_percent_;
 
     static void CanFrameReceivedCallback(const device *dev, can_frame *frame, void *user_data);
 
 public:
-    explicit Canbus(const device *canbus_dev);
+    explicit Canbus(const device *canbus_dev, uint32_t bitrate, uint32_t sampling_point_percent);
     ~Canbus();
 
     bool Initialize();

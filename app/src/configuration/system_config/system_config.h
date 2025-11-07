@@ -28,6 +28,13 @@ extern "C" {
 struct ComUserConfig {
 	uint64_t device_id;
 	uint32_t server_id;
+	uint32_t refresh_rate_ms;
+};
+
+struct CanbusConfig {
+	uint32_t bus_channel;
+	uint32_t bitrate;
+	uint32_t sampling_point_percent;
 };
 
 struct SystemConfig {
@@ -35,8 +42,10 @@ struct SystemConfig {
 	uint32_t hw_version;
 	uint32_t sw_version;
 	uint32_t build_number;
-	struct ComUserConfig ComUserConfig_m[24];
+	struct ComUserConfig ComUserConfig_m[8];
 	size_t ComUserConfig_m_count;
+	struct CanbusConfig CanbusConfig_m[8];
+	size_t CanbusConfig_m_count;
 };
 
 #ifdef __cplusplus
