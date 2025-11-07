@@ -86,11 +86,12 @@ int LogWriterService::LogWriterStart() {
         return -1;
     }
 
-    if(!fs_service_->Exists(CONFIG_EERIE_LEAP_LOG_DATA_FILES_DIR)) {}
+    if(!fs_service_->Exists(CONFIG_EERIE_LEAP_LOG_DATA_FILES_DIR)) {
         if(!fs_service_->CreateDirectory(CONFIG_EERIE_LEAP_LOG_DATA_FILES_DIR)) {
             LOG_ERR("Failed to create %s directory", CONFIG_EERIE_LEAP_LOG_DATA_FILES_DIR);
             return -1;
         }
+    }
 
     auto start_time = time_service_->GetCurrentTime();
     std::string file_name;
@@ -107,7 +108,10 @@ int LogWriterService::LogWriterStart() {
         return -1;
     }
 
-    fs_stream_buf_ = std::make_unique<FsServiceStreamBuf>(fs_service_.get(), file_name);
+    fs_stream_buf_ = std::make_unique<FsServiceStreamBuf>(
+        fs_service_.get(),
+        file_name,
+        FsServiceStreamBuf::OpenMode::Append);
     logger_->StartLogging(*fs_stream_buf_, start_time);
 
     LOG_INF("Logging started. Log file created: %s", file_name.c_str());

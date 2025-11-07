@@ -63,7 +63,7 @@ ZTEST(mdf_file, test_WriteToStream) {
     auto vlsd_channel_group_4 = mdf_file.CreateVLSDChannelGroup(data_group, 111);
     auto channel_group_4 = mdf_file.CreateCanDataFrameChannelGroup(data_group, vlsd_channel_group_4, 103, "Raw CAN Frame");
 
-    // FsServiceStreamBuf fs_buf(fs_service.get(), "output/data.mf4");
+    // FsServiceStreamBuf fs_buf(fs_service.get(), "output/data.mf4", FsServiceStreamBuf::OpenMode::Write);
     // auto bytes_written = mdf_file.WriteFileToStream(fs_buf);
     // fs_buf.close();
 

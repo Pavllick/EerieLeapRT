@@ -19,7 +19,6 @@
 #include "subsys/modbus/modbus.h"
 #include "subsys/cfb/cfb.h"
 #include "subsys/canbus/canbus.h"
-#include "subsys/dbc/dbc.h"
 #include "subsys/time/time_service.h"
 #include "subsys/time/rtc_provider.h"
 #include "subsys/time/boot_elapsed_time_provider.h"
@@ -46,6 +45,7 @@
 #include "controllers/logging_controller.h"
 #include "controllers/com_polling_controller.h"
 #include "controllers/display_controller.h"
+#include "controllers/canbus_controller.h"
 
 // Test sensors includes
 #include "utilities/math_parser/expression_evaluator.h"
@@ -79,7 +79,6 @@ using namespace eerie_leap::subsys::gpio;
 using namespace eerie_leap::subsys::cfb;
 using namespace eerie_leap::subsys::modbus;
 using namespace eerie_leap::subsys::canbus;
-using namespace eerie_leap::subsys::dbc;
 using namespace eerie_leap::subsys::time;
 
 using namespace eerie_leap::configuration::services;
@@ -202,7 +201,8 @@ int main(void) {
         }
     }
 
-    auto dbc = make_shared_ext<Dbc>();
+    auto canbus_controller = make_shared_ext<CanbusController>(sd_fs_service);
+    auto dbc = canbus_controller->GetDbc();
 
     auto system_configuration_manager = make_shared_ext<SystemConfigurationManager>(std::move(system_config_service));
     auto sensors_configuration_manager = make_shared_ext<SensorsConfigurationManager>(

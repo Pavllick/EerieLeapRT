@@ -206,6 +206,12 @@ zcbor code -sed --default-max-qty 24 -c ./app/src/configuration/cbor_schemas/adc
 zcbor code -sed --default-max-qty 24 -c ./app/src/configuration/cbor_schemas/sensor_config.cddl -t SensorsConfig --output-h ./app/src/configuration/sensor_config/sensor_config_cbor.h --output-c ./app/src/configuration/sensor_config/sensor_config_cbor.c --output-h-types ./app/src/configuration/sensor_config/sensor_config.h
 ```
 
+#### Example command to generate LoggingConfig helpers:
+
+```shell
+zcbor code -sed --default-max-qty 24 -c ./app/src/configuration/cbor_schemas/logging_config.cddl -t LoggingConfig --output-h ./app/src/configuration/logging_config/logging_config_cbor.h --output-c ./app/src/configuration/logging_config/logging_config_cbor.c --output-h-types ./app/src/configuration/logging_config/logging_config.h
+```
+
 ### Network
 
 #### ESP32S3 DevKitC v1.3

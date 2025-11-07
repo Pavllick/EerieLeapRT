@@ -2,23 +2,19 @@
 
 #include "dbc.h"
 
-#include "dbc_test_data.h"
-
 namespace eerie_leap::subsys::dbc {
 
-Dbc::Dbc() : is_loaded_(false) {
-   // TODO: Remove test data
-   std::stringstream dbc_content = DbcTestData::GetDbcContent();
-   LoadDbcFile(dbc_content);
-}
+Dbc::Dbc() : is_loaded_(false) {}
 
-bool Dbc::LoadDbcFile(std::istream &dbc_content) {
+bool Dbc::LoadDbcFile(std::streambuf& dbc_content) {
    messages_.clear();
-   net_ = dbcppp::INetwork::LoadDBCFromIs(dbc_content);
 
-   is_loaded_ = true;
+   std::istream stream(&dbc_content);
+   net_ = dbcppp::INetwork::LoadDBCFromIs(stream);
 
-   return true;
+   is_loaded_ = net_ != nullptr;
+
+   return is_loaded_;
 }
 
 double Dbc::GetSignalValue(uint64_t frame_id, const std::string& signal_name, const void* bytes) {

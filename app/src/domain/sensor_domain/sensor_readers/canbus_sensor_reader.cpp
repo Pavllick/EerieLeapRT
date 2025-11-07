@@ -24,6 +24,9 @@ CanbusSensorReader::CanbusSensorReader(
         canbus_(std::move(canbus)),
         dbc_(std::move(dbc)) {
 
+    memset(&can_frame_, 0, sizeof(can_frame_));
+    can_frame_.data.clear();
+
     canbus_->RegisterHandler(
         sensor_->configuration.canbus_source->frame_id,
         [&can_frame = can_frame_, &can_frame_lock = can_frame_lock_](const CanFrame& frame) {

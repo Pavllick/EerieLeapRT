@@ -4,15 +4,12 @@
 #include <string>
 #include <unordered_map>
 #include <memory>
-
+#include <streambuf>
 #include <fstream>
+
 #include <dbcppp/Network.h>
 
-#include "utilities/memory/heap_allocator.h"
-
 namespace eerie_leap::subsys::dbc {
-
-using namespace eerie_leap::utilities::memory;
 
 class Dbc {
 private:
@@ -29,7 +26,7 @@ public:
    Dbc();
    virtual ~Dbc() = default;
 
-   bool LoadDbcFile(std::istream &dbc_content);
+   bool LoadDbcFile(std::streambuf& dbc_content);
    double GetSignalValue(uint64_t frame_id, const std::string& signal_name, const void* bytes);
 };
 

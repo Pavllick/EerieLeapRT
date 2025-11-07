@@ -94,6 +94,10 @@ config EERIE_LEAP_MODBUS_RX_TIMEOUT
 	int "Modbus rx timeout"
 	default 50000
 
+config EERIE_LEAP_CANBUS_DBC_FILE_PATH
+	string "Canbus DBC file path"
+	default "user/in_canbus_0.dbc"
+
 module = APP
 module-str = APP
 source "subsys/logging/Kconfig.template.log_config"

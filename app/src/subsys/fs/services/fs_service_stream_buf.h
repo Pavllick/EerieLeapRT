@@ -15,13 +15,24 @@ private:
     struct fs_file_t file_;
     bool file_opened_;
 
+    static constexpr size_t BUFFER_SIZE = 4096;
+    std::vector<char> input_buffer_;
+
 protected:
     std::streamsize xsputn(const char* s, std::streamsize n) override;
     std::streambuf::int_type overflow(std::streambuf::int_type c) override;
+    std::streamsize xsgetn(char* s, std::streamsize n) override;
+    std::streambuf::int_type underflow() override;
     int sync() override;
 
 public:
-    FsServiceStreamBuf(IFsService* fs_service, const std::string& relative_path, bool append = false);
+    enum class OpenMode {
+        Read,
+        Write,
+        Append
+    };
+
+    FsServiceStreamBuf(IFsService* fs_service, const std::string& relative_path, OpenMode mode);
     ~FsServiceStreamBuf();
 
     bool close();
