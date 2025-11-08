@@ -53,19 +53,19 @@
 		};
 
 		di_4: di_4 {
-			gpios = <&gpio0 14 GPIO_PULL_UP>;
+			gpios = <&gpio0 11 GPIO_PULL_UP>;
 		};
 
 		di_5: di_5 {
-			gpios = <&gpio0 13 GPIO_PULL_UP>;
-		};
-
-		di_6: di_6 {
 			gpios = <&gpio0 12 GPIO_PULL_UP>;
 		};
 
+		di_6: di_6 {
+			gpios = <&gpio0 13 GPIO_PULL_UP>;
+		};
+
 		di_7: di_7 {
-			gpios = <&gpio0 11 GPIO_PULL_UP>;
+			gpios = <&gpio0 14 GPIO_PULL_UP>;
 		};
 	};
 };

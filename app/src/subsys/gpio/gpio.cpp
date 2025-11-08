@@ -16,7 +16,7 @@ int Gpio::Initialize() {
             return -1;
         }
 
-        gpio_pin_configure(gpio_spec.port, gpio_spec.pin, GPIO_INPUT | GPIO_PULL_UP | GPIO_ACTIVE_LOW);
+        gpio_pin_configure(gpio_spec.port, gpio_spec.pin, GPIO_INPUT | GPIO_PULL_UP | GPIO_ACTIVE_HIGH);
 
         LOG_INF("Gpio channel %d configured", gpio_spec.pin);
     }

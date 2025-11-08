@@ -24,12 +24,17 @@ private:
     ext_unique_ptr<ExtVector> sensors_config_raw_;
     ext_unique_ptr<SensorsConfig> sensors_config_;
     std::vector<std::shared_ptr<Sensor>> sensors_;
+    int gpio_channel_count_;
     int adc_channel_count_;
 
     void ValidateSensorType(const SensorConfiguration& sensor_configuration);
 
 public:
-    SensorsConfigurationManager(std::shared_ptr<MathParserService> math_parser_service, ext_unique_ptr<ConfigurationService<SensorsConfig>> sensors_configuration_service, int adc_channel_count);
+    SensorsConfigurationManager(
+        std::shared_ptr<MathParserService> math_parser_service,
+        ext_unique_ptr<ConfigurationService<SensorsConfig>> sensors_configuration_service,
+        int gpio_channel_count,
+        int adc_channel_count);
 
     bool Update(const std::vector<std::shared_ptr<Sensor>>& sensors);
     const std::vector<std::shared_ptr<Sensor>>* Get(bool force_load = false);

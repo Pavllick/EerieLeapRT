@@ -197,6 +197,7 @@ int main(void) {
     auto sensors_configuration_manager = make_shared_ext<SensorsConfigurationManager>(
         math_parser_service,
         std::move(sensors_config_service),
+        gpio->GetChannelCount(),
         adc_configuration_manager->Get()->GetChannelCount());
 
     auto canbus_controller = make_shared_ext<CanbusController>(sd_fs_service, system_configuration_manager);
@@ -481,8 +482,8 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
         sensor_1,
         sensor_2,
         sensor_3,
-        // sensor_4,
-        // sensor_5,
+        sensor_4,
+        sensor_5,
         sensor_6,
         sensor_7
     };
@@ -519,14 +520,14 @@ void SetupLoggingConfiguration(std::shared_ptr<SensorsConfigurationManager> sens
         .log_raw_value = true,
         .log_only_new_data = false
     };
-    logging_configuration->sensor_configurations.insert({sensors->at(3)->id_hash, sensor_logging_config_6});
+    logging_configuration->sensor_configurations.insert({sensors->at(5)->id_hash, sensor_logging_config_6});
 
     SensorLoggingConfiguration sensor_logging_config_7 = {
         .is_enabled = true,
         .log_raw_value = true,
         .log_only_new_data = true
     };
-    logging_configuration->sensor_configurations.insert({sensors->at(4)->id_hash, sensor_logging_config_7});
+    logging_configuration->sensor_configurations.insert({sensors->at(6)->id_hash, sensor_logging_config_7});
 
     logging_configuration_manager->Update(logging_configuration);
 }

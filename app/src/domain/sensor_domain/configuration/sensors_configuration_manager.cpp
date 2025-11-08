@@ -21,12 +21,13 @@ using namespace eerie_leap::utilities::voltage_interpolator;
 SensorsConfigurationManager::SensorsConfigurationManager(
     std::shared_ptr<MathParserService> math_parser_service,
     ext_unique_ptr<ConfigurationService<SensorsConfig>> sensors_configuration_service,
-    int adc_channel_count) :
-
-    math_parser_service_(std::move(math_parser_service)),
-    sensors_configuration_service_(std::move(sensors_configuration_service)),
-    sensors_config_(make_unique_ext<SensorsConfig>()),
-    adc_channel_count_(adc_channel_count) {
+    int gpio_channel_count,
+    int adc_channel_count)
+        : math_parser_service_(std::move(math_parser_service)),
+        sensors_configuration_service_(std::move(sensors_configuration_service)),
+        sensors_config_(make_unique_ext<SensorsConfig>()),
+        gpio_channel_count_(gpio_channel_count),
+        adc_channel_count_(adc_channel_count) {
 
     if(Get(true) == nullptr)
         LOG_ERR("Failed to load sensors configuration.");
@@ -57,7 +58,16 @@ bool SensorsConfigurationManager::Update(const std::vector<std::shared_ptr<Senso
         sensor_config->configuration.type = std::to_underlying(sensor->configuration.type);
 
         if(sensor->configuration.channel.has_value()) {
-            if(sensor->configuration.channel.value() < 0 || sensor->configuration.channel.value() > adc_channel_count_)
+            int channel_count = -1;
+
+            if(sensor->configuration.type == SensorType::PHYSICAL_INDICATOR)
+                channel_count = gpio_channel_count_;
+            else if(sensor->configuration.type == SensorType::PHYSICAL_ANALOG)
+                channel_count = adc_channel_count_;
+            else
+                throw std::runtime_error("Invalid sensor type.");
+
+            if(sensor->configuration.channel.value() < 0 || sensor->configuration.channel.value() >= channel_count)
                 throw std::runtime_error("Invalid channel value.");
 
             sensor_config->configuration.channel_present = true;
