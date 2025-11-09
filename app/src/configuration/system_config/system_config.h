@@ -33,7 +33,6 @@ struct ComUserConfig {
 struct CanbusConfig {
 	uint32_t bus_channel;
 	uint32_t bitrate;
-	uint32_t sampling_point_percent;
 };
 
 struct SystemConfig {

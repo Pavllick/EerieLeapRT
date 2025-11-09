@@ -316,7 +316,7 @@ void SetupSystemConfiguration(std::shared_ptr<SystemConfigurationManager> system
 
     CanbusConfiguration canbus_configuration_0 = {
         .bus_channel = 0,
-        .bitrate = 500000,
+        .bitrate = 0,
     };
     system_configuration->canbus_configurations.push_back(canbus_configuration_0);
 

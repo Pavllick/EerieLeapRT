@@ -19,10 +19,11 @@ using namespace eerie_leap::subsys::device_tree;
 
 LOG_MODULE_REGISTER(sdmmc_service_logger);
 
-SdmmcService::SdmmcService(fs_mount_t mountpoint, const char* disk_name) : FsService(mountpoint), disk_name_(disk_name), monitor_running_(ATOMIC_INIT(0)) { }
+SdmmcService::SdmmcService(fs_mount_t mountpoint, const char* disk_name)
+    : FsService(mountpoint), disk_name_(disk_name), monitor_running_(ATOMIC_INIT(0)) { }
 
 SdmmcService::~SdmmcService() {
-    k_thread_join(thread_id_, K_FOREVER);
+    k_thread_join(&thread_data_, K_FOREVER);
     k_thread_stack_free(stack_area_);
 }
 
@@ -87,12 +88,15 @@ int SdmmcService::SdMonitorStart() {
     k_sem_init(&sd_monitor_stop_sem_, 0, 1);
     atomic_set(&monitor_running_, 1);
 
-    stack_area_ = k_thread_stack_alloc(k_stack_size_, 0);
-    thread_id_ = k_thread_create(
+    if(!stack_area_)
+        stack_area_ = k_thread_stack_alloc(k_stack_size_, 0);
+
+    k_thread_create(
         &thread_data_,
         stack_area_,
         k_stack_size_,
-        [](void* instance, void* p2, void* p3) { static_cast<SdmmcService*>(instance)->SdMonitorThreadEntry(); },
+        [](void* instance, void* p2, void* p3) {
+            static_cast<SdmmcService*>(instance)->SdMonitorThreadEntry(); },
         this, nullptr, nullptr,
         k_priority_, 0, K_NO_WAIT);
 

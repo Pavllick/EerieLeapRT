@@ -19,11 +19,14 @@ CanbusController::CanbusController(std::shared_ptr<IFsService> fs_service, std::
     for(const auto& canbus_configuration : system_configuration_manager_->Get()->canbus_configurations) {
         auto canbus = make_shared_ext<Canbus>(
                 DtCanbus::Get(canbus_configuration.bus_channel),
-                canbus_configuration.bitrate,
-                canbus_configuration.sampling_point_percent);
+                canbus_configuration.bitrate);
 
         if(!canbus->Initialize())
             throw std::runtime_error("Failed to initialize CANBus.");
+
+        canbus->RegisterBitrateDetectedCallback([this, bus_channel = canbus_configuration.bus_channel](uint32_t bitrate) {
+            BitrateUpdated(bus_channel, bitrate);
+        });
 
         canbus_.insert({canbus_configuration.bus_channel, canbus});
     }
@@ -39,6 +42,24 @@ CanbusController::CanbusController(std::shared_ptr<IFsService> fs_service, std::
 
         fs_stream_buf.close();
     }
+}
+
+void CanbusController::BitrateUpdated(uint8_t bus_channel, uint32_t bitrate) {
+    bool is_bus_found = false;
+    auto system_configuration = system_configuration_manager_->Get();
+
+    for(auto& can_bus : system_configuration->canbus_configurations) {
+        if(can_bus.bus_channel == bus_channel) {
+            can_bus.bitrate = bitrate;
+            is_bus_found = true;
+            break;
+        }
+    }
+
+    if(is_bus_found && system_configuration_manager_->Update(system_configuration))
+        LOG_INF("Bitrate for bus channel %d updated to %d bps.", bus_channel, bitrate);
+    else
+        LOG_ERR("Failed to update bitrate for bus channel %d.", bus_channel);
 }
 
 bool CanbusController::LoadDbcFile(std::streambuf& dbc_content) {

@@ -20,7 +20,6 @@ private:
     static constexpr int k_priority_ = K_PRIO_COOP(2);
 
     k_thread_stack_t* stack_area_;
-    k_tid_t thread_id_;
     k_thread thread_data_;
 
     void SdMonitorThreadEntry();

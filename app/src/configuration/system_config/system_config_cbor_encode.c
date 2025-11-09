@@ -47,9 +47,8 @@ static bool encode_CanbusConfig(
 {
 	zcbor_log("%s\r\n", __func__);
 
-	bool res = (((zcbor_list_start_encode(state, 3) && ((((zcbor_uint32_encode(state, (&(*input).bus_channel))))
-	&& ((zcbor_uint32_encode(state, (&(*input).bitrate))))
-	&& ((zcbor_uint32_encode(state, (&(*input).sampling_point_percent))))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 3))));
+	bool res = (((zcbor_list_start_encode(state, 2) && ((((zcbor_uint32_encode(state, (&(*input).bus_channel))))
+	&& ((zcbor_uint32_encode(state, (&(*input).bitrate))))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 2))));
 
 	log_result(state, res, __func__);
 	return res;

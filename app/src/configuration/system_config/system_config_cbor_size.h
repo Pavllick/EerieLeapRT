@@ -29,8 +29,7 @@ static size_t cbor_get_size_SystemConfig(const SystemConfig& system_config) {
         builder.AddIndefiniteArrayStart();
 
         builder.AddUint(system_config.CanbusConfig_m[i].bus_channel)
-            .AddUint(system_config.CanbusConfig_m[i].bitrate)
-            .AddUint(system_config.CanbusConfig_m[i].sampling_point_percent);
+            .AddUint(system_config.CanbusConfig_m[i].bitrate);
     }
 
     return builder.Build();

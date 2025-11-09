@@ -144,7 +144,6 @@ bool SystemConfigurationManager::Update(std::shared_ptr<SystemConfiguration> sys
     for(size_t i = 0; i < system_configuration->canbus_configurations.size() && i < 8; i++) {
         system_config.CanbusConfig_m[i].bus_channel = system_configuration->canbus_configurations[i].bus_channel;
         system_config.CanbusConfig_m[i].bitrate = system_configuration->canbus_configurations[i].bitrate;
-        system_config.CanbusConfig_m[i].sampling_point_percent = system_configuration->canbus_configurations[i].sampling_point_percent;
 
         system_config.CanbusConfig_m_count++;
     }
@@ -158,9 +157,8 @@ bool SystemConfigurationManager::Update(std::shared_ptr<SystemConfiguration> sys
 }
 
 std::shared_ptr<SystemConfiguration> SystemConfigurationManager::Get(bool force_load) {
-    if (system_configuration_ != nullptr && !force_load) {
+    if (system_configuration_ != nullptr && !force_load)
         return system_configuration_;
-    }
 
     auto system_config = system_configuration_service_->Load();
     if(!system_config.has_value())
@@ -188,8 +186,7 @@ std::shared_ptr<SystemConfiguration> SystemConfigurationManager::Get(bool force_
     for(size_t i = 0; i < system_config_->CanbusConfig_m_count; i++) {
         CanbusConfiguration canbus_configuration {
             .bus_channel = system_config_->CanbusConfig_m[i].bus_channel,
-            .bitrate = system_config_->CanbusConfig_m[i].bitrate,
-            .sampling_point_percent = system_config_->CanbusConfig_m[i].sampling_point_percent
+            .bitrate = system_config_->CanbusConfig_m[i].bitrate
         };
         system_configuration.canbus_configurations.push_back(canbus_configuration);
     }

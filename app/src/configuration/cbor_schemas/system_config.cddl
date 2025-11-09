@@ -5,8 +5,7 @@ ComUserConfig = [
 
 CanbusConfig = [
   bus_channel: uint,
-  bitrate: uint,
-  sampling_point_percent: uint
+  bitrate: uint
 ]
 
 SystemConfig = [
