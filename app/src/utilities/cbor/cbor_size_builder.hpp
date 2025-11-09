@@ -36,34 +36,14 @@ public:
     }
 
     // Strings
-    CborSizeBuilder& AddTstr(const std::string& str) {
+    CborSizeBuilder& AddTstr(const zcbor_string& str) {
         size_ += CborSizeCalc::SizeOfTstr(str);
-        return *this;
-    }
-
-    CborSizeBuilder& AddTstr(const char* str) {
-        size_ += CborSizeCalc::SizeOfTstr(str);
-        return *this;
-    }
-
-    CborSizeBuilder& AddBstr(const std::vector<uint8_t>& data) {
-        size_ += CborSizeCalc::SizeOfBstr(data);
-        return *this;
-    }
-
-    CborSizeBuilder& AddBstr(const uint8_t* data, size_t length) {
-        size_ += CborSizeCalc::SizeOfBstr(data, length);
         return *this;
     }
 
     // Special values
     CborSizeBuilder& AddBool(bool value) {
         size_ += CborSizeCalc::SizeOfBool(value);
-        return *this;
-    }
-
-    CborSizeBuilder& AddNull() {
-        size_ += CborSizeCalc::SizeOfNull();
         return *this;
     }
 

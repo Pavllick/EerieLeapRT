@@ -151,6 +151,7 @@ const std::vector<std::shared_ptr<Sensor>>* SensorsConfigurationManager::Get(boo
 
     sensors_config_raw_ = std::move(sensors_config.value().config_raw);
     sensors_config_ = std::move(sensors_config.value().config);
+
     std::vector<std::shared_ptr<Sensor>> sensors;
 
     for(size_t i = 0; i < sensors_config_->SensorConfig_m_count; ++i) {

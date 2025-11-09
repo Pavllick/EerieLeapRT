@@ -30,23 +30,8 @@ public:
     CborSerializer(EncodeFn encoder, DecodeFn decoder, GetSerializingSizeFn getSerializingSizeFn)
         : encodeFn_(encoder), decodeFn_(decoder), getSerializingSizeFn_(getSerializingSizeFn) {}
 
-    size_t GetSerializingSize(const T& obj) {
-        size_t obj_size = 0;
-
-        auto buffer = make_shared_ext<ExtVector>(sizeof(T));
-
-        for(int i = 0; i < 100; i++) {
-            if(!encodeFn_(buffer->data(), buffer->size(), &obj, &obj_size))
-                return obj_size;
-
-            buffer = make_shared_ext<ExtVector>(buffer->size() + 256);
-        }
-
-        return obj_size;
-    }
-
     std::shared_ptr<ExtVector> Serialize(const T& obj, size_t *payload_len_out = nullptr) {
-        auto buffer = make_shared_ext<ExtVector>(GetSerializingSize(obj));
+        auto buffer = make_shared_ext<ExtVector>(getSerializingSizeFn_(obj));
 
         size_t obj_size = 0;
         if(encodeFn_(buffer->data(), buffer->size(), &obj, &obj_size)) {

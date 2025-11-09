@@ -44,8 +44,7 @@ bool LoggingConfigurationManager::Update(std::shared_ptr<LoggingConfiguration> l
     if(!logging_configuration_service_->Save(&logging_config))
         return false;
 
-    logging_config_ = make_unique_ext<LoggingConfig>(logging_config);
-    logging_configuration_ = logging_configuration;
+    Get(true);
 
     return true;
 }

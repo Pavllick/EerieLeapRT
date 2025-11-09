@@ -120,13 +120,13 @@ std::shared_ptr<IAdcManager> AdcConfigurationManager::Get(bool force_load) {
                 calibration_table.push_back({
                         .voltage = calibration_data.float32float_key,
                         .value = calibration_data.float32float});
-                }
-
-                auto calibration_table_ptr = make_shared_ext<std::vector<CalibrationData>>(calibration_table);
-                adc_channel_configuration->calibrator = make_shared_ext<AdcCalibrator>(interpolation_method, calibration_table_ptr);
-            } else {
-                throw std::runtime_error("ADC channel configuration is invalid. Calibration table is missing.");
             }
+
+            auto calibration_table_ptr = make_shared_ext<std::vector<CalibrationData>>(calibration_table);
+            adc_channel_configuration->calibrator = make_shared_ext<AdcCalibrator>(interpolation_method, calibration_table_ptr);
+        } else {
+            throw std::runtime_error("ADC channel configuration is invalid. Calibration table is missing.");
+        }
 
         adc_configuration->channel_configurations->push_back(adc_channel_configuration);
     }

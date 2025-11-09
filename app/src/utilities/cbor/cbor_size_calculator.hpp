@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include <zcbor_common.h>
+
 namespace eerie_leap::utilities::cbor {
 
 /**
@@ -68,62 +70,9 @@ public:
     /**
      * Calculate CBOR encoding size for text string (tstr)
      */
-    static size_t SizeOfTstr(const std::string& str) {
-        size_t len = str.length();
+    static size_t SizeOfTstr(const zcbor_string& str) {
+        size_t len = str.len;
         return SizeOfLength(len) + len;
-    }
-
-    /**
-     * Calculate CBOR encoding size for C-string
-     */
-    static size_t SizeOfTstr(const char* str) {
-        if (!str) return 0;
-        size_t len = strlen(str);
-        return SizeOfLength(len) + len;
-    }
-
-    /**
-     * Calculate CBOR encoding size for text string with known length
-     */
-    static size_t SizeOfTstrLen(size_t length) {
-        return SizeOfLength(length) + length;
-    }
-
-    /**
-     * Calculate CBOR encoding size for byte string (bstr)
-     */
-    static size_t SizeOfBstr(const std::vector<uint8_t>& data) {
-        size_t len = data.size();
-        return SizeOfLength(len) + len;
-    }
-
-    /**
-     * Calculate CBOR encoding size for byte string with pointer and length
-     */
-    static size_t SizeOfBstr(const uint8_t* data, size_t length) {
-        (void)data;
-        return SizeOfLength(length) + length;
-    }
-
-    /**
-     * Calculate CBOR encoding size for byte string with known length
-     */
-    static size_t SizeOfBstrLen(size_t length) {
-        return SizeOfLength(length) + length;
-    }
-
-    /**
-     * Calculate maximum CBOR encoding size for tstr with max length
-     */
-    static size_t SizeOfTstrMax(size_t maxLength) {
-        return SizeOfLength(maxLength) + maxLength;
-    }
-
-    /**
-     * Calculate maximum CBOR encoding size for bstr with max length
-     */
-    static size_t SizeOfBstrMax(size_t maxLength) {
-        return SizeOfLength(maxLength) + maxLength;
     }
 
     // ========================================================================
@@ -247,20 +196,6 @@ public:
         return 1;
     }
 
-    /**
-     * Calculate CBOR encoding size for null
-     */
-    static size_t SizeOfNull() {
-        return 1;
-    }
-
-    /**
-     * Calculate CBOR encoding size for undefined
-     */
-    static size_t SizeOfUndefined() {
-        return 1;
-    }
-
     // ========================================================================
     // Floating Point
     // ========================================================================
@@ -279,18 +214,6 @@ public:
     static size_t SizeOfDouble(double value) {
         (void)value;
         return 9;  // 1 byte type + 8 bytes data
-    }
-
-    // ========================================================================
-    // Tags
-    // ========================================================================
-
-    /**
-     * Calculate CBOR encoding size for a tag
-     * Tags wrap other values (e.g., timestamps, big numbers)
-     */
-    static size_t SizeOfTag(uint64_t tagNumber) {
-        return SizeOfUint(tagNumber);
     }
 
     // ========================================================================
