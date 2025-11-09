@@ -118,8 +118,7 @@ void SensorsApiController::ParseSensorsConfigJson(uint8_t *buffer, size_t len)
     std::vector<std::shared_ptr<Sensor>> sensors;
 
     for(size_t i = 0; i < data.sensors_len; ++i) {
-        auto sensor = make_shared_ext<Sensor>();
-        sensor->id = data.sensors[i].id;
+        auto sensor = make_shared_ext<Sensor>(data.sensors[i].id);
 
         sensor->metadata.name = data.sensors[i].metadata.name;
         sensor->metadata.unit = data.sensors[i].metadata.unit == nullptr ? "" : data.sensors[i].metadata.unit;

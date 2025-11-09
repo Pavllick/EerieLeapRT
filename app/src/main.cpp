@@ -368,8 +368,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
 
     // ExpressionEvaluator expression_evaluator_1(math_parser_service, "{x} * 2 + {sensor_2} + 1");
 
-    auto sensor_1 = make_shared_ext<Sensor>();
-    sensor_1->id = "sensor_1";
+    auto sensor_1 = make_shared_ext<Sensor>("sensor_1");
     sensor_1->metadata = {
             .name = "Sensor 1",
             .unit = "km/h",
@@ -394,8 +393,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
 
     ExpressionEvaluator expression_evaluator_2(math_parser_service, "x * 4 + 1.6");
 
-    auto sensor_2 = make_shared_ext<Sensor>();
-    sensor_2->id = "sensor_2";
+    auto sensor_2 = make_shared_ext<Sensor>("sensor_2");
     sensor_2->metadata = {
             .name = "Sensor 2",
             .unit = "km/h",
@@ -411,8 +409,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
 
     ExpressionEvaluator expression_evaluator_3(math_parser_service, "{sensor_1} + 8.34");
 
-    auto sensor_3 = make_shared_ext<Sensor>();
-    sensor_3->id = "sensor_3";
+    auto sensor_3 = make_shared_ext<Sensor>("sensor_3");
     sensor_3->metadata = {
             .name = "Sensor 3",
             .unit = "km/h",
@@ -424,8 +421,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
         .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_3)
     };
 
-    auto sensor_4 = make_shared_ext<Sensor>();
-    sensor_4->id = "sensor_4";
+    auto sensor_4 = make_shared_ext<Sensor>("sensor_4");
     sensor_4->metadata = {
             .name = "Sensor 4",
             .unit = "",
@@ -439,8 +435,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
 
     ExpressionEvaluator expression_evaluator_5(math_parser_service, "{sensor_1} < 400");
 
-    auto sensor_5 = make_shared_ext<Sensor>();
-    sensor_5->id = "sensor_5";
+    auto sensor_5 = make_shared_ext<Sensor>("sensor_5");
     sensor_5->metadata = {
             .name = "Sensor 5",
             .unit = "",
@@ -452,8 +447,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
         .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_5)
     };
 
-    auto sensor_6 = make_shared_ext<Sensor>();
-    sensor_6->id = "sensor_6";
+    auto sensor_6 = make_shared_ext<Sensor>("sensor_6");
     sensor_6->metadata = {
         .name = "Sensor 6",
         .unit = "",
@@ -465,8 +459,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
         .canbus_source = make_unique_ext<CanbusSource>(790, "RPM")
     };
 
-    auto sensor_7 = make_shared_ext<Sensor>();
-    sensor_7->id = "sensor_7";
+    auto sensor_7 = make_shared_ext<Sensor>("sensor_7");
     sensor_7->metadata = {
         .name = "Sensor 7",
         .unit = "",

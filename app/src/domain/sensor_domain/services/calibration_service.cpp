@@ -57,8 +57,7 @@ void CalibrationService::ProcessCalibrationWorkTask(k_work* work) {
 }
 
 std::shared_ptr<SensorTask> CalibrationService::CreateCalibrationTask(int channel) {
-    std::shared_ptr<Sensor> sensor = make_shared_ext<Sensor>();
-    sensor->id = "CalibrationSensor";
+    auto sensor = make_shared_ext<Sensor>("CalibrationSensor");
     sensor->configuration.type = SensorType::PHYSICAL_ANALOG;
     sensor->configuration.channel = channel;
     sensor->configuration.sampling_rate_ms = CONFIG_EERIE_LEAP_ADC_CALIBRATION_SAMPLING_RATE_MS;

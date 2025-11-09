@@ -91,10 +91,9 @@ static bool encode_SensorConfig(
 {
 	zcbor_log("%s\r\n", __func__);
 
-	bool res = (((zcbor_list_start_encode(state, 4) && ((((zcbor_tstr_encode(state, (&(*input).id))))
-	&& ((zcbor_uint32_encode(state, (&(*input).id_hash))))
+	bool res = (((zcbor_list_start_encode(state, 3) && ((((zcbor_tstr_encode(state, (&(*input).id))))
 	&& ((encode_SensorMetadataConfig(state, (&(*input).metadata))))
-	&& ((encode_SensorConfigurationConfig(state, (&(*input).configuration))))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 4))));
+	&& ((encode_SensorConfigurationConfig(state, (&(*input).configuration))))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 3))));
 
 	log_result(state, res, __func__);
 	return res;

@@ -99,7 +99,6 @@ static bool decode_SensorConfig(
 	zcbor_log("%s\r\n", __func__);
 
 	bool res = (((zcbor_list_start_decode(state) && ((((zcbor_tstr_decode(state, (&(*result).id))))
-	&& ((zcbor_uint32_decode(state, (&(*result).id_hash))))
 	&& ((decode_SensorMetadataConfig(state, (&(*result).metadata))))
 	&& ((decode_SensorConfigurationConfig(state, (&(*result).configuration))))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
 

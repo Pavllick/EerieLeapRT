@@ -14,8 +14,7 @@ static size_t cbor_get_size_SensorsConfig(const SensorsConfig& input) {
     for(int i = 0; i < input.SensorConfig_m_count; i++) {
         builder.AddIndefiniteArrayStart();
 
-        builder.AddTstr(input.SensorConfig_m[i].id)
-            .AddUint(input.SensorConfig_m[i].id_hash);
+        builder.AddTstr(input.SensorConfig_m[i].id);
 
         builder.AddIndefiniteArrayStart()
             .AddTstr(input.SensorConfig_m[i].metadata.name)

@@ -57,8 +57,7 @@ std::vector<std::shared_ptr<Sensor>> sensor_processor_GetTestSensors(std::shared
 
     ExpressionEvaluator expression_evaluator_1(math_parser_service, "{x} * 2 + {sensor_2} + 1");
 
-    auto sensor_1 = std::make_shared<Sensor>();
-    sensor_1->id = "sensor_1";
+    auto sensor_1 = std::make_shared<Sensor>("sensor_1");
     sensor_1->metadata = {
         .name = "Sensor 1",
         .unit = "km/h",
@@ -83,8 +82,7 @@ std::vector<std::shared_ptr<Sensor>> sensor_processor_GetTestSensors(std::shared
 
     ExpressionEvaluator expression_evaluator_2(math_parser_service, "x * 4 + 1.6");
 
-    auto sensor_2 = std::make_shared<Sensor>();
-    sensor_2->id = "sensor_2";
+    auto sensor_2 = std::make_shared<Sensor>("sensor_2");
     sensor_2->metadata = {
         .name = "Sensor 2",
         .unit = "km/h",
@@ -100,8 +98,7 @@ std::vector<std::shared_ptr<Sensor>> sensor_processor_GetTestSensors(std::shared
 
     ExpressionEvaluator expression_evaluator_3(math_parser_service, "{sensor_1} + 8.34");
 
-    auto sensor_3 = std::make_shared<Sensor>();
-    sensor_3->id = "sensor_3";
+    auto sensor_3 = std::make_shared<Sensor>("sensor_3");
     sensor_3->metadata = {
         .name = "Sensor 3",
         .unit = "km/h",
@@ -113,8 +110,7 @@ std::vector<std::shared_ptr<Sensor>> sensor_processor_GetTestSensors(std::shared
         .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_3)
     };
 
-    auto sensor_4 = std::make_shared<Sensor>();
-    sensor_4->id = "sensor_4";
+    auto sensor_4 = std::make_shared<Sensor>("sensor_4");
     sensor_4->metadata = {
         .name = "Sensor 4",
         .unit = "",
@@ -128,8 +124,7 @@ std::vector<std::shared_ptr<Sensor>> sensor_processor_GetTestSensors(std::shared
 
     ExpressionEvaluator expression_evaluator_5(math_parser_service, "{sensor_1} < 400");
 
-    auto sensor_5 = std::make_shared<Sensor>();
-    sensor_5->id = "sensor_5";
+    auto sensor_5 = std::make_shared<Sensor>("sensor_5");
     sensor_5->metadata = {
         .name = "Sensor 5",
         .unit = "",

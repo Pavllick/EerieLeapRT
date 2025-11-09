@@ -40,7 +40,6 @@ bool SensorsConfigurationManager::Update(const std::vector<std::shared_ptr<Senso
     memset(sensors_config.get(), 0, sizeof(SensorsConfig));
 
     SensorsOrderResolver resolver;
-    std::hash<std::string> string_hasher;
 
     for(size_t i = 0; i < sensors.size(); ++i) {
         const auto& sensor = sensors.at(i);
@@ -54,7 +53,6 @@ bool SensorsConfigurationManager::Update(const std::vector<std::shared_ptr<Senso
             throw std::runtime_error("Invalid sensor ID.");
 
         sensor_config->id = CborHelpers::ToZcborString(&sensor->id);
-        sensor_config->id_hash = static_cast<uint32_t>(string_hasher(sensor->id));
         sensor_config->configuration.type = std::to_underlying(sensor->configuration.type);
 
         if(sensor->configuration.channel.has_value()) {
@@ -156,10 +154,8 @@ const std::vector<std::shared_ptr<Sensor>>* SensorsConfigurationManager::Get(boo
 
     for(size_t i = 0; i < sensors_config_->SensorConfig_m_count; ++i) {
         const auto& sensor_config = sensors_config_->SensorConfig_m[i];
-        std::shared_ptr<Sensor> sensor = make_shared_ext<Sensor>();
+        std::shared_ptr<Sensor> sensor = make_shared_ext<Sensor>(CborHelpers::ToStdString(sensor_config.id));
 
-        sensor->id = CborHelpers::ToStdString(sensor_config.id);
-        sensor->id_hash = sensor_config.id_hash;
         sensor->configuration.type = static_cast<SensorType>(sensor_config.configuration.type);
 
         if(sensor_config.configuration.channel_present)

@@ -41,8 +41,7 @@ std::vector<std::shared_ptr<Sensor>> SetupTestSensors(std::shared_ptr<MathParser
 
     ExpressionEvaluator expression_evaluator_1(math_parser_service, "{x} * 2 + {sensor_2} + 1");
 
-    auto sensor_1 = std::make_shared<Sensor>();
-    sensor_1->id = "sensor_1";
+    auto sensor_1 = std::make_shared<Sensor>("sensor_1");
     sensor_1->metadata = {
         .name = "Sensor 1",
         .unit = "km/h",
@@ -67,8 +66,7 @@ std::vector<std::shared_ptr<Sensor>> SetupTestSensors(std::shared_ptr<MathParser
 
     ExpressionEvaluator expression_evaluator_2(math_parser_service, "x * 4 + 1.6");
 
-    auto sensor_2 = std::make_shared<Sensor>();
-    sensor_2->id = "sensor_2";
+    auto sensor_2 = std::make_shared<Sensor>("sensor_2");
     sensor_2->metadata = {
         .name = "Sensor 2",
         .unit = "km/h",
@@ -84,8 +82,7 @@ std::vector<std::shared_ptr<Sensor>> SetupTestSensors(std::shared_ptr<MathParser
 
     ExpressionEvaluator expression_evaluator_3(math_parser_service, "{sensor_1} + 8.34");
 
-    auto sensor_3 = std::make_shared<Sensor>();
-    sensor_3->id = "sensor_3";
+    auto sensor_3 = std::make_shared<Sensor>("sensor_3");
     sensor_3->metadata = {
         .name = "Sensor 3",
         .unit = "km/h",
@@ -98,8 +95,7 @@ std::vector<std::shared_ptr<Sensor>> SetupTestSensors(std::shared_ptr<MathParser
         .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_3)
     };
 
-    auto sensor_4 = std::make_shared<Sensor>();
-    sensor_4->id = "sensor_4";
+    auto sensor_4 = std::make_shared<Sensor>("sensor_4");
     sensor_4->metadata = {
         .name = "Sensor 4",
         .unit = "km/h",
@@ -127,7 +123,11 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
     auto sensors_configuration_service = make_unique_ext<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
 
     auto math_parser_service = std::make_shared<MathParserService>();
-    auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(math_parser_service, std::move(sensors_configuration_service), 16);
+    auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
+        math_parser_service,
+        std::move(sensors_configuration_service),
+        16,
+        16);
 
     auto sensors = SetupTestSensors(math_parser_service);
     sensors_configuration_manager->Update(sensors);
@@ -173,14 +173,22 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
     auto sensors_configuration_service = make_unique_ext<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
 
     auto math_parser_service = std::make_shared<MathParserService>();
-    auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(math_parser_service, std::move(sensors_configuration_service), 16);
+    auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
+        math_parser_service,
+        std::move(sensors_configuration_service),
+        16,
+        16);
 
     auto sensors = SetupTestSensors(math_parser_service);
     sensors_configuration_manager->Update(sensors);
 
     sensors_configuration_service = make_unique_ext<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
     sensors_configuration_manager = nullptr;
-    sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(math_parser_service, std::move(sensors_configuration_service), 16);
+    sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
+        math_parser_service,
+        std::move(sensors_configuration_service),
+        16,
+        16);
 
     auto saved_sensors = *sensors_configuration_manager->Get();
 
@@ -223,7 +231,11 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
     auto sensors_configuration_service = make_unique_ext<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
 
     auto math_parser_service = std::make_shared<MathParserService>();
-    auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(math_parser_service, std::move(sensors_configuration_service), 16);
+    auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
+        math_parser_service,
+        std::move(sensors_configuration_service),
+        16,
+        16);
 
     std::vector<CalibrationData> calibration_data_1 {
         {0.0, 0.0},
@@ -231,8 +243,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
     };
     auto calibration_data_1_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_1);
 
-    auto sensor_1 = std::make_shared<Sensor>();
-    sensor_1->id = "sensor_1";
+    auto sensor_1 = std::make_shared<Sensor>("sensor_1");
     sensor_1->metadata = {
         .name = "Sensor 1",
         .unit = "km/h",
@@ -245,8 +256,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
         .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
     };
 
-    auto sensor_2 = std::make_shared<Sensor>();
-    sensor_2->id = "_sensor_2";
+    auto sensor_2 = std::make_shared<Sensor>("_sensor_2");
     sensor_2->metadata = {
         .name = "Sensor 2",
         .unit = "km/h",
@@ -259,8 +269,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
         .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
     };
 
-    auto sensor_3 = std::make_shared<Sensor>();
-    sensor_3->id = "_";
+    auto sensor_3 = std::make_shared<Sensor>("_");
     sensor_3->metadata = {
         .name = "Sensor 3",
         .unit = "km/h",
@@ -289,7 +298,11 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
     auto sensors_configuration_service = make_unique_ext<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
 
     auto math_parser_service = std::make_shared<MathParserService>();
-    auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(math_parser_service, std::move(sensors_configuration_service), 16);
+    auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
+        math_parser_service,
+        std::move(sensors_configuration_service),
+        16,
+        16);
 
     std::vector<CalibrationData> calibration_data_1 {
         {0.0, 0.0},
@@ -297,8 +310,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
     };
     auto calibration_data_1_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_1);
 
-    auto sensor_1 = std::make_shared<Sensor>();
-    sensor_1->id = "1_sensor_1";
+    auto sensor_1 = std::make_shared<Sensor>("1_sensor_1");
     sensor_1->metadata = {
         .name = "Sensor 1",
         .unit = "km/h",
@@ -311,8 +323,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
         .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
     };
 
-    auto sensor_2 = std::make_shared<Sensor>();
-    sensor_2->id = "#sensor_2";
+    auto sensor_2 = std::make_shared<Sensor>("#sensor_2");
     sensor_2->metadata = {
         .name = "Sensor 2",
         .unit = "km/h",
@@ -325,8 +336,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
         .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
     };
 
-    auto sensor_3 = std::make_shared<Sensor>();
-    sensor_3->id = "3";
+    auto sensor_3 = std::make_shared<Sensor>("3");
     sensor_3->metadata = {
         .name = "Sensor 3",
         .unit = "km/h",
