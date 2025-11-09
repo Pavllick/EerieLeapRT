@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <optional>
 #include <array>
@@ -24,9 +25,10 @@ class CborSerializer {
 public:
     using EncodeFn = int (*)(uint8_t*, size_t, const T*, size_t*);
     using DecodeFn = int (*)(const uint8_t*, size_t, T*, size_t*);
+    using GetSerializingSizeFn = size_t (*)(const T&);
 
-    CborSerializer(EncodeFn encoder, DecodeFn decoder)
-        : encodeFn_(encoder), decodeFn_(decoder) {}
+    CborSerializer(EncodeFn encoder, DecodeFn decoder, GetSerializingSizeFn getSerializingSizeFn)
+        : encodeFn_(encoder), decodeFn_(decoder), getSerializingSizeFn_(getSerializingSizeFn) {}
 
     size_t GetSerializingSize(const T& obj) {
         size_t obj_size = 0;
@@ -74,6 +76,7 @@ public:
 private:
     EncodeFn encodeFn_;
     DecodeFn decodeFn_;
+    GetSerializingSizeFn getSerializingSizeFn_;
 };
 
 } // namespace eerie_leap::utilities::cbor
