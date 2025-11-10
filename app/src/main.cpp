@@ -32,6 +32,7 @@
 #include "domain/sensor_domain/sensor_readers/sensor_reader_factory.h"
 #include "domain/sensor_domain/services/processing_scheduler_service.h"
 #include "domain/sensor_domain/services/calibration_service.h"
+#include "domain/canbus_domain/services/canbus_service.h"
 
 #include "domain/logging_domain/services/log_writer_service.h"
 
@@ -42,7 +43,6 @@
 #include "controllers/logging_controller.h"
 #include "controllers/com_polling_controller.h"
 #include "controllers/display_controller.h"
-#include "controllers/canbus_controller.h"
 
 // Test sensors includes
 #include "utilities/math_parser/expression_evaluator.h"
@@ -79,6 +79,7 @@ using namespace eerie_leap::subsys::time;
 
 using namespace eerie_leap::configuration::services;
 
+using namespace eerie_leap::domain::canbus_domain::services;
 using namespace eerie_leap::domain::system_domain::configuration;
 using namespace eerie_leap::domain::sensor_domain::services;
 using namespace eerie_leap::domain::sensor_domain::sensor_readers;
@@ -200,8 +201,7 @@ int main(void) {
         gpio->GetChannelCount(),
         adc_configuration_manager->Get()->GetChannelCount());
 
-    auto canbus_controller = make_shared_ext<CanbusController>(sd_fs_service, system_configuration_manager);
-    auto dbc = canbus_controller->GetDbc();
+    auto canbus_service = make_shared_ext<CanbusService>(sd_fs_service, system_configuration_manager);
 
     // TODO: For test purposes only
     SetupTestSensors(math_parser_service, sensors_configuration_manager);
@@ -267,8 +267,7 @@ int main(void) {
         gpio,
         adc_configuration_manager,
         sensor_readings_frame,
-        canbus_controller->GetCanbus(0),
-        dbc);
+        canbus_service);
 
     auto processing_scheduler_service = make_shared_ext<ProcessingSchedulerService>(
         sensors_configuration_manager,
@@ -456,7 +455,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
     sensor_6->configuration = {
         .type = SensorType::CANBUS_ANALOG,
         .sampling_rate_ms = 1000,
-        .canbus_source = make_unique_ext<CanbusSource>(790, "RPM")
+        .canbus_source = make_unique_ext<CanbusSource>(0, 790, "RPM")
     };
 
     auto sensor_7 = make_shared_ext<Sensor>("sensor_7");
@@ -468,7 +467,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
     sensor_7->configuration = {
         .type = SensorType::CANBUS_RAW,
         .sampling_rate_ms = 300,
-        .canbus_source = make_unique_ext<CanbusSource>(790)
+        .canbus_source = make_unique_ext<CanbusSource>(0, 790)
     };
 
     std::vector<std::shared_ptr<Sensor>> sensors = {

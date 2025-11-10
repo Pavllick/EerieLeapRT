@@ -9,14 +9,14 @@
 #include "subsys/dbc/dbc.h"
 #include "domain/system_domain/configuration/system_configuration_manager.h"
 
-namespace eerie_leap::controllers {
+namespace eerie_leap::domain::canbus_domain::services {
 
 using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::subsys::canbus;
 using namespace eerie_leap::subsys::dbc;
 using namespace eerie_leap::domain::system_domain::configuration;
 
-class CanbusController {
+class CanbusService {
 private:
     std::shared_ptr<IFsService> fs_service_;
     std::shared_ptr<SystemConfigurationManager> system_configuration_manager_;
@@ -27,11 +27,11 @@ private:
     void BitrateUpdated(uint8_t bus_channel, uint32_t bitrate);
 
 public:
-    CanbusController(std::shared_ptr<IFsService> fs_service, std::shared_ptr<SystemConfigurationManager> system_configuration_manager);
+    CanbusService(std::shared_ptr<IFsService> fs_service, std::shared_ptr<SystemConfigurationManager> system_configuration_manager);
 
     bool LoadDbcFile(std::streambuf& dbc_content);
     std::shared_ptr<Canbus> GetCanbus(uint8_t bus_channel) const;
     std::shared_ptr<Dbc> GetDbc() const;
 };
 
-} // namespace eerie_leap::controllers
+} // namespace eerie_leap::domain::canbus_domain::services

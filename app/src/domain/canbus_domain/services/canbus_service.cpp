@@ -4,16 +4,16 @@
 #include "subsys/fs/services/fs_service_stream_buf.h"
 #include "subsys/device_tree/dt_canbus.h"
 
-#include "canbus_controller.h"
+#include "canbus_service.h"
 
-namespace eerie_leap::controllers {
+namespace eerie_leap::domain::canbus_domain::services {
 
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::subsys::device_tree;
 
-LOG_MODULE_REGISTER(canbus_controller_logger);
+LOG_MODULE_REGISTER(canbus_service_logger);
 
-CanbusController::CanbusController(std::shared_ptr<IFsService> fs_service, std::shared_ptr<SystemConfigurationManager> system_configuration_manager)
+CanbusService::CanbusService(std::shared_ptr<IFsService> fs_service, std::shared_ptr<SystemConfigurationManager> system_configuration_manager)
     : fs_service_(std::move(fs_service)), system_configuration_manager_(std::move(system_configuration_manager)) {
 
     for(const auto& canbus_configuration : system_configuration_manager_->Get()->canbus_configurations) {
@@ -44,7 +44,7 @@ CanbusController::CanbusController(std::shared_ptr<IFsService> fs_service, std::
     }
 }
 
-void CanbusController::BitrateUpdated(uint8_t bus_channel, uint32_t bitrate) {
+void CanbusService::BitrateUpdated(uint8_t bus_channel, uint32_t bitrate) {
     bool is_bus_found = false;
     auto system_configuration = system_configuration_manager_->Get();
 
@@ -62,7 +62,7 @@ void CanbusController::BitrateUpdated(uint8_t bus_channel, uint32_t bitrate) {
         LOG_ERR("Failed to update bitrate for bus channel %d.", bus_channel);
 }
 
-bool CanbusController::LoadDbcFile(std::streambuf& dbc_content) {
+bool CanbusService::LoadDbcFile(std::streambuf& dbc_content) {
     bool res = dbc_->LoadDbcFile(dbc_content);
     if(res)
         LOG_INF("DBC file loaded successfully.");
@@ -72,15 +72,15 @@ bool CanbusController::LoadDbcFile(std::streambuf& dbc_content) {
     return res;
 }
 
-std::shared_ptr<Canbus> CanbusController::GetCanbus(uint8_t bus_channel) const {
+std::shared_ptr<Canbus> CanbusService::GetCanbus(uint8_t bus_channel) const {
     if(!canbus_.contains(bus_channel))
         return nullptr;
 
     return canbus_.at(bus_channel);
 }
 
-std::shared_ptr<Dbc> CanbusController::GetDbc() const {
+std::shared_ptr<Dbc> CanbusService::GetDbc() const {
     return dbc_;
 }
 
-} // namespace eerie_leap::controllers
+} // namespace eerie_leap::domain::canbus_domain::services

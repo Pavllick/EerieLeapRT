@@ -16,15 +16,13 @@ SensorReaderFactory::SensorReaderFactory(
     std::shared_ptr<IGpio> gpio,
     std::shared_ptr<AdcConfigurationManager> adc_configuration_manager,
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame,
-    std::shared_ptr<Canbus> canbus,
-    std::shared_ptr<Dbc> dbc)
+    std::shared_ptr<CanbusService> canbus_service)
         : time_service_(std::move(time_service)),
         guid_generator_(std::move(guid_generator)),
         gpio_(std::move(gpio)),
         adc_configuration_manager_(std::move(adc_configuration_manager)),
         sensor_readings_frame_(std::move(sensor_readings_frame)),
-        canbus_(std::move(canbus)),
-        dbc_(std::move(dbc)) {}
+        canbus_service_(std::move(canbus_service)) {}
 
 std::unique_ptr<ISensorReader> SensorReaderFactory::Create(std::shared_ptr<Sensor> sensor) {
     std::unique_ptr<ISensorReader> sensor_reader;
@@ -61,15 +59,15 @@ std::unique_ptr<ISensorReader> SensorReaderFactory::Create(std::shared_ptr<Senso
             guid_generator_,
             sensor_readings_frame_,
             sensor,
-            canbus_);
+            canbus_service_->GetCanbus(sensor->configuration.canbus_source->bus_channel));
     } else if(sensor->configuration.type == SensorType::CANBUS_ANALOG || sensor->configuration.type == SensorType::CANBUS_INDICATOR) {
         sensor_reader = make_unique<CanbusSensorReader>(
             time_service_,
             guid_generator_,
             sensor_readings_frame_,
             sensor,
-            canbus_,
-            dbc_);
+            canbus_service_->GetCanbus(sensor->configuration.canbus_source->bus_channel),
+            canbus_service_->GetDbc());
     } else {
         throw std::runtime_error("Unsupported sensor type");
     }

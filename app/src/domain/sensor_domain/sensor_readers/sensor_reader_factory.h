@@ -5,13 +5,12 @@
 #include "utilities/guid/guid_generator.h"
 #include "subsys/time/i_time_service.h"
 #include "subsys/gpio/i_gpio.h"
-#include "subsys/canbus/canbus.h"
-#include "subsys/dbc/dbc.h"
 
 #include "domain/sensor_domain/configuration/sensors_configuration_manager.h"
 #include "domain/sensor_domain/configuration/adc_configuration_manager.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 #include "domain/sensor_domain/models/sensor.h"
+#include "domain/canbus_domain/services/canbus_service.h"
 #include "i_sensor_reader.h"
 
 namespace eerie_leap::domain::sensor_domain::sensor_readers {
@@ -19,12 +18,11 @@ namespace eerie_leap::domain::sensor_domain::sensor_readers {
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::subsys::time;
 using namespace eerie_leap::subsys::gpio;
-using namespace eerie_leap::subsys::canbus;
-using namespace eerie_leap::subsys::dbc;
 
 using namespace eerie_leap::domain::sensor_domain::configuration;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 using namespace eerie_leap::domain::sensor_domain::models;
+using namespace eerie_leap::domain::canbus_domain::services;
 
 class SensorReaderFactory {
 protected:
@@ -33,8 +31,7 @@ protected:
     std::shared_ptr<IGpio> gpio_;
     std::shared_ptr<AdcConfigurationManager> adc_configuration_manager_;
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame_;
-    std::shared_ptr<Canbus> canbus_;
-    std::shared_ptr<Dbc> dbc_;
+    std::shared_ptr<CanbusService> canbus_service_;
 
 public:
     SensorReaderFactory(
@@ -43,8 +40,7 @@ public:
         std::shared_ptr<IGpio> gpio,
         std::shared_ptr<AdcConfigurationManager> adc_configuration_manager,
         std::shared_ptr<SensorReadingsFrame> sensor_readings_frame,
-        std::shared_ptr<Canbus> canbus,
-        std::shared_ptr<Dbc> dbc);
+        std::shared_ptr<CanbusService> canbus_service);
 
     virtual ~SensorReaderFactory() = default;
 
