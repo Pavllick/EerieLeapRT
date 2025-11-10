@@ -10,7 +10,7 @@
 #include <zephyr/logging/log.h>
 
 #include "utilities/memory/heap_allocator.h"
-#include "utilities/cbor/cbor_serializer.hpp"
+#include "utilities/cbor/cbor_serializer.h"
 #include "subsys/fs/services/i_fs_service.h"
 
 #include "configuration/cbor_traits/system_config_trait.h"

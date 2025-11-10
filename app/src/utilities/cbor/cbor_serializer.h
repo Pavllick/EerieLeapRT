@@ -18,8 +18,6 @@ namespace eerie_leap::utilities::cbor {
 
 using namespace eerie_leap::utilities::memory;
 
-// TODO: Figure out logging without LOG_MODULE_REGISTER and LOG_INSTANCE_PTR_DECLARE
-
 template <typename T>
 class CborSerializer {
 public:
@@ -31,11 +29,13 @@ public:
         : encodeFn_(encoder), decodeFn_(decoder), getSerializingSizeFn_(getSerializingSizeFn) {}
 
     ext_unique_ptr<ExtVector> Serialize(const T& obj, size_t *payload_len_out = nullptr) {
+        LOG_MODULE_DECLARE(cbor_serializer_logger);
+
         auto buffer = make_unique_ext<ExtVector>(getSerializingSizeFn_(obj));
 
         size_t obj_size = 0;
         if(encodeFn_(buffer->data(), buffer->size(), &obj, &obj_size)) {
-            // LOG_ERR("Failed to encode object.");
+            LOG_ERR("Failed to encode object.");
             return nullptr;
         }
 
@@ -46,9 +46,11 @@ public:
     }
 
     ext_unique_ptr<T> Deserialize(std::span<const uint8_t> input) {
+        LOG_MODULE_DECLARE(cbor_serializer_logger);
+
         auto obj = make_unique_ext<T>();
         if(decodeFn_(input.data(), input.size(), obj.get(), nullptr)) {
-            // LOG_ERR("Failed to decode object.");
+            LOG_ERR("Failed to decode object.");
             return nullptr;
         }
 
