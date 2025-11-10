@@ -27,6 +27,7 @@ private:
     int gpio_channel_count_;
     int adc_channel_count_;
 
+    bool CreateDefaultConfiguration();
     void ValidateSensorType(const SensorConfiguration& sensor_configuration);
 
 public:

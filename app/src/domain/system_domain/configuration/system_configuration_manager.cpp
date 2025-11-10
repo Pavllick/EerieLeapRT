@@ -25,6 +25,8 @@ SystemConfigurationManager::SystemConfigurationManager(ext_unique_ptr<Configurat
             return;
         }
 
+        LOG_INF("Default System configuration loaded successfully.");
+
         system_config = Get();
     }
 

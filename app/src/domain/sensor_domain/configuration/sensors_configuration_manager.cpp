@@ -35,10 +35,16 @@ SensorsConfigurationManager::SensorsConfigurationManager(
         sensors = Get(true);
     } catch(const std::exception& e) {}
 
-    if(sensors != nullptr)
+    if(sensors == nullptr) {
+        if(!CreateDefaultConfiguration()) {
+            LOG_ERR("Failed to create default sensors configuration.");
+            return;
+        }
+
+        LOG_INF("Default Sensors configuration loaded successfully.");
+    } else {
         LOG_INF("Sensors Configuration Manager initialized successfully.");
-    else
-        LOG_ERR("Failed to load sensors configuration.");
+    }
 }
 
 bool SensorsConfigurationManager::Update(const std::vector<std::shared_ptr<Sensor>>& sensors) {
@@ -226,6 +232,12 @@ const std::vector<std::shared_ptr<Sensor>>* SensorsConfigurationManager::Get(boo
 
 const std::span<uint8_t> SensorsConfigurationManager::GetRaw() {
     return *sensors_config_raw_.get();
+}
+
+bool SensorsConfigurationManager::CreateDefaultConfiguration() {
+    auto sensors = std::vector<std::shared_ptr<Sensor>>();
+
+    return Update(sensors);
 }
 
 void SensorsConfigurationManager::ValidateSensorType(const SensorConfiguration& sensor_configuration) {
