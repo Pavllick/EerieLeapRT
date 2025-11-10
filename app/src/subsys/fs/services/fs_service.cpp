@@ -226,6 +226,26 @@ std::vector<std::string> FsService::ListFiles(const std::string& relative_path) 
     return files;
 }
 
+size_t FsService::GetFileSize(const std::string& relative_path) const {
+    if(!IsMounted()) {
+        LOG_ERR("Filesystem not mounted.");
+        return 0;
+    }
+
+    std::filesystem::path full_path(mountpoint_.mnt_point);
+    full_path /= relative_path;
+
+    struct fs_dirent entry;
+    int rc = fs_stat(full_path.string().c_str(), &entry);
+
+    if(rc < 0) {
+        LOG_ERR("fs_stat failed: %d.", rc);
+        return 0;
+    }
+
+    return entry.size;
+}
+
 size_t FsService::GetTotalSpace() const {
     if(!IsMounted()) {
         LOG_ERR("Filesystem not mounted.");

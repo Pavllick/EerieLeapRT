@@ -31,7 +31,6 @@ template <typename T>
 class ConfigurationService {
 private:
     const std::string configuration_dir_ = "config";
-    static constexpr size_t load_buffer_size_ = sizeof(T) + 2048;
 
     std::string configuration_name_;
     std::shared_ptr<IFsService> fs_service_;
@@ -80,29 +79,29 @@ private:
             return std::nullopt;
         }
 
-        auto buffer = make_unique_ext<ExtVector>(load_buffer_size_);
+        size_t buffer_size = fs_service_->GetFileSize(configuration_file_path_);
+        auto buffer = make_unique_ext<ExtVector>(buffer_size);
         size_t out_len = 0;
 
-        if (!fs_service_->ReadFile(configuration_file_path_, buffer->data(), load_buffer_size_, out_len)) {
+        if (!fs_service_->ReadFile(configuration_file_path_, buffer->data(), buffer_size, out_len)) {
             LOG_ERR("Failed to read configuration file %s.", configuration_file_path_.c_str());
             return std::nullopt;
         }
 
+        printk("Buffer size, %zu\n", buffer_size);
+        printk("Output size, %zu\n", out_len);
+
         auto config_bytes = std::span<const uint8_t>(buffer->data(), out_len);
         auto configuration = cbor_serializer_->Deserialize(config_bytes);
 
-        buffer->resize(out_len);
-
-        if (!configuration.has_value()) {
+        if (configuration == nullptr) {
             LOG_ERR("Failed to deserialize configuration %s.", configuration_file_path_.c_str());
             return std::nullopt;
         }
 
-        auto config = make_unique_ext<T>(configuration.value());
-
         LoadedConfig<T> loaded_config {
             .config_raw = std::move(buffer),
-            .config = std::move(config)
+            .config = std::move(configuration)
         };
 
         LOG_INF("%s configuration loaded successfully.", configuration_file_path_.c_str());

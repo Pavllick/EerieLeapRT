@@ -30,8 +30,8 @@ public:
     CborSerializer(EncodeFn encoder, DecodeFn decoder, GetSerializingSizeFn getSerializingSizeFn)
         : encodeFn_(encoder), decodeFn_(decoder), getSerializingSizeFn_(getSerializingSizeFn) {}
 
-    std::shared_ptr<ExtVector> Serialize(const T& obj, size_t *payload_len_out = nullptr) {
-        auto buffer = make_shared_ext<ExtVector>(getSerializingSizeFn_(obj));
+    ext_unique_ptr<ExtVector> Serialize(const T& obj, size_t *payload_len_out = nullptr) {
+        auto buffer = make_unique_ext<ExtVector>(getSerializingSizeFn_(obj));
 
         size_t obj_size = 0;
         if(encodeFn_(buffer->data(), buffer->size(), &obj, &obj_size)) {
@@ -42,17 +42,14 @@ public:
         if (payload_len_out != nullptr)
             *payload_len_out = obj_size;
 
-        auto buffer_serialized = make_shared_ext<ExtVector>(obj_size);
-        std::copy(buffer->data(), buffer->data() + obj_size, buffer_serialized->begin());
-
-        return buffer_serialized;
+        return buffer;
     }
 
-    std::optional<T> Deserialize(std::span<const uint8_t> input) {
-        T obj;
-        if(decodeFn_(input.data(), input.size(), &obj, nullptr)) {
+    ext_unique_ptr<T> Deserialize(std::span<const uint8_t> input) {
+        auto obj = make_unique_ext<T>();
+        if(decodeFn_(input.data(), input.size(), obj.get(), nullptr)) {
             // LOG_ERR("Failed to decode object.");
-            return std::nullopt;
+            return nullptr;
         }
 
         return obj;
