@@ -254,7 +254,7 @@ int main(void) {
             sensor_readings_frame,
             system_configuration_manager->Get()->com_user_refresh_rate_ms);
         com_reading_interface_service->Initialize();
-    
+
         if(logging_controller != nullptr) {
             com_polling_controller = make_shared_ext<ComPollingController>(user_com_interface, com_polling_interface_service, logging_controller);
             com_polling_controller->Initialize();

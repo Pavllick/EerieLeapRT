@@ -33,9 +33,7 @@ private:
     static constexpr uint32_t AUTO_DETECT_TIMEOUT_MS = 500;
     static constexpr uint32_t MIN_FRAMES_FOR_DETECTION = 3;
 
-    // TODO: Stack is used by SystemConfigurationManager config updater,
-    // on the force load step deserialization requires some stack space.
-    static constexpr int k_stack_size_ = 4096;
+    static constexpr int k_stack_size_ = 2048;
     static constexpr int k_priority_ = K_PRIO_PREEMPT(6);
 
     k_thread_stack_t* stack_area_ = nullptr;

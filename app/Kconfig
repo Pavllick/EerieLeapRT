@@ -98,6 +98,10 @@ config EERIE_LEAP_CANBUS_DBC_FILE_PATH
 	string "Canbus DBC file path"
 	default "user/in_canbus_0.dbc"
 
+config EERIE_LEAP_CANBUS_AUTO_DETECT_INTERVAL_MS
+	int "Canbus auto detect activity check interval ms"
+	default 5000
+
 module = APP
 module-str = APP
 source "subsys/logging/Kconfig.template.log_config"
