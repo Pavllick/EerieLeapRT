@@ -29,10 +29,16 @@ SensorsConfigurationManager::SensorsConfigurationManager(
         gpio_channel_count_(gpio_channel_count),
         adc_channel_count_(adc_channel_count) {
 
-    if(Get(true) == nullptr)
-        LOG_ERR("Failed to load sensors configuration.");
-    else
+    const std::vector<std::shared_ptr<Sensor>>* sensors = nullptr;
+
+    try {
+        sensors = Get(true);
+    } catch(const std::exception& e) {}
+
+    if(sensors != nullptr)
         LOG_INF("Sensors Configuration Manager initialized successfully.");
+    else
+        LOG_ERR("Failed to load sensors configuration.");
 }
 
 bool SensorsConfigurationManager::Update(const std::vector<std::shared_ptr<Sensor>>& sensors) {

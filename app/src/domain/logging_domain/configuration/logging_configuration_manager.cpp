@@ -9,11 +9,19 @@ LoggingConfigurationManager::LoggingConfigurationManager(ext_unique_ptr<Configur
     logging_config_(nullptr),
     logging_configuration_(nullptr) {
 
-    if(Get(true) == nullptr) {
+    std::shared_ptr<LoggingConfiguration> logging_configuration = nullptr;
+
+    try {
+        logging_configuration = Get(true);
+    } catch(const std::exception& e) {}
+
+    if(logging_configuration == nullptr) {
         if(!CreateDefaultConfiguration()) {
             LOG_ERR("Failed to create default Logging configuration.");
             return;
         }
+
+        LOG_INF("Default Logging configuration loaded successfully.");
     }
 
     LOG_INF("Logging Configuration Manager initialized successfully.");

@@ -13,7 +13,11 @@ SystemConfigurationManager::SystemConfigurationManager(ext_unique_ptr<Configurat
     system_config_(nullptr),
     system_configuration_(nullptr) {
 
-    auto system_config = Get(true);
+    std::shared_ptr<SystemConfiguration> system_config = nullptr;
+
+    try {
+        system_config = Get(true);
+    } catch(const std::exception& e) {}
 
     if(system_config == nullptr) {
         if(!CreateDefaultConfiguration()) {

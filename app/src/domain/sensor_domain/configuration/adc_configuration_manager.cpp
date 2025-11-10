@@ -27,10 +27,19 @@ AdcConfigurationManager::AdcConfigurationManager(ext_unique_ptr<ConfigurationSer
 
     adc_manager_->Initialize();
 
-    if(Get(true) == nullptr) {
+    std::shared_ptr<IAdcManager> adc_manager = nullptr;
+
+    try {
+        adc_manager = Get(true);
+    } catch(const std::exception& e) {}
+
+    if(adc_manager == nullptr) {
         LOG_ERR("Failed to load ADC configuration.");
 
-        CreateDefaultConfiguration();
+        if(!CreateDefaultConfiguration()) {
+            LOG_ERR("Failed to create default ADC configuration.");
+            return;
+        }
 
         LOG_INF("Default ADC configuration loaded successfully.");
     } else {
@@ -138,7 +147,7 @@ std::shared_ptr<IAdcManager> AdcConfigurationManager::Get(bool force_load) {
 }
 
 // TODO: Refine default configuration
-void AdcConfigurationManager::CreateDefaultConfiguration() {
+bool AdcConfigurationManager::CreateDefaultConfiguration() {
     std::vector<CalibrationData> adc_calibration_data_samples {
         {0.501, 0.469},
         {1.0, 0.968},
@@ -161,8 +170,7 @@ void AdcConfigurationManager::CreateDefaultConfiguration() {
     adc_configuration->channel_configurations =
         make_shared_ext<std::vector<std::shared_ptr<AdcChannelConfiguration>>>(channel_configurations);
 
-    if(!Update(*adc_configuration.get()))
-        throw std::runtime_error("Cannot save ADCs config");
+    return Update(*adc_configuration.get());
 }
 
 } // namespace eerie_leap::domain::sensor_domain::configuration
