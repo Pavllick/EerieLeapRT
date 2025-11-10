@@ -184,7 +184,7 @@ int main(void) {
     auto adc_configuration_manager = make_shared_ext<AdcConfigurationManager>(std::move(adc_config_service));
 
     // TODO: For test purposes only
-    // SetupAdcConfiguration(adc_configuration_manager);
+    SetupAdcConfiguration(adc_configuration_manager);
 
     auto gpio = GpioFactory::Create();
     gpio->Initialize();
@@ -342,10 +342,10 @@ void SetupAdcConfiguration(std::shared_ptr<AdcConfigurationManager> adc_configur
         make_shared_ext<AdcChannelConfiguration>(adc_calibrator),
         make_shared_ext<AdcChannelConfiguration>(adc_calibrator),
         make_shared_ext<AdcChannelConfiguration>(adc_calibrator),
-        make_shared_ext<AdcChannelConfiguration>(adc_calibrator),
-        make_shared_ext<AdcChannelConfiguration>(adc_calibrator),
-        make_shared_ext<AdcChannelConfiguration>(adc_calibrator),
-        make_shared_ext<AdcChannelConfiguration>(adc_calibrator),
+        // make_shared_ext<AdcChannelConfiguration>(adc_calibrator),
+        // make_shared_ext<AdcChannelConfiguration>(adc_calibrator),
+        // make_shared_ext<AdcChannelConfiguration>(adc_calibrator),
+        // make_shared_ext<AdcChannelConfiguration>(adc_calibrator),
     };
 
     auto adc_configuration = make_shared_ext<AdcConfiguration>();

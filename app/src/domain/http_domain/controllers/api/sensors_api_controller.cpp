@@ -1,3 +1,5 @@
+#include <zephyr/logging/log.h>
+
 #include "utilities/voltage_interpolator/interpolation_method.h"
 #include "utilities/memory/heap_allocator.h"
 #include "domain/sensor_domain/models/sensor.h"
@@ -10,6 +12,8 @@ namespace eerie_leap::domain::http_domain::controllers::api {
 
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::voltage_interpolator;
+
+LOG_MODULE_REGISTER(sensors_api_controller_logger);
 
 const size_t SensorsApiController::sensors_config_post_buffer_size_;
 
@@ -113,7 +117,7 @@ void SensorsApiController::ParseSensorsConfigJson(uint8_t *buffer, size_t len)
 	if (ret != expected_return_code)
         throw std::runtime_error("Invalid JSON payload.");
 
-    printk("JSON payload parsed successfully\n");
+    LOG_DBG("JSON payload parsed successfully.");
 
     std::vector<std::shared_ptr<Sensor>> sensors;
 
@@ -175,7 +179,7 @@ void SensorsApiController::ParseSensorsConfigJson(uint8_t *buffer, size_t len)
     }
 
     if(sensors_configuration_manager_->Update(sensors))
-        printk("Sensors configuration updated successfully\n");
+        LOG_DBG("Sensors configuration updated successfully.");
     else
         throw std::runtime_error("Failed to update sensors configuration.");
 
@@ -201,12 +205,12 @@ int SensorsApiController::sensors_config_post_handler(http_client_ctx *client, e
     static std::shared_ptr<std::string> error_msg;
 
 	if (status == HTTP_SERVER_DATA_FINAL) {
-        printk("JSON payload received successfully, len=%zu\n", cursor);
+        LOG_DBG("JSON payload received successfully, len=%zu", cursor);
 
         try {
             ParseSensorsConfigJson(sensors_config_post_buffer_->data(), cursor);
         } catch (const std::exception &e) {
-            printk("Failed to parse JSON: %s\n", e.what());
+            LOG_ERR("Failed to parse JSON: %s", e.what());
 
             error_msg = make_shared_ext<std::string>("Failed to parse JSON: " + std::string(e.what()));
 

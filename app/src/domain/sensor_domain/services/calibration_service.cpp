@@ -39,7 +39,7 @@ void CalibrationService::ProcessCalibrationWorkTask(k_work* work) {
             task->reader->Read();
             auto reading = task->readings_frame->GetReading(task->sensor->id);
 
-            printk("ADC Calibration Reading: Value: %.3f, Time: %s\n",
+            LOG_INF("ADC Calibration Reading: Value: %.3f, Time: %s\n",
                 reading->value.value_or(0.0f),
                 TimeHelpers::GetFormattedString(*reading->timestamp).c_str());
         } catch (const std::exception& e) {

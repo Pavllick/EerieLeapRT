@@ -88,9 +88,6 @@ private:
             return std::nullopt;
         }
 
-        printk("Buffer size, %zu\n", buffer_size);
-        printk("Output size, %zu\n", out_len);
-
         auto config_bytes = std::span<const uint8_t>(buffer->data(), out_len);
         auto configuration = cbor_serializer_->Deserialize(config_bytes);
 

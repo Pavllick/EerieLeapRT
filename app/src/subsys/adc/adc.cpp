@@ -25,9 +25,6 @@ int Adc::Initialize() {
         return -1;
     }
 
-    LOG_INF("ADC initialized with %d channels", channel_configs_.size());
-
-	/* Configure channels. */
 	for(size_t i = 0U; i < channel_configs_.size(); i++) {
 		int err = adc_channel_setup(adc_device_, &channel_configs_[i]);
 		if(err < 0) {
@@ -44,11 +41,9 @@ int Adc::Initialize() {
         }
 
         available_channels_.insert(channel_configs_[i].channel_id);
-
-		LOG_INF("ADC Channel %d configured", channel_configs_[i].channel_id);
 	}
 
-    LOG_INF("Adc initialized successfully.");
+    LOG_DBG("ADC initialized with %d channels", channel_configs_.size());
 
     return 0;
 }
@@ -74,8 +69,6 @@ void Adc::UpdateConfiguration(uint16_t samples) {
 			.resolution  = resolutions_[i],
 		});
 	}
-
-    LOG_INF("Adc configuration updated.");
 }
 
 float Adc::ReadChannel(int channel) {

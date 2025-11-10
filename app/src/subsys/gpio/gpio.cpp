@@ -9,16 +9,16 @@ namespace eerie_leap::subsys::gpio {
 int Gpio::Initialize() {
     LOG_INF("Gpio initialization started.");
 
-    for(auto& gpio_spec : gpio_specs_) {
-        if (!gpio_is_ready_dt(&gpio_spec)) {
-            LOG_ERR("Gpio device %s is not ready", gpio_spec.port->name);
+    for(int i = 0; i < gpio_specs_.size(); ++i) {
+        if (!gpio_is_ready_dt(&gpio_specs_[i])) {
+            LOG_ERR("Gpio device %s is not ready", gpio_specs_[i].port->name);
 
             return -1;
         }
 
-        gpio_pin_configure(gpio_spec.port, gpio_spec.pin, GPIO_INPUT | GPIO_PULL_UP | GPIO_ACTIVE_HIGH);
+        gpio_pin_configure(gpio_specs_[i].port, gpio_specs_[i].pin, GPIO_INPUT | GPIO_PULL_UP | GPIO_ACTIVE_HIGH);
 
-        LOG_INF("Gpio channel %d configured", gpio_spec.pin);
+        LOG_INF("Gpio channel %d configured", i);
     }
 
     LOG_INF("Gpio initialized successfully.");
