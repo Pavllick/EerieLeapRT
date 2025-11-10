@@ -25,16 +25,19 @@ ProcessingSchedulerService::ProcessingSchedulerService(
 };
 
 ProcessingSchedulerService::~ProcessingSchedulerService() {
-    k_work_queue_stop(&work_q, K_FOREVER);
+    if(stack_area_ == nullptr)
+        return;
+
+    k_work_queue_stop(&work_q_, K_FOREVER);
     k_thread_stack_free(stack_area_);
 }
 
 void ProcessingSchedulerService::Initialize() {
     stack_area_ = k_thread_stack_alloc(k_stack_size_, 0);
-    k_work_queue_init(&work_q);
-    k_work_queue_start(&work_q, stack_area_, k_stack_size_, k_priority_, nullptr);
+    k_work_queue_init(&work_q_);
+    k_work_queue_start(&work_q_, stack_area_, k_stack_size_, k_priority_, nullptr);
 
-    k_thread_name_set(&work_q.thread, "processing_scheduler_service");
+    k_thread_name_set(&work_q_.thread, "processing_scheduler_service");
 }
 
 void ProcessingSchedulerService::ProcessSensorWorkTask(k_work* work) {
@@ -52,7 +55,7 @@ void ProcessingSchedulerService::ProcessSensorWorkTask(k_work* work) {
         for(auto processor : *task->reading_processors)
             processor->ProcessReading(reading);
 
-        LOG_DBG("Sensor Reading - ID: %s, Guid: %llu, Value: %.3f, Time: %s",
+        LOG_INF("Sensor Reading - ID: %s, Guid: %llu, Value: %.3f, Time: %s",
             task->sensor->id.c_str(),
             reading->id.AsUint64(),
             reading->value.value_or(0.0f),
@@ -67,7 +70,7 @@ void ProcessingSchedulerService::ProcessSensorWorkTask(k_work* work) {
 
 std::shared_ptr<SensorTask> ProcessingSchedulerService::CreateSensorTask(std::shared_ptr<Sensor> sensor) {
     auto task = make_shared_ext<SensorTask>();
-    task->work_q = &work_q;
+    task->work_q = &work_q_;
     task->processing_semaphore = &processing_semaphore_;
     task->sampling_rate_ms = K_MSEC(sensor->configuration.sampling_rate_ms);
     task->sensor = sensor;
@@ -84,7 +87,7 @@ void ProcessingSchedulerService::StartTasks() {
         k_work_delayable* work = &task->work;
         k_work_init_delayable(work, ProcessSensorWorkTask);
 
-        k_work_schedule_for_queue(&work_q, work, K_NO_WAIT);
+        k_work_schedule_for_queue(&work_q_, work, K_NO_WAIT);
     }
 
     k_sleep(K_MSEC(1));

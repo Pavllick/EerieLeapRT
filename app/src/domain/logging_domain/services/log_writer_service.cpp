@@ -32,7 +32,10 @@ LogWriterService::LogWriterService(
 }
 
 LogWriterService::~LogWriterService() {
-    k_work_queue_stop(&work_q, K_FOREVER);
+    if(stack_area_ == nullptr)
+        return;
+
+    k_work_queue_stop(&work_q_, K_FOREVER);
     k_thread_stack_free(stack_area_);
 }
 
@@ -42,13 +45,13 @@ void LogWriterService::SetLogger(std::shared_ptr<ILogger<SensorReading>> logger)
 
 void LogWriterService::Initialize() {
     stack_area_ = k_thread_stack_alloc(k_stack_size_, 0);
-    k_work_queue_init(&work_q);
-    k_work_queue_start(&work_q, stack_area_, k_stack_size_, k_priority_, nullptr);
+    k_work_queue_init(&work_q_);
+    k_work_queue_start(&work_q_, stack_area_, k_stack_size_, k_priority_, nullptr);
 
-    k_thread_name_set(&work_q.thread, "log_writer_service");
+    k_thread_name_set(&work_q_.thread, "log_writer_service");
 
     task_ = std::make_shared<LogWriterTask>();
-    task_->work_q = &work_q;
+    task_->work_q = &work_q_;
     task_->processing_semaphore = &processing_semaphore_;
     task_->time_service = time_service_;
     task_->sensor_readings_frame = sensor_readings_frame_;
@@ -121,7 +124,7 @@ int LogWriterService::LogWriterStart() {
     task_->logger = logger_;
 
     atomic_set(&logger_running_, 1);
-    k_work_schedule_for_queue(&work_q, &task_->work, K_NO_WAIT);
+    k_work_schedule_for_queue(&work_q_, &task_->work, K_NO_WAIT);
 
     return 0;
 }

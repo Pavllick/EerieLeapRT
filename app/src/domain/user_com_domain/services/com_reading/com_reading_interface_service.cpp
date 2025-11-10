@@ -23,29 +23,32 @@ ComReadingInterfaceService::ComReadingInterfaceService(
 }
 
 ComReadingInterfaceService::~ComReadingInterfaceService() {
+    if(stack_area_ == nullptr)
+        return;
+
     k_work_sync sync;
     k_work_cancel_delayable_sync(&task_->work, &sync);
 
-    k_work_queue_stop(&work_q, K_FOREVER);
+    k_work_queue_stop(&work_q_, K_FOREVER);
     k_thread_stack_free(stack_area_);
 }
 
 void ComReadingInterfaceService::Initialize() {
     stack_area_ = k_thread_stack_alloc(k_stack_size_, 0);
-    k_work_queue_init(&work_q);
-    k_work_queue_start(&work_q, stack_area_, k_stack_size_, k_priority_, nullptr);
+    k_work_queue_init(&work_q_);
+    k_work_queue_start(&work_q_, stack_area_, k_stack_size_, k_priority_, nullptr);
 
-    k_thread_name_set(&work_q.thread, "com_reading_interface");
+    k_thread_name_set(&work_q_.thread, "com_reading_interface");
 
     task_ = std::make_shared<ComReadingTask>();
-    task_->work_q = &work_q;
+    task_->work_q = &work_q_;
     task_->processing_semaphore = &processing_semaphore_;
     task_->refresh_rate_ms = refresh_rate_ms_;
     task_->user_id = Modbus::SERVER_ID_ALL;
     task_->user_com = user_com_;
     task_->sensor_readings_frame = sensor_readings_frame_;
     k_work_init_delayable(&task_->work, SendReadingWorkTask);
-    k_work_schedule_for_queue(&work_q, &task_->work, K_NO_WAIT);
+    k_work_schedule_for_queue(&work_q_, &task_->work, K_NO_WAIT);
 
     LOG_INF("Com Reading interface initialized.");
 }

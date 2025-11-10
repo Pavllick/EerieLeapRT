@@ -40,6 +40,7 @@ private:
 
 public:
     explicit UserCom(std::shared_ptr<Modbus> modbus, std::shared_ptr<SystemConfigurationManager> system_configuration_manager);
+    ~UserCom();
     int Initialize();
 
     bool IsAvailable();

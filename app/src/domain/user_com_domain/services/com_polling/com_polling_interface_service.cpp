@@ -13,24 +13,27 @@ ComPollingInterfaceService::ComPollingInterfaceService(std::shared_ptr<UserCom> 
 }
 
 ComPollingInterfaceService::~ComPollingInterfaceService() {
-    k_work_queue_stop(&work_q, K_FOREVER);
+    if(stack_area_ == nullptr)
+        return;
+
+    k_work_queue_stop(&work_q_, K_FOREVER);
     k_thread_stack_free(stack_area_);
 }
 
 void ComPollingInterfaceService::Initialize() {
     stack_area_ = k_thread_stack_alloc(k_stack_size_, 0);
-    k_work_queue_init(&work_q);
-    k_work_queue_start(&work_q, stack_area_, k_stack_size_, k_priority_, nullptr);
+    k_work_queue_init(&work_q_);
+    k_work_queue_start(&work_q_, stack_area_, k_stack_size_, k_priority_, nullptr);
 
-    k_thread_name_set(&work_q.thread, "com_polling_interface");
+    k_thread_name_set(&work_q_.thread, "com_polling_interface");
 
     status_task_ = std::make_shared<ComStatusTask>();
-    status_task_->work_q = &work_q;
+    status_task_->work_q = &work_q_;
     status_task_->processing_semaphore = &processing_semaphore_;
     k_work_init_delayable(&status_task_->work, ProcessStatusWorkTask);
 
     task_ = std::make_shared<ComPollingTask>();
-    task_->work_q = &work_q;
+    task_->work_q = &work_q_;
     task_->processing_semaphore = &processing_semaphore_;
     task_->user_com = user_com_;
     task_->status_task = status_task_;
@@ -39,7 +42,7 @@ void ComPollingInterfaceService::Initialize() {
     task_->polling_rate_ms = K_MSEC(1000);
     k_work_init_delayable(&task_->work, PollStatusWorkTask);
 
-    k_work_schedule_for_queue(&work_q, &task_->work, K_NO_WAIT);
+    k_work_schedule_for_queue(&work_q_, &task_->work, K_NO_WAIT);
 
     LOG_INF("Com Polling interface initialized.");
 }

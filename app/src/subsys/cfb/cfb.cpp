@@ -19,6 +19,14 @@ Cfb::Cfb() {
     k_sem_init(&processing_semaphore_, 1, 1);
 }
 
+Cfb::~Cfb() {
+    if(stack_area_ == nullptr)
+        return;
+
+    k_work_queue_stop(&work_q_, K_FOREVER);
+    k_thread_stack_free(stack_area_);
+}
+
 bool Cfb::Initialize() {
     if(initialized_) {
         LOG_INF("Cfb already initialized.");
@@ -67,19 +75,19 @@ bool Cfb::Initialize() {
 
 void Cfb::InitializeThread() {
     stack_area_ = k_thread_stack_alloc(k_stack_size_, 0);
-    k_work_queue_init(&work_q);
-    k_work_queue_start(&work_q, stack_area_, k_stack_size_, k_priority_, nullptr);
+    k_work_queue_init(&work_q_);
+    k_work_queue_start(&work_q_, stack_area_, k_stack_size_, k_priority_, nullptr);
 
-    k_thread_name_set(&work_q.thread, "display_service");
+    k_thread_name_set(&work_q_.thread, "display_service");
 
     k_work_init(&task_.work, CfbTaskWorkTask);
-    task_.work_q = &work_q;
+    task_.work_q = &work_q_;
     task_.processing_semaphore = &processing_semaphore_;
     atomic_set(&task_.is_animation_running_, 0);
 
     LOG_INF("Display service initialized.");
 
-    k_work_submit_to_queue(&work_q, &task_.work);
+    k_work_submit_to_queue(&work_q_, &task_.work);
 }
 
 void Cfb::CfbTaskWorkTask(k_work* work) {
@@ -112,7 +120,7 @@ bool Cfb::Flush() {
     if(k_sem_count_get(&processing_semaphore_) == 0)
         return false;
 
-    k_work_submit_to_queue(&work_q, &task_.work);
+    k_work_submit_to_queue(&work_q_, &task_.work);
     k_work_flush(&task_.work, &work_sync_);
 
     return true;
@@ -238,7 +246,7 @@ void Cfb::SetAnimationHandler(std::function<void()> handler, uint32_t frame_rate
 
 void Cfb::StartAnimation() {
     atomic_set(&task_.is_animation_running_, 1);
-    k_work_submit_to_queue(&work_q, &task_.work);
+    k_work_submit_to_queue(&work_q_, &task_.work);
 }
 
 void Cfb::StopAnimation() {

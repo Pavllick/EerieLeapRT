@@ -19,6 +19,14 @@ UserCom::UserCom(std::shared_ptr<Modbus> modbus, std::shared_ptr<SystemConfigura
         system_configuration_manager_->Get()->com_user_configurations);
 }
 
+UserCom::~UserCom() {
+    if(stack_area_ == nullptr)
+        return;
+
+    k_work_queue_stop(&work_q_, K_FOREVER);
+    k_thread_stack_free(stack_area_);
+}
+
 int UserCom::Initialize() {
     stack_area_ = k_thread_stack_alloc(k_stack_size_, 0);
     k_work_queue_init(&work_q_);

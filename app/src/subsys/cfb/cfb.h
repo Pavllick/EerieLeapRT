@@ -22,7 +22,7 @@ private:
     static constexpr int k_priority_ = K_PRIO_PREEMPT(6);
 
     k_thread_stack_t* stack_area_;
-    k_work_q work_q;
+    k_work_q work_q_;
     k_work_sync work_sync_;
     CfbTask task_;
 
@@ -35,6 +35,7 @@ private:
 
 public:
     Cfb();
+    ~Cfb();
 
     bool Initialize();
     bool SetFont(uint8_t font_idx);
