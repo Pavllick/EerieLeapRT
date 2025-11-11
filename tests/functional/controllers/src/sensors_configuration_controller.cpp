@@ -30,9 +30,7 @@ using namespace eerie_leap::subsys::device_tree;
 
 ZTEST_SUITE(sensors_configuration_manager, NULL, NULL, NULL, NULL, NULL);
 
-std::vector<std::shared_ptr<Sensor>> SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service) {
-    // Test Sensors
-
+std::vector<std::shared_ptr<Sensor>> sensors_configuration_manager_SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service) {
     std::vector<CalibrationData> calibration_data_1 {
         {0.0, 0.0},
         {3.3, 100.0}
@@ -129,7 +127,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
         16,
         16);
 
-    auto sensors = SetupTestSensors(math_parser_service);
+    auto sensors = sensors_configuration_manager_SetupTestSensors(math_parser_service);
     sensors_configuration_manager->Update(sensors);
 
     auto saved_sensors = *sensors_configuration_manager->Get();
@@ -179,7 +177,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
         16,
         16);
 
-    auto sensors = SetupTestSensors(math_parser_service);
+    auto sensors = sensors_configuration_manager_SetupTestSensors(math_parser_service);
     sensors_configuration_manager->Update(sensors);
 
     sensors_configuration_service = make_unique_ext<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
