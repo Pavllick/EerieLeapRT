@@ -8,14 +8,16 @@
 #include <utilities/memory/heap_allocator.h>
 #include "configuration/sensor_config/sensor_config.h"
 #include "configuration/services/configuration_service.h"
+#include "domain/sensor_domain/utilities/parsers/sensors_cbor_parser.h"
 #include "domain/sensor_domain/models/sensor.h"
 
 namespace eerie_leap::domain::sensor_domain::configuration {
 
 using namespace eerie_leap::utilities::math_parser;
 using namespace eerie_leap::utilities::memory;
-using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::configuration::services;
+using namespace eerie_leap::domain::sensor_domain::models;
+using namespace eerie_leap::domain::sensor_domain::utilities::parsers;
 
 class SensorsConfigurationManager {
 private:
@@ -26,9 +28,9 @@ private:
     std::vector<std::shared_ptr<Sensor>> sensors_;
     int gpio_channel_count_;
     int adc_channel_count_;
+    std::unique_ptr<SensorsCborParser> sensors_cbor_parser_;
 
     bool CreateDefaultConfiguration();
-    void ValidateSensorType(const SensorConfiguration& sensor_configuration);
 
 public:
     SensorsConfigurationManager(
