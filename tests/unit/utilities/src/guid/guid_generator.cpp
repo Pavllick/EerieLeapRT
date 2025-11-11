@@ -6,9 +6,9 @@
 
 using namespace eerie_leap::utilities::guid;
 
-ZTEST_SUITE(guid, NULL, NULL, NULL, NULL, NULL);
+ZTEST_SUITE(guid_generator, NULL, NULL, NULL, NULL, NULL);
 
-ZTEST(guid, test_guid_is_nonzero) {
+ZTEST(guid_generator, test_guid_is_nonzero) {
     GuidGenerator generator;
     Guid guid = generator.Generate();
 
@@ -17,7 +17,7 @@ ZTEST(guid, test_guid_is_nonzero) {
     zassert_not_equal(guid.AsUint64(), 0);
 }
 
-ZTEST(guid, test_guids_are_unique) {
+ZTEST(guid_generator, test_guids_are_unique) {
     GuidGenerator generator;
     Guid guid0 = generator.Generate();
 

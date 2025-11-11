@@ -27,6 +27,8 @@ file(GLOB_RECURSE APP_SRC_CONFIGURATION
 set(APP_SRC_SUBSYS_DIR ${APP_SRC_DIR}/subsys)
 file(GLOB_RECURSE APP_SRC_SUBSYS
   ${APP_SRC_SUBSYS_DIR}/random/*.cpp
+  ${APP_SRC_SUBSYS_DIR}/adc/utilities/*.cpp
+  ${APP_SRC_SUBSYS_DIR}/adc/models/*.cpp
 )
 
 set(APP_SRC_DOMAIN_DIR ${APP_SRC_DIR}/domain)

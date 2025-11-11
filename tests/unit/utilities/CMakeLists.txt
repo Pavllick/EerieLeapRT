@@ -32,12 +32,18 @@ file(GLOB_RECURSE APP_SRC_UTILITIES
   ${APP_SRC_UTILITIES_DIR}/*.cpp
 )
 
+set(APP_SRC_DOMAIN_DIR ${APP_SRC_DIR}/domain)
+file(GLOB_RECURSE APP_SRC_DOMAIN
+  ${APP_SRC_DOMAIN_DIR}/sensor_domain/utilities/sensors_order_resolver.cpp
+)
+
 file(GLOB_RECURSE TEST_SOURCES src/*.c src/*.cpp)
 
 # Add all source files to the app target
 target_sources(app PRIVATE
   ${APP_SRC_SUBSYS_RANDOM}
   ${APP_SRC_UTILITIES}
+  ${APP_SRC_DOMAIN}
   ${TEST_SOURCES}
   ${MUPARSER_SOURCES}
 )

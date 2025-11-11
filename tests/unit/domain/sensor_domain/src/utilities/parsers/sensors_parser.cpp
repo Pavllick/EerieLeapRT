@@ -5,6 +5,7 @@
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
 
+#include "domain/sensor_domain/utilities/parsers/sensors_cbor_parser.h"
 #include "domain/sensor_domain/utilities/parsers/sensors_json_parser.h"
 #include "domain/sensor_domain/models/sensor.h"
 
@@ -16,9 +17,9 @@ using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 using namespace eerie_leap::utilities::voltage_interpolator;
 
-ZTEST_SUITE(sensors_json_parser, NULL, NULL, NULL, NULL, NULL);
+ZTEST_SUITE(sensors_parser, NULL, NULL, NULL, NULL, NULL);
 
-std::vector<std::shared_ptr<Sensor>> sensors_json_parser_GetTestSensors(std::shared_ptr<MathParserService> math_parser_service) {
+std::vector<std::shared_ptr<Sensor>> sensors_parser_GetTestSensors(std::shared_ptr<MathParserService> math_parser_service) {
     std::vector<CalibrationData> calibration_data_1 {
         {0.0, 0.0},
         {3.3, 100.0}
@@ -100,14 +101,9 @@ std::vector<std::shared_ptr<Sensor>> sensors_json_parser_GetTestSensors(std::sha
     return sensors;
 }
 
-ZTEST(sensors_json_parser, test_JsonSerializeDeserialize) {
-    auto math_parser_service = std::make_shared<MathParserService>();
-    auto sensors_json_parser = std::make_shared<SensorsJsonParser>(math_parser_service);
-
-    auto sensors = sensors_json_parser_GetTestSensors(math_parser_service);
-
-    auto serialized_sensors = sensors_json_parser->Serialize(sensors, 16, 16);
-    auto deserialized_sensors = sensors_json_parser->Deserialize(*serialized_sensors.get(), 16, 16);
+void sensors_parser_CompareSensors(
+    std::vector<std::shared_ptr<Sensor>>& sensors,
+    std::vector<std::shared_ptr<Sensor>>& deserialized_sensors) {
 
     zassert_equal(deserialized_sensors.size(), sensors.size());
 
@@ -137,4 +133,28 @@ ZTEST(sensors_json_parser, test_JsonSerializeDeserialize) {
         if(deserialized_sensor->configuration.expression_evaluator != nullptr || sensors[i]->configuration.expression_evaluator != nullptr)
             zassert_true(deserialized_sensor->configuration.expression_evaluator->GetExpression() == sensors[i]->configuration.expression_evaluator->GetExpression());
     }
+}
+
+ZTEST(sensors_parser, test_CborSerializeDeserialize) {
+    auto math_parser_service = std::make_shared<MathParserService>();
+    auto sensors_cbor_parser = std::make_shared<SensorsCborParser>(math_parser_service);
+
+    auto sensors = sensors_parser_GetTestSensors(math_parser_service);
+
+    auto serialized_sensors = sensors_cbor_parser->Serialize(sensors, 16, 16);
+    auto deserialized_sensors = sensors_cbor_parser->Deserialize(*serialized_sensors.get(), 16, 16);
+
+    sensors_parser_CompareSensors(sensors, deserialized_sensors);
+}
+
+ZTEST(sensors_parser, test_JsonSerializeDeserialize) {
+    auto math_parser_service = std::make_shared<MathParserService>();
+    auto sensors_json_parser = std::make_shared<SensorsJsonParser>(math_parser_service);
+
+    auto sensors = sensors_parser_GetTestSensors(math_parser_service);
+
+    auto serialized_sensors = sensors_json_parser->Serialize(sensors, 16, 16);
+    auto deserialized_sensors = sensors_json_parser->Deserialize(*serialized_sensors.get(), 16, 16);
+
+    sensors_parser_CompareSensors(sensors, deserialized_sensors);
 }
