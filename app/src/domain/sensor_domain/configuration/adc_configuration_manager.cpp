@@ -2,12 +2,10 @@
 #include <vector>
 
 #include "utilities/memory/heap_allocator.h"
-#include "utilities/cbor/cbor_helpers.hpp"
 #include "utilities/voltage_interpolator/calibration_data.h"
-#include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
-#include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
-#include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
+#include "utilities/voltage_interpolator/interpolation_method.h"
 #include "subsys/adc/adc_factory.hpp"
+
 #include "adc_configuration_manager.h"
 
 namespace eerie_leap::domain::sensor_domain::configuration {
@@ -24,7 +22,7 @@ AdcConfigurationManager::AdcConfigurationManager(ext_unique_ptr<ConfigurationSer
     adc_config_(nullptr),
     adc_configuration_(nullptr) {
 
-    adc_cbor_parser_ = std::make_unique<AdcCborParser>();
+    adc_configuration_cbor_parser_ = std::make_unique<AdcConfigurationCborParser>();
     adc_manager_->Initialize();
 
     std::shared_ptr<IAdcManager> adc_manager = nullptr;
@@ -48,7 +46,7 @@ AdcConfigurationManager::AdcConfigurationManager(ext_unique_ptr<ConfigurationSer
 }
 
 bool AdcConfigurationManager::Update(const AdcConfiguration& adc_configuration) {
-    auto adc_config = adc_cbor_parser_->Serialize(adc_configuration);
+    auto adc_config = adc_configuration_cbor_parser_->Serialize(adc_configuration);
 
     LOG_INF("Saving ADCs configuration.");
     if(!adc_configuration_service_->Save(adc_config.get()))
@@ -71,7 +69,7 @@ std::shared_ptr<IAdcManager> AdcConfigurationManager::Get(bool force_load) {
     adc_config_raw_ = std::move(adc_config.value().config_raw);
     adc_config_ = std::move(adc_config.value().config);
 
-    auto adc_configuration = adc_cbor_parser_->Deserialize(*adc_config_);
+    auto adc_configuration = adc_configuration_cbor_parser_->Deserialize(*adc_config_);
     adc_configuration_ = make_shared_ext<AdcConfiguration>(adc_configuration);
     adc_manager_->UpdateConfiguration(adc_configuration_);
 

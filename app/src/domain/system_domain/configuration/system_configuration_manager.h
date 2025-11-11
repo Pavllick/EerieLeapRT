@@ -5,12 +5,14 @@
 #include "utilities/memory/heap_allocator.h"
 #include "configuration/system_config/system_config.h"
 #include "configuration/services/configuration_service.h"
+#include "domain/system_domain/utilities/parsers/system_configuration_cbor_parser.h"
 #include "domain/system_domain/models/system_configuration.h"
 
 namespace eerie_leap::domain::system_domain::configuration {
 
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::configuration::services;
+using namespace eerie_leap::domain::system_domain::utilities::parsers;
 using namespace eerie_leap::domain::system_domain::models;
 
 class SystemConfigurationManager {
@@ -19,6 +21,7 @@ private:
     ext_unique_ptr<ExtVector> system_config_raw_;
     ext_unique_ptr<SystemConfig> system_config_;
     std::shared_ptr<SystemConfiguration> system_configuration_;
+    std::unique_ptr<SystemConfigurationCborParser> system_configuration_cbor_parser_;
 
     bool UpdateHwVersion(uint32_t hw_version);
     bool UpdateSwVersion(uint32_t sw_version);

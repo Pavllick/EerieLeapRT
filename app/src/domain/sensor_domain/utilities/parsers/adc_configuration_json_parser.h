@@ -44,12 +44,12 @@ static json_obj_descr adc_configuration_descr[] = {
     JSON_OBJ_DESCR_OBJ_ARRAY(AdcConfigurationJsonDto, channel_configurations, 24, channel_configurations_len, adc_channel_configuration_descr, ARRAY_SIZE(adc_channel_configuration_descr)),
 };
 
-class AdcJsonParser {
+class AdcConfigurationJsonParser {
 public:
-    AdcJsonParser() = default;
+    AdcConfigurationJsonParser() = default;
 
     ext_unique_ptr<ExtVector> Serialize(const AdcConfiguration& adc_configuration);
-    const AdcConfiguration Deserialize(const std::span<const uint8_t>& json);
+    AdcConfiguration Deserialize(const std::span<const uint8_t>& json);
 };
 
 } // namespace eerie_leap::domain::sensor_domain::utilities::parsers

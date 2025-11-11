@@ -1,13 +1,13 @@
 #include <zephyr/ztest.h>
 
-#include "domain/sensor_domain/utilities/parsers/adc_cbor_parser.h"
-#include "domain/sensor_domain/utilities/parsers/adc_json_parser.h"
+#include "domain/sensor_domain/utilities/parsers/adc_configuration_cbor_parser.h"
+#include "domain/sensor_domain/utilities/parsers/adc_configuration_json_parser.h"
 
 using namespace eerie_leap::domain::sensor_domain::utilities::parsers;
 
-ZTEST_SUITE(adc_parser, NULL, NULL, NULL, NULL, NULL);
+ZTEST_SUITE(adc_configuration_parser, NULL, NULL, NULL, NULL, NULL);
 
-AdcConfiguration adc_parser_GetTestConfiguration() {
+AdcConfiguration adc_configuration_parser_GetTestConfiguration() {
     std::vector<CalibrationData> adc_calibration_data_samples_1 {
         {0.0, 0.0},
         {5.0, 5.0}
@@ -47,7 +47,7 @@ AdcConfiguration adc_parser_GetTestConfiguration() {
     return adc_configuration;
 }
 
-void adc_parser_CompareAdcConfigurations(AdcConfiguration adc_configuration, AdcConfiguration deserialized_adc_configuration) {
+void adc_configuration_parser_CompareAdcConfigurations(AdcConfiguration adc_configuration, AdcConfiguration deserialized_adc_configuration) {
     zassert_equal(deserialized_adc_configuration.samples, adc_configuration.samples);
     zassert_equal(deserialized_adc_configuration.channel_configurations->size(), adc_configuration.channel_configurations->size());
 
@@ -68,24 +68,24 @@ void adc_parser_CompareAdcConfigurations(AdcConfiguration adc_configuration, Adc
     }
 }
 
-ZTEST(adc_parser, test_CborSerializeDeserialize) {
-    AdcCborParser adc_cbor_parser;
+ZTEST(adc_configuration_parser, test_CborSerializeDeserialize) {
+    AdcConfigurationCborParser adc_configuration_cbor_parser;
 
-    auto adc_configuration = adc_parser_GetTestConfiguration();
+    auto adc_configuration = adc_configuration_parser_GetTestConfiguration();
 
-    auto serialized_adc_configuration = adc_cbor_parser.Serialize(adc_configuration);
-    auto deserialized_adc_configuration = adc_cbor_parser.Deserialize(*serialized_adc_configuration.get());
+    auto serialized_adc_configuration = adc_configuration_cbor_parser.Serialize(adc_configuration);
+    auto deserialized_adc_configuration = adc_configuration_cbor_parser.Deserialize(*serialized_adc_configuration.get());
 
-    adc_parser_CompareAdcConfigurations(adc_configuration, deserialized_adc_configuration);
+    adc_configuration_parser_CompareAdcConfigurations(adc_configuration, deserialized_adc_configuration);
 }
 
-ZTEST(adc_parser, test_JsonSerializeDeserialize) {
-    AdcJsonParser adc_json_parser;
+ZTEST(adc_configuration_parser, test_JsonSerializeDeserialize) {
+    AdcConfigurationJsonParser adc_configuration_json_parser;
 
-    auto adc_configuration = adc_parser_GetTestConfiguration();
+    auto adc_configuration = adc_configuration_parser_GetTestConfiguration();
 
-    auto serialized_adc_configuration = adc_json_parser.Serialize(adc_configuration);
-    auto deserialized_adc_configuration = adc_json_parser.Deserialize(*serialized_adc_configuration.get());
+    auto serialized_adc_configuration = adc_configuration_json_parser.Serialize(adc_configuration);
+    auto deserialized_adc_configuration = adc_configuration_json_parser.Deserialize(*serialized_adc_configuration.get());
 
-    adc_parser_CompareAdcConfigurations(adc_configuration, deserialized_adc_configuration);
+    adc_configuration_parser_CompareAdcConfigurations(adc_configuration, deserialized_adc_configuration);
 }

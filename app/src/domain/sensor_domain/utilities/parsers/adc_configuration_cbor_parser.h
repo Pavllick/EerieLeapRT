@@ -11,12 +11,12 @@ namespace eerie_leap::domain::sensor_domain::utilities::parsers {
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::subsys::adc::models;
 
-class AdcCborParser {
+class AdcConfigurationCborParser {
 public:
-    AdcCborParser() = default;
+    AdcConfigurationCborParser() = default;
 
     ext_unique_ptr<AdcConfig> Serialize(const AdcConfiguration& adc_configuration);
-    const AdcConfiguration Deserialize(const AdcConfig& adc_config);
+    AdcConfiguration Deserialize(const AdcConfig& adc_config);
 };
 
 } // namespace eerie_leap::domain::sensor_domain::utilities::parsers

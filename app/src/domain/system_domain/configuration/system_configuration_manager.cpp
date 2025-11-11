@@ -13,6 +13,7 @@ SystemConfigurationManager::SystemConfigurationManager(ext_unique_ptr<Configurat
     system_config_(nullptr),
     system_configuration_(nullptr) {
 
+    system_configuration_cbor_parser_ = std::make_unique<SystemConfigurationCborParser>();
     std::shared_ptr<SystemConfiguration> system_config = nullptr;
 
     try {
@@ -126,35 +127,9 @@ bool SystemConfigurationManager::CreateDefaultConfiguration() {
 }
 
 bool SystemConfigurationManager::Update(std::shared_ptr<SystemConfiguration> system_configuration) {
-    SystemConfig system_config {
-        .device_id = system_configuration->device_id,
-        .hw_version = system_configuration->hw_version,
-        .sw_version = system_configuration->sw_version,
-        .build_number = system_configuration->build_number,
-        .com_user_refresh_rate_ms = system_configuration->com_user_refresh_rate_ms
-    };
+    auto system_config = system_configuration_cbor_parser_->Serialize(*system_configuration);
 
-    system_config.ComUserConfig_m_count = 0;
-    memset(system_config.ComUserConfig_m, 0, sizeof(system_config.ComUserConfig_m));
-
-    system_config.CanbusConfig_m_count = 0;
-    memset(system_config.CanbusConfig_m, 0, sizeof(system_config.CanbusConfig_m));
-
-    for(size_t i = 0; i < system_configuration->com_user_configurations.size() && i < 24; i++) {
-        system_config.ComUserConfig_m[i].device_id = system_configuration->com_user_configurations[i].device_id;
-        system_config.ComUserConfig_m[i].server_id = system_configuration->com_user_configurations[i].server_id;
-
-        system_config.ComUserConfig_m_count++;
-    }
-
-    for(size_t i = 0; i < system_configuration->canbus_configurations.size() && i < 8; i++) {
-        system_config.CanbusConfig_m[i].bus_channel = system_configuration->canbus_configurations[i].bus_channel;
-        system_config.CanbusConfig_m[i].bitrate = system_configuration->canbus_configurations[i].bitrate;
-
-        system_config.CanbusConfig_m_count++;
-    }
-
-    if(!system_configuration_service_->Save(&system_config))
+    if(!system_configuration_service_->Save(system_config.get()))
         return false;
 
     Get(true);
@@ -163,7 +138,7 @@ bool SystemConfigurationManager::Update(std::shared_ptr<SystemConfiguration> sys
 }
 
 std::shared_ptr<SystemConfiguration> SystemConfigurationManager::Get(bool force_load) {
-    if (system_configuration_ != nullptr && !force_load)
+    if(system_configuration_ != nullptr && !force_load)
         return system_configuration_;
 
     auto system_config = system_configuration_service_->Load();
@@ -173,31 +148,8 @@ std::shared_ptr<SystemConfiguration> SystemConfigurationManager::Get(bool force_
     system_config_raw_ = std::move(system_config.value().config_raw);
     system_config_ = std::move(system_config.value().config);
 
-    SystemConfiguration system_configuration {
-        .device_id = system_config_->device_id,
-        .hw_version = system_config_->hw_version,
-        .sw_version = system_config_->sw_version,
-        .build_number = system_config_->build_number,
-        .com_user_refresh_rate_ms = system_config_->com_user_refresh_rate_ms
-    };
-
-    for(size_t i = 0; i < system_config_->ComUserConfig_m_count; i++) {
-        ComUserConfiguration com_user_configuration {
-            .device_id = system_config_->ComUserConfig_m[i].device_id,
-            .server_id = system_config_->ComUserConfig_m[i].server_id
-        };
-        system_configuration.com_user_configurations.push_back(com_user_configuration);
-    }
-
-    for(size_t i = 0; i < system_config_->CanbusConfig_m_count; i++) {
-        CanbusConfiguration canbus_configuration {
-            .bus_channel = system_config_->CanbusConfig_m[i].bus_channel,
-            .bitrate = system_config_->CanbusConfig_m[i].bitrate
-        };
-        system_configuration.canbus_configurations.push_back(canbus_configuration);
-    }
-
-    system_configuration_ = make_shared_ext<SystemConfiguration>(system_configuration);
+    auto system_configuration = system_configuration_cbor_parser_->Deserialize(*system_config_);
+    system_configuration_ = std::make_shared<SystemConfiguration>(system_configuration);
 
     return system_configuration_;
 }

@@ -1,6 +1,6 @@
 #include <algorithm>
 
-#include "adc_json_parser.h"
+#include "adc_configuration_json_parser.h"
 
 namespace eerie_leap::domain::sensor_domain::utilities::parsers {
 
@@ -8,7 +8,7 @@ using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::voltage_interpolator;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 
-ext_unique_ptr<ExtVector> AdcJsonParser::Serialize(const AdcConfiguration& adc_configuration) {
+ext_unique_ptr<ExtVector> AdcConfigurationJsonParser::Serialize(const AdcConfiguration& adc_configuration) {
     AdcConfigurationJsonDto adc_configuration_json;
     memset(&adc_configuration_json, 0, sizeof(AdcConfigurationJsonDto));
 
@@ -63,7 +63,7 @@ ext_unique_ptr<ExtVector> AdcJsonParser::Serialize(const AdcConfiguration& adc_c
     return buffer;
 }
 
-const AdcConfiguration AdcJsonParser::Deserialize(const std::span<const uint8_t>& json) {
+AdcConfiguration AdcConfigurationJsonParser::Deserialize(const std::span<const uint8_t>& json) {
 	AdcConfigurationJsonDto adc_configuration_json;
 	const int expected_return_code = BIT_MASK(ARRAY_SIZE(adc_configuration_descr));
 

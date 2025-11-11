@@ -1,10 +1,10 @@
 #include <algorithm>
 
-#include "adc_cbor_parser.h"
+#include "adc_configuration_cbor_parser.h"
 
 namespace eerie_leap::domain::sensor_domain::utilities::parsers {
 
-ext_unique_ptr<AdcConfig> AdcCborParser::Serialize(const AdcConfiguration& adc_configuration) {
+ext_unique_ptr<AdcConfig> AdcConfigurationCborParser::Serialize(const AdcConfiguration& adc_configuration) {
     auto adc_config = make_unique_ext<AdcConfig>();
     memset(adc_config.get(), 0, sizeof(AdcConfig));
 
@@ -50,7 +50,7 @@ ext_unique_ptr<AdcConfig> AdcCborParser::Serialize(const AdcConfiguration& adc_c
     return adc_config;
 }
 
-const AdcConfiguration AdcCborParser::Deserialize(const AdcConfig& adc_config) {
+AdcConfiguration AdcConfigurationCborParser::Deserialize(const AdcConfig& adc_config) {
     AdcConfiguration adc_configuration;
 
     adc_configuration.samples = static_cast<uint16_t>(adc_config.samples);
