@@ -37,6 +37,8 @@ file(GLOB_RECURSE APP_SRC_DOMAIN
   ${APP_SRC_DOMAIN_DIR}/sensor_domain/models/*.cpp
   ${APP_SRC_DOMAIN_DIR}/system_domain/utilities/*.cpp
   ${APP_SRC_DOMAIN_DIR}/system_domain/models/*.cpp
+  ${APP_SRC_DOMAIN_DIR}/logging_domain/utilities/*.cpp
+  ${APP_SRC_DOMAIN_DIR}/logging_domain/models/*.cpp
 )
 
 set(APP_SRC_UTILITIES_DIR ${APP_SRC_DIR}/utilities)

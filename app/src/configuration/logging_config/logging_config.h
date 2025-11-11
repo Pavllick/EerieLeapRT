@@ -26,25 +26,17 @@ extern "C" {
 #define DEFAULT_MAX_QTY 24
 
 struct SensorLoggingConfig {
+	uint32_t sensor_id_hash;
 	bool is_enabled;
 	bool log_raw_value;
 	bool log_only_new_data;
 };
 
-struct SensorLoggingConfigMap_SensorLoggingConfig_m {
-	uint32_t SensorLoggingConfig_m_key;
-	struct SensorLoggingConfig SensorLoggingConfig_m;
-};
-
-struct SensorLoggingConfigMap {
-	struct SensorLoggingConfigMap_SensorLoggingConfig_m SensorLoggingConfig_m[24];
-	size_t SensorLoggingConfig_m_count;
-};
-
 struct LoggingConfig {
 	uint32_t logging_interval_ms;
 	uint32_t max_log_size_mb;
-	struct SensorLoggingConfigMap sensor_configurations;
+	struct SensorLoggingConfig SensorLoggingConfig_m[24];
+	size_t SensorLoggingConfig_m_count;
 };
 
 #ifdef __cplusplus

@@ -1,13 +1,13 @@
 SensorLoggingConfig = [
+  sensor_id_hash: uint,
+
   is_enabled: bool,
   log_raw_value: bool,
   log_only_new_data: bool
 ]
 
-SensorLoggingConfigMap = { 0*24(uint => SensorLoggingConfig) }
-
 LoggingConfig = [
   logging_interval_ms: uint,
   max_log_size_mb: uint,
-  sensor_configurations: SensorLoggingConfigMap
+  sensor_configs: [*SensorLoggingConfig]
 ]
