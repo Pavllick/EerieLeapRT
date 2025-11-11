@@ -236,15 +236,15 @@ int main(void) {
     if(DtModbus::Get() != nullptr) {
         auto modbus = make_shared_ext<Modbus>(DtModbus::Get());
         auto user_com_interface = make_shared_ext<UserCom>(modbus, system_configuration_manager);
-    user_com_interface->Initialize();
+        user_com_interface->Initialize();
 
-    // user_com_interface->ResolveUserIds();
+        if(user_com_interface->GetUsers()->size() == 0)
+            user_com_interface->ResolveUserIds();
 
         auto com_user_configurations = user_com_interface->GetUsers();
         LOG_INF("User IDs count: %zu", com_user_configurations->size());
-        for(auto com_user_configuration : *com_user_configurations) {
+        for(auto com_user_configuration : *com_user_configurations)
             LOG_INF("Com User Device ID: %llu, Server ID: %hu", com_user_configuration.device_id, com_user_configuration.server_id);
-    }
 
         com_polling_interface_service = make_shared_ext<ComPollingInterfaceService>(user_com_interface);
         com_polling_interface_service->Initialize();
