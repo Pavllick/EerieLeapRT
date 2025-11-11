@@ -2,11 +2,11 @@
 
 #include "utilities/memory/heap_allocator.h"
 #include "utilities/math_parser/math_parser_service.hpp"
-
-#include "domain/sensor_domain/utilities/parsers/sensors_cbor_parser.h"
-#include "domain/sensor_domain/models/sensor.h"
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
+
+#include "domain/sensor_domain/utilities/parsers/sensors_json_parser.h"
+#include "domain/sensor_domain/models/sensor.h"
 
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::math_parser;
@@ -16,9 +16,9 @@ using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 using namespace eerie_leap::utilities::voltage_interpolator;
 
-ZTEST_SUITE(sensors_cbor_parser, NULL, NULL, NULL, NULL, NULL);
+ZTEST_SUITE(sensors_json_parser, NULL, NULL, NULL, NULL, NULL);
 
-std::vector<std::shared_ptr<Sensor>> sensors_cbor_parser_GetTestSensors(std::shared_ptr<MathParserService> math_parser_service) {
+std::vector<std::shared_ptr<Sensor>> sensors_json_parser_GetTestSensors(std::shared_ptr<MathParserService> math_parser_service) {
     std::vector<CalibrationData> calibration_data_1 {
         {0.0, 0.0},
         {3.3, 100.0}
@@ -100,14 +100,14 @@ std::vector<std::shared_ptr<Sensor>> sensors_cbor_parser_GetTestSensors(std::sha
     return sensors;
 }
 
-ZTEST(sensors_cbor_parser, test_CborSerializeDeserialize) {
+ZTEST(sensors_json_parser, test_JsonSerializeDeserialize) {
     auto math_parser_service = std::make_shared<MathParserService>();
-    auto sensors_cbor_parser = std::make_shared<SensorsCborParser>(math_parser_service);
+    auto sensors_json_parser = std::make_shared<SensorsJsonParser>(math_parser_service);
 
-    auto sensors = sensors_cbor_parser_GetTestSensors(math_parser_service);
+    auto sensors = sensors_json_parser_GetTestSensors(math_parser_service);
 
-    auto serialized_sensors = sensors_cbor_parser->Serialize(sensors, 16, 16);
-    auto deserialized_sensors = sensors_cbor_parser->Deserialize(*serialized_sensors.get(), 16, 16);
+    auto serialized_sensors = sensors_json_parser->Serialize(sensors, 16, 16);
+    auto deserialized_sensors = sensors_json_parser->Deserialize(*serialized_sensors.get(), 16, 16);
 
     zassert_equal(deserialized_sensors.size(), sensors.size());
 

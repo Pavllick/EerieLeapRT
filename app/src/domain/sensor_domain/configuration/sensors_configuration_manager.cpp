@@ -64,7 +64,8 @@ const std::vector<std::shared_ptr<Sensor>>* SensorsConfigurationManager::Get(boo
     sensors_config_raw_ = std::move(sensors_config.value().config_raw);
     sensors_config_ = std::move(sensors_config.value().config);
 
-    sensors_ = sensors_cbor_parser_->Deserialize(*sensors_config_.get());
+    sensors_ = sensors_cbor_parser_->Deserialize(
+        *sensors_config_.get(), gpio_channel_count_, adc_channel_count_);
 
     return &sensors_;
 }

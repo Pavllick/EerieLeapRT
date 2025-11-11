@@ -1,3 +1,4 @@
+#include <utility>
 #include <zephyr/logging/log.h>
 
 #include "utilities/voltage_interpolator/interpolation_method.h"
@@ -17,9 +18,10 @@ LOG_MODULE_REGISTER(sensors_api_controller_logger);
 
 const size_t SensorsApiController::sensors_config_post_buffer_size_;
 
-std::shared_ptr<ExtVector> SensorsApiController::sensors_config_post_buffer_;
-std::shared_ptr<ExtVector> SensorsApiController::sensors_config_get_buffer_;
+ext_unique_ptr<ExtVector> SensorsApiController::sensors_config_post_buffer_;
+ext_unique_ptr<ExtVector> SensorsApiController::sensors_config_get_buffer_;
 
+std::unique_ptr<SensorsJsonParser> SensorsApiController::sensors_json_parser_ = nullptr;
 std::shared_ptr<MathParserService> SensorsApiController::math_parser_service_ = nullptr;
 std::shared_ptr<SensorsConfigurationManager> SensorsApiController::sensors_configuration_manager_ = nullptr;
 std::shared_ptr<ProcessingSchedulerService> SensorsApiController::processing_scheduler_service_ = nullptr;
@@ -29,158 +31,44 @@ SensorsApiController::SensorsApiController(
     std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager,
     std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service) {
 
-    sensors_config_post_buffer_ = make_shared_ext<ExtVector>(sensors_config_post_buffer_size_);
+    if(!sensors_config_post_buffer_)
+        sensors_config_post_buffer_ = make_unique_ext<ExtVector>(sensors_config_post_buffer_size_);
 
-    math_parser_service_ = std::move(math_parser_service);
-    sensors_configuration_manager_ = std::move(sensors_configuration_manager);
-    processing_scheduler_service_ = std::move(processing_scheduler_service);
+    if(!sensors_json_parser_)
+        sensors_json_parser_ = std::make_unique<SensorsJsonParser>(math_parser_service);
+
+    if(!math_parser_service_)
+        math_parser_service_ = std::move(math_parser_service);
+
+    if(!sensors_configuration_manager_)
+        sensors_configuration_manager_ = std::move(sensors_configuration_manager);
+
+    if(!processing_scheduler_service_)
+        processing_scheduler_service_ = std::move(processing_scheduler_service);
 }
 
 int SensorsApiController::sensors_config_get_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data) {
-    if (status == HTTP_SERVER_DATA_ABORTED) {
+    if (status == HTTP_SERVER_DATA_ABORTED)
         return 0;
-    }
 
     if (status == HTTP_SERVER_DATA_FINAL) {
-        const auto* sensors_configuration = sensors_configuration_manager_->Get();
-
-        std::vector<SensorJsonDto> sensors;
-        for(const auto& sensor : *sensors_configuration) {
-            InterpolationMethod interpolation_method = sensor->configuration.voltage_interpolator != nullptr
-                ? sensor->configuration.voltage_interpolator->GetInterpolationMethod()
-                : InterpolationMethod::NONE;
-
-            std::vector<SensorCalibrationDataMapJsonDto> calibration_table = {};
-            if(interpolation_method != InterpolationMethod::NONE) {
-                for(const auto& calibration_data : *sensor->configuration.voltage_interpolator->GetCalibrationTable()) {
-                    calibration_table.push_back({
-                        .voltage = calibration_data.voltage,
-                        .value = calibration_data.value
-                    });
-                }
-            }
-
-            SensorJsonDto sensor_json {
-                .id = sensor->id.c_str(),
-                .metadata = {
-                    .name = sensor->metadata.name.c_str(),
-                    .unit = sensor->metadata.unit.c_str(),
-                    .description = sensor->metadata.description.c_str()
-                },
-                .configuration = {
-                    .type = GetSensorTypeName(sensor->configuration.type),
-                    .channel = (int32_t)sensor->configuration.channel.value_or(-1),
-                    .sampling_rate_ms = sensor->configuration.sampling_rate_ms,
-                    .interpolation_method = GetInterpolationMethodName(interpolation_method),
-                    .calibration_table_len = calibration_table.size(),
-                    .expression = sensor->configuration.expression_evaluator != nullptr
-                        ? sensor->configuration.expression_evaluator->GetRawExpression().c_str()
-                        : ""
-                }
-            };
-
-            for(size_t i = 0; i < calibration_table.size(); ++i)
-                sensor_json.configuration.calibration_table[i] = calibration_table[i];
-
-            sensors.push_back(sensor_json);
-        }
-
-        SensorsJsonDto data {
-            .sensors_len = sensors.size()
-        };
-        for(size_t i = 0; i < sensors.size(); ++i)
-            data.sensors[i] = sensors[i];
-
-        ssize_t encoded_size = json_calc_encoded_len(sensors_descr, ARRAY_SIZE(sensors_descr), &data);
-        // size_t encoded_size = json_calc_encoded_arr_len(sensors_descr, &data);
-        // HACK: Otherwise final JSON is being truncated by 1 byte
-        sensors_config_get_buffer_ = make_shared_ext<ExtVector>(encoded_size + 1);
-
-        json_obj_encode_buf(sensors_descr, ARRAY_SIZE(sensors_descr), &data, (char*)sensors_config_get_buffer_->data(), sensors_config_get_buffer_->size());
-        // json_arr_encode_buf(sensors_descr, &data, (char*)sensors_config_get_buffer_->data(), sensors_config_get_buffer_->size());
+        const auto* sensors = sensors_configuration_manager_->Get();
+        // TODO: Get GPIO and ADC channel count
+        sensors_config_get_buffer_ = sensors_json_parser_->Serialize(*sensors, 16, 16);
 
         response_ctx->body = (uint8_t*)sensors_config_get_buffer_->data();
-        response_ctx->body_len = encoded_size;
+        response_ctx->body_len = sensors_config_get_buffer_->size();
         response_ctx->final_chunk = true;
     }
 
     return 0;
 }
 
-void SensorsApiController::ParseSensorsConfigJson(uint8_t *buffer, size_t len)
-{
-	int ret;
-	SensorsJsonDto data;
-	const int expected_return_code = BIT_MASK(ARRAY_SIZE(sensors_descr));
+void SensorsApiController::UpdateSensorsConfig(const std::span<const uint8_t>& buffer) {
+    // TODO: Get GPIO and ADC channel count
+    auto sensors = sensors_json_parser_->Deserialize(buffer, 16, 16);
 
-	ret = json_obj_parse((char*)buffer, len, sensors_descr, ARRAY_SIZE(sensors_descr), &data);
-	if (ret != expected_return_code)
-        throw std::runtime_error("Invalid JSON payload.");
-
-    LOG_DBG("JSON payload parsed successfully.");
-
-    std::vector<std::shared_ptr<Sensor>> sensors;
-
-    for(size_t i = 0; i < data.sensors_len; ++i) {
-        auto sensor = make_shared_ext<Sensor>(data.sensors[i].id);
-
-        sensor->metadata.name = data.sensors[i].metadata.name;
-        sensor->metadata.unit = data.sensors[i].metadata.unit == nullptr ? "" : data.sensors[i].metadata.unit;
-        sensor->metadata.description = data.sensors[i].metadata.description == nullptr ? "" : data.sensors[i].metadata.description;
-
-        sensor->configuration.type = GetSensorType(data.sensors[i].configuration.type);
-        sensor->configuration.channel = std::nullopt;
-        if(sensor->configuration.type == SensorType::PHYSICAL_ANALOG || sensor->configuration.type == SensorType::PHYSICAL_INDICATOR)
-            sensor->configuration.channel = data.sensors[i].configuration.channel;
-        sensor->configuration.sampling_rate_ms = data.sensors[i].configuration.sampling_rate_ms;
-
-        InterpolationMethod interpolation_method = InterpolationMethod::NONE;
-        if(sensor->configuration.type == SensorType::PHYSICAL_ANALOG)
-            interpolation_method = GetInterpolationMethod(data.sensors[i].configuration.interpolation_method);
-
-        if(interpolation_method != InterpolationMethod::NONE && data.sensors[i].configuration.calibration_table_len > 0) {
-            std::vector<CalibrationData> calibration_table;
-            for(size_t j = 0; j < data.sensors[i].configuration.calibration_table_len; ++j) {
-                const auto& calibration_data = data.sensors[i].configuration.calibration_table[j];
-
-                calibration_table.push_back({
-                    .voltage = calibration_data.voltage,
-                    .value = calibration_data.value});
-            }
-
-            auto calibration_table_ptr = make_shared_ext<std::vector<CalibrationData>>(calibration_table);
-
-            switch (interpolation_method) {
-            case InterpolationMethod::LINEAR:
-                sensor->configuration.voltage_interpolator = make_unique_ext<LinearVoltageInterpolator>(calibration_table_ptr);
-                break;
-
-            case InterpolationMethod::CUBIC_SPLINE:
-                sensor->configuration.voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_table_ptr);
-                break;
-
-            default:
-                throw std::runtime_error("Sensor uses unsupported interpolation method.");
-                break;
-            }
-        } else {
-            sensor->configuration.voltage_interpolator = nullptr;
-        }
-
-        if(data.sensors[i].configuration.expression != nullptr && strcmp(data.sensors[i].configuration.expression, "") != 0) {
-            sensor->configuration.expression_evaluator = make_unique_ext<ExpressionEvaluator>(
-                math_parser_service_,
-                std::string(data.sensors[i].configuration.expression));
-        } else {
-            sensor->configuration.expression_evaluator = nullptr;
-        }
-
-        sensors.push_back(sensor);
-    }
-
-    if(sensors_configuration_manager_->Update(sensors))
-        LOG_DBG("Sensors configuration updated successfully.");
-    else
+    if(!sensors_configuration_manager_->Update(sensors))
         throw std::runtime_error("Failed to update sensors configuration.");
 
     processing_scheduler_service_->Restart();
@@ -208,7 +96,8 @@ int SensorsApiController::sensors_config_post_handler(http_client_ctx *client, e
         LOG_DBG("JSON payload received successfully, len=%zu", cursor);
 
         try {
-            ParseSensorsConfigJson(sensors_config_post_buffer_->data(), cursor);
+            std::span<uint8_t> buffer(sensors_config_post_buffer_->data(), cursor);
+            UpdateSensorsConfig(buffer);
         } catch (const std::exception &e) {
             LOG_ERR("Failed to parse JSON: %s", e.what());
 

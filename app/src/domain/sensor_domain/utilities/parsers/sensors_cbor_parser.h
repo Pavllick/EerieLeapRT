@@ -19,16 +19,17 @@ class SensorsCborParser {
 private:
     std::shared_ptr<MathParserService> math_parser_service_;
 
-    void ValidateSensorType(const SensorConfiguration& sensor_configuration);
-
 public:
     explicit SensorsCborParser(std::shared_ptr<MathParserService> math_parser_service);
 
-    std::vector<std::shared_ptr<Sensor>> Deserialize(const SensorsConfig& sensors_config);
     ext_unique_ptr<SensorsConfig> Serialize(
         const std::vector<std::shared_ptr<Sensor>>& sensors,
-        size_t gpio_channel_count,
-        size_t adc_channel_count);
+        uint32_t gpio_channel_count,
+        uint32_t adc_channel_count);
+    std::vector<std::shared_ptr<Sensor>> Deserialize(
+        const SensorsConfig& sensors_config,
+        uint32_t gpio_channel_count,
+        uint32_t adc_channel_count);
 };
 
 } // namespace eerie_leap::domain::sensor_domain::utilities::parsers

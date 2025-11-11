@@ -4,63 +4,49 @@
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
 #include "domain/sensor_domain/utilities/sensors_order_resolver.h"
-#include "domain/sensor_domain/utilities/sensor_helpers.h"
+#include "sensor_validator.h"
 
 #include "sensors_cbor_parser.h"
 
 namespace eerie_leap::domain::sensor_domain::utilities::parsers {
 
 using namespace eerie_leap::utilities::cbor;
-using namespace eerie_leap::domain::sensor_domain::utilities;
 using namespace eerie_leap::utilities::voltage_interpolator;
+using namespace eerie_leap::domain::sensor_domain::utilities;
 
 SensorsCborParser::SensorsCborParser(std::shared_ptr<MathParserService> math_parser_service)
     : math_parser_service_(std::move(math_parser_service)) {}
 
 ext_unique_ptr<SensorsConfig> SensorsCborParser::Serialize(
     const std::vector<std::shared_ptr<Sensor>>& sensors,
-    size_t gpio_channel_count,
-    size_t adc_channel_count) {
+    uint32_t gpio_channel_count,
+    uint32_t adc_channel_count) {
 
     auto sensors_config = make_unique_ext<SensorsConfig>();
     memset(sensors_config.get(), 0, sizeof(SensorsConfig));
 
-    SensorsOrderResolver resolver;
+    SensorsOrderResolver order_resolver;
 
     for(size_t i = 0; i < sensors.size(); ++i) {
         const auto& sensor = sensors.at(i);
 
-        ValidateSensorType(sensor->configuration);
+        // NOTE: UpdateConnectionString() must be called before validation
+        sensor->configuration.UpdateConnectionString();
+        SensorValidator::ValidateSensor(*sensor, gpio_channel_count, adc_channel_count);
 
         auto sensor_config = make_shared_ext<SensorConfig>();
         memset(sensor_config.get(), 0, sizeof(SensorConfig));
-
-        if(!SensorHelpers::IsIdValid(sensor->id))
-            throw std::runtime_error("Invalid sensor ID.");
 
         sensor_config->id = CborHelpers::ToZcborString(&sensor->id);
         sensor_config->configuration.type = std::to_underlying(sensor->configuration.type);
 
         if(sensor->configuration.channel.has_value()) {
-            int channel_count = -1;
-
-            if(sensor->configuration.type == SensorType::PHYSICAL_INDICATOR)
-                channel_count = gpio_channel_count;
-            else if(sensor->configuration.type == SensorType::PHYSICAL_ANALOG)
-                channel_count = adc_channel_count;
-            else
-                throw std::runtime_error("Invalid sensor type.");
-
-            if(sensor->configuration.channel.value() < 0 || sensor->configuration.channel.value() >= channel_count)
-                throw std::runtime_error("Invalid channel value.");
-
             sensor_config->configuration.channel_present = true;
             sensor_config->configuration.channel = sensor->configuration.channel.value();
         } else {
             sensor_config->configuration.channel_present = false;
         }
 
-        sensor->configuration.UpdateConnectionString();
         sensor_config->configuration.connection_string = CborHelpers::ToZcborString(&sensor->configuration.connection_string);
 
         sensor_config->configuration.sampling_rate_ms = sensor->configuration.sampling_rate_ms;
@@ -75,9 +61,6 @@ ext_unique_ptr<SensorsConfig> SensorsCborParser::Serialize(
 
             auto& calibration_table = *sensor->configuration.voltage_interpolator->GetCalibrationTable();
             sensor_config->configuration.calibration_table.float32float_count = calibration_table.size();
-
-            if(calibration_table.size() < 2)
-                throw std::runtime_error("Calibration table must have at least 2 points.");
 
             std::ranges::sort(
                 calibration_table,
@@ -109,16 +92,20 @@ ext_unique_ptr<SensorsConfig> SensorsCborParser::Serialize(
         sensors_config->SensorConfig_m[i] = *sensor_config;
         sensors_config->SensorConfig_m_count++;
 
-        resolver.AddSensor(sensor);
+        order_resolver.AddSensor(sensor);
     }
 
     // Validate dependencies
-    resolver.GetProcessingOrder();
+    order_resolver.GetProcessingOrder();
 
     return sensors_config;
 }
 
-std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(const SensorsConfig& sensors_config) {
+std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
+    const SensorsConfig& sensors_config,
+    size_t gpio_channel_count,
+    size_t adc_channel_count) {
+
     std::vector<std::shared_ptr<Sensor>> sensors;
 
     for(size_t i = 0; i < sensors_config.SensorConfig_m_count; ++i) {
@@ -150,7 +137,7 @@ std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(const Sensor
 
             auto calibration_table_ptr = make_shared_ext<std::vector<CalibrationData>>(calibration_table);
 
-            switch (interpolation_method) {
+            switch(interpolation_method) {
             case InterpolationMethod::LINEAR:
                 sensor->configuration.voltage_interpolator = make_unique_ext<LinearVoltageInterpolator>(calibration_table_ptr);
                 break;
@@ -179,50 +166,12 @@ std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(const Sensor
 
         sensor->metadata.description = CborHelpers::ToStdString(sensor_config.metadata.description);
 
+        SensorValidator::ValidateSensor(*sensor, gpio_channel_count, adc_channel_count);
+
         sensors.push_back(sensor);
     }
 
     return sensors;
-}
-
-void SensorsCborParser::ValidateSensorType(const SensorConfiguration& sensor_configuration) {
-    if(sensor_configuration.type == SensorType::PHYSICAL_ANALOG) {
-        if(!sensor_configuration.channel.has_value())
-            throw std::runtime_error("Physical Analog sensor must have channel.");
-
-        if(sensor_configuration.voltage_interpolator == nullptr)
-            throw std::runtime_error("Physical Analog sensor must have interpolation method.");
-    } else if(sensor_configuration.type == SensorType::PHYSICAL_INDICATOR) {
-        if(!sensor_configuration.channel.has_value())
-            throw std::runtime_error("Physical Indicator sensor must have channel.");
-
-        if(sensor_configuration.voltage_interpolator != nullptr)
-            throw std::runtime_error("Physical Indicator sensor must not have interpolation method.");
-    } else if(sensor_configuration.type == SensorType::CANBUS_RAW) {
-        if(sensor_configuration.canbus_source == nullptr)
-            throw std::runtime_error("Canbus sensor must have source.");
-
-        if(sensor_configuration.voltage_interpolator != nullptr)
-            throw std::runtime_error("Canbus sensor must not have interpolation method.");
-
-        if(sensor_configuration.expression_evaluator != nullptr)
-            throw std::runtime_error("Canbus Raw sensor must not have math expression.");
-    } else if(sensor_configuration.type == SensorType::CANBUS_ANALOG || sensor_configuration.type == SensorType::CANBUS_INDICATOR) {
-        if(sensor_configuration.canbus_source == nullptr)
-            throw std::runtime_error("Canbus sensor must have source.");
-
-        if(sensor_configuration.canbus_source->signal_name.empty())
-            throw std::runtime_error("Canbus sensor must have signal name.");
-
-        if(sensor_configuration.voltage_interpolator != nullptr)
-            throw std::runtime_error("Canbus sensor must not have interpolation method.");
-    } else if(sensor_configuration.type == SensorType::VIRTUAL_ANALOG || sensor_configuration.type == SensorType::VIRTUAL_INDICATOR) {
-        if(sensor_configuration.expression_evaluator == nullptr)
-            throw std::runtime_error("Virtual sensor must have expression evaluator.");
-
-        if(sensor_configuration.voltage_interpolator != nullptr)
-            throw std::runtime_error("Virtual sensor must not have interpolation method.");
-    }
 }
 
 } // namespace eerie_leap::domain::sensor_domain::utilities::parsers
