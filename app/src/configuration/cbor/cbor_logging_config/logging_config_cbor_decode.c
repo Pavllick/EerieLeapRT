@@ -50,7 +50,8 @@ static bool decode_CborLoggingConfig(
 
 	bool res = (((zcbor_list_start_decode(state) && ((((zcbor_uint32_decode(state, (&(*result).logging_interval_ms))))
 	&& ((zcbor_uint32_decode(state, (&(*result).max_log_size_mb))))
-	&& ((zcbor_list_start_decode(state) && ((zcbor_multi_decode(0, 24, &(*result).CborSensorLoggingConfig_m_count, (zcbor_decoder_t *)decode_CborSensorLoggingConfig, state, (*&(*result).CborSensorLoggingConfig_m), sizeof(struct CborSensorLoggingConfig))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state)))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
+	&& ((zcbor_list_start_decode(state) && ((zcbor_multi_decode(0, 24, &(*result).CborSensorLoggingConfig_m_count, (zcbor_decoder_t *)decode_CborSensorLoggingConfig, state, (*&(*result).CborSensorLoggingConfig_m), sizeof(struct CborSensorLoggingConfig))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state)))
+	&& ((zcbor_uint32_decode(state, (&(*result).json_config_checksum))))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
 
 	if (false) {
 		/* For testing that the types of the arguments are correct.

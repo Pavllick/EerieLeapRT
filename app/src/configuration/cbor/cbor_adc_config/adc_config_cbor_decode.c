@@ -79,7 +79,8 @@ static bool decode_CborAdcConfig(
 	zcbor_log("%s\r\n", __func__);
 
 	bool res = (((zcbor_list_start_decode(state) && ((((zcbor_uint32_decode(state, (&(*result).samples))))
-	&& ((zcbor_list_start_decode(state) && ((zcbor_multi_decode(0, 24, &(*result).CborAdcChannelConfig_m_count, (zcbor_decoder_t *)decode_CborAdcChannelConfig, state, (*&(*result).CborAdcChannelConfig_m), sizeof(struct CborAdcChannelConfig))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state)))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
+	&& ((zcbor_list_start_decode(state) && ((zcbor_multi_decode(0, 24, &(*result).CborAdcChannelConfig_m_count, (zcbor_decoder_t *)decode_CborAdcChannelConfig, state, (*&(*result).CborAdcChannelConfig_m), sizeof(struct CborAdcChannelConfig))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state)))
+	&& ((zcbor_uint32_decode(state, (&(*result).json_config_checksum))))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
 
 	if (false) {
 		/* For testing that the types of the arguments are correct.

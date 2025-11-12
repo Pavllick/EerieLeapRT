@@ -6,21 +6,23 @@
 
 using namespace eerie_leap::utilities::cbor;
 
-static size_t cbor_get_size_CborLoggingConfig(const CborLoggingConfig& input) {
+static size_t cbor_get_size_CborLoggingConfig(const CborLoggingConfig& config) {
     CborSizeBuilder builder;
     builder.AddIndefiniteArrayStart();
 
-    builder.AddUint(input.logging_interval_ms)
-        .AddUint(input.max_log_size_mb);
+    builder.AddUint(config.logging_interval_ms)
+        .AddUint(config.max_log_size_mb);
 
     builder.AddIndefiniteArrayStart();
-    for(int i = 0; i < input.CborSensorLoggingConfig_m_count; i++) {
+    for(int i = 0; i < config.CborSensorLoggingConfig_m_count; i++) {
         builder.AddIndefiniteArrayStart()
-            .AddUint(input.CborSensorLoggingConfig_m[i].sensor_id_hash)
-            .AddBool(input.CborSensorLoggingConfig_m[i].is_enabled)
-            .AddBool(input.CborSensorLoggingConfig_m[i].log_raw_value)
-            .AddBool(input.CborSensorLoggingConfig_m[i].log_only_new_data);
+            .AddUint(config.CborSensorLoggingConfig_m[i].sensor_id_hash)
+            .AddBool(config.CborSensorLoggingConfig_m[i].is_enabled)
+            .AddBool(config.CborSensorLoggingConfig_m[i].log_raw_value)
+            .AddBool(config.CborSensorLoggingConfig_m[i].log_only_new_data);
     }
+
+    builder.AddUint(config.json_config_checksum);
 
     return builder.Build();
 }

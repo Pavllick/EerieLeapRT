@@ -111,7 +111,8 @@ static bool decode_CborSensorsConfig(
 {
 	zcbor_log("%s\r\n", __func__);
 
-	bool res = (((zcbor_list_start_decode(state) && ((((zcbor_list_start_decode(state) && ((zcbor_multi_decode(0, 24, &(*result).CborSensorConfig_m_count, (zcbor_decoder_t *)decode_CborSensorConfig, state, (*&(*result).CborSensorConfig_m), sizeof(struct CborSensorConfig))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state)))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
+	bool res = (((zcbor_list_start_decode(state) && ((((zcbor_list_start_decode(state) && ((zcbor_multi_decode(0, 24, &(*result).CborSensorConfig_m_count, (zcbor_decoder_t *)decode_CborSensorConfig, state, (*&(*result).CborSensorConfig_m), sizeof(struct CborSensorConfig))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state)))
+	&& ((zcbor_uint32_decode(state, (&(*result).json_config_checksum))))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
 
 	if (false) {
 		/* For testing that the types of the arguments are correct.

@@ -23,5 +23,7 @@ CborSensorConfig = [
 ]
 
 CborSensorsConfig = [
-  sensors: [*CborSensorConfig]
+  sensors: [*CborSensorConfig],
+
+  json_config_checksum: uint
 ]

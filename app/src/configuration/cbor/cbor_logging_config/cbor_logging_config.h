@@ -37,6 +37,7 @@ struct CborLoggingConfig {
 	uint32_t max_log_size_mb;
 	struct CborSensorLoggingConfig CborSensorLoggingConfig_m[24];
 	size_t CborSensorLoggingConfig_m_count;
+	uint32_t json_config_checksum;
 };
 
 #ifdef __cplusplus

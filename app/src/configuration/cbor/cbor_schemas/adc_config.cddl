@@ -7,5 +7,7 @@ CborAdcChannelConfig = [
 
 CborAdcConfig = [
   samples: uint,
-  adc_channels_config: [*CborAdcChannelConfig]
+  adc_channels_config: [*CborAdcChannelConfig],
+
+  json_config_checksum: uint
 ]

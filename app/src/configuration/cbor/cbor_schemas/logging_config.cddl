@@ -9,5 +9,7 @@ CborSensorLoggingConfig = [
 CborLoggingConfig = [
   logging_interval_ms: uint,
   max_log_size_mb: uint,
-  sensor_configs: [*CborSensorLoggingConfig]
+  sensor_configs: [*CborSensorLoggingConfig],
+
+  json_config_checksum: uint
 ]

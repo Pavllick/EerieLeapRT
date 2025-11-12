@@ -45,6 +45,7 @@ struct CborAdcConfig {
 	uint32_t samples;
 	struct CborAdcChannelConfig CborAdcChannelConfig_m[24];
 	size_t CborAdcChannelConfig_m_count;
+	uint32_t json_config_checksum;
 };
 
 #ifdef __cplusplus

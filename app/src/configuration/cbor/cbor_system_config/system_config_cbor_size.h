@@ -6,33 +6,33 @@
 
 using namespace eerie_leap::utilities::cbor;
 
-static size_t cbor_get_size_CborSystemConfig(const CborSystemConfig& system_config) {
+static size_t cbor_get_size_CborSystemConfig(const CborSystemConfig& config) {
     CborSizeBuilder builder;
     builder.AddIndefiniteArrayStart();
 
-    builder.AddUint(system_config.device_id)
-        .AddUint(system_config.hw_version)
-        .AddUint(system_config.sw_version)
-        .AddUint(system_config.build_number)
-        .AddUint(system_config.com_user_refresh_rate_ms);
+    builder.AddUint(config.device_id)
+        .AddUint(config.hw_version)
+        .AddUint(config.sw_version)
+        .AddUint(config.build_number)
+        .AddUint(config.com_user_refresh_rate_ms);
 
     builder.AddIndefiniteArrayStart();
-    for(int i = 0; i < system_config.CborComUserConfig_m_count; i++) {
+    for(int i = 0; i < config.CborComUserConfig_m_count; i++) {
         builder.AddIndefiniteArrayStart();
 
-        builder.AddUint(system_config.CborComUserConfig_m[i].device_id)
-            .AddUint(system_config.CborComUserConfig_m[i].server_id);
+        builder.AddUint(config.CborComUserConfig_m[i].device_id)
+            .AddUint(config.CborComUserConfig_m[i].server_id);
     }
 
     builder.AddIndefiniteArrayStart();
-    for(int i = 0; i < system_config.CborCanbusConfig_m_count; i++) {
+    for(int i = 0; i < config.CborCanbusConfig_m_count; i++) {
         builder.AddIndefiniteArrayStart();
 
-        builder.AddUint(system_config.CborCanbusConfig_m[i].bus_channel)
-            .AddUint(system_config.CborCanbusConfig_m[i].bitrate);
+        builder.AddUint(config.CborCanbusConfig_m[i].bus_channel)
+            .AddUint(config.CborCanbusConfig_m[i].bitrate);
     }
 
-    builder.AddUint(system_config.json_config_checksum);
+    builder.AddUint(config.json_config_checksum);
 
     return builder.Build();
 }

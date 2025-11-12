@@ -63,6 +63,7 @@ struct CborSensorConfig {
 struct CborSensorsConfig {
 	struct CborSensorConfig CborSensorConfig_m[24];
 	size_t CborSensorConfig_m_count;
+	uint32_t json_config_checksum;
 };
 
 #ifdef __cplusplus
