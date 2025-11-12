@@ -188,6 +188,8 @@ int main(void) {
         "system_config", sd_fs_service);
     auto json_adc_config_service = make_unique_ext<JsonConfigurationService<JsonAdcConfig>>(
         "adc_config", sd_fs_service);
+    auto json_sensors_config_service = make_unique_ext<JsonConfigurationService<JsonSensorsConfig>>(
+        "sensors_config", sd_fs_service);
 
     auto adc_configuration_manager = make_shared_ext<AdcConfigurationManager>(
         std::move(cbor_adc_config_service), std::move(json_adc_config_service));
@@ -207,6 +209,7 @@ int main(void) {
     auto sensors_configuration_manager = make_shared_ext<SensorsConfigurationManager>(
         math_parser_service,
         std::move(cbor_sensors_config_service),
+        std::move(json_sensors_config_service),
         gpio->GetChannelCount(),
         adc_configuration_manager->Get()->GetChannelCount());
 
@@ -328,7 +331,7 @@ void SetupSystemConfiguration(std::shared_ptr<SystemConfigurationManager> system
     };
     system_configuration->canbus_configurations.push_back(canbus_configuration_0);
 
-    if(!system_configuration_manager->Update(system_configuration))
+    if(!system_configuration_manager->Update(*system_configuration))
         throw std::runtime_error("Cannot save System config");
 }
 
