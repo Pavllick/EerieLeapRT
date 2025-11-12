@@ -6,7 +6,7 @@
 
 #include "utilities/math_parser/math_parser_service.hpp"
 #include "utilities/memory/heap_allocator.h"
-#include "configuration/cbor_sensor_config/cbor_sensor_config.h"
+#include "configuration/cbor/cbor_sensor_config/cbor_sensor_config.h"
 #include "domain/sensor_domain/models/sensor.h"
 
 namespace eerie_leap::domain::sensor_domain::utilities::parsers {

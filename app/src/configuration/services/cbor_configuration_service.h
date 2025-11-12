@@ -13,17 +13,17 @@
 #include "utilities/cbor/cbor_serializer.h"
 #include "subsys/fs/services/i_fs_service.h"
 
-#include "configuration/cbor_traits/system_config_trait.h"
-#include "configuration/cbor_traits/adc_config_trait.h"
-#include "configuration/cbor_traits/sensors_config_trait.h"
-#include "configuration/cbor_traits/logging_config_trait.h"
+#include "configuration/cbor/cbor_traits/system_config_trait.h"
+#include "configuration/cbor/cbor_traits/adc_config_trait.h"
+#include "configuration/cbor/cbor_traits/sensors_config_trait.h"
+#include "configuration/cbor/cbor_traits/logging_config_trait.h"
 
 #include "loaded_config.hpp"
 
 namespace eerie_leap::configuration::services {
 
 using namespace eerie_leap::utilities::memory;
-using namespace eerie_leap::configuration::traits;
+using namespace eerie_leap::configuration::cbor::traits;
 using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::utilities::cbor;
 

@@ -6,8 +6,8 @@
 #include "utilities/cbor/cbor_helpers.hpp"
 #include "utilities/math_parser/expression_evaluator.h"
 #include "utilities/math_parser/math_parser_service.hpp"
-#include "configuration/cbor_system_config/cbor_system_config.h"
-#include "configuration/cbor_sensor_config/cbor_sensor_config.h"
+#include "configuration/cbor/cbor_system_config/cbor_system_config.h"
+#include "configuration/cbor/cbor_sensor_config/cbor_sensor_config.h"
 #include "configuration/services/cbor_configuration_service.h"
 
 #include "domain/sensor_domain/configuration/sensors_configuration_manager.h"

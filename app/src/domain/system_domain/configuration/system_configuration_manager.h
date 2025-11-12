@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "utilities/memory/heap_allocator.h"
-#include "configuration/cbor_system_config/cbor_system_config.h"
+#include "configuration/cbor/cbor_system_config/cbor_system_config.h"
 #include "configuration/services/cbor_configuration_service.h"
 #include "domain/system_domain/utilities/parsers/system_configuration_cbor_parser.h"
 #include "domain/system_domain/utilities/parsers/system_configuration_json_parser.h"

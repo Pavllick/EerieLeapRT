@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "utilities/memory/heap_allocator.h"
-#include "configuration/cbor_adc_config/cbor_adc_config.h"
+#include "configuration/cbor/cbor_adc_config/cbor_adc_config.h"
 #include "configuration/services/cbor_configuration_service.h"
 #include "subsys/adc/models/adc_configuration.h"
 #include "subsys/adc/i_adc_manager.h"

@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "utilities/memory/heap_allocator.h"
-#include "configuration/cbor_logging_config/cbor_logging_config.h"
+#include "configuration/cbor/cbor_logging_config/cbor_logging_config.h"
 #include "domain/logging_domain/models/logging_configuration.h"
 
 namespace eerie_leap::domain::logging_domain::utilities::parsers {

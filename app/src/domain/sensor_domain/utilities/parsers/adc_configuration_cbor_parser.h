@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "utilities/memory/heap_allocator.h"
-#include "configuration/cbor_adc_config/cbor_adc_config.h"
+#include "configuration/cbor/cbor_adc_config/cbor_adc_config.h"
 #include "subsys/adc/models/adc_configuration.h"
 
 namespace eerie_leap::domain::sensor_domain::utilities::parsers {

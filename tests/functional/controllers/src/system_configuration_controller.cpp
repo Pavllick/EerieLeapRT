@@ -2,7 +2,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/ztest.h>
 
-#include "configuration/cbor_system_config/cbor_system_config.h"
+#include "configuration/cbor/cbor_system_config/cbor_system_config.h"
 #include "configuration/services/cbor_configuration_service.h"
 #include "domain/system_domain/configuration/system_configuration_manager.h"
 

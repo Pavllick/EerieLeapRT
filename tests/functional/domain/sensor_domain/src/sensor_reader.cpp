@@ -4,7 +4,7 @@
 #include "utilities/guid/guid_generator.h"
 #include "utilities/math_parser/math_parser_service.hpp"
 
-#include "configuration/cbor_adc_config/cbor_adc_config.h"
+#include "configuration/cbor/cbor_adc_config/cbor_adc_config.h"
 #include "configuration/services/cbor_configuration_service.h"
 
 #include "subsys/device_tree/dt_fs.h"

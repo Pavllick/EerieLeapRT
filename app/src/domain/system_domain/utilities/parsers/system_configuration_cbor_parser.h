@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "utilities/memory/heap_allocator.h"
-#include "configuration/cbor_system_config/cbor_system_config.h"
+#include "configuration/cbor/cbor_system_config/cbor_system_config.h"
 #include "domain/system_domain/models/system_configuration.h"
 
 namespace eerie_leap::domain::system_domain::utilities::parsers {

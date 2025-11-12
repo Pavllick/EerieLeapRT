@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "utilities/memory/heap_allocator.h"
-#include "configuration/cbor_logging_config/cbor_logging_config.h"
+#include "configuration/cbor/cbor_logging_config/cbor_logging_config.h"
 #include "configuration/services/cbor_configuration_service.h"
 #include "domain/logging_domain/utilities/parsers/logging_configuration_cbor_parser.h"
 #include "domain/logging_domain/models/logging_configuration.h"
