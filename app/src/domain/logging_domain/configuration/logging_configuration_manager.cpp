@@ -1,3 +1,5 @@
+#include <zephyr/sys/crc.h>
+
 #include "logging_configuration_manager.h"
 #include "domain/logging_domain/utilities/parsers/logging_configuration_cbor_parser.h"
 
@@ -5,12 +7,16 @@ namespace eerie_leap::domain::logging_domain::configuration {
 
 LOG_MODULE_REGISTER(logging_config_ctrl_logger);
 
-LoggingConfigurationManager::LoggingConfigurationManager(ext_unique_ptr<CborConfigurationService<CborLoggingConfig>> cbor_configuration_service) :
-    cbor_configuration_service_(std::move(cbor_configuration_service)),
-    config_(nullptr),
-    configuration_(nullptr) {
+LoggingConfigurationManager::LoggingConfigurationManager(
+    ext_unique_ptr<CborConfigurationService<CborLoggingConfig>> cbor_configuration_service,
+    ext_unique_ptr<JsonConfigurationService<JsonLoggingConfig>> json_configuration_service)
+        : cbor_configuration_service_(std::move(cbor_configuration_service)),
+        json_configuration_service_(std::move(json_configuration_service)),
+        cbor_config_(nullptr),
+        configuration_(nullptr) {
 
     cbor_parser_ = std::make_unique<LoggingConfigurationCborParser>();
+    json_parser_ = std::make_unique<LoggingConfigurationJsonParser>();
     std::shared_ptr<LoggingConfiguration> configuration = nullptr;
 
     try {
@@ -27,12 +33,55 @@ LoggingConfigurationManager::LoggingConfigurationManager(ext_unique_ptr<CborConf
     }
 
     LOG_INF("Logging Configuration Manager initialized successfully.");
+
+    ApplyJsonConfiguration();
 }
 
-bool LoggingConfigurationManager::Update(std::shared_ptr<LoggingConfiguration> configuration) {
-    auto config = cbor_parser_->Serialize(*configuration);
+bool LoggingConfigurationManager::ApplyJsonConfiguration() {
+    if(!json_configuration_service_->IsAvailable())
+        return false;
 
-    if(!cbor_configuration_service_->Save(config.get()))
+    auto json_config_loaded = json_configuration_service_->Load();
+    if(json_config_loaded.has_value()) {
+        uint32_t crc = crc32_ieee(json_config_loaded->config_raw->data(), json_config_loaded->config_raw->size());
+        if(crc == json_config_checksum_)
+            return true;
+
+        auto configuration = json_parser_->Deserialize(*json_config_loaded->config);
+
+        bool result = Update(configuration);
+        if(!result)
+            return false;
+
+        LOG_INF("JSON configuration loaded successfully.");
+
+        return true;
+    }
+
+    return Update(*configuration_);
+}
+
+bool LoggingConfigurationManager::Update(const LoggingConfiguration& configuration) {
+    if(json_configuration_service_->IsAvailable()) {
+        auto json_config = json_parser_->Serialize(configuration);
+        json_configuration_service_->Save(json_config.get());
+
+        auto json_config_loaded = json_configuration_service_->Load();
+        if(!json_config_loaded.has_value()) {
+            LOG_ERR("Failed to load newly updated JSON configuration.");
+            return false;
+        }
+
+        LOG_INF("JSON configuration updated successfully.");
+
+        uint32_t crc = crc32_ieee(json_config_loaded->config_raw->data(), json_config_loaded->config_raw->size());
+        json_config_checksum_ = crc;
+    }
+
+    auto cbor_config = cbor_parser_->Serialize(configuration);
+    cbor_config->json_config_checksum = json_config_checksum_;
+
+    if(!cbor_configuration_service_->Save(cbor_config.get()))
         return false;
 
     Get(true);
@@ -49,19 +98,21 @@ std::shared_ptr<LoggingConfiguration> LoggingConfigurationManager::Get(bool forc
     if(!config.has_value())
         return nullptr;
 
-    config_raw_ = std::move(config.value().config_raw);
-    config_ = std::move(config.value().config);
+    cbor_config_raw_ = std::move(config.value().config_raw);
+    cbor_config_ = std::move(config.value().config);
 
-    auto configuration = cbor_parser_->Deserialize(*config_);
+    auto configuration = cbor_parser_->Deserialize(*cbor_config_);
     configuration_ = make_shared_ext<LoggingConfiguration>(configuration);
+
+    json_config_checksum_ = cbor_config_->json_config_checksum;
 
     return configuration_;
 }
 
 bool LoggingConfigurationManager::CreateDefaultConfiguration() {
-    auto configuration = make_shared_ext<LoggingConfiguration>();
+    auto configuration = make_unique_ext<LoggingConfiguration>();
 
-    return Update(configuration);
+    return Update(*configuration);
 }
 
 } // namespace eerie_leap::domain::logging_domain::configuration

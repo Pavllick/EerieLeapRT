@@ -33,10 +33,14 @@ CanbusService::CanbusService(std::shared_ptr<IFsService> fs_service, std::shared
 
     dbc_ = make_shared_ext<Dbc>();
 
-    if(fs_service_ != nullptr && fs_service_->Exists(CONFIG_EERIE_LEAP_CANBUS_DBC_FILE_PATH)) {
+    std::string dbc_file_path = CONFIG_EERIE_LEAP_SD_CARD_USER_CONFIG_DIR;
+    dbc_file_path += "/";
+    dbc_file_path += CONFIG_EERIE_LEAP_CANBUS_DBC_FILE_NAME;
+
+    if(fs_service_ != nullptr && fs_service_->Exists(dbc_file_path)) {
         FsServiceStreamBuf fs_stream_buf(
             fs_service_.get(),
-            CONFIG_EERIE_LEAP_CANBUS_DBC_FILE_PATH,
+            dbc_file_path,
             FsServiceStreamBuf::OpenMode::Read);
         LoadDbcFile(fs_stream_buf);
 

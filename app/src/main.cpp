@@ -195,7 +195,7 @@ int main(void) {
         std::move(cbor_adc_config_service), std::move(json_adc_config_service));
 
     // TODO: For test purposes only
-    SetupAdcConfiguration(adc_configuration_manager);
+    // SetupAdcConfiguration(adc_configuration_manager);
 
     auto gpio = GpioFactory::Create();
     gpio->Initialize();
@@ -216,17 +216,22 @@ int main(void) {
     auto canbus_service = make_shared_ext<CanbusService>(sd_fs_service, system_configuration_manager);
 
     // TODO: For test purposes only
-    SetupTestSensors(math_parser_service, sensors_configuration_manager);
+    // SetupTestSensors(math_parser_service, sensors_configuration_manager);
 
     auto sensor_readings_frame = make_shared_ext<SensorReadingsFrame>();
 
     std::shared_ptr<LoggingController> logging_controller = nullptr;
     if(sd_fs_service != nullptr) {
-        auto cbor_logging_config_service = make_unique_ext<CborConfigurationService<CborLoggingConfig>>("logging_config", fs_service);
-        auto logging_configuration_manager = make_shared_ext<LoggingConfigurationManager>(std::move(cbor_logging_config_service));
+        auto cbor_logging_config_service = make_unique_ext<CborConfigurationService<CborLoggingConfig>>(
+            "logging_config", fs_service);
+        auto json_logging_config_service = make_unique_ext<JsonConfigurationService<JsonLoggingConfig>>(
+            "logging_config", sd_fs_service);
+
+        auto logging_configuration_manager = make_shared_ext<LoggingConfigurationManager>(
+            std::move(cbor_logging_config_service), std::move(json_logging_config_service));
 
         // TODO: For test purposes only
-        SetupLoggingConfiguration(sensors_configuration_manager, logging_configuration_manager);
+        // SetupLoggingConfiguration(sensors_configuration_manager, logging_configuration_manager);
 
         auto log_writer_service = make_shared_ext<LogWriterService>(
             sd_fs_service,
@@ -502,7 +507,7 @@ void SetupLoggingConfiguration(std::shared_ptr<SensorsConfigurationManager> sens
 
     auto sensors = sensors_configuration_manager->Get();
 
-    auto logging_configuration = make_shared_ext<LoggingConfiguration>();
+    auto logging_configuration = make_unique_ext<LoggingConfiguration>();
     logging_configuration->logging_interval_ms = 100;
 
     SensorLoggingConfiguration sensor_logging_config_1 = {
@@ -533,5 +538,5 @@ void SetupLoggingConfiguration(std::shared_ptr<SensorsConfigurationManager> sens
     };
     logging_configuration->sensor_configurations.insert({sensors->at(6)->id_hash, sensor_logging_config_7});
 
-    logging_configuration_manager->Update(logging_configuration);
+    logging_configuration_manager->Update(*logging_configuration);
 }

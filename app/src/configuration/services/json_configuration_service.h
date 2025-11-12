@@ -30,7 +30,7 @@ using namespace eerie_leap::subsys::fs::services;
 template <typename T>
 class JsonConfigurationService {
 private:
-    const std::string configuration_dir_ = "configuration";
+    const std::string configuration_dir_ = CONFIG_EERIE_LEAP_SD_CARD_USER_CONFIG_DIR;
 
     std::string configuration_name_;
     std::shared_ptr<IFsService> fs_service_;
