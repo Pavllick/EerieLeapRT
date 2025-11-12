@@ -56,7 +56,7 @@ void CanbusService::BitrateUpdated(uint8_t bus_channel, uint32_t bitrate) {
         }
     }
 
-    if(is_bus_found && system_configuration_manager_->Update(system_configuration))
+    if(is_bus_found && system_configuration_manager_->Update(*system_configuration))
         LOG_INF("Bitrate for bus channel %d updated to %d bps.", bus_channel, bitrate);
     else
         LOG_ERR("Failed to update bitrate for bus channel %d.", bus_channel);

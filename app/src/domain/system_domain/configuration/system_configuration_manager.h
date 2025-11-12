@@ -46,7 +46,7 @@ public:
     bool UpdateBuildNumber(uint32_t build_number);
     bool UpdateComUsers(const std::vector<ComUserConfiguration>& com_user_configurations);
 
-    bool Update(std::shared_ptr<SystemConfiguration> configuration);
+    bool Update(const SystemConfiguration& configuration);
     std::shared_ptr<SystemConfiguration> Get(bool force_load = false);
 };
 

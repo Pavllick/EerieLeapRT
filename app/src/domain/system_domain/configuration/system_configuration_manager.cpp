@@ -41,15 +41,13 @@ SystemConfigurationManager::SystemConfigurationManager(
     UpdateHwVersion(configuration->hw_version);
     UpdateSwVersion(configuration->sw_version);
 
-    ApplyJsonConfiguration();
-
-    configuration = Get();
-
     LOG_INF("System Configuration Manager initialized successfully.");
 
     LOG_INF("HW Version: %s, SW Version: %s",
-        configuration->GetFormattedHwVersion().c_str(), configuration->GetFormattedSwVersion().c_str());
-    LOG_INF("Device ID: %llu", configuration->device_id);
+        configuration_->GetFormattedHwVersion().c_str(), configuration_->GetFormattedSwVersion().c_str());
+    LOG_INF("Device ID: %llu", configuration_->device_id);
+
+    ApplyJsonConfiguration();
 }
 
 bool SystemConfigurationManager::ApplyJsonConfiguration() {
@@ -69,7 +67,7 @@ bool SystemConfigurationManager::ApplyJsonConfiguration() {
             configuration_->sw_version,
             configuration_->build_number);
 
-        bool result = Update(std::make_shared<SystemConfiguration>(configuration));
+        bool result = Update(configuration);
         if(!result)
             return false;
 
@@ -78,7 +76,7 @@ bool SystemConfigurationManager::ApplyJsonConfiguration() {
         return true;
     }
 
-    return Update(configuration_);
+    return Update(*configuration_);
 }
 
 bool SystemConfigurationManager::UpdateBuildNumber(uint32_t build_number) {
@@ -89,7 +87,7 @@ bool SystemConfigurationManager::UpdateBuildNumber(uint32_t build_number) {
     if(build_number != configuration->build_number) {
         configuration->build_number = build_number;
 
-        bool result = Update(configuration);
+        bool result = Update(*configuration);
         if(!result)
             return false;
 
@@ -106,7 +104,7 @@ bool SystemConfigurationManager::UpdateComUsers(const std::vector<ComUserConfigu
 
     configuration->com_user_configurations = com_user_configurations;
 
-    bool result = Update(configuration);
+    bool result = Update(*configuration);
     if(!result)
         return false;
 
@@ -124,7 +122,7 @@ bool SystemConfigurationManager::UpdateHwVersion(uint32_t hw_version) {
     if(hw_version != config_hw_version) {
         configuration->hw_version = config_hw_version;
 
-        bool result = Update(configuration);
+        bool result = Update(*configuration);
         if(!result)
             return false;
 
@@ -144,7 +142,7 @@ bool SystemConfigurationManager::UpdateSwVersion(uint32_t sw_version) {
         configuration->sw_version = config_sw_version;
         configuration->build_number = 0;
 
-        bool result = Update(configuration);
+        bool result = Update(*configuration);
         if(!result)
             return false;
 
@@ -154,19 +152,9 @@ bool SystemConfigurationManager::UpdateSwVersion(uint32_t sw_version) {
     return true;
 }
 
-bool SystemConfigurationManager::CreateDefaultConfiguration() {
-    auto configuration = make_shared_ext<SystemConfiguration>();
-    configuration->device_id = Rng::Get64(true);
-    configuration->hw_version = 0;
-    configuration->sw_version = 0;
-    configuration->build_number = 0;
-
-    return Update(configuration);
-}
-
-bool SystemConfigurationManager::Update(std::shared_ptr<SystemConfiguration> configuration) {
+bool SystemConfigurationManager::Update(const SystemConfiguration& configuration) {
     if(json_configuration_service_->IsAvailable()) {
-        auto json_config = json_parser_->Serialize(*configuration);
+        auto json_config = json_parser_->Serialize(configuration);
         json_configuration_service_->Save(json_config.get());
 
         auto json_config_loaded = json_configuration_service_->Load();
@@ -181,7 +169,7 @@ bool SystemConfigurationManager::Update(std::shared_ptr<SystemConfiguration> con
         json_config_checksum_ = crc;
     }
 
-    auto cbor_config = cbor_parser_->Serialize(*configuration);
+    auto cbor_config = cbor_parser_->Serialize(configuration);
     cbor_config->json_config_checksum = json_config_checksum_;
 
     if(!cbor_configuration_service_->Save(cbor_config.get()))
@@ -209,6 +197,16 @@ std::shared_ptr<SystemConfiguration> SystemConfigurationManager::Get(bool force_
     json_config_checksum_ = cbor_config_->json_config_checksum;
 
     return configuration_;
+}
+
+bool SystemConfigurationManager::CreateDefaultConfiguration() {
+    auto configuration = make_unique_ext<SystemConfiguration>();
+    configuration->device_id = Rng::Get64(true);
+    configuration->hw_version = 0;
+    configuration->sw_version = 0;
+    configuration->build_number = 0;
+
+    return Update(*configuration);
 }
 
 } // namespace eerie_leap::domain::system_domain::configuration

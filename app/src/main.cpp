@@ -20,16 +20,7 @@
 #include "subsys/time/rtc_provider.h"
 #include "subsys/time/boot_elapsed_time_provider.h"
 
-#include "configuration/cbor/cbor_system_config/cbor_system_config.h"
-#include "configuration/cbor/cbor_adc_config/cbor_adc_config.h"
-#include "configuration/cbor/cbor_sensor_config/cbor_sensor_config.h"
-#include "configuration/cbor/cbor_logging_config/cbor_logging_config.h"
 #include "configuration/services/cbor_configuration_service.h"
-
-#include "configuration/json/configs/json_system_config.h"
-// #include "configuration/json/json_adc_config/json_adc_config.h"
-// #include "configuration/json/json_sensor_config/json_sensor_config.h"
-// #include "configuration/json/json_logging_config/json_logging_config.h"
 #include "configuration/services/json_configuration_service.h"
 
 #include "domain/system_domain/configuration/system_configuration_manager.h"
@@ -186,13 +177,20 @@ int main(void) {
     auto guid_generator = make_shared_ext<GuidGenerator>();
     auto math_parser_service = make_shared_ext<MathParserService>();
 
-    auto cbor_system_config_service = make_unique_ext<CborConfigurationService<CborSystemConfig>>("system_config", fs_service);
-    auto cbor_adc_config_service = make_unique_ext<CborConfigurationService<CborAdcConfig>>("adc_config", fs_service);
-    auto cbor_sensors_config_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
+    auto cbor_system_config_service = make_unique_ext<CborConfigurationService<CborSystemConfig>>(
+        "system_config", fs_service);
+    auto cbor_adc_config_service = make_unique_ext<CborConfigurationService<CborAdcConfig>>(
+        "adc_config", fs_service);
+    auto cbor_sensors_config_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>(
+        "sensors_config", fs_service);
 
-    auto json_system_config_service = make_unique_ext<JsonConfigurationService<JsonSystemConfig>>("system_config", sd_fs_service);
+    auto json_system_config_service = make_unique_ext<JsonConfigurationService<JsonSystemConfig>>(
+        "system_config", sd_fs_service);
+    auto json_adc_config_service = make_unique_ext<JsonConfigurationService<JsonAdcConfig>>(
+        "adc_config", sd_fs_service);
 
-    auto adc_configuration_manager = make_shared_ext<AdcConfigurationManager>(std::move(cbor_adc_config_service));
+    auto adc_configuration_manager = make_shared_ext<AdcConfigurationManager>(
+        std::move(cbor_adc_config_service), std::move(json_adc_config_service));
 
     // TODO: For test purposes only
     SetupAdcConfiguration(adc_configuration_manager);
@@ -201,8 +199,7 @@ int main(void) {
     gpio->Initialize();
 
     auto system_configuration_manager = make_shared_ext<SystemConfigurationManager>(
-        std::move(cbor_system_config_service),
-        std::move(json_system_config_service));
+        std::move(cbor_system_config_service), std::move(json_system_config_service));
 
     // TODO: For test purposes only
     // SetupSystemConfiguration(system_configuration_manager);
