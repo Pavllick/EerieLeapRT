@@ -20,10 +20,10 @@
 #include "subsys/time/rtc_provider.h"
 #include "subsys/time/boot_elapsed_time_provider.h"
 
-#include "configuration/system_config/system_config.h"
-#include "configuration/adc_config/adc_config.h"
-#include "configuration/sensor_config/sensor_config.h"
-#include "configuration/logging_config/logging_config.h"
+#include "configuration/cbor_system_config/cbor_system_config.h"
+#include "configuration/cbor_adc_config/cbor_adc_config.h"
+#include "configuration/cbor_sensor_config/cbor_sensor_config.h"
+#include "configuration/cbor_logging_config/cbor_logging_config.h"
 #include "configuration/services/cbor_configuration_service.h"
 #include "domain/system_domain/configuration/system_configuration_manager.h"
 #include "domain/sensor_domain/configuration/adc_configuration_manager.h"
@@ -178,9 +178,9 @@ int main(void) {
     auto guid_generator = make_shared_ext<GuidGenerator>();
     auto math_parser_service = make_shared_ext<MathParserService>();
 
-    auto system_config_service = make_unique_ext<CborConfigurationService<SystemConfig>>("system_config", fs_service);
-    auto adc_config_service = make_unique_ext<CborConfigurationService<AdcConfig>>("adc_config", fs_service);
-    auto sensors_config_service = make_unique_ext<CborConfigurationService<SensorsConfig>>("sensors_config", fs_service);
+    auto system_config_service = make_unique_ext<CborConfigurationService<CborSystemConfig>>("system_config", fs_service);
+    auto adc_config_service = make_unique_ext<CborConfigurationService<CborAdcConfig>>("adc_config", fs_service);
+    auto sensors_config_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
 
     auto adc_configuration_manager = make_shared_ext<AdcConfigurationManager>(std::move(adc_config_service));
 
@@ -210,7 +210,7 @@ int main(void) {
 
     std::shared_ptr<LoggingController> logging_controller = nullptr;
     if(sd_fs_service != nullptr) {
-        auto logging_config_service = make_unique_ext<CborConfigurationService<LoggingConfig>>("logging_config", fs_service);
+        auto logging_config_service = make_unique_ext<CborConfigurationService<CborLoggingConfig>>("logging_config", fs_service);
         auto logging_configuration_manager = make_shared_ext<LoggingConfigurationManager>(std::move(logging_config_service));
 
         // TODO: For test purposes only

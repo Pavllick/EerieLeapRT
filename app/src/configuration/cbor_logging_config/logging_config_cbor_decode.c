@@ -25,12 +25,12 @@
 	} \
 } while(0)
 
-static bool decode_SensorLoggingConfig(zcbor_state_t *state, struct SensorLoggingConfig *result);
-static bool decode_LoggingConfig(zcbor_state_t *state, struct LoggingConfig *result);
+static bool decode_CborSensorLoggingConfig(zcbor_state_t *state, struct CborSensorLoggingConfig *result);
+static bool decode_CborLoggingConfig(zcbor_state_t *state, struct CborLoggingConfig *result);
 
 
-static bool decode_SensorLoggingConfig(
-		zcbor_state_t *state, struct SensorLoggingConfig *result)
+static bool decode_CborSensorLoggingConfig(
+		zcbor_state_t *state, struct CborSensorLoggingConfig *result)
 {
 	zcbor_log("%s\r\n", __func__);
 
@@ -43,20 +43,20 @@ static bool decode_SensorLoggingConfig(
 	return res;
 }
 
-static bool decode_LoggingConfig(
-		zcbor_state_t *state, struct LoggingConfig *result)
+static bool decode_CborLoggingConfig(
+		zcbor_state_t *state, struct CborLoggingConfig *result)
 {
 	zcbor_log("%s\r\n", __func__);
 
 	bool res = (((zcbor_list_start_decode(state) && ((((zcbor_uint32_decode(state, (&(*result).logging_interval_ms))))
 	&& ((zcbor_uint32_decode(state, (&(*result).max_log_size_mb))))
-	&& ((zcbor_list_start_decode(state) && ((zcbor_multi_decode(0, 24, &(*result).SensorLoggingConfig_m_count, (zcbor_decoder_t *)decode_SensorLoggingConfig, state, (*&(*result).SensorLoggingConfig_m), sizeof(struct SensorLoggingConfig))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state)))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
+	&& ((zcbor_list_start_decode(state) && ((zcbor_multi_decode(0, 24, &(*result).CborSensorLoggingConfig_m_count, (zcbor_decoder_t *)decode_CborSensorLoggingConfig, state, (*&(*result).CborSensorLoggingConfig_m), sizeof(struct CborSensorLoggingConfig))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state)))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
 
 	if (false) {
 		/* For testing that the types of the arguments are correct.
 		 * A compiler error here means a bug in zcbor.
 		 */
-		decode_SensorLoggingConfig(state, (*&(*result).SensorLoggingConfig_m));
+		decode_CborSensorLoggingConfig(state, (*&(*result).CborSensorLoggingConfig_m));
 	}
 
 	log_result(state, res, __func__);
@@ -65,13 +65,13 @@ static bool decode_LoggingConfig(
 
 
 
-int cbor_decode_LoggingConfig(
+int cbor_decode_CborLoggingConfig(
 		const uint8_t *payload, size_t payload_len,
-		struct LoggingConfig *result,
+		struct CborLoggingConfig *result,
 		size_t *payload_len_out)
 {
 	zcbor_state_t states[5];
 
 	return zcbor_entry_function(payload, payload_len, (void *)result, payload_len_out, states,
-		(zcbor_decoder_t *)decode_LoggingConfig, sizeof(states) / sizeof(zcbor_state_t), 1);
+		(zcbor_decoder_t *)decode_CborLoggingConfig, sizeof(states) / sizeof(zcbor_state_t), 1);
 }

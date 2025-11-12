@@ -2,7 +2,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/ztest.h>
 
-#include "configuration/adc_config/adc_config.h"
+#include "configuration/cbor_adc_config/cbor_adc_config.h"
 #include "configuration/services/cbor_configuration_service.h"
 
 #include "subsys/device_tree/dt_fs.h"
@@ -47,7 +47,7 @@ ZTEST(adc_configuration_manager, test_AdcConfigurationManager_Save_config_succes
 
     fs_service->Format();
 
-    auto adc_configuration_service = make_unique_ext<CborConfigurationService<AdcConfig>>("adc_config", fs_service);
+    auto adc_configuration_service = make_unique_ext<CborConfigurationService<CborAdcConfig>>("adc_config", fs_service);
     auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(std::move(adc_configuration_service));
 
     auto adc_configuration = adc_configuration_manager_GetTestConfiguration();
@@ -78,7 +78,7 @@ ZTEST(adc_configuration_manager, test_AdcConfigurationManager_Save_config_and_Lo
 
     fs_service->Format();
 
-    auto adc_configuration_service = make_unique_ext<CborConfigurationService<AdcConfig>>("adc_config", fs_service);
+    auto adc_configuration_service = make_unique_ext<CborConfigurationService<CborAdcConfig>>("adc_config", fs_service);
     auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(std::move(adc_configuration_service));
 
     auto adc_configuration = adc_configuration_manager_GetTestConfiguration();
@@ -86,7 +86,7 @@ ZTEST(adc_configuration_manager, test_AdcConfigurationManager_Save_config_and_Lo
     bool result = adc_configuration_manager->Update(adc_configuration);
     zassert_true(result);
 
-    adc_configuration_service = make_unique_ext<CborConfigurationService<AdcConfig>>("adc_config", fs_service);
+    adc_configuration_service = make_unique_ext<CborConfigurationService<CborAdcConfig>>("adc_config", fs_service);
     adc_configuration_manager = nullptr;
     adc_configuration_manager = std::make_shared<AdcConfigurationManager>(std::move(adc_configuration_service));
 

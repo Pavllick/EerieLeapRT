@@ -4,8 +4,8 @@
  * Generated with a --default-max-qty of 24
  */
 
-#ifndef SENSOR_CONFIG_H__
-#define SENSOR_CONFIG_H__
+#ifndef CBOR_SENSOR_CONFIG_H__
+#define CBOR_SENSOR_CONFIG_H__
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -25,48 +25,48 @@ extern "C" {
  */
 #define DEFAULT_MAX_QTY 24
 
-struct SensorMetadataConfig {
+struct CborSensorMetadataConfig {
 	struct zcbor_string name;
 	struct zcbor_string unit;
 	struct zcbor_string description;
 };
 
-struct SensorCalibrationDataMap_float32float {
+struct CborSensorCalibrationDataMap_float32float {
 	float float32float_key;
 	float float32float;
 };
 
-struct SensorCalibrationDataMap {
-	struct SensorCalibrationDataMap_float32float float32float[50];
+struct CborSensorCalibrationDataMap {
+	struct CborSensorCalibrationDataMap_float32float float32float[50];
 	size_t float32float_count;
 };
 
-struct SensorConfigurationConfig {
+struct CborSensorConfigurationConfig {
 	uint32_t type;
 	uint32_t sampling_rate_ms;
 	uint32_t interpolation_method;
 	uint32_t channel;
 	bool channel_present;
 	struct zcbor_string connection_string;
-	struct SensorCalibrationDataMap calibration_table;
+	struct CborSensorCalibrationDataMap calibration_table;
 	bool calibration_table_present;
 	struct zcbor_string expression;
 	bool expression_present;
 };
 
-struct SensorConfig {
+struct CborSensorConfig {
 	struct zcbor_string id;
-	struct SensorMetadataConfig metadata;
-	struct SensorConfigurationConfig configuration;
+	struct CborSensorMetadataConfig metadata;
+	struct CborSensorConfigurationConfig configuration;
 };
 
-struct SensorsConfig {
-	struct SensorConfig SensorConfig_m[24];
-	size_t SensorConfig_m_count;
+struct CborSensorsConfig {
+	struct CborSensorConfig CborSensorConfig_m[24];
+	size_t CborSensorConfig_m_count;
 };
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* SENSOR_CONFIG_H__ */
+#endif /* CBOR_SENSOR_CONFIG_H__ */

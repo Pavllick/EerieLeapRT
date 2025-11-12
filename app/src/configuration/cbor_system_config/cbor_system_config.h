@@ -4,8 +4,8 @@
  * Generated with a --default-max-qty of 24
  */
 
-#ifndef SYSTEM_CONFIG_H__
-#define SYSTEM_CONFIG_H__
+#ifndef CBOR_SYSTEM_CONFIG_H__
+#define CBOR_SYSTEM_CONFIG_H__
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -25,26 +25,26 @@ extern "C" {
  */
 #define DEFAULT_MAX_QTY 24
 
-struct ComUserConfig {
+struct CborComUserConfig {
 	uint64_t device_id;
 	uint32_t server_id;
 };
 
-struct CanbusConfig {
+struct CborCanbusConfig {
 	uint32_t bus_channel;
 	uint32_t bitrate;
 };
 
-struct SystemConfig {
+struct CborSystemConfig {
 	uint64_t device_id;
 	uint32_t hw_version;
 	uint32_t sw_version;
 	uint32_t build_number;
 	uint32_t com_user_refresh_rate_ms;
-	struct ComUserConfig ComUserConfig_m[8];
-	size_t ComUserConfig_m_count;
-	struct CanbusConfig CanbusConfig_m[8];
-	size_t CanbusConfig_m_count;
+	struct CborComUserConfig CborComUserConfig_m[8];
+	size_t CborComUserConfig_m_count;
+	struct CborCanbusConfig CborCanbusConfig_m[8];
+	size_t CborCanbusConfig_m_count;
 	uint32_t sd_json_checksum;
 };
 
@@ -52,4 +52,4 @@ struct SystemConfig {
 }
 #endif
 
-#endif /* SYSTEM_CONFIG_H__ */
+#endif /* CBOR_SYSTEM_CONFIG_H__ */

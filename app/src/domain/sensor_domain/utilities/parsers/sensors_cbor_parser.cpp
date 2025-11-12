@@ -17,13 +17,13 @@ using namespace eerie_leap::domain::sensor_domain::utilities;
 SensorsCborParser::SensorsCborParser(std::shared_ptr<MathParserService> math_parser_service)
     : math_parser_service_(std::move(math_parser_service)) {}
 
-ext_unique_ptr<SensorsConfig> SensorsCborParser::Serialize(
+ext_unique_ptr<CborSensorsConfig> SensorsCborParser::Serialize(
     const std::vector<std::shared_ptr<Sensor>>& sensors,
     uint32_t gpio_channel_count,
     uint32_t adc_channel_count) {
 
-    auto sensors_config = make_unique_ext<SensorsConfig>();
-    memset(sensors_config.get(), 0, sizeof(SensorsConfig));
+    auto sensors_config = make_unique_ext<CborSensorsConfig>();
+    memset(sensors_config.get(), 0, sizeof(CborSensorsConfig));
 
     SensorsOrderResolver order_resolver;
 
@@ -34,8 +34,8 @@ ext_unique_ptr<SensorsConfig> SensorsCborParser::Serialize(
         sensor->configuration.UpdateConnectionString();
         SensorValidator::ValidateSensor(*sensor, gpio_channel_count, adc_channel_count);
 
-        auto sensor_config = make_shared_ext<SensorConfig>();
-        memset(sensor_config.get(), 0, sizeof(SensorConfig));
+        auto sensor_config = make_shared_ext<CborSensorConfig>();
+        memset(sensor_config.get(), 0, sizeof(CborSensorConfig));
 
         sensor_config->id = CborHelpers::ToZcborString(&sensor->id);
         sensor_config->configuration.type = std::to_underlying(sensor->configuration.type);
@@ -89,8 +89,8 @@ ext_unique_ptr<SensorsConfig> SensorsCborParser::Serialize(
 
         sensor_config->metadata.description = CborHelpers::ToZcborString(&sensor->metadata.description);
 
-        sensors_config->SensorConfig_m[i] = *sensor_config;
-        sensors_config->SensorConfig_m_count++;
+        sensors_config->CborSensorConfig_m[i] = *sensor_config;
+        sensors_config->CborSensorConfig_m_count++;
 
         order_resolver.AddSensor(sensor);
     }
@@ -102,14 +102,14 @@ ext_unique_ptr<SensorsConfig> SensorsCborParser::Serialize(
 }
 
 std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
-    const SensorsConfig& sensors_config,
+    const CborSensorsConfig& sensors_config,
     size_t gpio_channel_count,
     size_t adc_channel_count) {
 
     std::vector<std::shared_ptr<Sensor>> sensors;
 
-    for(size_t i = 0; i < sensors_config.SensorConfig_m_count; ++i) {
-        const auto& sensor_config = sensors_config.SensorConfig_m[i];
+    for(size_t i = 0; i < sensors_config.CborSensorConfig_m_count; ++i) {
+        const auto& sensor_config = sensors_config.CborSensorConfig_m[i];
         std::shared_ptr<Sensor> sensor = make_shared_ext<Sensor>(CborHelpers::ToStdString(sensor_config.id));
 
         sensor->configuration.type = static_cast<SensorType>(sensor_config.configuration.type);

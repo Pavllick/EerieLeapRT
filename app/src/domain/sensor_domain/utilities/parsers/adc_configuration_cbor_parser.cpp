@@ -4,15 +4,15 @@
 
 namespace eerie_leap::domain::sensor_domain::utilities::parsers {
 
-ext_unique_ptr<AdcConfig> AdcConfigurationCborParser::Serialize(const AdcConfiguration& adc_configuration) {
-    auto adc_config = make_unique_ext<AdcConfig>();
-    memset(adc_config.get(), 0, sizeof(AdcConfig));
+ext_unique_ptr<CborAdcConfig> AdcConfigurationCborParser::Serialize(const AdcConfiguration& adc_configuration) {
+    auto adc_config = make_unique_ext<CborAdcConfig>();
+    memset(adc_config.get(), 0, sizeof(CborAdcConfig));
 
     adc_config->samples = adc_configuration.samples;
 
     for(size_t i = 0; i < adc_configuration.channel_configurations->size(); ++i) {
-        auto adc_channel_config = make_shared_ext<AdcChannelConfig>();
-        memset(adc_channel_config.get(), 0, sizeof(AdcChannelConfig));
+        auto adc_channel_config = make_shared_ext<CborAdcChannelConfig>();
+        memset(adc_channel_config.get(), 0, sizeof(CborAdcChannelConfig));
 
         auto interpolation_method = adc_configuration.channel_configurations->at(i)->calibrator != nullptr
             ? adc_configuration.channel_configurations->at(i)->calibrator->GetInterpolationMethod()
@@ -43,21 +43,21 @@ ext_unique_ptr<AdcConfig> AdcConfigurationCborParser::Serialize(const AdcConfigu
             throw std::runtime_error("ADC channel configuration is invalid. Calibration table is missing.");
         }
 
-        adc_config->AdcChannelConfig_m[i] = *adc_channel_config;
-        adc_config->AdcChannelConfig_m_count++;
+        adc_config->CborAdcChannelConfig_m[i] = *adc_channel_config;
+        adc_config->CborAdcChannelConfig_m_count++;
     }
 
     return adc_config;
 }
 
-AdcConfiguration AdcConfigurationCborParser::Deserialize(const AdcConfig& adc_config) {
+AdcConfiguration AdcConfigurationCborParser::Deserialize(const CborAdcConfig& adc_config) {
     AdcConfiguration adc_configuration;
 
     adc_configuration.samples = static_cast<uint16_t>(adc_config.samples);
     adc_configuration.channel_configurations = make_shared_ext<std::vector<std::shared_ptr<AdcChannelConfiguration>>>();
 
-    for(size_t i = 0; i < adc_config.AdcChannelConfig_m_count; ++i) {
-        const auto& adc_channel_config = adc_config.AdcChannelConfig_m[i];
+    for(size_t i = 0; i < adc_config.CborAdcChannelConfig_m_count; ++i) {
+        const auto& adc_channel_config = adc_config.CborAdcChannelConfig_m[i];
         auto adc_channel_configuration = make_shared_ext<AdcChannelConfiguration>();
 
         auto interpolation_method = static_cast<InterpolationMethod>(adc_channel_config.interpolation_method);

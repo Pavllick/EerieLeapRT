@@ -6,7 +6,7 @@
 
 #include "utilities/math_parser/math_parser_service.hpp"
 #include "utilities/memory/heap_allocator.h"
-#include "configuration/sensor_config/sensor_config.h"
+#include "configuration/cbor_sensor_config/cbor_sensor_config.h"
 #include "domain/sensor_domain/models/sensor.h"
 
 namespace eerie_leap::domain::sensor_domain::utilities::parsers {
@@ -22,12 +22,12 @@ private:
 public:
     explicit SensorsCborParser(std::shared_ptr<MathParserService> math_parser_service);
 
-    ext_unique_ptr<SensorsConfig> Serialize(
+    ext_unique_ptr<CborSensorsConfig> Serialize(
         const std::vector<std::shared_ptr<Sensor>>& sensors,
         uint32_t gpio_channel_count,
         uint32_t adc_channel_count);
     std::vector<std::shared_ptr<Sensor>> Deserialize(
-        const SensorsConfig& sensors_config,
+        const CborSensorsConfig& sensors_config,
         uint32_t gpio_channel_count,
         uint32_t adc_channel_count);
 };

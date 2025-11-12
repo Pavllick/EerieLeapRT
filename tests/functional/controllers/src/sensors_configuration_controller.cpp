@@ -6,8 +6,8 @@
 #include "utilities/cbor/cbor_helpers.hpp"
 #include "utilities/math_parser/expression_evaluator.h"
 #include "utilities/math_parser/math_parser_service.hpp"
-#include "configuration/system_config/system_config.h"
-#include "configuration/sensor_config/sensor_config.h"
+#include "configuration/cbor_system_config/cbor_system_config.h"
+#include "configuration/cbor_sensor_config/cbor_sensor_config.h"
 #include "configuration/services/cbor_configuration_service.h"
 
 #include "domain/sensor_domain/configuration/sensors_configuration_manager.h"
@@ -118,7 +118,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
 
     fs_service->Format();
 
-    auto sensors_configuration_service = make_unique_ext<CborConfigurationService<SensorsConfig>>("sensors_config", fs_service);
+    auto sensors_configuration_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
 
     auto math_parser_service = std::make_shared<MathParserService>();
     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
@@ -168,7 +168,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
 
     fs_service->Format();
 
-    auto sensors_configuration_service = make_unique_ext<CborConfigurationService<SensorsConfig>>("sensors_config", fs_service);
+    auto sensors_configuration_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
 
     auto math_parser_service = std::make_shared<MathParserService>();
     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
@@ -180,7 +180,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
     auto sensors = sensors_configuration_manager_SetupTestSensors(math_parser_service);
     sensors_configuration_manager->Update(sensors);
 
-    sensors_configuration_service = make_unique_ext<CborConfigurationService<SensorsConfig>>("sensors_config", fs_service);
+    sensors_configuration_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
     sensors_configuration_manager = nullptr;
     sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
         math_parser_service,
@@ -226,7 +226,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
 
     fs_service->Format();
 
-    auto sensors_configuration_service = make_unique_ext<CborConfigurationService<SensorsConfig>>("sensors_config", fs_service);
+    auto sensors_configuration_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
 
     auto math_parser_service = std::make_shared<MathParserService>();
     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
@@ -293,7 +293,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
 
     fs_service->Format();
 
-    auto sensors_configuration_service = make_unique_ext<CborConfigurationService<SensorsConfig>>("sensors_config", fs_service);
+    auto sensors_configuration_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
 
     auto math_parser_service = std::make_shared<MathParserService>();
     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(

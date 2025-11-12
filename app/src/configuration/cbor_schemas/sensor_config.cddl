@@ -1,27 +1,27 @@
-SensorMetadataConfig = [
+CborSensorMetadataConfig = [
   name: tstr,
   unit: tstr,
   description: tstr
 ]
 
-SensorCalibrationDataMap = { 2*50(float32 => float32) }
+CborSensorCalibrationDataMap = { 2*50(float32 => float32) }
 
-SensorConfigurationConfig = [
+CborSensorConfigurationConfig = [
   type: uint,
   sampling_rate_ms: uint,
   interpolation_method: uint,
   ? channel: uint,
   connection_string: tstr,
-  ? calibration_table: SensorCalibrationDataMap,
+  ? calibration_table: CborSensorCalibrationDataMap,
   ? expression: tstr
 ]
 
-SensorConfig = [
+CborSensorConfig = [
   id: tstr,
-  metadata: SensorMetadataConfig,
-  configuration: SensorConfigurationConfig
+  metadata: CborSensorMetadataConfig,
+  configuration: CborSensorConfigurationConfig
 ]
 
-SensorsConfig = [
-  sensors: [*SensorConfig]
+CborSensorsConfig = [
+  sensors: [*CborSensorConfig]
 ]

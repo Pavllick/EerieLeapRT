@@ -25,12 +25,12 @@
 	} \
 } while(0)
 
-static bool encode_SensorLoggingConfig(zcbor_state_t *state, const struct SensorLoggingConfig *input);
-static bool encode_LoggingConfig(zcbor_state_t *state, const struct LoggingConfig *input);
+static bool encode_CborSensorLoggingConfig(zcbor_state_t *state, const struct CborSensorLoggingConfig *input);
+static bool encode_CborLoggingConfig(zcbor_state_t *state, const struct CborLoggingConfig *input);
 
 
-static bool encode_SensorLoggingConfig(
-		zcbor_state_t *state, const struct SensorLoggingConfig *input)
+static bool encode_CborSensorLoggingConfig(
+		zcbor_state_t *state, const struct CborSensorLoggingConfig *input)
 {
 	zcbor_log("%s\r\n", __func__);
 
@@ -43,14 +43,14 @@ static bool encode_SensorLoggingConfig(
 	return res;
 }
 
-static bool encode_LoggingConfig(
-		zcbor_state_t *state, const struct LoggingConfig *input)
+static bool encode_CborLoggingConfig(
+		zcbor_state_t *state, const struct CborLoggingConfig *input)
 {
 	zcbor_log("%s\r\n", __func__);
 
 	bool res = (((zcbor_list_start_encode(state, 3) && ((((zcbor_uint32_encode(state, (&(*input).logging_interval_ms))))
 	&& ((zcbor_uint32_encode(state, (&(*input).max_log_size_mb))))
-	&& ((zcbor_list_start_encode(state, 24) && ((zcbor_multi_encode_minmax(0, 24, &(*input).SensorLoggingConfig_m_count, (zcbor_encoder_t *)encode_SensorLoggingConfig, state, (*&(*input).SensorLoggingConfig_m), sizeof(struct SensorLoggingConfig))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 24)))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 3))));
+	&& ((zcbor_list_start_encode(state, 24) && ((zcbor_multi_encode_minmax(0, 24, &(*input).CborSensorLoggingConfig_m_count, (zcbor_encoder_t *)encode_CborSensorLoggingConfig, state, (*&(*input).CborSensorLoggingConfig_m), sizeof(struct CborSensorLoggingConfig))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 24)))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 3))));
 
 	log_result(state, res, __func__);
 	return res;
@@ -58,13 +58,13 @@ static bool encode_LoggingConfig(
 
 
 
-int cbor_encode_LoggingConfig(
+int cbor_encode_CborLoggingConfig(
 		uint8_t *payload, size_t payload_len,
-		const struct LoggingConfig *input,
+		const struct CborLoggingConfig *input,
 		size_t *payload_len_out)
 {
 	zcbor_state_t states[5];
 
 	return zcbor_entry_function(payload, payload_len, (void *)input, payload_len_out, states,
-		(zcbor_decoder_t *)encode_LoggingConfig, sizeof(states) / sizeof(zcbor_state_t), 1);
+		(zcbor_decoder_t *)encode_CborLoggingConfig, sizeof(states) / sizeof(zcbor_state_t), 1);
 }

@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "utilities/memory/heap_allocator.h"
-#include "configuration/logging_config/logging_config.h"
+#include "configuration/cbor_logging_config/cbor_logging_config.h"
 #include "domain/logging_domain/models/logging_configuration.h"
 
 namespace eerie_leap::domain::logging_domain::utilities::parsers {
@@ -15,8 +15,8 @@ class LoggingConfigurationCborParser {
 public:
     LoggingConfigurationCborParser() = default;
 
-    ext_unique_ptr<LoggingConfig> Serialize(const LoggingConfiguration& logging_configuration);
-    LoggingConfiguration Deserialize(const LoggingConfig& logging_config);
+    ext_unique_ptr<CborLoggingConfig> Serialize(const LoggingConfiguration& logging_configuration);
+    LoggingConfiguration Deserialize(const CborLoggingConfig& logging_config);
 };
 
 } // namespace eerie_leap::domain::logging_domain::utilities::parsers

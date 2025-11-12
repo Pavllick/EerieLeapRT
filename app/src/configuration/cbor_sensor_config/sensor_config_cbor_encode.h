@@ -4,14 +4,14 @@
  * Generated with a --default-max-qty of 24
  */
 
-#ifndef SENSOR_CONFIG_CBOR_DECODE_H__
-#define SENSOR_CONFIG_CBOR_DECODE_H__
+#ifndef SENSOR_CONFIG_CBOR_ENCODE_H__
+#define SENSOR_CONFIG_CBOR_ENCODE_H__
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <string.h>
-#include "sensor_config.h"
+#include "cbor_sensor_config.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,9 +22,9 @@ extern "C" {
 #endif
 
 
-int cbor_decode_SensorsConfig(
-		const uint8_t *payload, size_t payload_len,
-		struct SensorsConfig *result,
+int cbor_encode_CborSensorsConfig(
+		uint8_t *payload, size_t payload_len,
+		const struct CborSensorsConfig *input,
 		size_t *payload_len_out);
 
 
@@ -32,4 +32,4 @@ int cbor_decode_SensorsConfig(
 }
 #endif
 
-#endif /* SENSOR_CONFIG_CBOR_DECODE_H__ */
+#endif /* SENSOR_CONFIG_CBOR_ENCODE_H__ */

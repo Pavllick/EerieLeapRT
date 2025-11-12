@@ -2,7 +2,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/ztest.h>
 
-#include "configuration/system_config/system_config.h"
+#include "configuration/cbor_system_config/cbor_system_config.h"
 #include "configuration/services/cbor_configuration_service.h"
 #include "domain/system_domain/configuration/system_configuration_manager.h"
 
@@ -24,7 +24,7 @@ ZTEST(system_configuration_manager, test_SystemConfigurationManager_Save_config_
 
     fs_service->Format();
 
-    auto system_configuration_service = make_unique_ext<CborConfigurationService<SystemConfig>>("system_config", fs_service);
+    auto system_configuration_service = make_unique_ext<CborConfigurationService<CborSystemConfig>>("system_config", fs_service);
     auto system_configuration_manager = std::make_shared<SystemConfigurationManager>(std::move(system_configuration_service));
 
     SystemConfiguration system_configuration {
@@ -48,7 +48,7 @@ ZTEST(system_configuration_manager, test_SystemConfigurationManager_Save_config_
 
     fs_service->Format();
 
-    auto system_configuration_service = make_unique_ext<CborConfigurationService<SystemConfig>>("system_config", fs_service);
+    auto system_configuration_service = make_unique_ext<CborConfigurationService<CborSystemConfig>>("system_config", fs_service);
     auto system_configuration_manager = std::make_shared<SystemConfigurationManager>(std::move(system_configuration_service));
 
     SystemConfiguration system_configuration {
@@ -59,7 +59,7 @@ ZTEST(system_configuration_manager, test_SystemConfigurationManager_Save_config_
     bool result = system_configuration_manager->Update(system_configuration_ptr);
     zassert_true(result);
 
-    system_configuration_service = make_unique_ext<CborConfigurationService<SystemConfig>>("system_config", fs_service);
+    system_configuration_service = make_unique_ext<CborConfigurationService<CborSystemConfig>>("system_config", fs_service);
     system_configuration_manager = nullptr;
     system_configuration_manager = std::make_shared<SystemConfigurationManager>(std::move(system_configuration_service));
 

@@ -191,25 +191,25 @@ npm install -g html-minifier-terser
 #### Example command to generate SystemConfig helpers:
 
 ```shell
-zcbor code -sed --default-max-qty 24 -c ./app/src/configuration/cbor_schemas/system_config.cddl -t SystemConfig --output-h ./app/src/configuration/system_config/system_config_cbor.h --output-c ./app/src/configuration/system_config/system_config_cbor.c --output-h-types ./app/src/configuration/system_config/system_config.h
+zcbor code -sed --default-max-qty 24 -c ./app/src/configuration/cbor_schemas/system_config.cddl -t CborSystemConfig --output-h ./app/src/configuration/cbor_system_config/system_config_cbor.h --output-c ./app/src/configuration/cbor_system_config/system_config_cbor.c --output-h-types ./app/src/configuration/cbor_system_config/cbor_system_config.h
 ```
 
 #### Example command to generate AdcConfig helpers:
 
 ```shell
-zcbor code -sed --default-max-qty 24 -c ./app/src/configuration/cbor_schemas/adc_config.cddl -t AdcConfig --output-h ./app/src/configuration/adc_config/adc_config_cbor.h --output-c ./app/src/configuration/adc_config/adc_config_cbor.c --output-h-types ./app/src/configuration/adc_config/adc_config.h
+zcbor code -sed --default-max-qty 24 -c ./app/src/configuration/cbor_schemas/adc_config.cddl -t CborAdcConfig --output-h ./app/src/configuration/cbor_adc_config/adc_config_cbor.h --output-c ./app/src/configuration/cbor_adc_config/adc_config_cbor.c --output-h-types ./app/src/configuration/cbor_adc_config/cbor_adc_config.h
 ```
 
 #### Example command to generate SensorConfig helpers:
 
 ```shell
-zcbor code -sed --default-max-qty 24 -c ./app/src/configuration/cbor_schemas/sensor_config.cddl -t SensorsConfig --output-h ./app/src/configuration/sensor_config/sensor_config_cbor.h --output-c ./app/src/configuration/sensor_config/sensor_config_cbor.c --output-h-types ./app/src/configuration/sensor_config/sensor_config.h
+zcbor code -sed --default-max-qty 24 -c ./app/src/configuration/cbor_schemas/sensor_config.cddl -t CborSensorsConfig --output-h ./app/src/configuration/cbor_sensor_config/sensor_config_cbor.h --output-c ./app/src/configuration/cbor_sensor_config/sensor_config_cbor.c --output-h-types ./app/src/configuration/cbor_sensor_config/cbor_sensor_config.h
 ```
 
 #### Example command to generate LoggingConfig helpers:
 
 ```shell
-zcbor code -sed --default-max-qty 24 -c ./app/src/configuration/cbor_schemas/logging_config.cddl -t LoggingConfig --output-h ./app/src/configuration/logging_config/logging_config_cbor.h --output-c ./app/src/configuration/logging_config/logging_config_cbor.c --output-h-types ./app/src/configuration/logging_config/logging_config.h
+zcbor code -sed --default-max-qty 24 -c ./app/src/configuration/cbor_schemas/logging_config.cddl -t CborLoggingConfig --output-h ./app/src/configuration/cbor_logging_config/logging_config_cbor.h --output-c ./app/src/configuration/cbor_logging_config/logging_config_cbor.c --output-h-types ./app/src/configuration/cbor_logging_config/cbor_logging_config.h
 ```
 
 ### Network

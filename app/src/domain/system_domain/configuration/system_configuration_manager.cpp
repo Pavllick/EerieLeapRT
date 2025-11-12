@@ -10,7 +10,7 @@ using namespace eerie_leap::subsys::random;
 
 LOG_MODULE_REGISTER(system_config_mngr_logger);
 
-SystemConfigurationManager::SystemConfigurationManager(ext_unique_ptr<CborConfigurationService<SystemConfig>> cbor_configuration_service)
+SystemConfigurationManager::SystemConfigurationManager(ext_unique_ptr<CborConfigurationService<CborSystemConfig>> cbor_configuration_service)
     : cbor_configuration_service_(std::move(cbor_configuration_service)),
     config_(nullptr),
     configuration_(nullptr),

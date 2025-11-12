@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "utilities/memory/heap_allocator.h"
-#include "configuration/adc_config/adc_config.h"
+#include "configuration/cbor_adc_config/cbor_adc_config.h"
 #include "subsys/adc/models/adc_configuration.h"
 
 namespace eerie_leap::domain::sensor_domain::utilities::parsers {
@@ -15,8 +15,8 @@ class AdcConfigurationCborParser {
 public:
     AdcConfigurationCborParser() = default;
 
-    ext_unique_ptr<AdcConfig> Serialize(const AdcConfiguration& adc_configuration);
-    AdcConfiguration Deserialize(const AdcConfig& adc_config);
+    ext_unique_ptr<CborAdcConfig> Serialize(const AdcConfiguration& adc_configuration);
+    AdcConfiguration Deserialize(const CborAdcConfig& adc_config);
 };
 
 } // namespace eerie_leap::domain::sensor_domain::utilities::parsers

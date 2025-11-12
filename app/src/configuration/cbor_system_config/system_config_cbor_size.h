@@ -2,11 +2,11 @@
 
 #include "utilities/cbor/cbor_size_builder.hpp"
 
-#include "system_config.h"
+#include "cbor_system_config.h"
 
 using namespace eerie_leap::utilities::cbor;
 
-static size_t cbor_get_size_SystemConfig(const SystemConfig& system_config) {
+static size_t cbor_get_size_CborSystemConfig(const CborSystemConfig& system_config) {
     CborSizeBuilder builder;
     builder.AddIndefiniteArrayStart();
 
@@ -17,19 +17,19 @@ static size_t cbor_get_size_SystemConfig(const SystemConfig& system_config) {
         .AddUint(system_config.com_user_refresh_rate_ms);
 
     builder.AddIndefiniteArrayStart();
-    for(int i = 0; i < system_config.ComUserConfig_m_count; i++) {
+    for(int i = 0; i < system_config.CborComUserConfig_m_count; i++) {
         builder.AddIndefiniteArrayStart();
 
-        builder.AddUint(system_config.ComUserConfig_m[i].device_id)
-            .AddUint(system_config.ComUserConfig_m[i].server_id);
+        builder.AddUint(system_config.CborComUserConfig_m[i].device_id)
+            .AddUint(system_config.CborComUserConfig_m[i].server_id);
     }
 
     builder.AddIndefiniteArrayStart();
-    for(int i = 0; i < system_config.CanbusConfig_m_count; i++) {
+    for(int i = 0; i < system_config.CborCanbusConfig_m_count; i++) {
         builder.AddIndefiniteArrayStart();
 
-        builder.AddUint(system_config.CanbusConfig_m[i].bus_channel)
-            .AddUint(system_config.CanbusConfig_m[i].bitrate);
+        builder.AddUint(system_config.CborCanbusConfig_m[i].bus_channel)
+            .AddUint(system_config.CborCanbusConfig_m[i].bitrate);
     }
 
     builder.AddUint(system_config.sd_json_checksum);

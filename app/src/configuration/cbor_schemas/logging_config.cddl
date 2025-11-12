@@ -1,4 +1,4 @@
-SensorLoggingConfig = [
+CborSensorLoggingConfig = [
   sensor_id_hash: uint,
 
   is_enabled: bool,
@@ -6,8 +6,8 @@ SensorLoggingConfig = [
   log_only_new_data: bool
 ]
 
-LoggingConfig = [
+CborLoggingConfig = [
   logging_interval_ms: uint,
   max_log_size_mb: uint,
-  sensor_configs: [*SensorLoggingConfig]
+  sensor_configs: [*CborSensorLoggingConfig]
 ]

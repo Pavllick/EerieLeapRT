@@ -11,7 +11,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <string.h>
-#include "system_config.h"
+#include "cbor_system_config.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,9 +22,9 @@ extern "C" {
 #endif
 
 
-int cbor_decode_SystemConfig(
+int cbor_decode_CborSystemConfig(
 		const uint8_t *payload, size_t payload_len,
-		struct SystemConfig *result,
+		struct CborSystemConfig *result,
 		size_t *payload_len_out);
 
 

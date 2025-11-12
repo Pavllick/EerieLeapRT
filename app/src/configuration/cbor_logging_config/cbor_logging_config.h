@@ -4,8 +4,8 @@
  * Generated with a --default-max-qty of 24
  */
 
-#ifndef LOGGING_CONFIG_H__
-#define LOGGING_CONFIG_H__
+#ifndef CBOR_LOGGING_CONFIG_H__
+#define CBOR_LOGGING_CONFIG_H__
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -25,22 +25,22 @@ extern "C" {
  */
 #define DEFAULT_MAX_QTY 24
 
-struct SensorLoggingConfig {
+struct CborSensorLoggingConfig {
 	uint32_t sensor_id_hash;
 	bool is_enabled;
 	bool log_raw_value;
 	bool log_only_new_data;
 };
 
-struct LoggingConfig {
+struct CborLoggingConfig {
 	uint32_t logging_interval_ms;
 	uint32_t max_log_size_mb;
-	struct SensorLoggingConfig SensorLoggingConfig_m[24];
-	size_t SensorLoggingConfig_m_count;
+	struct CborSensorLoggingConfig CborSensorLoggingConfig_m[24];
+	size_t CborSensorLoggingConfig_m_count;
 };
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* LOGGING_CONFIG_H__ */
+#endif /* CBOR_LOGGING_CONFIG_H__ */

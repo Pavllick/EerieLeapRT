@@ -10,12 +10,12 @@ LOG_MODULE_REGISTER(sensors_config_ctrl_logger);
 
 SensorsConfigurationManager::SensorsConfigurationManager(
     std::shared_ptr<MathParserService> math_parser_service,
-    ext_unique_ptr<CborConfigurationService<SensorsConfig>> cbor_configuration_service,
+    ext_unique_ptr<CborConfigurationService<CborSensorsConfig>> cbor_configuration_service,
     int gpio_channel_count,
     int adc_channel_count)
         : math_parser_service_(std::move(math_parser_service)),
         cbor_configuration_service_(std::move(cbor_configuration_service)),
-        config_(make_unique_ext<SensorsConfig>()),
+        config_(make_unique_ext<CborSensorsConfig>()),
         gpio_channel_count_(gpio_channel_count),
         adc_channel_count_(adc_channel_count) {
 

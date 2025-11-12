@@ -16,7 +16,7 @@ using namespace eerie_leap::subsys::adc;
 
 LOG_MODULE_REGISTER(adc_config_ctrl_logger);
 
-AdcConfigurationManager::AdcConfigurationManager(ext_unique_ptr<CborConfigurationService<AdcConfig>> cbor_configuration_service) :
+AdcConfigurationManager::AdcConfigurationManager(ext_unique_ptr<CborConfigurationService<CborAdcConfig>> cbor_configuration_service) :
     cbor_configuration_service_(std::move(cbor_configuration_service)),
     adc_manager_(AdcFactory::Create()),
     config_(nullptr),

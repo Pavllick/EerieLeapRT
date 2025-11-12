@@ -1,11 +1,11 @@
-AdcCalibrationDataMap = { 2*50(float32 => float32) }
+CborAdcCalibrationDataMap = { 2*50(float32 => float32) }
 
-AdcChannelConfig = [
+CborAdcChannelConfig = [
   interpolation_method: uint,
-  ? calibration_table: AdcCalibrationDataMap
+  ? calibration_table: CborAdcCalibrationDataMap
 ]
 
-AdcConfig = [
+CborAdcConfig = [
   samples: uint,
-  adc_channels_config: [*AdcChannelConfig]
+  adc_channels_config: [*CborAdcChannelConfig]
 ]

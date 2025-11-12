@@ -4,8 +4,8 @@
  * Generated with a --default-max-qty of 24
  */
 
-#ifndef ADC_CONFIG_H__
-#define ADC_CONFIG_H__
+#ifndef CBOR_ADC_CONFIG_H__
+#define CBOR_ADC_CONFIG_H__
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -25,30 +25,30 @@ extern "C" {
  */
 #define DEFAULT_MAX_QTY 24
 
-struct AdcCalibrationDataMap_float32float {
+struct CborAdcCalibrationDataMap_float32float {
 	float float32float_key;
 	float float32float;
 };
 
-struct AdcCalibrationDataMap {
-	struct AdcCalibrationDataMap_float32float float32float[50];
+struct CborAdcCalibrationDataMap {
+	struct CborAdcCalibrationDataMap_float32float float32float[50];
 	size_t float32float_count;
 };
 
-struct AdcChannelConfig {
+struct CborAdcChannelConfig {
 	uint32_t interpolation_method;
-	struct AdcCalibrationDataMap calibration_table;
+	struct CborAdcCalibrationDataMap calibration_table;
 	bool calibration_table_present;
 };
 
-struct AdcConfig {
+struct CborAdcConfig {
 	uint32_t samples;
-	struct AdcChannelConfig AdcChannelConfig_m[24];
-	size_t AdcChannelConfig_m_count;
+	struct CborAdcChannelConfig CborAdcChannelConfig_m[24];
+	size_t CborAdcChannelConfig_m_count;
 };
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* ADC_CONFIG_H__ */
+#endif /* CBOR_ADC_CONFIG_H__ */

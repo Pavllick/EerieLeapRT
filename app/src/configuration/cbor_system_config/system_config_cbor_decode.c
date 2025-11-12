@@ -25,13 +25,13 @@
 	} \
 } while(0)
 
-static bool decode_ComUserConfig(zcbor_state_t *state, struct ComUserConfig *result);
-static bool decode_CanbusConfig(zcbor_state_t *state, struct CanbusConfig *result);
-static bool decode_SystemConfig(zcbor_state_t *state, struct SystemConfig *result);
+static bool decode_CborComUserConfig(zcbor_state_t *state, struct CborComUserConfig *result);
+static bool decode_CborCanbusConfig(zcbor_state_t *state, struct CborCanbusConfig *result);
+static bool decode_CborSystemConfig(zcbor_state_t *state, struct CborSystemConfig *result);
 
 
-static bool decode_ComUserConfig(
-		zcbor_state_t *state, struct ComUserConfig *result)
+static bool decode_CborComUserConfig(
+		zcbor_state_t *state, struct CborComUserConfig *result)
 {
 	zcbor_log("%s\r\n", __func__);
 
@@ -42,8 +42,8 @@ static bool decode_ComUserConfig(
 	return res;
 }
 
-static bool decode_CanbusConfig(
-		zcbor_state_t *state, struct CanbusConfig *result)
+static bool decode_CborCanbusConfig(
+		zcbor_state_t *state, struct CborCanbusConfig *result)
 {
 	zcbor_log("%s\r\n", __func__);
 
@@ -54,8 +54,8 @@ static bool decode_CanbusConfig(
 	return res;
 }
 
-static bool decode_SystemConfig(
-		zcbor_state_t *state, struct SystemConfig *result)
+static bool decode_CborSystemConfig(
+		zcbor_state_t *state, struct CborSystemConfig *result)
 {
 	zcbor_log("%s\r\n", __func__);
 
@@ -64,16 +64,16 @@ static bool decode_SystemConfig(
 	&& ((zcbor_uint32_decode(state, (&(*result).sw_version))))
 	&& ((zcbor_uint32_decode(state, (&(*result).build_number))))
 	&& ((zcbor_uint32_decode(state, (&(*result).com_user_refresh_rate_ms))))
-	&& ((zcbor_list_start_decode(state) && ((zcbor_multi_decode(0, 8, &(*result).ComUserConfig_m_count, (zcbor_decoder_t *)decode_ComUserConfig, state, (*&(*result).ComUserConfig_m), sizeof(struct ComUserConfig))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state)))
-	&& ((zcbor_list_start_decode(state) && ((zcbor_multi_decode(0, 8, &(*result).CanbusConfig_m_count, (zcbor_decoder_t *)decode_CanbusConfig, state, (*&(*result).CanbusConfig_m), sizeof(struct CanbusConfig))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state)))
+	&& ((zcbor_list_start_decode(state) && ((zcbor_multi_decode(0, 8, &(*result).CborComUserConfig_m_count, (zcbor_decoder_t *)decode_CborComUserConfig, state, (*&(*result).CborComUserConfig_m), sizeof(struct CborComUserConfig))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state)))
+	&& ((zcbor_list_start_decode(state) && ((zcbor_multi_decode(0, 8, &(*result).CborCanbusConfig_m_count, (zcbor_decoder_t *)decode_CborCanbusConfig, state, (*&(*result).CborCanbusConfig_m), sizeof(struct CborCanbusConfig))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state)))
 	&& ((zcbor_uint32_decode(state, (&(*result).sd_json_checksum))))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
 
 	if (false) {
 		/* For testing that the types of the arguments are correct.
 		 * A compiler error here means a bug in zcbor.
 		 */
-		decode_ComUserConfig(state, (*&(*result).ComUserConfig_m));
-		decode_CanbusConfig(state, (*&(*result).CanbusConfig_m));
+		decode_CborComUserConfig(state, (*&(*result).CborComUserConfig_m));
+		decode_CborCanbusConfig(state, (*&(*result).CborCanbusConfig_m));
 	}
 
 	log_result(state, res, __func__);
@@ -82,13 +82,13 @@ static bool decode_SystemConfig(
 
 
 
-int cbor_decode_SystemConfig(
+int cbor_decode_CborSystemConfig(
 		const uint8_t *payload, size_t payload_len,
-		struct SystemConfig *result,
+		struct CborSystemConfig *result,
 		size_t *payload_len_out)
 {
 	zcbor_state_t states[5];
 
 	return zcbor_entry_function(payload, payload_len, (void *)result, payload_len_out, states,
-		(zcbor_decoder_t *)decode_SystemConfig, sizeof(states) / sizeof(zcbor_state_t), 1);
+		(zcbor_decoder_t *)decode_CborSystemConfig, sizeof(states) / sizeof(zcbor_state_t), 1);
 }

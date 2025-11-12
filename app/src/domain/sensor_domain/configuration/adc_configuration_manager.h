@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "utilities/memory/heap_allocator.h"
-#include "configuration/adc_config/adc_config.h"
+#include "configuration/cbor_adc_config/cbor_adc_config.h"
 #include "configuration/services/cbor_configuration_service.h"
 #include "subsys/adc/models/adc_configuration.h"
 #include "subsys/adc/i_adc_manager.h"
@@ -19,17 +19,17 @@ using namespace eerie_leap::domain::sensor_domain::utilities::parsers;
 
 class AdcConfigurationManager {
 private:
-    ext_unique_ptr<CborConfigurationService<AdcConfig>> cbor_configuration_service_;
+    ext_unique_ptr<CborConfigurationService<CborAdcConfig>> cbor_configuration_service_;
     std::shared_ptr<IAdcManager> adc_manager_;
     ext_unique_ptr<ExtVector> config_raw_;
-    ext_unique_ptr<AdcConfig> config_;
+    ext_unique_ptr<CborAdcConfig> config_;
     std::shared_ptr<AdcConfiguration> configuration_;
     std::unique_ptr<AdcConfigurationCborParser> cbor_parser_;
 
     bool CreateDefaultConfiguration();
 
 public:
-    AdcConfigurationManager(ext_unique_ptr<CborConfigurationService<AdcConfig>> cbor_configuration_service);
+    AdcConfigurationManager(ext_unique_ptr<CborConfigurationService<CborAdcConfig>> cbor_configuration_service);
 
     bool Update(const AdcConfiguration& configuration);
     std::shared_ptr<IAdcManager> Get(bool force_load = false);

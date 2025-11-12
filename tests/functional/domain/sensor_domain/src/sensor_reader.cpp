@@ -4,7 +4,7 @@
 #include "utilities/guid/guid_generator.h"
 #include "utilities/math_parser/math_parser_service.hpp"
 
-#include "configuration/adc_config/adc_config.h"
+#include "configuration/cbor_adc_config/cbor_adc_config.h"
 #include "configuration/services/cbor_configuration_service.h"
 
 #include "subsys/device_tree/dt_fs.h"
@@ -187,7 +187,7 @@ sensors_reader_HelperInstances sensors_reader_GetReadingInstances() {
 
     const auto adc_configuration = sensors_reader_GetTestConfiguration();
 
-    auto adc_configuration_service = make_unique_ext<CborConfigurationService<AdcConfig>>("adc_config", fs_service);
+    auto adc_configuration_service = make_unique_ext<CborConfigurationService<CborAdcConfig>>("adc_config", fs_service);
     auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(std::move(adc_configuration_service));
     adc_configuration_manager->Update(adc_configuration);
 

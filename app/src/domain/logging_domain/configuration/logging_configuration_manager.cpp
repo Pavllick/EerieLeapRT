@@ -5,7 +5,7 @@ namespace eerie_leap::domain::logging_domain::configuration {
 
 LOG_MODULE_REGISTER(logging_config_ctrl_logger);
 
-LoggingConfigurationManager::LoggingConfigurationManager(ext_unique_ptr<CborConfigurationService<LoggingConfig>> cbor_configuration_service) :
+LoggingConfigurationManager::LoggingConfigurationManager(ext_unique_ptr<CborConfigurationService<CborLoggingConfig>> cbor_configuration_service) :
     cbor_configuration_service_(std::move(cbor_configuration_service)),
     config_(nullptr),
     configuration_(nullptr) {
