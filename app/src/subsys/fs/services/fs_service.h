@@ -23,14 +23,14 @@ public:
 
     bool Initialize() override;
     bool IsAvailable() const override;
-    bool WriteFile(const std::string& relative_path, const void* data_p, size_t data_size, bool append = false) override;
-    bool ReadFile(const std::string& relative_path, void* data_p, size_t data_size, size_t& out_len) override;
-    bool CreateDirectory(const std::string& relative_path) override;
-    bool Exists(const std::string& relative_path) override;
-    bool DeleteFile(const std::string& relative_path) override;
-    bool DeleteRecursive(const std::string& relative_path = "") override;
-    std::vector<std::string> ListFiles(const std::string& relative_path = "") const override;
-    size_t GetFileSize(const std::string& relative_path) const override;
+    bool WriteFile(std::string_view relative_path, const void* data_p, size_t data_size, bool append = false) override;
+    bool ReadFile(std::string_view relative_path, void* data_p, size_t data_size, size_t& out_len) override;
+    bool CreateDirectory(std::string_view relative_path) override;
+    bool Exists(std::string_view relative_path) override;
+    bool DeleteFile(std::string_view relative_path) override;
+    bool DeleteRecursive(std::string_view relative_path = "") override;
+    std::vector<std::string> ListFiles(std::string_view relative_path = "") const override;
+    size_t GetFileSize(std::string_view relative_path) const override;
     size_t GetTotalSpace() const override;
     size_t GetUsedSpace() const override;
     bool Format() override;

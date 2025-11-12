@@ -12,14 +12,14 @@ class IFsService {
 public:
     virtual bool Initialize() = 0;
     virtual bool IsAvailable() const = 0;
-    virtual bool WriteFile(const std::string& relative_path, const void* data_p, size_t data_size, bool append = false) = 0;
-    virtual bool ReadFile(const std::string& relative_path, void* data_p, size_t data_size, size_t& out_len) = 0;
-    virtual bool CreateDirectory(const std::string& relative_path) = 0;
-    virtual bool Exists(const std::string& relative_path) = 0;
-    virtual bool DeleteFile(const std::string& relative_path) = 0;
-    virtual bool DeleteRecursive(const std::string& relative_path = "") = 0;
-    virtual std::vector<std::string> ListFiles(const std::string& relative_path = "") const = 0;
-    virtual size_t GetFileSize(const std::string& relative_path) const = 0;
+    virtual bool WriteFile(std::string_view relative_path, const void* data_p, size_t data_size, bool append = false) = 0;
+    virtual bool ReadFile(std::string_view relative_path, void* data_p, size_t data_size, size_t& out_len) = 0;
+    virtual bool CreateDirectory(std::string_view relative_path) = 0;
+    virtual bool Exists(std::string_view relative_path) = 0;
+    virtual bool DeleteFile(std::string_view relative_path) = 0;
+    virtual bool DeleteRecursive(std::string_view relative_path = "") = 0;
+    virtual std::vector<std::string> ListFiles(std::string_view relative_path = "") const = 0;
+    virtual size_t GetFileSize(std::string_view relative_path) const = 0;
     virtual size_t GetTotalSpace() const = 0;
     virtual size_t GetUsedSpace() const = 0;
     virtual bool Format() = 0;

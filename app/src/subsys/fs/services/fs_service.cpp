@@ -1,4 +1,5 @@
 #include <sstream>
+#include <spanstream>
 #include <filesystem>
 #include <zephyr/fs/fs.h>
 #include <zephyr/logging/log.h>
@@ -23,7 +24,7 @@ bool FsService::IsAvailable() const {
     return IsMounted();
 }
 
-bool FsService::WriteFile(const std::string& relative_path, const void* data_p, size_t data_size, bool append) {
+bool FsService::WriteFile(std::string_view relative_path, const void* data_p, size_t data_size, bool append) {
     if(!IsMounted()) {
         LOG_ERR("Filesystem not mounted.");
         return false;
@@ -55,7 +56,7 @@ bool FsService::WriteFile(const std::string& relative_path, const void* data_p, 
     return true;
 }
 
-bool FsService::ReadFile(const std::string& relative_path, void* data_p, size_t data_size, size_t& out_len) {
+bool FsService::ReadFile(std::string_view relative_path, void* data_p, size_t data_size, size_t& out_len) {
     if(!IsMounted()) {
         LOG_ERR("Filesystem not mounted.");
         return false;
@@ -86,13 +87,13 @@ bool FsService::ReadFile(const std::string& relative_path, void* data_p, size_t 
     return true;
 }
 
-bool FsService::CreateDirectory(const std::string& relative_path) {
+bool FsService::CreateDirectory(std::string_view relative_path) {
     if(!IsMounted()) {
         LOG_ERR("Filesystem not mounted.");
         return false;
     }
 
-    std::istringstream stream(relative_path);
+    std::ispanstream stream(relative_path);
     std::string segment;
     std::filesystem::path full_path(mountpoint_.mnt_point);
 
@@ -112,7 +113,7 @@ bool FsService::CreateDirectory(const std::string& relative_path) {
     return true;
 }
 
-bool FsService::Exists(const std::string& relative_path) {
+bool FsService::Exists(std::string_view relative_path) {
     if(!IsMounted()) {
         LOG_ERR("Filesystem not mounted.");
         return false;
@@ -127,7 +128,7 @@ bool FsService::Exists(const std::string& relative_path) {
     return rc == 0;
 }
 
-bool FsService::DeleteFile(const std::string& relative_path) {
+bool FsService::DeleteFile(std::string_view relative_path) {
     if(!IsMounted()) {
         LOG_ERR("Filesystem not mounted.");
         return false;
@@ -145,7 +146,7 @@ bool FsService::DeleteFile(const std::string& relative_path) {
     return true;
 }
 
-bool FsService::DeleteRecursive(const std::string& relative_path) {
+bool FsService::DeleteRecursive(std::string_view relative_path) {
     if(!IsMounted()) {
         LOG_ERR("Filesystem not mounted.");
         return false;
@@ -197,7 +198,7 @@ bool FsService::DeleteRecursive(const std::string& relative_path) {
 }
 
 
-std::vector<std::string> FsService::ListFiles(const std::string& relative_path) const {
+std::vector<std::string> FsService::ListFiles(std::string_view relative_path) const {
     std::vector<std::string> files;
 
     if(!IsMounted()) {
@@ -226,7 +227,7 @@ std::vector<std::string> FsService::ListFiles(const std::string& relative_path) 
     return files;
 }
 
-size_t FsService::GetFileSize(const std::string& relative_path) const {
+size_t FsService::GetFileSize(std::string_view relative_path) const {
     if(!IsMounted()) {
         LOG_ERR("Filesystem not mounted.");
         return 0;
