@@ -45,7 +45,7 @@ struct CborSystemConfig {
 	size_t CborComUserConfig_m_count;
 	struct CborCanbusConfig CborCanbusConfig_m[8];
 	size_t CborCanbusConfig_m_count;
-	uint32_t sd_json_checksum;
+	uint32_t json_config_checksum;
 };
 
 #ifdef __cplusplus

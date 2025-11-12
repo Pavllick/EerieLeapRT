@@ -12,42 +12,42 @@
 #include "utilities/memory/heap_allocator.h"
 #include "subsys/fs/services/i_fs_service.h"
 
-#include "configuration/cbor/cbor_serializer.h"
-#include "configuration/cbor/traits/system_config_trait.h"
-#include "configuration/cbor/traits/adc_config_trait.h"
-#include "configuration/cbor/traits/sensors_config_trait.h"
-#include "configuration/cbor/traits/logging_config_trait.h"
+#include "configuration/json/json_serializer.h"
+#include "configuration/json/traits/system_config_trait.h"
+// #include "configuration/json/traits/adc_config_trait.h"
+// #include "configuration/json/traits/sensors_config_trait.h"
+// #include "configuration/json/traits/logging_config_trait.h"
 
 #include "loaded_config.hpp"
 
 namespace eerie_leap::configuration::services {
 
 using namespace eerie_leap::utilities::memory;
-using namespace eerie_leap::configuration::cbor;
-using namespace eerie_leap::configuration::cbor::traits;
+using namespace eerie_leap::configuration::json;
+using namespace eerie_leap::configuration::json::traits;
 using namespace eerie_leap::subsys::fs::services;
 
 template <typename T>
-class CborConfigurationService {
+class JsonConfigurationService {
 private:
-    const std::string configuration_dir_ = "config";
+    const std::string configuration_dir_ = "configuration";
 
     std::string configuration_name_;
     std::shared_ptr<IFsService> fs_service_;
-    std::shared_ptr<CborSerializer<T>> cbor_serializer_;
+    std::shared_ptr<JsonSerializer<T>> serializer_;
 
-    const std::string configuration_file_path_ = configuration_dir_ + "/" + configuration_name_ + ".cbor";
+    const std::string configuration_file_path_ = configuration_dir_ + "/" + configuration_name_ + ".json";
 
     struct SaveTask {
         k_work work;
-        CborConfigurationService<T>* instance;
+        JsonConfigurationService<T>* instance;
         T* configuration;
         bool result;
     };
 
     struct LoadTask {
         k_work work;
-        CborConfigurationService<T>* instance;
+        JsonConfigurationService<T>* instance;
         std::optional<LoadedConfig<T>> result;
     };
 
@@ -59,19 +59,26 @@ private:
     LoadTask task_load_;
 
     bool SaveProcessor(T* configuration) {
+        if(!fs_service_)
+            return false;
+
         LOG_MODULE_DECLARE(configuration_service_logger);
 
-        auto config_bytes = cbor_serializer_->Serialize(*configuration);
+        auto config_bytes = serializer_->Serialize(*configuration);
 
         if (!config_bytes) {
             LOG_ERR("Failed to serialize configuration %s.", configuration_file_path_.c_str());
             return false;
         }
 
-        return fs_service_->WriteFile(configuration_file_path_, config_bytes->data(), config_bytes->size());
+        // Remove null terminator
+        return fs_service_->WriteFile(configuration_file_path_, config_bytes->data(), config_bytes->size() - 1);
     }
 
     std::optional<LoadedConfig<T>> LoadProcessor() {
+        if(!fs_service_)
+            return std::nullopt;
+
         LOG_MODULE_DECLARE(configuration_service_logger);
 
         if (!fs_service_->Exists(configuration_file_path_)) {
@@ -89,7 +96,7 @@ private:
         }
 
         auto config_bytes = std::span<const uint8_t>(buffer->data(), out_len);
-        auto configuration = cbor_serializer_->Deserialize(config_bytes);
+        auto configuration = serializer_->Deserialize(config_bytes);
 
         if (configuration == nullptr) {
             LOG_ERR("Failed to deserialize configuration %s.", configuration_file_path_.c_str());
@@ -119,7 +126,7 @@ private:
     }
 
 public:
-    CborConfigurationService(std::string configuration_name, std::shared_ptr<IFsService> fs_service)
+    JsonConfigurationService(std::string configuration_name, std::shared_ptr<IFsService> fs_service)
         : configuration_name_(std::move(configuration_name)), fs_service_(std::move(fs_service)) {
 
         task_save_.instance = this;
@@ -128,11 +135,19 @@ public:
         task_load_.instance = this;
         k_work_init(&task_load_.work, WorkTaskLoad);
 
-        cbor_serializer_ = make_shared_ext<CborSerializer<T>>(
-            CborTrait<T>::Encode, CborTrait<T>::Decode, CborTrait<T>::GetSerializingSize);
+        serializer_ = make_shared_ext<JsonSerializer<T>>(
+            JsonTrait<T>::object_descriptor,
+            JsonTrait<T>::object_descriptor_size);
+
+        if(!fs_service_)
+            return;
 
         if (!fs_service_->Exists(configuration_dir_))
             fs_service_->CreateDirectory(configuration_dir_);
+    }
+
+    bool IsAvailable() {
+        return fs_service_ != nullptr && fs_service_->IsAvailable();
     }
 
     bool Save(T* configuration) {

@@ -66,7 +66,7 @@ static bool encode_CborSystemConfig(
 	&& ((zcbor_uint32_encode(state, (&(*input).com_user_refresh_rate_ms))))
 	&& ((zcbor_list_start_encode(state, 8) && ((zcbor_multi_encode_minmax(0, 8, &(*input).CborComUserConfig_m_count, (zcbor_encoder_t *)encode_CborComUserConfig, state, (*&(*input).CborComUserConfig_m), sizeof(struct CborComUserConfig))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 8)))
 	&& ((zcbor_list_start_encode(state, 8) && ((zcbor_multi_encode_minmax(0, 8, &(*input).CborCanbusConfig_m_count, (zcbor_encoder_t *)encode_CborCanbusConfig, state, (*&(*input).CborCanbusConfig_m), sizeof(struct CborCanbusConfig))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 8)))
-	&& ((zcbor_uint32_encode(state, (&(*input).sd_json_checksum))))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 8))));
+	&& ((zcbor_uint32_encode(state, (&(*input).json_config_checksum))))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 8))));
 
 	log_result(state, res, __func__);
 	return res;

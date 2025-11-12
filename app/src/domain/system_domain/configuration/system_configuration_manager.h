@@ -4,7 +4,9 @@
 
 #include "utilities/memory/heap_allocator.h"
 #include "configuration/cbor/cbor_system_config/cbor_system_config.h"
+#include "configuration/json/configs/json_system_config.h"
 #include "configuration/services/cbor_configuration_service.h"
+#include "configuration/services/json_configuration_service.h"
 #include "domain/system_domain/utilities/parsers/system_configuration_cbor_parser.h"
 #include "domain/system_domain/utilities/parsers/system_configuration_json_parser.h"
 #include "domain/system_domain/models/system_configuration.h"
@@ -12,6 +14,7 @@
 namespace eerie_leap::domain::system_domain::configuration {
 
 using namespace eerie_leap::utilities::memory;
+using namespace eerie_leap::configuration::json::configs;
 using namespace eerie_leap::configuration::services;
 using namespace eerie_leap::domain::system_domain::utilities::parsers;
 using namespace eerie_leap::domain::system_domain::models;
@@ -19,21 +22,26 @@ using namespace eerie_leap::domain::system_domain::models;
 class SystemConfigurationManager {
 private:
     ext_unique_ptr<CborConfigurationService<CborSystemConfig>> cbor_configuration_service_;
+    ext_unique_ptr<JsonConfigurationService<JsonSystemConfig>> json_configuration_service_;
 
-    ext_unique_ptr<ExtVector> config_raw_;
-    ext_unique_ptr<CborSystemConfig> config_;
-    std::shared_ptr<SystemConfiguration> configuration_;
     std::unique_ptr<SystemConfigurationCborParser> cbor_parser_;
     std::unique_ptr<SystemConfigurationJsonParser> json_parser_;
 
-    uint32_t sd_json_checksum_;
+    ext_unique_ptr<ExtVector> cbor_config_raw_;
+    ext_unique_ptr<CborSystemConfig> cbor_config_;
+    std::shared_ptr<SystemConfiguration> configuration_;
+
+    uint32_t json_config_checksum_;
 
     bool UpdateHwVersion(uint32_t hw_version);
     bool UpdateSwVersion(uint32_t sw_version);
+    bool ApplyJsonConfiguration();
     bool CreateDefaultConfiguration();
 
 public:
-    explicit SystemConfigurationManager(ext_unique_ptr<CborConfigurationService<CborSystemConfig>> cbor_configuration_service);
+    explicit SystemConfigurationManager(
+        ext_unique_ptr<CborConfigurationService<CborSystemConfig>> cbor_configuration_service,
+        ext_unique_ptr<JsonConfigurationService<JsonSystemConfig>> json_configuration_service);
 
     bool UpdateBuildNumber(uint32_t build_number);
     bool UpdateComUsers(const std::vector<ComUserConfiguration>& com_user_configurations);

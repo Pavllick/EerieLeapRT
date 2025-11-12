@@ -18,5 +18,5 @@ CborSystemConfig = [
   com_users: [0*8 CborComUserConfig],
   canbus_configs: [0*8 CborCanbusConfig],
 
-  sd_json_checksum: uint
+  json_config_checksum: uint
 ]

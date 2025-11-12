@@ -25,6 +25,13 @@
 #include "configuration/cbor/cbor_sensor_config/cbor_sensor_config.h"
 #include "configuration/cbor/cbor_logging_config/cbor_logging_config.h"
 #include "configuration/services/cbor_configuration_service.h"
+
+#include "configuration/json/configs/json_system_config.h"
+// #include "configuration/json/json_adc_config/json_adc_config.h"
+// #include "configuration/json/json_sensor_config/json_sensor_config.h"
+// #include "configuration/json/json_logging_config/json_logging_config.h"
+#include "configuration/services/json_configuration_service.h"
+
 #include "domain/system_domain/configuration/system_configuration_manager.h"
 #include "domain/sensor_domain/configuration/adc_configuration_manager.h"
 #include "domain/sensor_domain/configuration/sensors_configuration_manager.h"
@@ -178,11 +185,13 @@ int main(void) {
     auto guid_generator = make_shared_ext<GuidGenerator>();
     auto math_parser_service = make_shared_ext<MathParserService>();
 
-    auto system_config_service = make_unique_ext<CborConfigurationService<CborSystemConfig>>("system_config", fs_service);
-    auto adc_config_service = make_unique_ext<CborConfigurationService<CborAdcConfig>>("adc_config", fs_service);
-    auto sensors_config_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
+    auto cbor_system_config_service = make_unique_ext<CborConfigurationService<CborSystemConfig>>("system_config", fs_service);
+    auto cbor_adc_config_service = make_unique_ext<CborConfigurationService<CborAdcConfig>>("adc_config", fs_service);
+    auto cbor_sensors_config_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
 
-    auto adc_configuration_manager = make_shared_ext<AdcConfigurationManager>(std::move(adc_config_service));
+    auto json_system_config_service = make_unique_ext<JsonConfigurationService<JsonSystemConfig>>("system_config", sd_fs_service);
+
+    auto adc_configuration_manager = make_shared_ext<AdcConfigurationManager>(std::move(cbor_adc_config_service));
 
     // TODO: For test purposes only
     SetupAdcConfiguration(adc_configuration_manager);
@@ -190,14 +199,16 @@ int main(void) {
     auto gpio = GpioFactory::Create();
     gpio->Initialize();
 
-    auto system_configuration_manager = make_shared_ext<SystemConfigurationManager>(std::move(system_config_service));
+    auto system_configuration_manager = make_shared_ext<SystemConfigurationManager>(
+        std::move(cbor_system_config_service),
+        std::move(json_system_config_service));
 
     // TODO: For test purposes only
-    SetupSystemConfiguration(system_configuration_manager);
+    // SetupSystemConfiguration(system_configuration_manager);
 
     auto sensors_configuration_manager = make_shared_ext<SensorsConfigurationManager>(
         math_parser_service,
-        std::move(sensors_config_service),
+        std::move(cbor_sensors_config_service),
         gpio->GetChannelCount(),
         adc_configuration_manager->Get()->GetChannelCount());
 
@@ -210,8 +221,8 @@ int main(void) {
 
     std::shared_ptr<LoggingController> logging_controller = nullptr;
     if(sd_fs_service != nullptr) {
-        auto logging_config_service = make_unique_ext<CborConfigurationService<CborLoggingConfig>>("logging_config", fs_service);
-        auto logging_configuration_manager = make_shared_ext<LoggingConfigurationManager>(std::move(logging_config_service));
+        auto cbor_logging_config_service = make_unique_ext<CborConfigurationService<CborLoggingConfig>>("logging_config", fs_service);
+        auto logging_configuration_manager = make_shared_ext<LoggingConfigurationManager>(std::move(cbor_logging_config_service));
 
         // TODO: For test purposes only
         SetupLoggingConfiguration(sensors_configuration_manager, logging_configuration_manager);

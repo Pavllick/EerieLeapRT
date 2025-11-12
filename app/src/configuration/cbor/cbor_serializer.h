@@ -2,9 +2,8 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <optional>
-#include <array>
 #include <span>
+
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/logging/log_instance.h>
@@ -12,9 +11,9 @@
 #include <zcbor_encode.h>
 #include <zcbor_decode.h>
 
-#include <utilities/memory/heap_allocator.h>
+#include "utilities/memory/heap_allocator.h"
 
-namespace eerie_leap::utilities::cbor {
+namespace eerie_leap::configuration::cbor {
 
 using namespace eerie_leap::utilities::memory;
 
@@ -63,4 +62,4 @@ private:
     GetSerializingSizeFn getSerializingSizeFn_;
 };
 
-} // namespace eerie_leap::utilities::cbor
+} // namespace eerie_leap::configuration::cbor

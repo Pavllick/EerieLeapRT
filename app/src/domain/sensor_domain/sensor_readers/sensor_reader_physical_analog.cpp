@@ -6,14 +6,10 @@
 #include "domain/sensor_domain/models/reading_metadata.h"
 #include "sensor_reader_physical_analog.h"
 
-#include "subsys/random/rng.h"
-
 namespace eerie_leap::domain::sensor_domain::sensor_readers {
 
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::subsys::adc::utilities;
-
-using namespace eerie_leap::subsys::random;
 
 SensorReaderPhysicalAnalog::SensorReaderPhysicalAnalog(
     std::shared_ptr<ITimeService> time_service,
@@ -40,7 +36,6 @@ void SensorReaderPhysicalAnalog::Read() {
     auto reading = make_shared_ext<SensorReading>(guid_generator_->Generate(), sensor_);
     reading->timestamp = time_service_->GetCurrentTime();
 
-    // float voltage = AdcChannelReader();
     float voltage = (Rng::Get32() / static_cast<float>(UINT32_MAX)) * 3.3F;
     float voltage_calibrated = adc_channel_configuration_->calibrator->InterpolateToCalibratedRange(voltage);
 

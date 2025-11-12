@@ -32,7 +32,7 @@ static size_t cbor_get_size_CborSystemConfig(const CborSystemConfig& system_conf
             .AddUint(system_config.CborCanbusConfig_m[i].bitrate);
     }
 
-    builder.AddUint(system_config.sd_json_checksum);
+    builder.AddUint(system_config.json_config_checksum);
 
     return builder.Build();
 }

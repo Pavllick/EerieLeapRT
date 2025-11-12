@@ -10,11 +10,14 @@ using namespace eerie_leap::subsys::random;
 
 LOG_MODULE_REGISTER(system_config_mngr_logger);
 
-SystemConfigurationManager::SystemConfigurationManager(ext_unique_ptr<CborConfigurationService<CborSystemConfig>> cbor_configuration_service)
-    : cbor_configuration_service_(std::move(cbor_configuration_service)),
-    config_(nullptr),
-    configuration_(nullptr),
-    sd_json_checksum_(0) {
+SystemConfigurationManager::SystemConfigurationManager(
+    ext_unique_ptr<CborConfigurationService<CborSystemConfig>> cbor_configuration_service,
+    ext_unique_ptr<JsonConfigurationService<JsonSystemConfig>> json_configuration_service)
+        : cbor_configuration_service_(std::move(cbor_configuration_service)),
+        json_configuration_service_(std::move(json_configuration_service)),
+        cbor_config_(nullptr),
+        configuration_(nullptr),
+        json_config_checksum_(0) {
 
     cbor_parser_ = std::make_unique<SystemConfigurationCborParser>();
     json_parser_ = std::make_unique<SystemConfigurationJsonParser>();
@@ -38,6 +41,8 @@ SystemConfigurationManager::SystemConfigurationManager(ext_unique_ptr<CborConfig
     UpdateHwVersion(configuration->hw_version);
     UpdateSwVersion(configuration->sw_version);
 
+    ApplyJsonConfiguration();
+
     configuration = Get();
 
     LOG_INF("System Configuration Manager initialized successfully.");
@@ -45,6 +50,55 @@ SystemConfigurationManager::SystemConfigurationManager(ext_unique_ptr<CborConfig
     LOG_INF("HW Version: %s, SW Version: %s",
         configuration->GetFormattedHwVersion().c_str(), configuration->GetFormattedSwVersion().c_str());
     LOG_INF("Device ID: %llu", configuration->device_id);
+}
+
+bool SystemConfigurationManager::ApplyJsonConfiguration() {
+    if(!json_configuration_service_->IsAvailable())
+        return false;
+
+    auto json_config_loaded = json_configuration_service_->Load();
+    if(json_config_loaded.has_value()) {
+        uint32_t crc = crc32_ieee(json_config_loaded->config_raw->data(), json_config_loaded->config_raw->size());
+        if(crc == json_config_checksum_)
+            return true;
+
+        auto configuration = json_parser_->Deserialize(
+            *json_config_loaded->config,
+            configuration_->device_id,
+            configuration_->hw_version,
+            configuration_->sw_version,
+            configuration_->build_number);
+
+        bool result = Update(std::make_shared<SystemConfiguration>(configuration));
+        if(!result)
+            return false;
+
+        LOG_INF("JSON configuration loaded successfully.");
+
+        return true;
+    }
+
+    auto json_config = json_parser_->Serialize(*configuration_);
+    if(json_config == nullptr)
+        return false;
+
+    if(!json_configuration_service_->Save(json_config.get())) {
+        LOG_ERR("Failed to save JSON configuration.");
+        return false;
+    }
+
+    json_config_loaded = json_configuration_service_->Load();
+    if(!json_config_loaded.has_value()) {
+        LOG_ERR("Failed to load newly created JSON configuration.");
+        return false;
+    }
+
+    LOG_INF("JSON configuration saved successfully.");
+
+    uint32_t crc = crc32_ieee(json_config_loaded->config_raw->data(), json_config_loaded->config_raw->size());
+    json_config_checksum_ = crc;
+
+    return Update(configuration_);
 }
 
 bool SystemConfigurationManager::UpdateBuildNumber(uint32_t build_number) {
@@ -131,11 +185,16 @@ bool SystemConfigurationManager::CreateDefaultConfiguration() {
 }
 
 bool SystemConfigurationManager::Update(std::shared_ptr<SystemConfiguration> configuration) {
-    auto config = cbor_parser_->Serialize(*configuration);
-    config->sd_json_checksum = sd_json_checksum_;
+    auto cbor_config = cbor_parser_->Serialize(*configuration);
+    cbor_config->json_config_checksum = json_config_checksum_;
 
-    if(!cbor_configuration_service_->Save(config.get()))
+    if(!cbor_configuration_service_->Save(cbor_config.get()))
         return false;
+
+    if(json_configuration_service_->IsAvailable()) {
+        auto json_config = json_parser_->Serialize(*configuration);
+        json_configuration_service_->Save(json_config.get());
+    }
 
     Get(true);
 
@@ -146,17 +205,17 @@ std::shared_ptr<SystemConfiguration> SystemConfigurationManager::Get(bool force_
     if(configuration_ != nullptr && !force_load)
         return configuration_;
 
-    auto config = cbor_configuration_service_->Load();
-    if(!config.has_value())
+    auto cbor_config = cbor_configuration_service_->Load();
+    if(!cbor_config.has_value())
         return nullptr;
 
-    config_raw_ = std::move(config.value().config_raw);
-    config_ = std::move(config.value().config);
+    cbor_config_raw_ = std::move(cbor_config.value().config_raw);
+    cbor_config_ = std::move(cbor_config.value().config);
 
-    auto configuration = cbor_parser_->Deserialize(*config_);
+    auto configuration = cbor_parser_->Deserialize(*cbor_config_);
     configuration_ = std::make_shared<SystemConfiguration>(configuration);
 
-    sd_json_checksum_ = config_->sd_json_checksum;
+    json_config_checksum_ = cbor_config_->json_config_checksum;
 
     return configuration_;
 }
