@@ -1,3 +1,5 @@
+#include <zephyr/sys/crc.h>
+
 #include "subsys/random/rng.h"
 
 #include "system_configuration_manager.h"
@@ -6,21 +8,26 @@ namespace eerie_leap::domain::system_domain::configuration {
 
 using namespace eerie_leap::subsys::random;
 
-LOG_MODULE_REGISTER(system_config_ctrl_logger);
+LOG_MODULE_REGISTER(system_config_mngr_logger);
 
-SystemConfigurationManager::SystemConfigurationManager(ext_unique_ptr<ConfigurationService<SystemConfig>> system_configuration_service) :
-    system_configuration_service_(std::move(system_configuration_service)),
-    system_config_(nullptr),
-    system_configuration_(nullptr) {
+SystemConfigurationManager::SystemConfigurationManager(
+    ext_unique_ptr<ConfigurationService<SystemConfig>> cbor_configuration_service,
+    std::shared_ptr<IFsService> sd_fs_service)
+        : cbor_configuration_service_(std::move(cbor_configuration_service)),
+        sd_fs_service_(std::move(sd_fs_service)),
+        config_(nullptr),
+        configuration_(nullptr),
+        sd_json_checksum_(0) {
 
-    system_configuration_cbor_parser_ = std::make_unique<SystemConfigurationCborParser>();
-    std::shared_ptr<SystemConfiguration> system_config = nullptr;
+    cbor_parser_ = std::make_unique<SystemConfigurationCborParser>();
+    json_parser_ = std::make_unique<SystemConfigurationJsonParser>();
+    std::shared_ptr<SystemConfiguration> configuration = nullptr;
 
     try {
-        system_config = Get(true);
+        configuration = Get(true);
     } catch(const std::exception& e) {}
 
-    if(system_config == nullptr) {
+    if(configuration == nullptr) {
         if(!CreateDefaultConfiguration()) {
             LOG_ERR("Failed to create default System configuration.");
             return;
@@ -28,108 +35,109 @@ SystemConfigurationManager::SystemConfigurationManager(ext_unique_ptr<Configurat
 
         LOG_INF("Default System configuration loaded successfully.");
 
-        system_config = Get();
+        configuration = Get();
     }
 
-    UpdateHwVersion(system_config->hw_version);
-    UpdateSwVersion(system_config->sw_version);
+    UpdateHwVersion(configuration->hw_version);
+    UpdateSwVersion(configuration->sw_version);
 
-    system_config = Get();
+    configuration = Get();
 
     LOG_INF("System Configuration Manager initialized successfully.");
 
     LOG_INF("HW Version: %s, SW Version: %s",
-        system_config->GetFormattedHwVersion().c_str(), system_config->GetFormattedSwVersion().c_str());
-    LOG_INF("Device ID: %llu", system_config->device_id);
+        configuration->GetFormattedHwVersion().c_str(), configuration->GetFormattedSwVersion().c_str());
+    LOG_INF("Device ID: %llu", configuration->device_id);
 }
 
 bool SystemConfigurationManager::UpdateBuildNumber(uint32_t build_number) {
-    auto system_configuration = Get();
-    if(system_configuration == nullptr)
+    auto configuration = Get();
+    if(configuration == nullptr)
         return false;
 
-    if(build_number != system_configuration->build_number) {
-        system_configuration->build_number = build_number;
+    if(build_number != configuration->build_number) {
+        configuration->build_number = build_number;
 
-        bool result = Update(system_configuration);
+        bool result = Update(configuration);
         if(!result)
             return false;
 
-        LOG_INF("Build number updated to %u.", system_configuration->build_number);
+        LOG_INF("Build number updated to %u.", configuration->build_number);
     }
 
     return true;
 }
 
 bool SystemConfigurationManager::UpdateComUsers(const std::vector<ComUserConfiguration>& com_user_configurations) {
-    auto system_configuration = Get();
-    if(system_configuration == nullptr)
+    auto configuration = Get();
+    if(configuration == nullptr)
         return false;
 
-    system_configuration->com_user_configurations = com_user_configurations;
+    configuration->com_user_configurations = com_user_configurations;
 
-    bool result = Update(system_configuration);
+    bool result = Update(configuration);
     if(!result)
         return false;
 
-    LOG_INF("Com Users updated. Total count: %zu.", system_configuration->com_user_configurations.size());
+    LOG_INF("Com Users updated. Total count: %zu.", configuration->com_user_configurations.size());
 
     return true;
 }
 
 bool SystemConfigurationManager::UpdateHwVersion(uint32_t hw_version) {
-    auto system_configuration = Get();
-    if(system_configuration == nullptr)
+    auto configuration = Get();
+    if(configuration == nullptr)
         return false;
 
     uint32_t config_hw_version = SystemConfiguration::GetConfigHwVersion();
     if(hw_version != config_hw_version) {
-        system_configuration->hw_version = config_hw_version;
+        configuration->hw_version = config_hw_version;
 
-        bool result = Update(system_configuration);
+        bool result = Update(configuration);
         if(!result)
             return false;
 
-        LOG_INF("HW version updated to %s.", system_configuration->GetFormattedHwVersion().c_str());
+        LOG_INF("HW version updated to %s.", configuration->GetFormattedHwVersion().c_str());
     }
 
     return true;
 }
 
 bool SystemConfigurationManager::UpdateSwVersion(uint32_t sw_version) {
-    auto system_configuration = Get();
-    if(system_configuration == nullptr)
+    auto configuration = Get();
+    if(configuration == nullptr)
         return false;
 
     uint32_t config_sw_version = SystemConfiguration::GetConfigSwVersion();
     if(sw_version != config_sw_version) {
-        system_configuration->sw_version = config_sw_version;
-        system_configuration->build_number = 0;
+        configuration->sw_version = config_sw_version;
+        configuration->build_number = 0;
 
-        bool result = Update(system_configuration);
+        bool result = Update(configuration);
         if(!result)
             return false;
 
-        LOG_INF("SW version updated to %s.", system_configuration->GetFormattedSwVersion().c_str());
+        LOG_INF("SW version updated to %s.", configuration->GetFormattedSwVersion().c_str());
     }
 
     return true;
 }
 
 bool SystemConfigurationManager::CreateDefaultConfiguration() {
-    auto system_config = make_shared_ext<SystemConfiguration>();
-    system_config->device_id = Rng::Get64(true);
-    system_config->hw_version = 0;
-    system_config->sw_version = 0;
-    system_config->build_number = 0;
+    auto configuration = make_shared_ext<SystemConfiguration>();
+    configuration->device_id = Rng::Get64(true);
+    configuration->hw_version = 0;
+    configuration->sw_version = 0;
+    configuration->build_number = 0;
 
-    return Update(system_config);
+    return Update(configuration);
 }
 
-bool SystemConfigurationManager::Update(std::shared_ptr<SystemConfiguration> system_configuration) {
-    auto system_config = system_configuration_cbor_parser_->Serialize(*system_configuration);
+bool SystemConfigurationManager::Update(std::shared_ptr<SystemConfiguration> configuration) {
+    auto config = cbor_parser_->Serialize(*configuration);
+    config->sd_json_checksum = sd_json_checksum_;
 
-    if(!system_configuration_service_->Save(system_config.get()))
+    if(!cbor_configuration_service_->Save(config.get()))
         return false;
 
     Get(true);
@@ -138,20 +146,22 @@ bool SystemConfigurationManager::Update(std::shared_ptr<SystemConfiguration> sys
 }
 
 std::shared_ptr<SystemConfiguration> SystemConfigurationManager::Get(bool force_load) {
-    if(system_configuration_ != nullptr && !force_load)
-        return system_configuration_;
+    if(configuration_ != nullptr && !force_load)
+        return configuration_;
 
-    auto system_config = system_configuration_service_->Load();
-    if(!system_config.has_value())
+    auto config = cbor_configuration_service_->Load();
+    if(!config.has_value())
         return nullptr;
 
-    system_config_raw_ = std::move(system_config.value().config_raw);
-    system_config_ = std::move(system_config.value().config);
+    config_raw_ = std::move(config.value().config_raw);
+    config_ = std::move(config.value().config);
 
-    auto system_configuration = system_configuration_cbor_parser_->Deserialize(*system_config_);
-    system_configuration_ = std::make_shared<SystemConfiguration>(system_configuration);
+    auto configuration = cbor_parser_->Deserialize(*config_);
+    configuration_ = std::make_shared<SystemConfiguration>(configuration);
 
-    return system_configuration_;
+    sd_json_checksum_ = config_->sd_json_checksum;
+
+    return configuration_;
 }
 
 } // namespace eerie_leap::domain::system_domain::configuration

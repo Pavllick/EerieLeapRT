@@ -23,10 +23,6 @@ struct CanbusConfigurationJsonDto {
 };
 
 struct SystemConfigurationJsonDto {
-    uint64_t device_id;
-    uint32_t hw_version;
-    uint32_t sw_version;
-    uint32_t build_number;
     uint32_t com_user_refresh_rate_ms;
     ComUserConfigurationJsonDto com_user_configurations[8];
     size_t com_user_configurations_len;
@@ -45,10 +41,6 @@ static json_obj_descr canbus_configuration_descr[] = {
 };
 
 static json_obj_descr system_configuration_descr[] = {
-    JSON_OBJ_DESCR_PRIM(SystemConfigurationJsonDto, device_id, JSON_TOK_UINT64),
-    JSON_OBJ_DESCR_PRIM(SystemConfigurationJsonDto, hw_version, JSON_TOK_UINT),
-    JSON_OBJ_DESCR_PRIM(SystemConfigurationJsonDto, sw_version, JSON_TOK_UINT),
-    JSON_OBJ_DESCR_PRIM(SystemConfigurationJsonDto, build_number, JSON_TOK_UINT),
     JSON_OBJ_DESCR_PRIM(SystemConfigurationJsonDto, com_user_refresh_rate_ms, JSON_TOK_UINT),
     JSON_OBJ_DESCR_OBJ_ARRAY(SystemConfigurationJsonDto, com_user_configurations, 8, com_user_configurations_len, com_user_configuration_descr, ARRAY_SIZE(com_user_configuration_descr)),
     JSON_OBJ_DESCR_OBJ_ARRAY(SystemConfigurationJsonDto, canbus_configurations, 8, canbus_configurations_len, canbus_configuration_descr, ARRAY_SIZE(canbus_configuration_descr)),
@@ -59,7 +51,12 @@ public:
     SystemConfigurationJsonParser() = default;
 
     ext_unique_ptr<ExtVector> Serialize(const SystemConfiguration& system_configuration);
-    SystemConfiguration Deserialize(const std::span<const uint8_t>& json);
+    SystemConfiguration Deserialize(
+        const std::span<const uint8_t>& json,
+        uint64_t device_id,
+        uint32_t hw_version,
+        uint32_t sw_version,
+        uint32_t build_number);
 };
 
 } // namespace eerie_leap::domain::system_domain::utilities::parsers

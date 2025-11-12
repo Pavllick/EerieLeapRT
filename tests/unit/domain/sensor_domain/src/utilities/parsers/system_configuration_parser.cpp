@@ -1,3 +1,5 @@
+#include <fstream>
+
 #include <zephyr/ztest.h>
 
 #include "domain/system_domain/utilities/parsers/system_configuration_cbor_parser.h"
@@ -72,7 +74,21 @@ ZTEST(system_configuration_parser, test_JsonSerializeDeserialize) {
     auto system_configuration = system_configuration_parser_GetTestConfiguration();
 
     auto serialized_system_configuration = system_configuration_json_parser.Serialize(system_configuration);
-    auto deserialized_system_configuration = system_configuration_json_parser.Deserialize(*serialized_system_configuration.get());
+    auto deserialized_system_configuration = system_configuration_json_parser.Deserialize(
+        *serialized_system_configuration.get(),
+        system_configuration.device_id,
+        system_configuration.hw_version,
+        system_configuration.sw_version,
+        system_configuration.build_number);
 
     system_configuration_parser_CompareSystemConfigurations(system_configuration, deserialized_system_configuration);
+
+
+    // Will create file in the twister-out directory
+    std::ofstream file("../../../../../../../../system_configuration.json", std::ios::out);
+    zassert_true(file.is_open());
+
+    file << serialized_system_configuration->data();
+
+    file.close();
 }

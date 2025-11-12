@@ -16,5 +16,7 @@ SystemConfig = [
 
   com_user_refresh_rate_ms: uint,
   com_users: [0*8 ComUserConfig],
-  canbus_configs: [0*8 CanbusConfig]
+  canbus_configs: [0*8 CanbusConfig],
+
+  sd_json_checksum: uint
 ]

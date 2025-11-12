@@ -6,10 +6,6 @@ ext_unique_ptr<ExtVector> SystemConfigurationJsonParser::Serialize(const SystemC
     SystemConfigurationJsonDto system_configuration_json;
     memset(&system_configuration_json, 0, sizeof(SystemConfigurationJsonDto));
 
-    system_configuration_json.device_id = system_configuration.device_id;
-    system_configuration_json.hw_version = system_configuration.hw_version;
-    system_configuration_json.sw_version = system_configuration.sw_version;
-    system_configuration_json.build_number = system_configuration.build_number;
     system_configuration_json.com_user_refresh_rate_ms = system_configuration.com_user_refresh_rate_ms;
 
     system_configuration_json.com_user_configurations_len = 0;
@@ -44,7 +40,13 @@ ext_unique_ptr<ExtVector> SystemConfigurationJsonParser::Serialize(const SystemC
     return buffer;
 }
 
-SystemConfiguration SystemConfigurationJsonParser::Deserialize(const std::span<const uint8_t>& json) {
+SystemConfiguration SystemConfigurationJsonParser::Deserialize(
+    const std::span<const uint8_t>& json,
+    uint64_t device_id,
+    uint32_t hw_version,
+    uint32_t sw_version,
+    uint32_t build_number) {
+
 	SystemConfigurationJsonDto system_configuration_json;
 	const int expected_return_code = BIT_MASK(ARRAY_SIZE(system_configuration_descr));
 
@@ -54,10 +56,10 @@ SystemConfiguration SystemConfigurationJsonParser::Deserialize(const std::span<c
 
     SystemConfiguration system_configuration;
 
-    system_configuration.device_id = system_configuration_json.device_id;
-    system_configuration.hw_version = system_configuration_json.hw_version;
-    system_configuration.sw_version = system_configuration_json.sw_version;
-    system_configuration.build_number = system_configuration_json.build_number;
+    system_configuration.device_id = device_id;
+    system_configuration.hw_version = hw_version;
+    system_configuration.sw_version = sw_version;
+    system_configuration.build_number = build_number;
     system_configuration.com_user_refresh_rate_ms = system_configuration_json.com_user_refresh_rate_ms;
 
     for(size_t i = 0; i < system_configuration_json.com_user_configurations_len; ++i) {

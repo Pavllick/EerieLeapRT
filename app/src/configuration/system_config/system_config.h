@@ -45,6 +45,7 @@ struct SystemConfig {
 	size_t ComUserConfig_m_count;
 	struct CanbusConfig CanbusConfig_m[8];
 	size_t CanbusConfig_m_count;
+	uint32_t sd_json_checksum;
 };
 
 #ifdef __cplusplus

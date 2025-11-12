@@ -65,7 +65,8 @@ static bool decode_SystemConfig(
 	&& ((zcbor_uint32_decode(state, (&(*result).build_number))))
 	&& ((zcbor_uint32_decode(state, (&(*result).com_user_refresh_rate_ms))))
 	&& ((zcbor_list_start_decode(state) && ((zcbor_multi_decode(0, 8, &(*result).ComUserConfig_m_count, (zcbor_decoder_t *)decode_ComUserConfig, state, (*&(*result).ComUserConfig_m), sizeof(struct ComUserConfig))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state)))
-	&& ((zcbor_list_start_decode(state) && ((zcbor_multi_decode(0, 8, &(*result).CanbusConfig_m_count, (zcbor_decoder_t *)decode_CanbusConfig, state, (*&(*result).CanbusConfig_m), sizeof(struct CanbusConfig))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state)))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
+	&& ((zcbor_list_start_decode(state) && ((zcbor_multi_decode(0, 8, &(*result).CanbusConfig_m_count, (zcbor_decoder_t *)decode_CanbusConfig, state, (*&(*result).CanbusConfig_m), sizeof(struct CanbusConfig))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state)))
+	&& ((zcbor_uint32_decode(state, (&(*result).sd_json_checksum))))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
 
 	if (false) {
 		/* For testing that the types of the arguments are correct.

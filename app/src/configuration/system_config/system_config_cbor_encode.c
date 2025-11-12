@@ -59,13 +59,14 @@ static bool encode_SystemConfig(
 {
 	zcbor_log("%s\r\n", __func__);
 
-	bool res = (((zcbor_list_start_encode(state, 7) && ((((zcbor_uint64_encode(state, (&(*input).device_id))))
+	bool res = (((zcbor_list_start_encode(state, 8) && ((((zcbor_uint64_encode(state, (&(*input).device_id))))
 	&& ((zcbor_uint32_encode(state, (&(*input).hw_version))))
 	&& ((zcbor_uint32_encode(state, (&(*input).sw_version))))
 	&& ((zcbor_uint32_encode(state, (&(*input).build_number))))
 	&& ((zcbor_uint32_encode(state, (&(*input).com_user_refresh_rate_ms))))
 	&& ((zcbor_list_start_encode(state, 8) && ((zcbor_multi_encode_minmax(0, 8, &(*input).ComUserConfig_m_count, (zcbor_encoder_t *)encode_ComUserConfig, state, (*&(*input).ComUserConfig_m), sizeof(struct ComUserConfig))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 8)))
-	&& ((zcbor_list_start_encode(state, 8) && ((zcbor_multi_encode_minmax(0, 8, &(*input).CanbusConfig_m_count, (zcbor_encoder_t *)encode_CanbusConfig, state, (*&(*input).CanbusConfig_m), sizeof(struct CanbusConfig))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 8)))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 7))));
+	&& ((zcbor_list_start_encode(state, 8) && ((zcbor_multi_encode_minmax(0, 8, &(*input).CanbusConfig_m_count, (zcbor_encoder_t *)encode_CanbusConfig, state, (*&(*input).CanbusConfig_m), sizeof(struct CanbusConfig))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 8)))
+	&& ((zcbor_uint32_encode(state, (&(*input).sd_json_checksum))))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 8))));
 
 	log_result(state, res, __func__);
 	return res;
