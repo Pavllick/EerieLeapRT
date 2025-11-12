@@ -16,13 +16,13 @@ using namespace eerie_leap::subsys::adc;
 
 LOG_MODULE_REGISTER(adc_config_ctrl_logger);
 
-AdcConfigurationManager::AdcConfigurationManager(ext_unique_ptr<ConfigurationService<AdcConfig>> adc_configuration_service) :
-    adc_configuration_service_(std::move(adc_configuration_service)),
+AdcConfigurationManager::AdcConfigurationManager(ext_unique_ptr<CborConfigurationService<AdcConfig>> cbor_configuration_service) :
+    cbor_configuration_service_(std::move(cbor_configuration_service)),
     adc_manager_(AdcFactory::Create()),
-    adc_config_(nullptr),
-    adc_configuration_(nullptr) {
+    config_(nullptr),
+    configuration_(nullptr) {
 
-    adc_configuration_cbor_parser_ = std::make_unique<AdcConfigurationCborParser>();
+    cbor_parser_ = std::make_unique<AdcConfigurationCborParser>();
     adc_manager_->Initialize();
 
     std::shared_ptr<IAdcManager> adc_manager = nullptr;
@@ -45,11 +45,11 @@ AdcConfigurationManager::AdcConfigurationManager(ext_unique_ptr<ConfigurationSer
     }
 }
 
-bool AdcConfigurationManager::Update(const AdcConfiguration& adc_configuration) {
-    auto adc_config = adc_configuration_cbor_parser_->Serialize(adc_configuration);
+bool AdcConfigurationManager::Update(const AdcConfiguration& configuration) {
+    auto config = cbor_parser_->Serialize(configuration);
 
     LOG_INF("Saving ADCs configuration.");
-    if(!adc_configuration_service_->Save(adc_config.get()))
+    if(!cbor_configuration_service_->Save(config.get()))
         return false;
 
     Get(true);
@@ -58,20 +58,20 @@ bool AdcConfigurationManager::Update(const AdcConfiguration& adc_configuration) 
 }
 
 std::shared_ptr<IAdcManager> AdcConfigurationManager::Get(bool force_load) {
-    if (adc_configuration_ != nullptr && !force_load) {
+    if (configuration_ != nullptr && !force_load) {
         return adc_manager_;
     }
 
-    auto adc_config = adc_configuration_service_->Load();
-    if(!adc_config.has_value())
+    auto config = cbor_configuration_service_->Load();
+    if(!config.has_value())
         return nullptr;
 
-    adc_config_raw_ = std::move(adc_config.value().config_raw);
-    adc_config_ = std::move(adc_config.value().config);
+    config_raw_ = std::move(config.value().config_raw);
+    config_ = std::move(config.value().config);
 
-    auto adc_configuration = adc_configuration_cbor_parser_->Deserialize(*adc_config_);
-    adc_configuration_ = make_shared_ext<AdcConfiguration>(adc_configuration);
-    adc_manager_->UpdateConfiguration(adc_configuration_);
+    auto configuration = cbor_parser_->Deserialize(*config_);
+    configuration_ = make_shared_ext<AdcConfiguration>(configuration);
+    adc_manager_->UpdateConfiguration(configuration_);
 
     return adc_manager_;
 }
@@ -95,12 +95,12 @@ bool AdcConfigurationManager::CreateDefaultConfiguration() {
     for(size_t i = 0; i < adc_manager_->GetChannelCount(); ++i)
         channel_configurations.push_back(make_shared_ext<AdcChannelConfiguration>(adc_calibrator));
 
-    auto adc_configuration = make_shared_ext<AdcConfiguration>();
-    adc_configuration->samples = 40;
-    adc_configuration->channel_configurations =
+    auto configuration = make_shared_ext<AdcConfiguration>();
+    configuration->samples = 40;
+    configuration->channel_configurations =
         make_shared_ext<std::vector<std::shared_ptr<AdcChannelConfiguration>>>(channel_configurations);
 
-    return Update(*adc_configuration.get());
+    return Update(*configuration.get());
 }
 
 } // namespace eerie_leap::domain::sensor_domain::configuration

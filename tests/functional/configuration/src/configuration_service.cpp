@@ -4,7 +4,7 @@
 #include "utilities/cbor/cbor_helpers.hpp"
 #include "configuration/system_config/system_config.h"
 #include "configuration/sensor_config/sensor_config.h"
-#include "configuration/services/configuration_service.h"
+#include "configuration/services/cbor_configuration_service.h"
 
 #include "subsys/device_tree/dt_fs.h"
 #include "subsys/fs/services/i_fs_service.h"
@@ -29,7 +29,7 @@ ZTEST(configuration_service, test_SystemConfig_Save_config_successfully_saved) {
     auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
 
     fs_service->Format();
-    auto system_config_service = make_unique_ext<ConfigurationService<SystemConfig>>("system_config", fs_service);
+    auto system_config_service = make_unique_ext<CborConfigurationService<SystemConfig>>("system_config", fs_service);
 
     auto save_res = system_config_service->Save(&system_config);
     zassert_true(save_res);
@@ -47,7 +47,7 @@ ZTEST(configuration_service, test_SystemConfig_Load_config_successfully_saved_an
     auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
 
     fs_service->Format();
-    auto system_config_service = make_unique_ext<ConfigurationService<SystemConfig>>("system_config", fs_service);
+    auto system_config_service = make_unique_ext<CborConfigurationService<SystemConfig>>("system_config", fs_service);
 
     auto save_res = system_config_service->Save(&system_config);
     zassert_true(save_res);
@@ -135,7 +135,7 @@ ZTEST(configuration_service, test_SensorsConfig_Save_config_successfully_saved) 
     auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
 
     fs_service->Format();
-    auto sensors_config_service = make_unique_ext<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
+    auto sensors_config_service = make_unique_ext<CborConfigurationService<SensorsConfig>>("sensors_config", fs_service);
 
     auto save_res = sensors_config_service->Save(&sensors_config);
     zassert_true(save_res);
@@ -222,7 +222,7 @@ ZTEST(configuration_service, test_SensorsConfig_Load_config_successfully_saved_a
     auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
 
     fs_service->Format();
-    auto sensors_config_service = make_unique_ext<ConfigurationService<SensorsConfig>>("sensors_config", fs_service);
+    auto sensors_config_service = make_unique_ext<CborConfigurationService<SensorsConfig>>("sensors_config", fs_service);
 
     // Save config
     auto save_res = sensors_config_service->Save(&sensors_config);

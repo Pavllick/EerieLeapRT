@@ -189,7 +189,7 @@ sensor_processor_HelperInstances sensor_processor_GetReadingInstances() {
     std::shared_ptr<GuidGenerator> guid_generator = std::make_shared<GuidGenerator>();
     std::shared_ptr<MathParserService> math_parser_service = std::make_shared<MathParserService>();
 
-    auto adc_configuration_service = make_unique_ext<ConfigurationService<AdcConfig>>("adc_config", fs_service);
+    auto adc_configuration_service = make_unique_ext<CborConfigurationService<AdcConfig>>("adc_config", fs_service);
     auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(std::move(adc_configuration_service));
 
     const auto adc_configuration = sensor_processor_GetTestConfiguration();

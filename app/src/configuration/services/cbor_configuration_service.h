@@ -28,7 +28,7 @@ using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::utilities::cbor;
 
 template <typename T>
-class ConfigurationService {
+class CborConfigurationService {
 private:
     const std::string configuration_dir_ = "config";
 
@@ -40,14 +40,14 @@ private:
 
     struct SaveTask {
         k_work work;
-        ConfigurationService<T>* instance;
+        CborConfigurationService<T>* instance;
         T* configuration;
         bool result;
     };
 
     struct LoadTask {
         k_work work;
-        ConfigurationService<T>* instance;
+        CborConfigurationService<T>* instance;
         std::optional<LoadedConfig<T>> result;
     };
 
@@ -119,7 +119,7 @@ private:
     }
 
 public:
-    ConfigurationService(std::string configuration_name, std::shared_ptr<IFsService> fs_service)
+    CborConfigurationService(std::string configuration_name, std::shared_ptr<IFsService> fs_service)
         : configuration_name_(std::move(configuration_name)), fs_service_(std::move(fs_service)) {
 
         task_save_.instance = this;

@@ -5,19 +5,19 @@ namespace eerie_leap::domain::logging_domain::configuration {
 
 LOG_MODULE_REGISTER(logging_config_ctrl_logger);
 
-LoggingConfigurationManager::LoggingConfigurationManager(ext_unique_ptr<ConfigurationService<LoggingConfig>> logging_configuration_service) :
-    logging_configuration_service_(std::move(logging_configuration_service)),
-    logging_config_(nullptr),
-    logging_configuration_(nullptr) {
+LoggingConfigurationManager::LoggingConfigurationManager(ext_unique_ptr<CborConfigurationService<LoggingConfig>> cbor_configuration_service) :
+    cbor_configuration_service_(std::move(cbor_configuration_service)),
+    config_(nullptr),
+    configuration_(nullptr) {
 
-    logging_configuration_cbor_parser_ = std::make_unique<LoggingConfigurationCborParser>();
-    std::shared_ptr<LoggingConfiguration> logging_configuration = nullptr;
+    cbor_parser_ = std::make_unique<LoggingConfigurationCborParser>();
+    std::shared_ptr<LoggingConfiguration> configuration = nullptr;
 
     try {
-        logging_configuration = Get(true);
+        configuration = Get(true);
     } catch(const std::exception& e) {}
 
-    if(logging_configuration == nullptr) {
+    if(configuration == nullptr) {
         if(!CreateDefaultConfiguration()) {
             LOG_ERR("Failed to create default Logging configuration.");
             return;
@@ -29,10 +29,10 @@ LoggingConfigurationManager::LoggingConfigurationManager(ext_unique_ptr<Configur
     LOG_INF("Logging Configuration Manager initialized successfully.");
 }
 
-bool LoggingConfigurationManager::Update(std::shared_ptr<LoggingConfiguration> logging_configuration) {
-    auto logging_config = logging_configuration_cbor_parser_->Serialize(*logging_configuration);
+bool LoggingConfigurationManager::Update(std::shared_ptr<LoggingConfiguration> configuration) {
+    auto config = cbor_parser_->Serialize(*configuration);
 
-    if(!logging_configuration_service_->Save(logging_config.get()))
+    if(!cbor_configuration_service_->Save(config.get()))
         return false;
 
     Get(true);
@@ -41,27 +41,27 @@ bool LoggingConfigurationManager::Update(std::shared_ptr<LoggingConfiguration> l
 }
 
 std::shared_ptr<LoggingConfiguration> LoggingConfigurationManager::Get(bool force_load) {
-    if (logging_configuration_ != nullptr && !force_load) {
-        return logging_configuration_;
+    if (configuration_ != nullptr && !force_load) {
+        return configuration_;
     }
 
-    auto logging_config = logging_configuration_service_->Load();
-    if(!logging_config.has_value())
+    auto config = cbor_configuration_service_->Load();
+    if(!config.has_value())
         return nullptr;
 
-    logging_config_raw_ = std::move(logging_config.value().config_raw);
-    logging_config_ = std::move(logging_config.value().config);
+    config_raw_ = std::move(config.value().config_raw);
+    config_ = std::move(config.value().config);
 
-    auto logging_configuration = logging_configuration_cbor_parser_->Deserialize(*logging_config_);
-    logging_configuration_ = make_shared_ext<LoggingConfiguration>(logging_configuration);
+    auto configuration = cbor_parser_->Deserialize(*config_);
+    configuration_ = make_shared_ext<LoggingConfiguration>(configuration);
 
-    return logging_configuration_;
+    return configuration_;
 }
 
 bool LoggingConfigurationManager::CreateDefaultConfiguration() {
-    auto logging_configuration = make_shared_ext<LoggingConfiguration>();
+    auto configuration = make_shared_ext<LoggingConfiguration>();
 
-    return Update(logging_configuration);
+    return Update(configuration);
 }
 
 } // namespace eerie_leap::domain::logging_domain::configuration

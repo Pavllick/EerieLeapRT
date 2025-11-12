@@ -10,14 +10,11 @@ using namespace eerie_leap::subsys::random;
 
 LOG_MODULE_REGISTER(system_config_mngr_logger);
 
-SystemConfigurationManager::SystemConfigurationManager(
-    ext_unique_ptr<ConfigurationService<SystemConfig>> cbor_configuration_service,
-    std::shared_ptr<IFsService> sd_fs_service)
-        : cbor_configuration_service_(std::move(cbor_configuration_service)),
-        sd_fs_service_(std::move(sd_fs_service)),
-        config_(nullptr),
-        configuration_(nullptr),
-        sd_json_checksum_(0) {
+SystemConfigurationManager::SystemConfigurationManager(ext_unique_ptr<CborConfigurationService<SystemConfig>> cbor_configuration_service)
+    : cbor_configuration_service_(std::move(cbor_configuration_service)),
+    config_(nullptr),
+    configuration_(nullptr),
+    sd_json_checksum_(0) {
 
     cbor_parser_ = std::make_unique<SystemConfigurationCborParser>();
     json_parser_ = std::make_unique<SystemConfigurationJsonParser>();

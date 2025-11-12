@@ -18,8 +18,7 @@ using namespace eerie_leap::domain::system_domain::models;
 
 class SystemConfigurationManager {
 private:
-    ext_unique_ptr<ConfigurationService<SystemConfig>> cbor_configuration_service_;
-    std::shared_ptr<IFsService> sd_fs_service_;
+    ext_unique_ptr<CborConfigurationService<SystemConfig>> cbor_configuration_service_;
 
     ext_unique_ptr<ExtVector> config_raw_;
     ext_unique_ptr<SystemConfig> config_;
@@ -34,9 +33,7 @@ private:
     bool CreateDefaultConfiguration();
 
 public:
-    explicit SystemConfigurationManager(
-        ext_unique_ptr<ConfigurationService<SystemConfig>> cbor_configuration_service,
-        std::shared_ptr<IFsService> sd_fs_service);
+    explicit SystemConfigurationManager(ext_unique_ptr<CborConfigurationService<SystemConfig>> cbor_configuration_service);
 
     bool UpdateBuildNumber(uint32_t build_number);
     bool UpdateComUsers(const std::vector<ComUserConfiguration>& com_user_configurations);
