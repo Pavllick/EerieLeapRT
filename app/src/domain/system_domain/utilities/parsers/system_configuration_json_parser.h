@@ -16,9 +16,9 @@ class SystemConfigurationJsonParser {
 public:
     SystemConfigurationJsonParser() = default;
 
-    ext_unique_ptr<JsonSystemConfig> Serialize(const SystemConfiguration& system_configuration);
+    ext_unique_ptr<JsonSystemConfig> Serialize(const SystemConfiguration& configuration);
     SystemConfiguration Deserialize(
-        const JsonSystemConfig& system_config,
+        const JsonSystemConfig& config,
         uint64_t device_id,
         uint32_t hw_version,
         uint32_t sw_version,

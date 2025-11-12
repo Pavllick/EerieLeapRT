@@ -4,32 +4,32 @@
 
 namespace eerie_leap::configuration::json::configs {
 
-struct ComUserConfigJson {
+struct JsonComUserConfig {
     uint64_t device_id;
     uint32_t server_id;
 };
 
-struct CanbusConfigJson {
+struct JsonCanbusConfig {
     uint32_t bus_channel;
     uint32_t bitrate;
 };
 
 struct JsonSystemConfig {
     uint32_t com_user_refresh_rate_ms;
-    ComUserConfigJson com_user_configs[8];
+    JsonComUserConfig com_user_configs[8];
     size_t com_user_configs_len;
-    CanbusConfigJson canbus_configs[8];
+    JsonCanbusConfig canbus_configs[8];
     size_t canbus_configs_len;
 };
 
 static json_obj_descr json_com_user_config_descr[] = {
-    JSON_OBJ_DESCR_PRIM(ComUserConfigJson, device_id, JSON_TOK_UINT64),
-    JSON_OBJ_DESCR_PRIM(ComUserConfigJson, server_id, JSON_TOK_UINT),
+    JSON_OBJ_DESCR_PRIM(JsonComUserConfig, device_id, JSON_TOK_UINT64),
+    JSON_OBJ_DESCR_PRIM(JsonComUserConfig, server_id, JSON_TOK_UINT),
 };
 
 static json_obj_descr json_canbus_config_descr[] = {
-    JSON_OBJ_DESCR_PRIM(CanbusConfigJson, bus_channel, JSON_TOK_UINT),
-    JSON_OBJ_DESCR_PRIM(CanbusConfigJson, bitrate, JSON_TOK_UINT),
+    JSON_OBJ_DESCR_PRIM(JsonCanbusConfig, bus_channel, JSON_TOK_UINT),
+    JSON_OBJ_DESCR_PRIM(JsonCanbusConfig, bitrate, JSON_TOK_UINT),
 };
 
 static json_obj_descr json_system_config_descr[] = {

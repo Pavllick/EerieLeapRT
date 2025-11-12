@@ -16,13 +16,13 @@ SensorsJsonParser::SensorsJsonParser(
     std::shared_ptr<MathParserService> math_parser_service)
     : math_parser_service_(std::move(math_parser_service)) {}
 
-ext_unique_ptr<ExtVector> SensorsJsonParser::Serialize(
+ext_unique_ptr<JsonSensorsConfig> SensorsJsonParser::Serialize(
     const std::vector<std::shared_ptr<Sensor>>& sensors,
     uint32_t gpio_channel_count,
     uint32_t adc_channel_count) {
 
-    SensorsJsonDto sensors_json;
-    memset(&sensors_json, 0, sizeof(SensorsJsonDto));
+    auto config = make_unique_ext<JsonSensorsConfig>();
+    memset(config.get(), 0, sizeof(JsonSensorsConfig));
 
     SensorsOrderResolver order_resolver;
 
@@ -33,8 +33,8 @@ ext_unique_ptr<ExtVector> SensorsJsonParser::Serialize(
         sensor->configuration.UpdateConnectionString();
         SensorValidator::ValidateSensor(*sensor, gpio_channel_count, adc_channel_count);
 
-        SensorJsonDto sensor_json;
-        memset(&sensor_json, 0, sizeof(SensorJsonDto));
+        JsonSensorConfig sensor_json;
+        memset(&sensor_json, 0, sizeof(JsonSensorConfig));
 
         sensor_json.id = sensor->id.c_str();
         sensor_json.configuration.type = GetSensorTypeName(sensor->configuration.type);
@@ -77,8 +77,8 @@ ext_unique_ptr<ExtVector> SensorsJsonParser::Serialize(
         sensor_json.metadata.name = sensor->metadata.name.c_str();
         sensor_json.metadata.description = sensor->metadata.description.c_str();
 
-        sensors_json.sensors[i] = sensor_json;
-        sensors_json.sensors_len++;
+        config->sensors[i] = sensor_json;
+        config->sensors_len++;
 
         order_resolver.AddSensor(sensor);
     }
@@ -86,58 +86,40 @@ ext_unique_ptr<ExtVector> SensorsJsonParser::Serialize(
     // Validate dependencies
     order_resolver.GetProcessingOrder();
 
-    auto buf_size = json_calc_encoded_len(sensors_descr, ARRAY_SIZE(sensors_descr), &sensors_json);
-    if(buf_size < 0)
-        throw std::runtime_error("Failed to calculate buffer size.");
-
-    // Add 1 for null terminator
-    auto buffer = make_unique_ext<ExtVector>(buf_size + 1);
-
-    int res = json_obj_encode_buf(sensors_descr, ARRAY_SIZE(sensors_descr), &sensors_json, (char*)buffer->data(), buffer->size());
-    if(res != 0)
-        throw std::runtime_error("Failed to serialize sensors.");
-
-    return buffer;
+    return config;
 }
 
 std::vector<std::shared_ptr<Sensor>> SensorsJsonParser::Deserialize(
-    const std::span<const uint8_t>& json,
+    const JsonSensorsConfig& config,
     uint32_t gpio_channel_count,
     uint32_t adc_channel_count) {
 
-	SensorsJsonDto sensors_json;
-	const int expected_return_code = BIT_MASK(ARRAY_SIZE(sensors_descr));
-
-	int ret = json_obj_parse((char*)json.data(), json.size(), sensors_descr, ARRAY_SIZE(sensors_descr), &sensors_json);
-	if(ret != expected_return_code)
-        throw std::runtime_error("Invalid JSON payload.");
-
     std::vector<std::shared_ptr<Sensor>> sensors;
 
-    for(size_t i = 0; i < sensors_json.sensors_len; ++i) {
-        auto sensor = make_shared_ext<Sensor>(sensors_json.sensors[i].id);
+    for(size_t i = 0; i < config.sensors_len; ++i) {
+        auto sensor = make_shared_ext<Sensor>(config.sensors[i].id);
 
-        sensor->metadata.name = sensors_json.sensors[i].metadata.name;
-        sensor->metadata.unit = sensors_json.sensors[i].metadata.unit == nullptr ? "" : sensors_json.sensors[i].metadata.unit;
-        sensor->metadata.description = sensors_json.sensors[i].metadata.description == nullptr ? "" : sensors_json.sensors[i].metadata.description;
+        sensor->metadata.name = config.sensors[i].metadata.name;
+        sensor->metadata.unit = config.sensors[i].metadata.unit == nullptr ? "" : config.sensors[i].metadata.unit;
+        sensor->metadata.description = config.sensors[i].metadata.description == nullptr ? "" : config.sensors[i].metadata.description;
 
-        sensor->configuration.type = GetSensorType(sensors_json.sensors[i].configuration.type);
+        sensor->configuration.type = GetSensorType(config.sensors[i].configuration.type);
         sensor->configuration.channel = std::nullopt;
         if(sensor->configuration.type == SensorType::PHYSICAL_ANALOG || sensor->configuration.type == SensorType::PHYSICAL_INDICATOR)
-            sensor->configuration.channel = sensors_json.sensors[i].configuration.channel;
-        sensor->configuration.sampling_rate_ms = sensors_json.sensors[i].configuration.sampling_rate_ms;
+            sensor->configuration.channel = config.sensors[i].configuration.channel;
+        sensor->configuration.sampling_rate_ms = config.sensors[i].configuration.sampling_rate_ms;
 
-        sensor->configuration.connection_string = sensors_json.sensors[i].configuration.connection_string;
+        sensor->configuration.connection_string = config.sensors[i].configuration.connection_string;
         sensor->configuration.UnwrapConnectionString();
 
         InterpolationMethod interpolation_method = InterpolationMethod::NONE;
         if(sensor->configuration.type == SensorType::PHYSICAL_ANALOG)
-            interpolation_method = GetInterpolationMethod(sensors_json.sensors[i].configuration.interpolation_method);
+            interpolation_method = GetInterpolationMethod(config.sensors[i].configuration.interpolation_method);
 
-        if(interpolation_method != InterpolationMethod::NONE && sensors_json.sensors[i].configuration.calibration_table_len > 0) {
+        if(interpolation_method != InterpolationMethod::NONE && config.sensors[i].configuration.calibration_table_len > 0) {
             std::vector<CalibrationData> calibration_table;
-            for(size_t j = 0; j < sensors_json.sensors[i].configuration.calibration_table_len; ++j) {
-                const auto& calibration_data = sensors_json.sensors[i].configuration.calibration_table[j];
+            for(size_t j = 0; j < config.sensors[i].configuration.calibration_table_len; ++j) {
+                const auto& calibration_data = config.sensors[i].configuration.calibration_table[j];
 
                 calibration_table.push_back({
                     .voltage = calibration_data.voltage,
@@ -163,10 +145,10 @@ std::vector<std::shared_ptr<Sensor>> SensorsJsonParser::Deserialize(
             sensor->configuration.voltage_interpolator = nullptr;
         }
 
-        if(sensors_json.sensors[i].configuration.expression != nullptr && strcmp(sensors_json.sensors[i].configuration.expression, "") != 0) {
+        if(config.sensors[i].configuration.expression != nullptr && strcmp(config.sensors[i].configuration.expression, "") != 0) {
             sensor->configuration.expression_evaluator = make_unique_ext<ExpressionEvaluator>(
                 math_parser_service_,
-                std::string(sensors_json.sensors[i].configuration.expression));
+                std::string(config.sensors[i].configuration.expression));
         } else {
             sensor->configuration.expression_evaluator = nullptr;
         }

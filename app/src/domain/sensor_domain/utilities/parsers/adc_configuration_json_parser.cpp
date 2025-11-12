@@ -1,4 +1,7 @@
 #include <algorithm>
+#include <vector>
+
+#include "utilities/voltage_interpolator/calibration_data.h"
 
 #include "adc_configuration_json_parser.h"
 
@@ -8,18 +11,18 @@ using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::voltage_interpolator;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 
-ext_unique_ptr<ExtVector> AdcConfigurationJsonParser::Serialize(const AdcConfiguration& adc_configuration) {
-    AdcConfigurationJsonDto adc_configuration_json;
-    memset(&adc_configuration_json, 0, sizeof(AdcConfigurationJsonDto));
+ext_unique_ptr<JsonAdcConfig> AdcConfigurationJsonParser::Serialize(const AdcConfiguration& configuration) {
+    auto config = make_unique_ext<JsonAdcConfig>();
+    memset(config.get(), 0, sizeof(JsonAdcConfig));
 
-    adc_configuration_json.samples = adc_configuration.samples;
+    config->samples = configuration.samples;
 
-    for(size_t i = 0; i < adc_configuration.channel_configurations->size(); ++i) {
-        AdcChannelConfigurationJsonDto channel_configuration;
-        memset(&channel_configuration, 0, sizeof(AdcChannelConfigurationJsonDto));
+    for(size_t i = 0; i < configuration.channel_configurations->size(); ++i) {
+        JsonAdcChannelConfig channel_configuration;
+        memset(&channel_configuration, 0, sizeof(JsonAdcChannelConfig));
 
-        auto interpolation_method = adc_configuration.channel_configurations->at(i)->calibrator != nullptr
-            ? adc_configuration.channel_configurations->at(i)->calibrator->GetInterpolationMethod()
+        auto interpolation_method = configuration.channel_configurations->at(i)->calibrator != nullptr
+            ? configuration.channel_configurations->at(i)->calibrator->GetInterpolationMethod()
             : InterpolationMethod::NONE;
 
         if(interpolation_method == InterpolationMethod::NONE)
@@ -27,7 +30,7 @@ ext_unique_ptr<ExtVector> AdcConfigurationJsonParser::Serialize(const AdcConfigu
 
         channel_configuration.interpolation_method = GetInterpolationMethodName(interpolation_method);
 
-        auto& calibration_table = *adc_configuration.channel_configurations->at(i)->calibrator->GetCalibrationTable();
+        auto& calibration_table = *configuration.channel_configurations->at(i)->calibrator->GetCalibrationTable();
         channel_configuration.calibration_table_len = calibration_table.size();
 
         if(calibration_table.size() < 2)
@@ -45,39 +48,21 @@ ext_unique_ptr<ExtVector> AdcConfigurationJsonParser::Serialize(const AdcConfigu
             channel_configuration.calibration_table[j].value = calibration_data.value;
         }
 
-        adc_configuration_json.channel_configurations[i] = channel_configuration;
-        adc_configuration_json.channel_configurations_len++;
+        config->channel_configurations[i] = channel_configuration;
+        config->channel_configurations_len++;
     }
 
-    auto buf_size = json_calc_encoded_len(adc_configuration_descr, ARRAY_SIZE(adc_configuration_descr), &adc_configuration_json);
-    if(buf_size < 0)
-        throw std::runtime_error("Failed to calculate buffer size.");
-
-    // Add 1 for null terminator
-    auto buffer = make_unique_ext<ExtVector>(buf_size + 1);
-
-    int res = json_obj_encode_buf(adc_configuration_descr, ARRAY_SIZE(adc_configuration_descr), &adc_configuration_json, (char*)buffer->data(), buffer->size());
-    if(res != 0)
-        throw std::runtime_error("Failed to serialize ADC configuration.");
-
-    return buffer;
+    return config;
 }
 
-AdcConfiguration AdcConfigurationJsonParser::Deserialize(const std::span<const uint8_t>& json) {
-	AdcConfigurationJsonDto adc_configuration_json;
-	const int expected_return_code = BIT_MASK(ARRAY_SIZE(adc_configuration_descr));
+AdcConfiguration AdcConfigurationJsonParser::Deserialize(const JsonAdcConfig& config) {
+    AdcConfiguration configuration;
 
-	int ret = json_obj_parse((char*)json.data(), json.size(), adc_configuration_descr, ARRAY_SIZE(adc_configuration_descr), &adc_configuration_json);
-	if(ret != expected_return_code)
-        throw std::runtime_error("Invalid JSON payload.");
+    configuration.samples = static_cast<uint16_t>(config.samples);
+    configuration.channel_configurations = make_shared_ext<std::vector<std::shared_ptr<AdcChannelConfiguration>>>();
 
-    AdcConfiguration adc_configuration;
-
-    adc_configuration.samples = static_cast<uint16_t>(adc_configuration_json.samples);
-    adc_configuration.channel_configurations = make_shared_ext<std::vector<std::shared_ptr<AdcChannelConfiguration>>>();
-
-    for(size_t i = 0; i < adc_configuration_json.channel_configurations_len; ++i) {
-        const auto& adc_channel_config = adc_configuration_json.channel_configurations[i];
+    for(size_t i = 0; i < config.channel_configurations_len; ++i) {
+        const auto& adc_channel_config = config.channel_configurations[i];
         auto adc_channel_configuration = make_shared_ext<AdcChannelConfiguration>();
 
         auto interpolation_method = GetInterpolationMethod(adc_channel_config.interpolation_method);
@@ -100,10 +85,10 @@ AdcConfiguration AdcConfigurationJsonParser::Deserialize(const std::span<const u
         auto calibration_table_ptr = make_shared_ext<std::vector<CalibrationData>>(calibration_table);
         adc_channel_configuration->calibrator = make_shared_ext<AdcCalibrator>(interpolation_method, calibration_table_ptr);
 
-        adc_configuration.channel_configurations->push_back(adc_channel_configuration);
+        configuration.channel_configurations->push_back(adc_channel_configuration);
     }
 
-    return adc_configuration;
+    return configuration;
 }
 
 } // eerie_leap::domain::sensor_domain::utilities::parsers

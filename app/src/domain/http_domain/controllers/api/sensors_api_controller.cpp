@@ -3,16 +3,15 @@
 
 #include "utilities/voltage_interpolator/interpolation_method.h"
 #include "utilities/memory/heap_allocator.h"
-#include "domain/sensor_domain/models/sensor.h"
-#include "utilities/voltage_interpolator/interpolation_method.h"
-#include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
-#include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
+#include "configuration/json/traits/sensors_config_trait.h"
+
 #include "sensors_api_controller.h"
 
 namespace eerie_leap::domain::http_domain::controllers::api {
 
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::voltage_interpolator;
+using namespace eerie_leap::configuration::json::traits;
 
 LOG_MODULE_REGISTER(sensors_api_controller_logger);
 
@@ -25,6 +24,7 @@ std::unique_ptr<SensorsJsonParser> SensorsApiController::sensors_json_parser_ = 
 std::shared_ptr<MathParserService> SensorsApiController::math_parser_service_ = nullptr;
 std::shared_ptr<SensorsConfigurationManager> SensorsApiController::sensors_configuration_manager_ = nullptr;
 std::shared_ptr<ProcessingSchedulerService> SensorsApiController::processing_scheduler_service_ = nullptr;
+std::unique_ptr<JsonSerializer<JsonSensorsConfig>> SensorsApiController::json_serializer_ = nullptr;
 
 SensorsApiController::SensorsApiController(
     std::shared_ptr<MathParserService> math_parser_service,
@@ -45,6 +45,11 @@ SensorsApiController::SensorsApiController(
 
     if(!processing_scheduler_service_)
         processing_scheduler_service_ = std::move(processing_scheduler_service);
+
+    if(!json_serializer_)
+        json_serializer_ = std::make_unique<JsonSerializer<JsonSensorsConfig>>(
+            JsonTrait<JsonSensorsConfig>::object_descriptor,
+            JsonTrait<JsonSensorsConfig>::object_descriptor_size);
 }
 
 int SensorsApiController::sensors_config_get_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data) {
@@ -54,7 +59,8 @@ int SensorsApiController::sensors_config_get_handler(http_client_ctx *client, en
     if (status == HTTP_SERVER_DATA_FINAL) {
         const auto* sensors = sensors_configuration_manager_->Get();
         // TODO: Get GPIO and ADC channel count
-        sensors_config_get_buffer_ = sensors_json_parser_->Serialize(*sensors, 16, 16);
+        auto config = sensors_json_parser_->Serialize(*sensors, 16, 16);
+        sensors_config_get_buffer_ = json_serializer_->Serialize(*config);
 
         response_ctx->body = (uint8_t*)sensors_config_get_buffer_->data();
         response_ctx->body_len = sensors_config_get_buffer_->size();
@@ -66,7 +72,8 @@ int SensorsApiController::sensors_config_get_handler(http_client_ctx *client, en
 
 void SensorsApiController::UpdateSensorsConfig(const std::span<const uint8_t>& buffer) {
     // TODO: Get GPIO and ADC channel count
-    auto sensors = sensors_json_parser_->Deserialize(buffer, 16, 16);
+    auto json_sensors_config = json_serializer_->Deserialize(buffer);
+    auto sensors = sensors_json_parser_->Deserialize(*json_sensors_config, 16, 16);
 
     if(!sensors_configuration_manager_->Update(sensors))
         throw std::runtime_error("Failed to update sensors configuration.");

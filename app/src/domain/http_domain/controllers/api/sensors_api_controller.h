@@ -7,6 +7,8 @@
 #include <zephyr/data/json.h>
 
 #include "utilities/memory/heap_allocator.h"
+#include "configuration/json/configs/json_sensors_config.h"
+#include "configuration/json/json_serializer.h"
 #include "domain/sensor_domain/utilities/parsers/sensors_json_parser.h"
 #include "domain/sensor_domain/configuration/sensors_configuration_manager.h"
 #include "domain/sensor_domain/services/processing_scheduler_service.h"
@@ -14,6 +16,9 @@
 namespace eerie_leap::domain::http_domain::controllers::api {
 
 using namespace eerie_leap::utilities::memory;
+using namespace eerie_leap::configuration::json::configs;
+using namespace eerie_leap::configuration::json;
+
 using namespace eerie_leap::domain::sensor_domain::utilities::parsers;
 using namespace eerie_leap::domain::sensor_domain::configuration;
 using namespace eerie_leap::domain::sensor_domain::services;
@@ -29,6 +34,7 @@ private:
     static std::shared_ptr<MathParserService> math_parser_service_;
     static std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager_;
     static std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service_;
+    static std::unique_ptr<JsonSerializer<JsonSensorsConfig>> json_serializer_;
 
     static void UpdateSensorsConfig(const std::span<const uint8_t>& buffer);
 

@@ -84,6 +84,7 @@ using namespace eerie_leap::subsys::cfb;
 using namespace eerie_leap::subsys::modbus;
 using namespace eerie_leap::subsys::time;
 
+using namespace eerie_leap::configuration::json::configs;
 using namespace eerie_leap::configuration::services;
 
 using namespace eerie_leap::domain::canbus_domain::services;

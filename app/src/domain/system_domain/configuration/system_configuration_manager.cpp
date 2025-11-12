@@ -78,26 +78,6 @@ bool SystemConfigurationManager::ApplyJsonConfiguration() {
         return true;
     }
 
-    auto json_config = json_parser_->Serialize(*configuration_);
-    if(json_config == nullptr)
-        return false;
-
-    if(!json_configuration_service_->Save(json_config.get())) {
-        LOG_ERR("Failed to save JSON configuration.");
-        return false;
-    }
-
-    json_config_loaded = json_configuration_service_->Load();
-    if(!json_config_loaded.has_value()) {
-        LOG_ERR("Failed to load newly created JSON configuration.");
-        return false;
-    }
-
-    LOG_INF("JSON configuration saved successfully.");
-
-    uint32_t crc = crc32_ieee(json_config_loaded->config_raw->data(), json_config_loaded->config_raw->size());
-    json_config_checksum_ = crc;
-
     return Update(configuration_);
 }
 
@@ -185,16 +165,27 @@ bool SystemConfigurationManager::CreateDefaultConfiguration() {
 }
 
 bool SystemConfigurationManager::Update(std::shared_ptr<SystemConfiguration> configuration) {
+    if(json_configuration_service_->IsAvailable()) {
+        auto json_config = json_parser_->Serialize(*configuration);
+        json_configuration_service_->Save(json_config.get());
+
+        auto json_config_loaded = json_configuration_service_->Load();
+        if(!json_config_loaded.has_value()) {
+            LOG_ERR("Failed to load newly updated JSON configuration.");
+            return false;
+        }
+
+        LOG_INF("JSON configuration updated successfully.");
+
+        uint32_t crc = crc32_ieee(json_config_loaded->config_raw->data(), json_config_loaded->config_raw->size());
+        json_config_checksum_ = crc;
+    }
+
     auto cbor_config = cbor_parser_->Serialize(*configuration);
     cbor_config->json_config_checksum = json_config_checksum_;
 
     if(!cbor_configuration_service_->Save(cbor_config.get()))
         return false;
-
-    if(json_configuration_service_->IsAvailable()) {
-        auto json_config = json_parser_->Serialize(*configuration);
-        json_configuration_service_->Save(json_config.get());
-    }
 
     Get(true);
 
