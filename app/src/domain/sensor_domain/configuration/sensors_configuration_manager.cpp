@@ -55,14 +55,18 @@ bool SensorsConfigurationManager::ApplyJsonConfiguration() {
         if(crc == json_config_checksum_)
             return true;
 
-        auto sensors = json_parser_->Deserialize(
-            *json_config_loaded->config,
-            gpio_channel_count_,
-            adc_channel_count_);
+        try {
+            auto sensors = json_parser_->Deserialize(
+                *json_config_loaded->config,
+                gpio_channel_count_,
+                adc_channel_count_);
 
-        bool result = Update(sensors);
-        if(!result)
+            if(!Update(sensors))
+                return false;
+        } catch(const std::exception& e) {
+            LOG_ERR("Failed to deserialize JSON configuration. %s", e.what());
             return false;
+        }
 
         LOG_INF("JSON configuration loaded successfully.");
 
@@ -73,33 +77,38 @@ bool SensorsConfigurationManager::ApplyJsonConfiguration() {
 }
 
 bool SensorsConfigurationManager::Update(const std::vector<std::shared_ptr<Sensor>>& sensors) {
-    if(json_configuration_service_->IsAvailable()) {
-        auto json_config = json_parser_->Serialize(
+    try {
+        if(json_configuration_service_->IsAvailable()) {
+            auto json_config = json_parser_->Serialize(
+                sensors,
+                gpio_channel_count_,
+                adc_channel_count_);
+            json_configuration_service_->Save(json_config.get());
+
+            auto json_config_loaded = json_configuration_service_->Load();
+            if(!json_config_loaded.has_value()) {
+                LOG_ERR("Failed to load newly updated JSON configuration.");
+                return false;
+            }
+
+            LOG_INF("JSON configuration updated successfully.");
+
+            uint32_t crc = crc32_ieee(json_config_loaded->config_raw->data(), json_config_loaded->config_raw->size());
+            json_config_checksum_ = crc;
+        }
+
+        auto cbor_config = cbor_parser_->Serialize(
             sensors,
             gpio_channel_count_,
             adc_channel_count_);
-        json_configuration_service_->Save(json_config.get());
+        cbor_config->json_config_checksum = json_config_checksum_;
 
-        auto json_config_loaded = json_configuration_service_->Load();
-        if(!json_config_loaded.has_value()) {
-            LOG_ERR("Failed to load newly updated JSON configuration.");
+        if(!cbor_configuration_service_->Save(cbor_config.get()))
             return false;
-        }
-
-        LOG_INF("JSON configuration updated successfully.");
-
-        uint32_t crc = crc32_ieee(json_config_loaded->config_raw->data(), json_config_loaded->config_raw->size());
-        json_config_checksum_ = crc;
-    }
-
-    auto cbor_config = cbor_parser_->Serialize(
-        sensors,
-        gpio_channel_count_,
-        adc_channel_count_);
-    cbor_config->json_config_checksum = json_config_checksum_;
-
-    if(!cbor_configuration_service_->Save(cbor_config.get()))
+    } catch(const std::exception& e) {
+        LOG_ERR("Failed to update Sensors configuration. %s", e.what());
         return false;
+    }
 
     Get(true);
 

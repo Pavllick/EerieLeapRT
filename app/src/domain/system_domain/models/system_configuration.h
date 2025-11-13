@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <string>
 
 #include "com_user_configuration.h"
 #include "canbus_configuration.h"

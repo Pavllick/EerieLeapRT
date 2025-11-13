@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 #include "utilities/memory/heap_allocator.h"
 #include "configuration/cbor/cbor_logging_config/cbor_logging_config.h"
 #include "domain/logging_domain/models/logging_configuration.h"

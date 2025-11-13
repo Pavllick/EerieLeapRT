@@ -1,8 +1,11 @@
+#include "system_configuration_validator.h"
 #include "system_configuration_json_parser.h"
 
 namespace eerie_leap::domain::system_domain::utilities::parsers {
 
 ext_unique_ptr<JsonSystemConfig> SystemConfigurationJsonParser::Serialize(const SystemConfiguration& configuration) {
+    SystemConfigurationValidator::ValidateSystemConfiguration(configuration);
+
     auto config = make_unique_ext<JsonSystemConfig>();
     memset(config.get(), 0, sizeof(JsonSystemConfig));
 
@@ -59,6 +62,8 @@ SystemConfiguration SystemConfigurationJsonParser::Deserialize(
             .bitrate = canbus_config.bitrate
         });
     }
+
+    SystemConfigurationValidator::ValidateSystemConfiguration(configuration);
 
     return configuration;
 }

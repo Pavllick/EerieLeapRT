@@ -1,7 +1,5 @@
 #pragma once
 
-#include <span>
-
 #include <zephyr/data/json.h>
 
 #include "utilities/memory/heap_allocator.h"

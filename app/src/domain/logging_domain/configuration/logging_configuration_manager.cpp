@@ -47,11 +47,15 @@ bool LoggingConfigurationManager::ApplyJsonConfiguration() {
         if(crc == json_config_checksum_)
             return true;
 
-        auto configuration = json_parser_->Deserialize(*json_config_loaded->config);
+        try {
+            auto configuration = json_parser_->Deserialize(*json_config_loaded->config);
 
-        bool result = Update(configuration);
-        if(!result)
+            if(!Update(configuration))
+                return false;
+        } catch(const std::exception& e) {
+            LOG_ERR("Failed to deserialize JSON configuration. %s", e.what());
             return false;
+        }
 
         LOG_INF("JSON configuration loaded successfully.");
 
@@ -62,27 +66,32 @@ bool LoggingConfigurationManager::ApplyJsonConfiguration() {
 }
 
 bool LoggingConfigurationManager::Update(const LoggingConfiguration& configuration) {
-    if(json_configuration_service_->IsAvailable()) {
-        auto json_config = json_parser_->Serialize(configuration);
-        json_configuration_service_->Save(json_config.get());
+    try {
+        if(json_configuration_service_->IsAvailable()) {
+            auto json_config = json_parser_->Serialize(configuration);
+            json_configuration_service_->Save(json_config.get());
 
-        auto json_config_loaded = json_configuration_service_->Load();
-        if(!json_config_loaded.has_value()) {
-            LOG_ERR("Failed to load newly updated JSON configuration.");
-            return false;
+            auto json_config_loaded = json_configuration_service_->Load();
+            if(!json_config_loaded.has_value()) {
+                LOG_ERR("Failed to load newly updated JSON configuration.");
+                return false;
+            }
+
+            LOG_INF("JSON configuration updated successfully.");
+
+            uint32_t crc = crc32_ieee(json_config_loaded->config_raw->data(), json_config_loaded->config_raw->size());
+            json_config_checksum_ = crc;
         }
 
-        LOG_INF("JSON configuration updated successfully.");
+        auto cbor_config = cbor_parser_->Serialize(configuration);
+        cbor_config->json_config_checksum = json_config_checksum_;
 
-        uint32_t crc = crc32_ieee(json_config_loaded->config_raw->data(), json_config_loaded->config_raw->size());
-        json_config_checksum_ = crc;
-    }
-
-    auto cbor_config = cbor_parser_->Serialize(configuration);
-    cbor_config->json_config_checksum = json_config_checksum_;
-
-    if(!cbor_configuration_service_->Save(cbor_config.get()))
+        if(!cbor_configuration_service_->Save(cbor_config.get()))
+            return false;
+    } catch(const std::exception& e) {
+        LOG_ERR("Failed to update Logging configuration. %s", e.what());
         return false;
+    }
 
     Get(true);
 
