@@ -48,7 +48,9 @@ ZTEST(adc_configuration_manager, test_AdcConfigurationManager_Save_config_succes
     fs_service->Format();
 
     auto adc_configuration_service = make_unique_ext<CborConfigurationService<CborAdcConfig>>("adc_config", fs_service);
-    auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(std::move(adc_configuration_service));
+    auto json_configuration_service = make_unique_ext<JsonConfigurationService<JsonAdcConfig>>("adc_config", fs_service);
+    auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(
+        std::move(adc_configuration_service), std::move(json_configuration_service));
 
     auto adc_configuration = adc_configuration_manager_GetTestConfiguration();
 
@@ -79,7 +81,9 @@ ZTEST(adc_configuration_manager, test_AdcConfigurationManager_Save_config_and_Lo
     fs_service->Format();
 
     auto adc_configuration_service = make_unique_ext<CborConfigurationService<CborAdcConfig>>("adc_config", fs_service);
-    auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(std::move(adc_configuration_service));
+    auto json_configuration_service = make_unique_ext<JsonConfigurationService<JsonAdcConfig>>("adc_config", fs_service);
+    auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(
+        std::move(adc_configuration_service), std::move(json_configuration_service));
 
     auto adc_configuration = adc_configuration_manager_GetTestConfiguration();
 
@@ -87,8 +91,10 @@ ZTEST(adc_configuration_manager, test_AdcConfigurationManager_Save_config_and_Lo
     zassert_true(result);
 
     adc_configuration_service = make_unique_ext<CborConfigurationService<CborAdcConfig>>("adc_config", fs_service);
+    json_configuration_service = make_unique_ext<JsonConfigurationService<JsonAdcConfig>>("adc_config", fs_service);
     adc_configuration_manager = nullptr;
-    adc_configuration_manager = std::make_shared<AdcConfigurationManager>(std::move(adc_configuration_service));
+    adc_configuration_manager = std::make_shared<AdcConfigurationManager>(
+        std::move(adc_configuration_service), std::move(json_configuration_service));
 
     auto adc_manager = adc_configuration_manager->Get();
 

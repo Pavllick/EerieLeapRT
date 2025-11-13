@@ -118,12 +118,14 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
 
     fs_service->Format();
 
-    auto sensors_configuration_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
+    auto cbor_sensors_configuration_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
+    auto json_sensors_configuration_service = make_unique_ext<JsonConfigurationService<JsonSensorsConfig>>("sensors_config", fs_service);
 
     auto math_parser_service = std::make_shared<MathParserService>();
     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
         math_parser_service,
-        std::move(sensors_configuration_service),
+        std::move(cbor_sensors_configuration_service),
+        std::move(json_sensors_configuration_service),
         16,
         16);
 
@@ -168,23 +170,27 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
 
     fs_service->Format();
 
-    auto sensors_configuration_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
+    auto cbor_sensors_configuration_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
+    auto json_sensors_configuration_service = make_unique_ext<JsonConfigurationService<JsonSensorsConfig>>("sensors_config", fs_service);
 
     auto math_parser_service = std::make_shared<MathParserService>();
     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
         math_parser_service,
-        std::move(sensors_configuration_service),
+        std::move(cbor_sensors_configuration_service),
+        std::move(json_sensors_configuration_service),
         16,
         16);
 
     auto sensors = sensors_configuration_manager_SetupTestSensors(math_parser_service);
     sensors_configuration_manager->Update(sensors);
 
-    sensors_configuration_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
+    cbor_sensors_configuration_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
+    json_sensors_configuration_service = make_unique_ext<JsonConfigurationService<JsonSensorsConfig>>("sensors_config", fs_service);
     sensors_configuration_manager = nullptr;
     sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
         math_parser_service,
-        std::move(sensors_configuration_service),
+        std::move(cbor_sensors_configuration_service),
+        std::move(json_sensors_configuration_service),
         16,
         16);
 
@@ -226,12 +232,14 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
 
     fs_service->Format();
 
-    auto sensors_configuration_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
+    auto cbor_sensors_configuration_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
+    auto json_sensors_configuration_service = make_unique_ext<JsonConfigurationService<JsonSensorsConfig>>("sensors_config", fs_service);
 
     auto math_parser_service = std::make_shared<MathParserService>();
     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
         math_parser_service,
-        std::move(sensors_configuration_service),
+        std::move(cbor_sensors_configuration_service),
+        std::move(json_sensors_configuration_service),
         16,
         16);
 
@@ -293,12 +301,14 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
 
     fs_service->Format();
 
-    auto sensors_configuration_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
+    auto cbor_sensors_configuration_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
+    auto json_sensors_configuration_service = make_unique_ext<JsonConfigurationService<JsonSensorsConfig>>("sensors_config", fs_service);
 
     auto math_parser_service = std::make_shared<MathParserService>();
     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
         math_parser_service,
-        std::move(sensors_configuration_service),
+        std::move(cbor_sensors_configuration_service),
+        std::move(json_sensors_configuration_service),
         16,
         16);
 
@@ -350,13 +360,6 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
     std::vector<std::shared_ptr<Sensor>> sensors {
         sensor_1, sensor_2, sensor_3 };
 
-    for(auto sensor : sensors) {
-        try {
-            sensors_configuration_manager->Update({sensor});
-
-            zassert_true(false, "Save config expected to fail, but it didn't.");
-        } catch(...) {
-            zassert_true(true, "Save config failed as expected due to invalid sensor id.");
-        }
-    }
+    for(auto sensor : sensors)
+        zassert_false(sensors_configuration_manager->Update({sensor}), "Invalid sensor configuration update expected to fail.");
 }

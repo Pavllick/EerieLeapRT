@@ -2,9 +2,13 @@
 
 #include <zephyr/ztest.h>
 
+#include "configuration/json/json_serializer.h"
+#include "configuration/json/traits/system_config_trait.h"
 #include "domain/system_domain/utilities/parsers/system_configuration_cbor_parser.h"
 #include "domain/system_domain/utilities/parsers/system_configuration_json_parser.h"
 
+using namespace eerie_leap::configuration::json;
+using namespace eerie_leap::configuration::json::traits;
 using namespace eerie_leap::domain::system_domain::utilities::parsers;
 
 ZTEST_SUITE(system_configuration_parser, NULL, NULL, NULL, NULL, NULL);
@@ -73,9 +77,9 @@ ZTEST(system_configuration_parser, test_JsonSerializeDeserialize) {
 
     auto system_configuration = system_configuration_parser_GetTestConfiguration();
 
-    auto serialized_system_configuration = system_configuration_json_parser.Serialize(system_configuration);
+    auto json_system_config = system_configuration_json_parser.Serialize(system_configuration);
     auto deserialized_system_configuration = system_configuration_json_parser.Deserialize(
-        *serialized_system_configuration.get(),
+        *json_system_config.get(),
         system_configuration.device_id,
         system_configuration.hw_version,
         system_configuration.sw_version,
@@ -88,7 +92,13 @@ ZTEST(system_configuration_parser, test_JsonSerializeDeserialize) {
     std::ofstream file("../../../../../../../../system_configuration.json", std::ios::out);
     zassert_true(file.is_open());
 
-    file << serialized_system_configuration->data();
+    auto json_serializer_ = std::make_unique<JsonSerializer<JsonSystemConfig>>(
+        JsonTrait<JsonSystemConfig>::object_descriptor,
+        JsonTrait<JsonSystemConfig>::object_descriptor_size);
+
+    auto system_config_buffer = json_serializer_->Serialize(*json_system_config);
+
+    file << system_config_buffer->data();
 
     file.close();
 }
