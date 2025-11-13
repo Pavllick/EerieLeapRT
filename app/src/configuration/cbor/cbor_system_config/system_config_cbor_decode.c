@@ -47,7 +47,8 @@ static bool decode_CborCanbusConfig(
 {
 	zcbor_log("%s\r\n", __func__);
 
-	bool res = (((zcbor_list_start_decode(state) && ((((zcbor_uint32_decode(state, (&(*result).bus_channel))))
+	bool res = (((zcbor_list_start_decode(state) && ((((zcbor_uint32_decode(state, (&(*result).type))))
+	&& ((zcbor_uint32_decode(state, (&(*result).bus_channel))))
 	&& ((zcbor_uint32_decode(state, (&(*result).bitrate))))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
 
 	log_result(state, res, __func__);

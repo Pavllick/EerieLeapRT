@@ -4,6 +4,7 @@ CborComUserConfig = [
 ]
 
 CborCanbusConfig = [
+  type: uint,
   bus_channel: uint,
   bitrate: uint
 ]

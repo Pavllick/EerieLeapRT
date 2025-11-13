@@ -10,6 +10,7 @@ struct JsonComUserConfig {
 };
 
 struct JsonCanbusConfig {
+    uint8_t type;
     uint32_t bus_channel;
     uint32_t bitrate;
 };
@@ -28,6 +29,7 @@ static json_obj_descr json_com_user_config_descr[] = {
 };
 
 static json_obj_descr json_canbus_config_descr[] = {
+    JSON_OBJ_DESCR_PRIM(JsonCanbusConfig, type, JSON_TOK_UINT),
     JSON_OBJ_DESCR_PRIM(JsonCanbusConfig, bus_channel, JSON_TOK_UINT),
     JSON_OBJ_DESCR_PRIM(JsonCanbusConfig, bitrate, JSON_TOK_UINT),
 };

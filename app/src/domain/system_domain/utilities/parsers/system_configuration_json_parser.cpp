@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "system_configuration_validator.h"
 #include "system_configuration_json_parser.h"
 
@@ -23,6 +25,7 @@ ext_unique_ptr<JsonSystemConfig> SystemConfigurationJsonParser::Serialize(const 
     config->canbus_configs_len = 0;
 
     for(size_t i = 0; i < configuration.canbus_configurations.size() && i < 8; i++) {
+        config->canbus_configs[i].type = std::to_underlying(configuration.canbus_configurations[i].type);
         config->canbus_configs[i].bus_channel = configuration.canbus_configurations[i].bus_channel;
         config->canbus_configs[i].bitrate = configuration.canbus_configurations[i].bitrate;
 
@@ -58,6 +61,7 @@ SystemConfiguration SystemConfigurationJsonParser::Deserialize(
     for(size_t i = 0; i < config.canbus_configs_len; ++i) {
         const auto& canbus_config = config.canbus_configs[i];
         configuration.canbus_configurations.push_back({
+            .type = static_cast<CanbusType>(canbus_config.type),
             .bus_channel = static_cast<uint8_t>(canbus_config.bus_channel),
             .bitrate = canbus_config.bitrate
         });

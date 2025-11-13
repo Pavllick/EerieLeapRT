@@ -12,6 +12,7 @@
 #include <zephyr/drivers/can.h>
 #include <zephyr/sys/atomic.h>
 
+#include "canbus_type.h"
 #include "can_frame.h"
 
 namespace eerie_leap::subsys::canbus {
@@ -25,6 +26,7 @@ private:
     std::unordered_map<uint32_t, std::vector<CanFrameHandler>> handlers_;
 
     bool is_initialized_ = false;
+    CanbusType type_;
     uint32_t bitrate_;
     bool bitrate_detected_ = false;
     atomic_t auto_detect_running_;
@@ -39,11 +41,14 @@ private:
     k_thread_stack_t* stack_area_ = nullptr;
     k_thread thread_data_;
 
-    int supported_bitrates_count_;
     // Ordered by most common first
-    static constexpr std::array<uint32_t, 13> supported_bitrates_ = {
+    static constexpr std::array<uint32_t, 9> classical_can_supported_bitrates_ = {
         500000, 1000000, 250000, 125000, 100000, 83333, 50000, 20000, 10000,
-        // CAN FD bitrates
+    };
+
+    // Ordered by most common first
+    static constexpr std::array<uint32_t, 13> canfd_supported_bitrates_ = {
+        500000, 1000000, 250000, 125000, 100000, 83333, 50000, 20000, 10000,
         2000000, 4000000, 5000000, 8000000
     };
 
@@ -61,7 +66,7 @@ private:
 public:
     using BitrateDetectedCallback = std::function<void (uint32_t bitrate)>;
 
-    explicit Canbus(const device *canbus_dev, uint32_t bitrate);
+    explicit Canbus(const device *canbus_dev, CanbusType type, uint32_t bitrate);
     ~Canbus();
 
     bool Initialize();
@@ -70,6 +75,8 @@ public:
     uint32_t GetDetectedBitrate() const { return bitrate_; }
     bool IsBitrateDetected() const { return bitrate_detected_; }
     void RegisterBitrateDetectedCallback(const BitrateDetectedCallback& callback);
+
+    static bool IsBitrateSupported(CanbusType type, uint32_t bitrate);
 };
 
 }  // namespace eerie_leap::subsys::canbus

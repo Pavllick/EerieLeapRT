@@ -1,4 +1,6 @@
 #include <stdexcept>
+#include <span>
+#include <algorithm>
 
 #include <zephyr/logging/log.h>
 
@@ -8,8 +10,8 @@ LOG_MODULE_REGISTER(canbus_logger);
 
 namespace eerie_leap::subsys::canbus {
 
-Canbus::Canbus(const device *canbus_dev, uint32_t bitrate)
-    : canbus_dev_(canbus_dev), bitrate_(bitrate), auto_detect_running_(ATOMIC_INIT(0)) {}
+Canbus::Canbus(const device *canbus_dev, CanbusType type, uint32_t bitrate)
+    : canbus_dev_(canbus_dev), bitrate_(bitrate), auto_detect_running_(ATOMIC_INIT(0)), type_(type) {}
 
 Canbus::~Canbus() {
     StopActivityMonitoring();
@@ -32,13 +34,11 @@ bool Canbus::Initialize() {
         return false;
     }
 
-    supported_bitrates_count_ = 9;
-
     can_mode_t can_mode = CAN_MODE_NORMAL;
-    if(capabilities & CAN_MODE_FD) {
+    if(type_ == CanbusType::CANFD && (capabilities & CAN_MODE_FD))
         can_mode = CAN_MODE_FD;
-        supported_bitrates_count_ = 13;
-    }
+    else
+        type_ = CanbusType::CLASSICAL_CAN;
 
     ret = can_set_mode(canbus_dev_, can_mode);
 	if(ret != 0) {
@@ -196,16 +196,22 @@ void Canbus::ActivityMonitorThreadEntry() {
 }
 
 bool Canbus::AutoDetectBitrate() {
-    for(int i = 0; i < supported_bitrates_count_; i++) {
+    std::span<const uint32_t> supported_bitrates;
+    if(type_ == CanbusType::CANFD)
+        supported_bitrates = canfd_supported_bitrates_;
+    else
+        supported_bitrates = classical_can_supported_bitrates_;
+
+    for(int i = 0; i < supported_bitrates.size(); i++) {
         if(!atomic_get(&auto_detect_running_)) {
             LOG_WRN("Bitrate detection stopped by user");
             return false;
         }
 
         uint32_t frame_count = 0;
-        if(TestBitrate(supported_bitrates_[i], frame_count)) {
+        if(TestBitrate(supported_bitrates[i], frame_count)) {
             bitrate_detected_ = true;
-            bitrate_ = supported_bitrates_[i];
+            bitrate_ = supported_bitrates[i];
 
             return true;
         }
@@ -215,6 +221,13 @@ bool Canbus::AutoDetectBitrate() {
     }
 
     return false;
+}
+
+bool Canbus::IsBitrateSupported(CanbusType type, uint32_t bitrate) {
+    if(type == CanbusType::CANFD)
+        return std::ranges::find(canfd_supported_bitrates_, bitrate) != canfd_supported_bitrates_.end();
+    else
+        return std::ranges::find(classical_can_supported_bitrates_, bitrate) != classical_can_supported_bitrates_.end();
 }
 
 bool Canbus::TestBitrate(uint32_t bitrate, uint32_t &frame_count) {

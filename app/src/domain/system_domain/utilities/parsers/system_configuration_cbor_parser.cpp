@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "system_configuration_validator.h"
 #include "system_configuration_cbor_parser.h"
 
@@ -27,6 +29,7 @@ ext_unique_ptr<CborSystemConfig> SystemConfigurationCborParser::Serialize(const 
     config->CborCanbusConfig_m_count = 0;
 
     for(size_t i = 0; i < configuration.canbus_configurations.size() && i < 8; i++) {
+        config->CborCanbusConfig_m[i].type = std::to_underlying(configuration.canbus_configurations[i].type);
         config->CborCanbusConfig_m[i].bus_channel = configuration.canbus_configurations[i].bus_channel;
         config->CborCanbusConfig_m[i].bitrate = configuration.canbus_configurations[i].bitrate;
 
@@ -56,6 +59,7 @@ SystemConfiguration SystemConfigurationCborParser::Deserialize(const CborSystemC
     for(size_t i = 0; i < system_config.CborCanbusConfig_m_count; ++i) {
         const auto& canbus_config = system_config.CborCanbusConfig_m[i];
         configuration.canbus_configurations.push_back({
+            .type = static_cast<CanbusType>(canbus_config.type),
             .bus_channel = static_cast<uint8_t>(canbus_config.bus_channel),
             .bitrate = canbus_config.bitrate
         });

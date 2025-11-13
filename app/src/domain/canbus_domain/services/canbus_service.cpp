@@ -18,8 +18,9 @@ CanbusService::CanbusService(std::shared_ptr<IFsService> fs_service, std::shared
 
     for(const auto& canbus_configuration : system_configuration_manager_->Get()->canbus_configurations) {
         auto canbus = make_shared_ext<Canbus>(
-                DtCanbus::Get(canbus_configuration.bus_channel),
-                canbus_configuration.bitrate);
+            DtCanbus::Get(canbus_configuration.bus_channel),
+            canbus_configuration.type,
+            canbus_configuration.bitrate);
 
         if(!canbus->Initialize())
             throw std::runtime_error("Failed to initialize CANBus.");

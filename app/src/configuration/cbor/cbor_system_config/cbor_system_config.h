@@ -31,6 +31,7 @@ struct CborComUserConfig {
 };
 
 struct CborCanbusConfig {
+	uint32_t type;
 	uint32_t bus_channel;
 	uint32_t bitrate;
 };
