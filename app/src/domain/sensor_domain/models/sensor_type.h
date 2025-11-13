@@ -4,6 +4,7 @@
 #include <array>
 #include <stdexcept>
 #include <utility>
+#include <string_view>
 
 namespace eerie_leap::domain::sensor_domain::models {
 

@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <array>
 #include <stdexcept>
+#include <string_view>
 
 #include "interpolation_method.h"
 
