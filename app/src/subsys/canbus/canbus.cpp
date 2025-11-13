@@ -32,12 +32,12 @@ bool Canbus::Initialize() {
         return false;
     }
 
-    bitrates_count_ = 9;
+    supported_bitrates_count_ = 9;
 
     can_mode_t can_mode = CAN_MODE_NORMAL;
     if(capabilities & CAN_MODE_FD) {
         can_mode = CAN_MODE_FD;
-        bitrates_count_ = 13;
+        supported_bitrates_count_ = 13;
     }
 
     ret = can_set_mode(canbus_dev_, can_mode);
@@ -196,7 +196,7 @@ void Canbus::ActivityMonitorThreadEntry() {
 }
 
 bool Canbus::AutoDetectBitrate() {
-    for(int i = 0; i < bitrates_count_; i++) {
+    for(int i = 0; i < supported_bitrates_count_; i++) {
         if(!atomic_get(&auto_detect_running_)) {
             LOG_WRN("Bitrate detection stopped by user");
             return false;

@@ -69,6 +69,10 @@ void ProcessingSchedulerService::ProcessSensorWorkTask(k_work* work) {
 }
 
 std::shared_ptr<SensorTask> ProcessingSchedulerService::CreateSensorTask(std::shared_ptr<Sensor> sensor) {
+    auto reader = sensor_reader_factory_->Create(sensor);
+    if(reader == nullptr)
+        return nullptr;
+
     auto task = make_shared_ext<SensorTask>();
     task->work_q = &work_q_;
     task->processing_semaphore = &processing_semaphore_;
@@ -77,7 +81,7 @@ std::shared_ptr<SensorTask> ProcessingSchedulerService::CreateSensorTask(std::sh
     task->readings_frame = sensor_readings_frame_;
     task->reading_processors = reading_processors_;
 
-    task->reader = sensor_reader_factory_->Create(sensor);
+    task->reader = std::move(reader);
 
     return task;
 }
@@ -101,9 +105,12 @@ void ProcessingSchedulerService::Start() {
     const auto* sensors = sensors_configuration_manager_->Get();
 
     for(const auto& sensor : *sensors) {
-        LOG_INF("Creating task for sensor: %s", sensor->id.c_str());
         auto task = CreateSensorTask(sensor);
+        if(task == nullptr)
+            continue;
+
         sensor_tasks_.push_back(task);
+        LOG_INF("Created task for sensor: %s", sensor->id.c_str());
     }
 
     StartTasks();

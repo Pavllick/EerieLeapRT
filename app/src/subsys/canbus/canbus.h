@@ -39,7 +39,7 @@ private:
     k_thread_stack_t* stack_area_ = nullptr;
     k_thread thread_data_;
 
-    int bitrates_count_;
+    int supported_bitrates_count_;
     // Ordered by most common first
     static constexpr std::array<uint32_t, 13> supported_bitrates_ = {
         500000, 1000000, 250000, 125000, 100000, 83333, 50000, 20000, 10000,

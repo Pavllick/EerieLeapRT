@@ -16,8 +16,11 @@ ComReadingInterfaceService::ComReadingInterfaceService(
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame,
     uint32_t refresh_rate_ms)
     : user_com_(std::move(user_com)),
-    sensor_readings_frame_(std::move(sensor_readings_frame)),
-    refresh_rate_ms_(refresh_rate_ms) {
+    sensor_readings_frame_(std::move(sensor_readings_frame)) {
+
+    refresh_rate_ms_ = refresh_rate_ms < MIN_REFRESH_RATE_MS
+        ? MIN_REFRESH_RATE_MS
+        : refresh_rate_ms;
 
     k_sem_init(&processing_semaphore_, 1, 1);
 }

@@ -497,9 +497,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
         sensor_7
     };
 
-    auto res = sensors_configuration_manager->Update(sensors);
-    if(!res)
-        throw std::runtime_error("Cannot save Sensors config");
+    sensors_configuration_manager->Update(sensors);
 }
 
 void SetupLoggingConfiguration(std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager,

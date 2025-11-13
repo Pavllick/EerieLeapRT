@@ -25,6 +25,7 @@ private:
 
     static void SendReadingWorkTask(k_work* work);
 
+    static constexpr uint32_t MIN_REFRESH_RATE_MS = 10;
     uint32_t refresh_rate_ms_;
 
     std::shared_ptr<UserCom> user_com_;
