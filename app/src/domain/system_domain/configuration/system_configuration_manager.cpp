@@ -15,7 +15,6 @@ SystemConfigurationManager::SystemConfigurationManager(
     ext_unique_ptr<JsonConfigurationService<JsonSystemConfig>> json_configuration_service)
         : cbor_configuration_service_(std::move(cbor_configuration_service)),
         json_configuration_service_(std::move(json_configuration_service)),
-        cbor_config_(nullptr),
         configuration_(nullptr),
         json_config_checksum_(0) {
 
@@ -193,17 +192,16 @@ std::shared_ptr<SystemConfiguration> SystemConfigurationManager::Get(bool force_
     if(configuration_ != nullptr && !force_load)
         return configuration_;
 
-    auto cbor_config = cbor_configuration_service_->Load();
-    if(!cbor_config.has_value())
+    auto cbor_config_data = cbor_configuration_service_->Load();
+    if(!cbor_config_data.has_value())
         return nullptr;
 
-    cbor_config_raw_ = std::move(cbor_config.value().config_raw);
-    cbor_config_ = std::move(cbor_config.value().config);
+    auto cbor_config = std::move(cbor_config_data.value().config);
 
-    auto configuration = cbor_parser_->Deserialize(*cbor_config_);
+    auto configuration = cbor_parser_->Deserialize(*cbor_config);
     configuration_ = std::make_shared<SystemConfiguration>(configuration);
 
-    json_config_checksum_ = cbor_config_->json_config_checksum;
+    json_config_checksum_ = cbor_config->json_config_checksum;
 
     return configuration_;
 }

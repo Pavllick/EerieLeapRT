@@ -27,8 +27,6 @@ private:
     std::unique_ptr<SystemConfigurationCborParser> cbor_parser_;
     std::unique_ptr<SystemConfigurationJsonParser> json_parser_;
 
-    ext_unique_ptr<ExtVector> cbor_config_raw_;
-    ext_unique_ptr<CborSystemConfig> cbor_config_;
     std::shared_ptr<SystemConfiguration> configuration_;
 
     uint32_t json_config_checksum_;

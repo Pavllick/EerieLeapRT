@@ -18,7 +18,6 @@ SensorsConfigurationManager::SensorsConfigurationManager(
         : math_parser_service_(std::move(math_parser_service)),
         cbor_configuration_service_(std::move(cbor_configuration_service)),
         json_configuration_service_(std::move(json_configuration_service)),
-        cbor_config_(make_unique_ext<CborSensorsConfig>()),
         gpio_channel_count_(gpio_channel_count),
         adc_channel_count_(adc_channel_count) {
 
@@ -119,17 +118,16 @@ const std::vector<std::shared_ptr<Sensor>>* SensorsConfigurationManager::Get(boo
     if(!sensors_.empty() && !force_load)
         return &sensors_;
 
-    auto config = cbor_configuration_service_->Load();
-    if(!config.has_value())
+    auto cbor_config_data = cbor_configuration_service_->Load();
+    if(!cbor_config_data.has_value())
         return nullptr;
 
-    cbor_config_raw_ = std::move(config.value().config_raw);
-    cbor_config_ = std::move(config.value().config);
+    auto cbor_config = std::move(cbor_config_data.value().config);
 
     sensors_ = cbor_parser_->Deserialize(
-        *cbor_config_.get(), gpio_channel_count_, adc_channel_count_);
+        *cbor_config.get(), gpio_channel_count_, adc_channel_count_);
 
-    json_config_checksum_ = cbor_config_->json_config_checksum;
+    json_config_checksum_ = cbor_config->json_config_checksum;
 
     return &sensors_;
 }

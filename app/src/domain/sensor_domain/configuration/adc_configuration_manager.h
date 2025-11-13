@@ -29,8 +29,6 @@ private:
     std::unique_ptr<AdcConfigurationJsonParser> json_parser_;
 
     std::shared_ptr<IAdcManager> adc_manager_;
-    ext_unique_ptr<ExtVector> cbor_config_raw_;
-    ext_unique_ptr<CborAdcConfig> cbor_config_;
     std::shared_ptr<AdcConfiguration> configuration_;
 
     uint32_t json_config_checksum_;

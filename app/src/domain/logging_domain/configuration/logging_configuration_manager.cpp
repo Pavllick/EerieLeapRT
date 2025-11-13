@@ -12,7 +12,6 @@ LoggingConfigurationManager::LoggingConfigurationManager(
     ext_unique_ptr<JsonConfigurationService<JsonLoggingConfig>> json_configuration_service)
         : cbor_configuration_service_(std::move(cbor_configuration_service)),
         json_configuration_service_(std::move(json_configuration_service)),
-        cbor_config_(nullptr),
         configuration_(nullptr) {
 
     cbor_parser_ = std::make_unique<LoggingConfigurationCborParser>();
@@ -103,17 +102,16 @@ std::shared_ptr<LoggingConfiguration> LoggingConfigurationManager::Get(bool forc
         return configuration_;
     }
 
-    auto config = cbor_configuration_service_->Load();
-    if(!config.has_value())
+    auto cbor_config_data = cbor_configuration_service_->Load();
+    if(!cbor_config_data.has_value())
         return nullptr;
 
-    cbor_config_raw_ = std::move(config.value().config_raw);
-    cbor_config_ = std::move(config.value().config);
+    auto cbor_config = std::move(cbor_config_data.value().config);
 
-    auto configuration = cbor_parser_->Deserialize(*cbor_config_);
+    auto configuration = cbor_parser_->Deserialize(*cbor_config);
     configuration_ = make_shared_ext<LoggingConfiguration>(configuration);
 
-    json_config_checksum_ = cbor_config_->json_config_checksum;
+    json_config_checksum_ = cbor_config->json_config_checksum;
 
     return configuration_;
 }

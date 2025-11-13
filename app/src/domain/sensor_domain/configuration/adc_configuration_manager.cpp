@@ -24,7 +24,6 @@ AdcConfigurationManager::AdcConfigurationManager(
         : cbor_configuration_service_(std::move(cbor_configuration_service)),
         json_configuration_service_(std::move(json_configuration_service)),
         adc_manager_(AdcFactory::Create()),
-        cbor_config_(nullptr),
         configuration_(nullptr),
         json_config_checksum_(0) {
 
@@ -120,18 +119,17 @@ std::shared_ptr<IAdcManager> AdcConfigurationManager::Get(bool force_load) {
         return adc_manager_;
     }
 
-    auto cbor_config = cbor_configuration_service_->Load();
-    if(!cbor_config.has_value())
+    auto cbor_config_data = cbor_configuration_service_->Load();
+    if(!cbor_config_data.has_value())
         return nullptr;
 
-    cbor_config_raw_ = std::move(cbor_config.value().config_raw);
-    cbor_config_ = std::move(cbor_config.value().config);
+    auto cbor_config = std::move(cbor_config_data.value().config);
 
-    auto configuration = cbor_parser_->Deserialize(*cbor_config_);
+    auto configuration = cbor_parser_->Deserialize(*cbor_config);
     configuration_ = make_shared_ext<AdcConfiguration>(configuration);
     adc_manager_->UpdateConfiguration(configuration_);
 
-    json_config_checksum_ = cbor_config_->json_config_checksum;
+    json_config_checksum_ = cbor_config->json_config_checksum;
 
     return adc_manager_;
 }

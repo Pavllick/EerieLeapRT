@@ -32,8 +32,6 @@ private:
     std::unique_ptr<SensorsCborParser> cbor_parser_;
     std::unique_ptr<SensorsJsonParser> json_parser_;
 
-    ext_unique_ptr<ExtVector> cbor_config_raw_;
-    ext_unique_ptr<CborSensorsConfig> cbor_config_;
     std::vector<std::shared_ptr<Sensor>> sensors_;
     int gpio_channel_count_;
     int adc_channel_count_;

@@ -25,8 +25,6 @@ private:
     std::unique_ptr<LoggingConfigurationCborParser> cbor_parser_;
     std::unique_ptr<LoggingConfigurationJsonParser> json_parser_;
 
-    ext_unique_ptr<ExtVector> cbor_config_raw_;
-    ext_unique_ptr<CborLoggingConfig> cbor_config_;
     std::shared_ptr<LoggingConfiguration> configuration_;
 
     uint32_t json_config_checksum_;
