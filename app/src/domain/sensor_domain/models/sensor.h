@@ -1,24 +1,23 @@
 #pragma once
 
-#include <cstdint>
 #include <string>
-#include <functional>
+
+#include "utilities/string/string_helpers.h"
 
 #include "sensor_metadata.h"
 #include "sensor_configuration.h"
 
 namespace eerie_leap::domain::sensor_domain::models {
 
+using namespace eerie_leap::utilities::string;
+
 struct Sensor {
     std::string id;
-    uint32_t id_hash;
+    size_t id_hash;
     SensorMetadata metadata;
     SensorConfiguration configuration;
 
-    explicit Sensor(const std::string& id) : id(id) {
-        std::hash<std::string> string_hasher;
-        id_hash = static_cast<uint32_t>(string_hasher(id));
-    }
+    explicit Sensor(const std::string& id) : id(id), id_hash(StringHelpers::GetHash(id)) {}
 };
 
 } // namespace eerie_leap::domain::sensor_domain::models

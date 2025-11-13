@@ -40,7 +40,7 @@ public:
     ~ComPollingInterfaceService();
 
     void Initialize();
-    void RegisterHandler(ComUserStatus status, ComPollingHandler handler);
+    void RegisterHandler(ComUserStatus status, const ComPollingHandler& handler);
 };
 
 } // namespace eerie_leap::domain::user_com_domain::services::com_polling

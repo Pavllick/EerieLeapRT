@@ -1,12 +1,7 @@
-#include <stdexcept>
-
-#include "utilities/memory/heap_allocator.h"
-
 #include "canbus_sensor_reader.h"
 
 namespace eerie_leap::domain::sensor_domain::sensor_readers {
 
-using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::subsys::canbus;
 
 CanbusSensorReader::CanbusSensorReader(
@@ -23,7 +18,12 @@ CanbusSensorReader::CanbusSensorReader(
             std::move(sensor),
             std::move(canbus)
         ),
-        dbc_(std::move(dbc)) {}
+        dbc_(std::move(dbc)) {
+
+    dbc_->RegisterSignal(
+        sensor_->configuration.canbus_source->frame_id,
+        sensor_->configuration.canbus_source->signal_name);
+}
 
 void CanbusSensorReader::Read() {
     auto reading = CreateRawReading();
@@ -32,7 +32,7 @@ void CanbusSensorReader::Read() {
 
     reading->value = dbc_->GetSignalValue(
         sensor_->configuration.canbus_source->frame_id,
-        sensor_->configuration.canbus_source->signal_name,
+        sensor_->configuration.canbus_source->signal_name_hash,
         reading->metadata.GetTag<CanFrame>(ReadingMetadataTag::CANBUS_DATA).value().data.data());
     reading->status = ReadingStatus::RAW;
 

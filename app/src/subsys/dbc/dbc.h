@@ -5,7 +5,6 @@
 #include <unordered_map>
 #include <memory>
 #include <streambuf>
-#include <fstream>
 
 #include <dbcppp/Network.h>
 
@@ -15,7 +14,7 @@ class Dbc {
 private:
    struct DbcMessage {
       const dbcppp::IMessage* message;
-      std::unordered_map<std::string, const dbcppp::ISignal*> signals;
+      std::unordered_map<size_t, const dbcppp::ISignal*> signals;
    };
 
    std::unique_ptr<dbcppp::INetwork> net_;
@@ -26,8 +25,12 @@ public:
    Dbc();
    virtual ~Dbc() = default;
 
+   using SignalReader = std::function<float (size_t)>;
+
    bool LoadDbcFile(std::streambuf& dbc_content);
-   double GetSignalValue(uint64_t frame_id, const std::string& signal_name, const void* bytes);
+   void RegisterSignal(uint64_t frame_id, const std::string& signal_name);
+   double GetSignalValue(uint64_t frame_id, size_t signal_name_hash, const void* bytes);
+   std::vector<uint8_t> EncodeMessage(uint64_t frame_id, const SignalReader& signal_reader);
 };
 
 } // namespace eerie_leap::subsys::dbc

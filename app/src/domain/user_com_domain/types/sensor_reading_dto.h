@@ -20,12 +20,12 @@ struct SensorReadingDto {
     ReadingStatus status;
 
     static SensorReadingDto FromSensorReading(const SensorReading& reading) {
-        return SensorReadingDto{
-            reading.id,
-            reading.sensor->id_hash,
-            TimeHelpers::ToMilliseconds(*reading.timestamp),
-            reading.value.value_or(0.0f),
-            reading.status
+        return {
+            .id = reading.id,
+            .sensor_id_hash = static_cast<uint32_t>(reading.sensor->id_hash),
+            .timestamp_ms = TimeHelpers::ToMilliseconds(*reading.timestamp),
+            .value = reading.value.value_or(0.0f),
+            .status = reading.status
         };
     }
 };

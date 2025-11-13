@@ -271,7 +271,7 @@ bool Canbus::TestBitrate(uint32_t bitrate, uint32_t &frame_count) {
     return false;
 }
 
-void Canbus::RegisterBitrateDetectedCallback(std::function<void (uint32_t bitrate)> callback) {
+void Canbus::RegisterBitrateDetectedCallback(const BitrateDetectedCallback& callback) {
     bitrate_detected_fn_ = callback;
 }
 

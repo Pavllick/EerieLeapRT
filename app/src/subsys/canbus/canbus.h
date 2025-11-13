@@ -59,6 +59,8 @@ private:
     static void CanFrameReceivedCallback(const device *dev, can_frame *frame, void *user_data);
 
 public:
+    using BitrateDetectedCallback = std::function<void (uint32_t bitrate)>;
+
     explicit Canbus(const device *canbus_dev, uint32_t bitrate);
     ~Canbus();
 
@@ -67,7 +69,7 @@ public:
 
     uint32_t GetDetectedBitrate() const { return bitrate_; }
     bool IsBitrateDetected() const { return bitrate_detected_; }
-    void RegisterBitrateDetectedCallback(std::function<void (uint32_t bitrate)> callback);
+    void RegisterBitrateDetectedCallback(const BitrateDetectedCallback& callback);
 };
 
 }  // namespace eerie_leap::subsys::canbus
