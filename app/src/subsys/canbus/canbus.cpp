@@ -1,6 +1,7 @@
 #include <stdexcept>
 #include <span>
 #include <algorithm>
+#include <memory>
 
 #include <zephyr/logging/log.h>
 
@@ -84,8 +85,27 @@ bool Canbus::SetTiming(uint32_t bitrate) {
     return true;
 }
 
+void Canbus::SendFrame(const CanFrame& frame) {
+    // TODO: Make sure this doesn't cause a memory leak
+    auto can_frame = std::make_unique<struct can_frame>();
+    can_frame->id = frame.id;
+    can_frame->dlc = static_cast<uint8_t>(frame.data.size());
+    memcpy(can_frame->data, frame.data.data(), frame.data.size());
+
+    int ret = can_send(canbus_dev_, can_frame.get(), K_NO_WAIT, SendFrameCallback, can_frame.release());
+    if(ret != 0)
+        LOG_ERR("Failed to send frame [%d].", ret);
+}
+
+void Canbus::SendFrameCallback(const device* dev, int error, void* user_data) {
+    std::unique_ptr<struct can_frame> frame(static_cast<can_frame*>(user_data));
+
+    if (error != 0)
+        LOG_ERR("Sending failed [%d]. Frame ID: %u", error, frame->id);
+}
+
 void Canbus::CanFrameReceivedCallback(const device *dev, can_frame *frame, void *user_data) {
-    Canbus *canbus = static_cast<Canbus*>(user_data);
+    auto* canbus = static_cast<Canbus*>(user_data);
 
     CanFrame can_frame = {
         .id = frame->id
@@ -100,7 +120,7 @@ void Canbus::CanFrameReceivedCallback(const device *dev, can_frame *frame, void 
     }
 }
 
-bool Canbus::RegisterHandler(uint32_t can_id, CanFrameHandler handler) {
+bool Canbus::RegisterFrameReceivedHandler(uint32_t can_id, CanFrameHandler handler) {
     if(!is_initialized_) {
         LOG_ERR("CANBus is not initialized.");
         return false;

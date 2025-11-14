@@ -22,7 +22,7 @@ CanbusSensorReaderRaw::CanbusSensorReaderRaw(
             std::move(sensor)),
         canbus_(std::move(canbus)) {
 
-    canbus_->RegisterHandler(
+    canbus_->RegisterFrameReceivedHandler(
         sensor_->configuration.canbus_source->frame_id,
         [this](const CanFrame& frame) {
             auto lock_key = k_spin_lock(&can_frame_lock_);

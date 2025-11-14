@@ -59,6 +59,7 @@ private:
     bool AutoDetectBitrate();
     bool TestBitrate(uint32_t bitrate, uint32_t &frame_count);
 
+    static void SendFrameCallback(const device* dev, int error, void* user_data);
     bool SetTiming(uint32_t bitrate);
     bool RegisterFilter(uint32_t can_id);
     static void CanFrameReceivedCallback(const device *dev, can_frame *frame, void *user_data);
@@ -70,8 +71,9 @@ public:
     ~Canbus();
 
     bool Initialize();
-    bool RegisterHandler(uint32_t can_id, CanFrameHandler handler);
+    bool RegisterFrameReceivedHandler(uint32_t can_id, CanFrameHandler handler);
 
+    void SendFrame(const CanFrame& frame);
     uint32_t GetDetectedBitrate() const { return bitrate_; }
     bool IsBitrateDetected() const { return bitrate_detected_; }
     void RegisterBitrateDetectedCallback(const BitrateDetectedCallback& callback);
