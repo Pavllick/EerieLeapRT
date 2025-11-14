@@ -17,21 +17,23 @@ private:
 
     std::string expression_raw_;
     std::string expression_;
-    std::unordered_set<std::string> variables_;
+    std::unordered_map<size_t, std::string> variables_;
 
     std::string SanitizeExpression(const std::string& expression) const;
     std::string UnwrapVariables() const;
     bool IsValidVariableName(const std::string& str) const;
-    std::unordered_set<std::string> ExtractVariables() const;
+    std::unordered_map<size_t, std::string> ExtractVariables() const;
 
 public:
     ExpressionEvaluator(std::shared_ptr<MathParserService> math_parser_service, const std::string& expression);
 
-    const std::string& GetExpression() const { return expression_; }
-    const std::string& GetRawExpression() const { return expression_raw_; }
-    const std::unordered_set<std::string>& GetVariables() const { return variables_; }
+    const std::string& GetExpression() const;
+    const std::string& GetRawExpression() const;
+    const std::unordered_set<size_t> GetVariableNameHashes() const;
+    const std::unordered_set<std::string> GetVariableNames() const;
+    const std::string& GetVariableName(size_t hash) const;
 
-    float Evaluate(const std::unordered_map<std::string, float*>& variables, std::optional<float> x = std::nullopt) const;
+    float Evaluate(const std::unordered_map<size_t, float*>& variables, std::optional<float> x = std::nullopt) const;
 };
 
 } // namespace eerie_leap::utilities::math_parser

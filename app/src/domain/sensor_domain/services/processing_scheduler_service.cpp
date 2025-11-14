@@ -50,7 +50,7 @@ void ProcessingSchedulerService::ProcessSensorWorkTask(k_work* work) {
 
     try {
         task->reader->Read();
-        auto reading = task->readings_frame->GetReading(task->sensor->id);
+        auto reading = task->readings_frame->GetReading(task->sensor->id_hash);
 
         for(auto processor : *task->reading_processors)
             processor->ProcessReading(reading);

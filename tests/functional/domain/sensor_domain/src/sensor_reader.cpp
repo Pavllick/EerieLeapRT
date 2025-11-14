@@ -2,6 +2,7 @@
 
 #include "utilities/memory/heap_allocator.h"
 #include "utilities/guid/guid_generator.h"
+#include "utilities/string/string_helpers.h"
 #include "utilities/math_parser/math_parser_service.hpp"
 
 #include "configuration/cbor/cbor_adc_config/cbor_adc_config.h"
@@ -33,6 +34,7 @@
 
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::guid;
+using namespace eerie_leap::utilities::string;
 using namespace eerie_leap::utilities::math_parser;
 
 using namespace eerie_leap::subsys::device_tree;
@@ -256,34 +258,34 @@ ZTEST(sensors_reader, test_Read) {
     readings = sensor_readings_frame->GetReadings();
     zassert_equal(readings.size(), 5);
 
-    auto reading = sensor_readings_frame->GetReadings().at("sensor_2");
+    auto reading = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_2"));
     zassert_equal(reading->status, ReadingStatus::RAW);
     zassert_true(reading->value.has_value());
     zassert_true(reading->timestamp.has_value());
     zassert_true(reading->id.AsUint64() > 0);
     zassert_between_inclusive(reading->value.value(), 0, 3.3);
 
-    reading = sensor_readings_frame->GetReadings().at("sensor_1");
+    reading = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_1"));
     zassert_equal(reading->status, ReadingStatus::RAW);
     zassert_true(reading->value.has_value());
     zassert_true(reading->timestamp.has_value());
     zassert_true(reading->id.AsUint64() > 0);
     zassert_between_inclusive(reading->value.value(), 0, 3.3);
 
-    reading = sensor_readings_frame->GetReadings().at("sensor_3");
+    reading = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_3"));
     zassert_equal(reading->status, ReadingStatus::UNINITIALIZED);
     zassert_true(reading->timestamp.has_value());
     zassert_true(reading->id.AsUint64() > 0);
     zassert_false(reading->value.has_value());
 
-    reading = sensor_readings_frame->GetReadings().at("sensor_4");
+    reading = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_4"));
     zassert_equal(reading->status, ReadingStatus::RAW);
     zassert_true(reading->timestamp.has_value());
     zassert_true(reading->id.AsUint64() > 0);
     zassert_true(reading->value.has_value());
     zassert_true(reading->value.value() == 1 || reading->value.value() == 0);
 
-    reading = sensor_readings_frame->GetReadings().at("sensor_5");
+    reading = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_5"));
     zassert_equal(reading->status, ReadingStatus::UNINITIALIZED);
     zassert_true(reading->timestamp.has_value());
     zassert_true(reading->id.AsUint64() > 0);

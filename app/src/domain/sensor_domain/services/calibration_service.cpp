@@ -37,7 +37,7 @@ void CalibrationService::ProcessCalibrationWorkTask(k_work* work) {
     if(k_sem_take(task->processing_semaphore, PROCESSING_TIMEOUT) == 0) {
         try {
             task->reader->Read();
-            auto reading = task->readings_frame->GetReading(task->sensor->id);
+            auto reading = task->readings_frame->GetReading(task->sensor->id_hash);
 
             LOG_INF("ADC Calibration Reading: Value: %.3f, Time: %s\n",
                 reading->value.value_or(0.0f),

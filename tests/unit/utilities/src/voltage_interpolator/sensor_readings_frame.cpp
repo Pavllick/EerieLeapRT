@@ -4,11 +4,13 @@
 #include "domain/sensor_domain/models/sensor.h"
 #include "domain/sensor_domain/models/sensor_reading.h"
 #include "domain/sensor_domain/models/reading_status.h"
+#include "utilities/string/string_helpers.h"
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/math_parser/math_parser_service.hpp"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 
 using namespace eerie_leap::utilities::guid;
+using namespace eerie_leap::utilities::string;
 using namespace eerie_leap::utilities::math_parser;
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::domain::sensor_domain::utilities;
@@ -119,7 +121,7 @@ ZTEST(sensor_readings_frame, test_AddOrUpdateReading) {
         readings = sensor_readings_frame->GetReadings();
         zassert_equal(readings.size(), 1);
 
-        auto fr_reading = sensor_readings_frame->GetReadings().at("sensor_2");
+        auto fr_reading = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_2"));
         zassert_equal(fr_reading->status, ReadingStatus::UNINITIALIZED);
         zassert_false(fr_reading->value.has_value());
 
@@ -131,7 +133,7 @@ ZTEST(sensor_readings_frame, test_AddOrUpdateReading) {
         readings = sensor_readings_frame->GetReadings();
         zassert_equal(readings.size(), 1);
 
-        fr_reading = sensor_readings_frame->GetReadings().at("sensor_2");
+        fr_reading = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_2"));
         zassert_equal(fr_reading->status, ReadingStatus::PROCESSED);
         zassert_true(fr_reading->value.has_value());
 
@@ -155,10 +157,10 @@ ZTEST(sensor_readings_frame, test_GetReading) {
     auto reading2 = std::make_shared<SensorReading>(guid_generator->Generate(), sensors[2]);
     sensor_readings_frame->AddOrUpdateReading(reading2);
 
-    auto rf_reading1 = sensor_readings_frame->GetReading("sensor_2");
+    auto rf_reading1 = sensor_readings_frame->GetReading(StringHelpers::GetHash("sensor_2"));
     zassert_str_equal(rf_reading1->sensor->id.c_str(), "sensor_2");
 
-    auto rf_reading2 = sensor_readings_frame->GetReading("sensor_3");
+    auto rf_reading2 = sensor_readings_frame->GetReading(StringHelpers::GetHash("sensor_3"));
     zassert_str_equal(rf_reading2->sensor->id.c_str(), "sensor_3");
 }
 
@@ -172,7 +174,7 @@ ZTEST(sensor_readings_frame, test_GetReading_no_sensor) {
     auto sensors = sensor_readings_frame_GetTestSensors(math_parser_service);
 
     try {
-        sensor_readings_frame->GetReading("sensor_2");
+        sensor_readings_frame->GetReading(StringHelpers::GetHash("sensor_2"));
         zassert_true(true, "GetReading expected to fail, but it didn't.");
     } catch(...) {
         zassert_true(false, "GetReading failed as expected due to missing sensor reading.");
@@ -183,14 +185,14 @@ ZTEST(sensor_readings_frame, test_GetReading_no_sensor) {
     auto reading2 = std::make_shared<SensorReading>(guid_generator->Generate(), sensors[2]);
     sensor_readings_frame->AddOrUpdateReading(reading2);
 
-    auto rf_reading1 = sensor_readings_frame->GetReading("sensor_2");
+    auto rf_reading1 = sensor_readings_frame->GetReading(StringHelpers::GetHash("sensor_2"));
     zassert_str_equal(rf_reading1->sensor->id.c_str(), "sensor_2");
 
-    auto rf_reading2 = sensor_readings_frame->GetReading("sensor_3");
+    auto rf_reading2 = sensor_readings_frame->GetReading(StringHelpers::GetHash("sensor_3"));
     zassert_str_equal(rf_reading2->sensor->id.c_str(), "sensor_3");
 
     try {
-        sensor_readings_frame->GetReading("sensor_1");
+        sensor_readings_frame->GetReading(StringHelpers::GetHash("sensor_1"));
         zassert_true(true, "GetReading expected to fail, but it didn't.");
     } catch(...) {
         zassert_true(false, "GetReading failed as expected due to missing sensor reading.");
@@ -213,18 +215,18 @@ ZTEST(sensor_readings_frame, test_GetReadings) {
     auto reading2 = std::make_shared<SensorReading>(guid_generator->Generate(), sensors[2]);
     sensor_readings_frame->AddOrUpdateReading(reading2);
 
-    auto rf_reading1 = sensor_readings_frame->GetReading("sensor_2");
+    auto rf_reading1 = sensor_readings_frame->GetReading(StringHelpers::GetHash("sensor_2"));
     zassert_str_equal(rf_reading1->sensor->id.c_str(), "sensor_2");
 
-    auto rf_reading2 = sensor_readings_frame->GetReading("sensor_3");
+    auto rf_reading2 = sensor_readings_frame->GetReading(StringHelpers::GetHash("sensor_3"));
     zassert_str_equal(rf_reading2->sensor->id.c_str(), "sensor_3");
 
     readings = sensor_readings_frame->GetReadings();
     zassert_equal(readings.size(), 2);
 
-    auto fr_reading1 = sensor_readings_frame->GetReadings().at("sensor_2");
+    auto fr_reading1 = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_2"));
     zassert_str_equal(fr_reading1->sensor->id.c_str(), "sensor_2");
-    auto fr_reading2 = sensor_readings_frame->GetReadings().at("sensor_3");
+    auto fr_reading2 = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_3"));
     zassert_str_equal(fr_reading2->sensor->id.c_str(), "sensor_3");
 }
 
@@ -251,9 +253,9 @@ ZTEST(sensor_readings_frame, test_GetReadingValues) {
     auto readings = sensor_readings_frame->GetReadingValues();
     zassert_equal(readings.size(), 2);
 
-    float fr_reading1 = *readings.at("sensor_1");
+    float fr_reading1 = *readings.at(StringHelpers::GetHash("sensor_1"));
     zassert_between_inclusive(fr_reading1, 2.39, 2.41);
-    float fr_reading2 = *readings.at("sensor_3");
+    float fr_reading2 = *readings.at(StringHelpers::GetHash("sensor_3"));
     zassert_between_inclusive(fr_reading2, 2.59, 2.61);
 }
 

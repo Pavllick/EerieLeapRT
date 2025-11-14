@@ -3,9 +3,11 @@
 #include <string>
 #include <zephyr/ztest.h>
 
+#include "utilities/string/string_helpers.h"
 #include "utilities/math_parser/expression_evaluator.h"
 #include "utilities/math_parser/math_parser_service.hpp"
 
+using namespace eerie_leap::utilities::string;
 using namespace eerie_leap::utilities::math_parser;
 
 ZTEST_SUITE(expression_evaluator, NULL, NULL, NULL, NULL, NULL);
@@ -14,7 +16,7 @@ ZTEST(expression_evaluator, test_Evaluate_x_returns_x) {
     auto math_parser_service = std::make_shared<MathParserService>();
     ExpressionEvaluator expression_evaluator(math_parser_service, "x");
 
-    std::unordered_map<std::string, float*> vars;
+    std::unordered_map<size_t, float*> vars;
     float res = expression_evaluator.Evaluate(vars, 8.0);
 
     zassert_equal(res, 8.0);
@@ -24,9 +26,9 @@ ZTEST(expression_evaluator, test_Evaluate_braced_x_returns_correct_value) {
     auto math_parser_service = std::make_shared<MathParserService>();
     ExpressionEvaluator expression_evaluator(math_parser_service, "({x} + {y}) * 4");
 
-    std::unordered_map<std::string, float*> vars;
+    std::unordered_map<size_t, float*> vars;
     float y = 2.0;
-    vars["y"] = &y;
+    vars[StringHelpers::GetHash("y")] = &y;
     float res = expression_evaluator.Evaluate(vars, 8.0);
 
     zassert_equal(res, 40.0);
@@ -36,9 +38,9 @@ ZTEST(expression_evaluator, test_Evaluate_not_braced_x_returns_correct_value) {
     auto math_parser_service = std::make_shared<MathParserService>();
     ExpressionEvaluator expression_evaluator(math_parser_service, "(x + {y}) * 4");
 
-    std::unordered_map<std::string, float*> vars;
+    std::unordered_map<size_t, float*> vars;
     float y = 2.0;
-    vars["y"] = &y;
+    vars[StringHelpers::GetHash("y")] = &y;
     float res = expression_evaluator.Evaluate(vars, 8.0);
 
     zassert_equal(res, 40.0);
@@ -49,7 +51,7 @@ ZTEST(expression_evaluator, test_Evaluate_empty_expression_throws_exception) {
     auto math_parser_service = std::make_shared<MathParserService>();
     ExpressionEvaluator expression_evaluator(math_parser_service, "");
 
-    std::unordered_map<std::string, float*> vars;
+    std::unordered_map<size_t, float*> vars;
 
     try {
         expression_evaluator.Evaluate(vars);
@@ -64,17 +66,17 @@ ZTEST(expression_evaluator, test_multiple_ExpressionEvaluator_eval_correctly) {
     ExpressionEvaluator expression_evaluator_1(math_parser_service, "({x} + {y}) * 4");
     ExpressionEvaluator expression_evaluator_2(math_parser_service, "({x} - 8 * {var_d}) / {f}");
 
-    std::unordered_map<std::string, float*> vars1;
+    std::unordered_map<size_t, float*> vars1;
     float y = 2.0;
-    vars1["y"] = &y;
+    vars1[StringHelpers::GetHash("y")] = &y;
     float res1 = expression_evaluator_1.Evaluate(vars1, 8.0);
     zassert_equal(res1, 40.0);
 
-    std::unordered_map<std::string, float*> vars2;
+    std::unordered_map<size_t, float*> vars2;
     float var_d = 2.0;
-    vars2["var_d"] = &var_d;
+    vars2[StringHelpers::GetHash("var_d")] = &var_d;
     float f = 2.0;
-    vars2["f"] = &f;
+    vars2[StringHelpers::GetHash("f")] = &f;
     float res2 = expression_evaluator_2.Evaluate(vars2, 80.0);
     zassert_equal(res2, 32.0);
 }
@@ -104,18 +106,30 @@ ZTEST(expression_evaluator, test_ExtractVariables_returns_list_of_vars) {
     ExpressionEvaluator expression_evaluator_3(math_parser_service, "(x + {y}) * 4");
     ExpressionEvaluator expression_evaluator_4(math_parser_service, "({x} - 8 * {var_d}) / {f}");
 
-    auto vars1 = expression_evaluator_1.GetVariables();
+    auto vars1_hashes = expression_evaluator_1.GetVariableNameHashes();
+    zassert_equal(vars1_hashes.size(), 0);
+
+    auto vars1 = expression_evaluator_1.GetVariableNames();
     zassert_equal(vars1.size(), 0);
 
-    auto vars2 = expression_evaluator_2.GetVariables();
+    auto vars2_hashes = expression_evaluator_2.GetVariableNameHashes();
+    zassert_equal(vars2_hashes.size(), 0);
+
+    auto vars2 = expression_evaluator_2.GetVariableNames();
     zassert_equal(vars2.size(), 0);
 
-    auto vars3 = expression_evaluator_3.GetVariables();
+    auto vars3_hashes = expression_evaluator_3.GetVariableNameHashes();
+    zassert_equal(vars3_hashes.size(), 1);
+
+    auto vars3 = expression_evaluator_3.GetVariableNames();
     zassert_equal(vars3.size(), 1);
     zassert_equal(vars3.count("x"), 0);
     zassert_equal(vars3.count("y"), 1);
 
-    auto vars4 = expression_evaluator_4.GetVariables();
+    auto vars4_hashes = expression_evaluator_4.GetVariableNameHashes();
+    zassert_equal(vars4_hashes.size(), 2);
+
+    auto vars4 = expression_evaluator_4.GetVariableNames();
     zassert_equal(vars4.size(), 2);
     zassert_equal(vars4.count("x"), 0);
     zassert_equal(vars4.count("var_d"), 1);

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <unordered_map>
-#include <string>
 #include <stdexcept>
 #include <memory>
 
@@ -15,8 +14,8 @@ using namespace eerie_leap::domain::sensor_domain::models;
 
 class SensorReadingsFrame {
 private:
-    std::unordered_map<std::string, std::shared_ptr<SensorReading>> readings_;
-    std::unordered_map<std::string, float*> reading_values_;
+    std::unordered_map<size_t, std::shared_ptr<SensorReading>> readings_;
+    std::unordered_map<size_t, float*> reading_values_;
 
     k_spinlock reading_lock_;
 
@@ -24,33 +23,33 @@ public:
     SensorReadingsFrame() = default;
 
     void AddOrUpdateReading(std::shared_ptr<SensorReading> reading) {
-        std::string sensor_id = reading->sensor->id;
+        size_t sensor_id_hash = reading->sensor->id_hash;
 
         auto lock_key = k_spin_lock(&reading_lock_);
 
-        readings_[sensor_id] = reading;
-        if(readings_[sensor_id]->status == ReadingStatus::PROCESSED && readings_[sensor_id]->value.has_value())
-            reading_values_[sensor_id] = &readings_[sensor_id]->value.value();
+        readings_[sensor_id_hash] = reading;
+        if(readings_[sensor_id_hash]->status == ReadingStatus::PROCESSED && readings_[sensor_id_hash]->value.has_value())
+            reading_values_[sensor_id_hash] = &readings_[sensor_id_hash]->value.value();
 
         k_spin_unlock(&reading_lock_, lock_key);
     }
 
-    bool HasReading(const std::string& sensor_id) const {
-        return readings_.contains(sensor_id);
+    bool HasReading(const size_t sensor_id_hash) const {
+        return readings_.contains(sensor_id_hash);
     }
 
-    std::shared_ptr<SensorReading> GetReading(const std::string& sensor_id) const {
-        if(!HasReading(sensor_id))
+    std::shared_ptr<SensorReading> GetReading(const size_t sensor_id_hash) const {
+        if(!HasReading(sensor_id_hash))
             throw std::runtime_error("Sensor ID not found");
 
-        return readings_.at(sensor_id);
+        return readings_.at(sensor_id_hash);
     }
 
-    const std::unordered_map<std::string, std::shared_ptr<SensorReading>>& GetReadings() const {
+    const std::unordered_map<size_t, std::shared_ptr<SensorReading>>& GetReadings() const {
         return readings_;
     }
 
-    const std::unordered_map<std::string, float*>& GetReadingValues() const {
+    const std::unordered_map<size_t, float*>& GetReadingValues() const {
         return reading_values_;
     }
 

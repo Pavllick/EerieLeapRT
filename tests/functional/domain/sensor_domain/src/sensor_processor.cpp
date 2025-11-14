@@ -2,6 +2,7 @@
 
 #include "utilities/memory/heap_allocator.h"
 #include "utilities/guid/guid_generator.h"
+#include "utilities/string/string_helpers.h"
 #include "subsys/time/rtc_provider.h"
 #include "subsys/time/boot_elapsed_time_provider.h"
 #include "subsys/time/time_service.h"
@@ -31,6 +32,7 @@
 
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::guid;
+using namespace eerie_leap::utilities::string;
 using namespace eerie_leap::utilities::math_parser;
 
 using namespace eerie_leap::subsys::device_tree;
@@ -256,26 +258,26 @@ ZTEST(sensor_processor, test_ProcessReading) {
     for(int i = 0; i < sensor_readers->size(); i++)
         sensor_readers->at(i)->Read();
 
-    auto reading_2 = sensor_readings_frame->GetReadings().at("sensor_2");
+    auto reading_2 = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_2"));
     zassert_equal(reading_2->status, ReadingStatus::RAW);
     zassert_true(reading_2->value.has_value());
     zassert_between_inclusive(reading_2->value.value(), 0, 3.3);
 
-    auto reading_1 = sensor_readings_frame->GetReadings().at("sensor_1");
+    auto reading_1 = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_1"));
     zassert_equal(reading_1->status, ReadingStatus::RAW);
     zassert_true(reading_1->value.has_value());
     zassert_between_inclusive(reading_1->value.value(), 0, 3.3);
 
-    auto reading_3 = sensor_readings_frame->GetReadings().at("sensor_3");
+    auto reading_3 = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_3"));
     zassert_equal(reading_3->status, ReadingStatus::UNINITIALIZED);
     zassert_false(reading_3->value.has_value());
 
-    auto reading_4 = sensor_readings_frame->GetReadings().at("sensor_4");
+    auto reading_4 = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_4"));
     zassert_equal(reading_4->status, ReadingStatus::RAW);
     zassert_true(reading_4->value.has_value());
     zassert_true(reading_4->value.value() == 1 || reading_4->value.value() == 0);
 
-    auto reading_5 = sensor_readings_frame->GetReadings().at("sensor_5");
+    auto reading_5 = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_5"));
     zassert_equal(reading_5->status, ReadingStatus::UNINITIALIZED);
     zassert_false(reading_5->value.has_value());
 
@@ -286,32 +288,32 @@ ZTEST(sensor_processor, test_ProcessReading) {
 
     SensorProcessor sensor_processor(sensor_readings_frame);
     for(auto& sensor : sensors)
-        sensor_processor.ProcessReading(sensor_readings_frame->GetReading(sensor->id));
+        sensor_processor.ProcessReading(sensor_readings_frame->GetReading(sensor->id_hash));
 
-    auto proc_reading_2 = sensor_readings_frame->GetReadings().at("sensor_2");
+    auto proc_reading_2 = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_2"));
     zassert_equal(proc_reading_2->status, ReadingStatus::PROCESSED);
     zassert_true(proc_reading_2->value.has_value());
     float proc_reading_2_value = reading_2_value * 4 + 1.6;
     zassert_equal(proc_reading_2->value.value(), proc_reading_2_value);
 
-    auto proc_reading_1 = sensor_readings_frame->GetReadings().at("sensor_1");
+    auto proc_reading_1 = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_1"));
     zassert_equal(proc_reading_1->status, ReadingStatus::PROCESSED);
     zassert_true(proc_reading_1->value.has_value());
     float proc_reading_1_value = reading_1_value * 2 + proc_reading_2_value + 1;
     zassert_equal(proc_reading_1->value.value(), proc_reading_1_value);
 
-    auto proc_reading_3 = sensor_readings_frame->GetReadings().at("sensor_3");
+    auto proc_reading_3 = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_3"));
     zassert_equal(proc_reading_3->status, ReadingStatus::PROCESSED);
     zassert_true(proc_reading_3->value.has_value());
     float proc_reading_3_value = proc_reading_1_value + 8.34;
     zassert_equal(proc_reading_3->value.value(), proc_reading_3_value);
 
-    auto proc_reading_4 = sensor_readings_frame->GetReadings().at("sensor_4");
+    auto proc_reading_4 = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_4"));
     zassert_equal(proc_reading_4->status, ReadingStatus::PROCESSED);
     zassert_true(proc_reading_4->value.has_value());
     zassert_true(proc_reading_4->value.value() == 1 || proc_reading_4->value.value() == 0);
 
-    auto proc_reading_5 = sensor_readings_frame->GetReadings().at("sensor_5");
+    auto proc_reading_5 = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_5"));
     zassert_equal(proc_reading_5->status, ReadingStatus::PROCESSED);
     zassert_true(proc_reading_5->value.has_value());
     zassert_true(proc_reading_5->value.value() ==  proc_reading_1_value < 400);
