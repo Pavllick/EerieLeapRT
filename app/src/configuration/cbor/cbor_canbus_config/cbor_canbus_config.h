@@ -4,8 +4,8 @@
  * Generated with a --default-max-qty of 24
  */
 
-#ifndef CBOR_SYSTEM_CONFIG_H__
-#define CBOR_SYSTEM_CONFIG_H__
+#ifndef CBOR_CANBUS_CONFIG_H__
+#define CBOR_CANBUS_CONFIG_H__
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -25,19 +25,22 @@ extern "C" {
  */
 #define DEFAULT_MAX_QTY 24
 
-struct CborComUserConfig {
-	uint64_t device_id;
-	uint32_t server_id;
+struct CborCanMessageConfig {
+	uint32_t frame_id;
+	uint32_t send_interval_ms;
 };
 
-struct CborSystemConfig {
-	uint64_t device_id;
-	uint32_t hw_version;
-	uint32_t sw_version;
-	uint32_t build_number;
-	uint32_t com_user_refresh_rate_ms;
-	struct CborComUserConfig CborComUserConfig_m[8];
-	size_t CborComUserConfig_m_count;
+struct CborCanChannelConfig {
+	uint32_t type;
+	uint32_t bus_channel;
+	uint32_t bitrate;
+	struct CborCanMessageConfig CborCanMessageConfig_m[24];
+	size_t CborCanMessageConfig_m_count;
+};
+
+struct CborCanbusConfig {
+	struct CborCanChannelConfig CborCanChannelConfig_m[8];
+	size_t CborCanChannelConfig_m_count;
 	uint32_t json_config_checksum;
 };
 
@@ -45,4 +48,4 @@ struct CborSystemConfig {
 }
 #endif
 
-#endif /* CBOR_SYSTEM_CONFIG_H__ */
+#endif /* CBOR_CANBUS_CONFIG_H__ */

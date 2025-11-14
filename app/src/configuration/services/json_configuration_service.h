@@ -17,6 +17,7 @@
 #include "configuration/json/traits/adc_config_trait.h"
 #include "configuration/json/traits/sensors_config_trait.h"
 #include "configuration/json/traits/logging_config_trait.h"
+#include "configuration/json/traits/canbus_config_trait.h"
 
 #include "loaded_config.hpp"
 

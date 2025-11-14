@@ -5,7 +5,6 @@
 #include <string>
 
 #include "com_user_configuration.h"
-#include "canbus_configuration.h"
 
 namespace eerie_leap::domain::system_domain::models {
 
@@ -17,7 +16,6 @@ struct SystemConfiguration {
 
     uint32_t com_user_refresh_rate_ms;
     std::vector<ComUserConfiguration> com_user_configurations;
-    std::vector<CanbusConfiguration> canbus_configurations;
 
     std::string GetFormattedHwVersion() const {
         uint8_t hw_version_major = (hw_version >> 24) & 0xFF;

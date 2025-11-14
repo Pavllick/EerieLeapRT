@@ -17,6 +17,7 @@
 #include "configuration/cbor/traits/adc_config_trait.h"
 #include "configuration/cbor/traits/sensors_config_trait.h"
 #include "configuration/cbor/traits/logging_config_trait.h"
+#include "configuration/cbor/traits/canbus_config_trait.h"
 
 #include "loaded_config.hpp"
 

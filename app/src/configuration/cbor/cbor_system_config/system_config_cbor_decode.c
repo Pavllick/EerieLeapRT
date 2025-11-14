@@ -26,7 +26,6 @@
 } while(0)
 
 static bool decode_CborComUserConfig(zcbor_state_t *state, struct CborComUserConfig *result);
-static bool decode_CborCanbusConfig(zcbor_state_t *state, struct CborCanbusConfig *result);
 static bool decode_CborSystemConfig(zcbor_state_t *state, struct CborSystemConfig *result);
 
 
@@ -37,19 +36,6 @@ static bool decode_CborComUserConfig(
 
 	bool res = (((zcbor_list_start_decode(state) && ((((zcbor_uint64_decode(state, (&(*result).device_id))))
 	&& ((zcbor_uint32_decode(state, (&(*result).server_id))))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
-
-	log_result(state, res, __func__);
-	return res;
-}
-
-static bool decode_CborCanbusConfig(
-		zcbor_state_t *state, struct CborCanbusConfig *result)
-{
-	zcbor_log("%s\r\n", __func__);
-
-	bool res = (((zcbor_list_start_decode(state) && ((((zcbor_uint32_decode(state, (&(*result).type))))
-	&& ((zcbor_uint32_decode(state, (&(*result).bus_channel))))
-	&& ((zcbor_uint32_decode(state, (&(*result).bitrate))))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
 
 	log_result(state, res, __func__);
 	return res;
@@ -66,7 +52,6 @@ static bool decode_CborSystemConfig(
 	&& ((zcbor_uint32_decode(state, (&(*result).build_number))))
 	&& ((zcbor_uint32_decode(state, (&(*result).com_user_refresh_rate_ms))))
 	&& ((zcbor_list_start_decode(state) && ((zcbor_multi_decode(0, 8, &(*result).CborComUserConfig_m_count, (zcbor_decoder_t *)decode_CborComUserConfig, state, (*&(*result).CborComUserConfig_m), sizeof(struct CborComUserConfig))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state)))
-	&& ((zcbor_list_start_decode(state) && ((zcbor_multi_decode(0, 8, &(*result).CborCanbusConfig_m_count, (zcbor_decoder_t *)decode_CborCanbusConfig, state, (*&(*result).CborCanbusConfig_m), sizeof(struct CborCanbusConfig))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state)))
 	&& ((zcbor_uint32_decode(state, (&(*result).json_config_checksum))))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
 
 	if (false) {
@@ -74,7 +59,6 @@ static bool decode_CborSystemConfig(
 		 * A compiler error here means a bug in zcbor.
 		 */
 		decode_CborComUserConfig(state, (*&(*result).CborComUserConfig_m));
-		decode_CborCanbusConfig(state, (*&(*result).CborCanbusConfig_m));
 	}
 
 	log_result(state, res, __func__);

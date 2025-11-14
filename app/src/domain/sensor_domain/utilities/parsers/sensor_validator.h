@@ -18,7 +18,7 @@ public:
     static void ValidateSamplingRateMs(const SensorConfiguration& sensor_configuration);
     static void ValidateInterpolationMethod(const SensorConfiguration& sensor_configuration);
     static void ValidateExpression(const SensorConfiguration& sensor_configuration);
-    static void ValidateSensor(
+    static void Validate(
         const Sensor& sensor,
         uint32_t gpio_channel_count,
         uint32_t adc_channel_count);

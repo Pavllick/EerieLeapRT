@@ -27,6 +27,7 @@
 #include "domain/sensor_domain/configuration/adc_configuration_manager.h"
 #include "domain/sensor_domain/configuration/sensors_configuration_manager.h"
 #include "domain/logging_domain/configuration/logging_configuration_manager.h"
+#include "domain/canbus_domain/configuration/canbus_configuration_manager.h"
 #include "domain/sensor_domain/sensor_readers/sensor_reader_factory.h"
 #include "domain/sensor_domain/services/processing_scheduler_service.h"
 #include "domain/sensor_domain/services/calibration_service.h"
@@ -79,6 +80,7 @@ using namespace eerie_leap::configuration::json::configs;
 using namespace eerie_leap::configuration::services;
 
 using namespace eerie_leap::domain::canbus_domain::services;
+using namespace eerie_leap::domain::canbus_domain::configuration;
 using namespace eerie_leap::domain::system_domain::configuration;
 using namespace eerie_leap::domain::sensor_domain::services;
 using namespace eerie_leap::domain::sensor_domain::sensor_readers;
@@ -99,6 +101,7 @@ LOG_MODULE_REGISTER(main_logger);
 constexpr uint32_t SLEEP_TIME_MS = 10000;
 
 void SetupSystemConfiguration(std::shared_ptr<SystemConfigurationManager> system_configuration_manager);
+void SetupCanbusConfiguration(std::shared_ptr<CanbusConfigurationManager> canbus_configuration_manager);
 void SetupAdcConfiguration(std::shared_ptr<AdcConfigurationManager> adc_configuration_manager);
 void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager);
 void SetupLoggingConfiguration(std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager,
@@ -183,6 +186,8 @@ int main(void) {
         "adc_config", fs_service);
     auto cbor_sensors_config_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>(
         "sensors_config", fs_service);
+    auto cbor_canbus_config_service = make_unique_ext<CborConfigurationService<CborCanbusConfig>>(
+        "canbus_config", fs_service);
 
     auto json_system_config_service = make_unique_ext<JsonConfigurationService<JsonSystemConfig>>(
         "system_config", sd_fs_service);
@@ -190,6 +195,8 @@ int main(void) {
         "adc_config", sd_fs_service);
     auto json_sensors_config_service = make_unique_ext<JsonConfigurationService<JsonSensorsConfig>>(
         "sensors_config", sd_fs_service);
+    auto json_canbus_config_service = make_unique_ext<JsonConfigurationService<JsonCanbusConfig>>(
+        "canbus_config", sd_fs_service);
 
     auto adc_configuration_manager = make_shared_ext<AdcConfigurationManager>(
         std::move(cbor_adc_config_service), std::move(json_adc_config_service));
@@ -206,6 +213,12 @@ int main(void) {
     // TODO: For test purposes only
     // SetupSystemConfiguration(system_configuration_manager);
 
+    auto canbus_configuration_manager = make_shared_ext<CanbusConfigurationManager>(
+        std::move(cbor_canbus_config_service), std::move(json_canbus_config_service));
+
+    // TODO: For test purposes only
+    // SetupCanbusConfiguration(canbus_configuration_manager);
+
     auto sensors_configuration_manager = make_shared_ext<SensorsConfigurationManager>(
         math_parser_service,
         std::move(cbor_sensors_config_service),
@@ -213,7 +226,7 @@ int main(void) {
         gpio->GetChannelCount(),
         adc_configuration_manager->Get()->GetChannelCount());
 
-    auto canbus_service = make_shared_ext<CanbusService>(sd_fs_service, system_configuration_manager);
+    auto canbus_service = make_shared_ext<CanbusService>(sd_fs_service, canbus_configuration_manager);
 
     // TODO: For test purposes only
     // SetupTestSensors(math_parser_service, sensors_configuration_manager);
@@ -328,16 +341,21 @@ void SetupSystemConfiguration(std::shared_ptr<SystemConfigurationManager> system
 
     system_configuration->com_user_refresh_rate_ms = 20;
 
-    system_configuration->canbus_configurations.clear();
+    system_configuration_manager->Update(*system_configuration);
+}
 
-    CanbusConfiguration canbus_configuration_0 = {
+void SetupCanbusConfiguration(std::shared_ptr<CanbusConfigurationManager> canbus_configuration_manager) {
+    auto canbus_configuration = canbus_configuration_manager->Get();
+
+    canbus_configuration->channel_configurations.clear();
+
+    CanChannelConfiguration canbus_channel_configuration_0 = {
         .bus_channel = 0,
         .bitrate = 0,
     };
-    system_configuration->canbus_configurations.push_back(canbus_configuration_0);
+    canbus_configuration->channel_configurations.push_back(canbus_channel_configuration_0);
 
-    if(!system_configuration_manager->Update(*system_configuration))
-        throw std::runtime_error("Cannot save System config");
+    canbus_configuration_manager->Update(*canbus_configuration);
 }
 
 void SetupAdcConfiguration(std::shared_ptr<AdcConfigurationManager> adc_configuration_manager) {
@@ -369,8 +387,7 @@ void SetupAdcConfiguration(std::shared_ptr<AdcConfigurationManager> adc_configur
     adc_configuration->channel_configurations =
         make_shared_ext<std::vector<std::shared_ptr<AdcChannelConfiguration>>>(channel_configurations);
 
-    if(!adc_configuration_manager->Update(*adc_configuration.get()))
-        throw std::runtime_error("Cannot save ADCs config");
+    adc_configuration_manager->Update(*adc_configuration.get());
 }
 
 void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager) {

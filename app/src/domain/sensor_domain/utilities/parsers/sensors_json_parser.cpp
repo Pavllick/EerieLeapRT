@@ -31,7 +31,7 @@ ext_unique_ptr<JsonSensorsConfig> SensorsJsonParser::Serialize(
 
         // NOTE: UpdateConnectionString() must be called before validation
         sensor->configuration.UpdateConnectionString();
-        SensorValidator::ValidateSensor(*sensor, gpio_channel_count, adc_channel_count);
+        SensorValidator::Validate(*sensor, gpio_channel_count, adc_channel_count);
 
         JsonSensorConfig sensor_json;
         memset(&sensor_json, 0, sizeof(JsonSensorConfig));
@@ -153,7 +153,7 @@ std::vector<std::shared_ptr<Sensor>> SensorsJsonParser::Deserialize(
             sensor->configuration.expression_evaluator = nullptr;
         }
 
-        SensorValidator::ValidateSensor(*sensor, gpio_channel_count, adc_channel_count);
+        SensorValidator::Validate(*sensor, gpio_channel_count, adc_channel_count);
 
         sensors.push_back(sensor);
     }

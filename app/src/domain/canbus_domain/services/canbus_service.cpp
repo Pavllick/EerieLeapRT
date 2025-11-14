@@ -13,23 +13,23 @@ using namespace eerie_leap::subsys::device_tree;
 
 LOG_MODULE_REGISTER(canbus_service_logger);
 
-CanbusService::CanbusService(std::shared_ptr<IFsService> fs_service, std::shared_ptr<SystemConfigurationManager> system_configuration_manager)
-    : fs_service_(std::move(fs_service)), system_configuration_manager_(std::move(system_configuration_manager)) {
+CanbusService::CanbusService(std::shared_ptr<IFsService> fs_service, std::shared_ptr<CanbusConfigurationManager> canbus_configuration_manager)
+    : fs_service_(std::move(fs_service)), canbus_configuration_manager_(std::move(canbus_configuration_manager)) {
 
-    for(const auto& canbus_configuration : system_configuration_manager_->Get()->canbus_configurations) {
+    for(const auto& channel_configuration : canbus_configuration_manager_->Get()->channel_configurations) {
         auto canbus = make_shared_ext<Canbus>(
-            DtCanbus::Get(canbus_configuration.bus_channel),
-            canbus_configuration.type,
-            canbus_configuration.bitrate);
+            DtCanbus::Get(channel_configuration.bus_channel),
+            channel_configuration.type,
+            channel_configuration.bitrate);
 
         if(!canbus->Initialize())
             throw std::runtime_error("Failed to initialize CANBus.");
 
-        canbus->RegisterBitrateDetectedCallback([this, bus_channel = canbus_configuration.bus_channel](uint32_t bitrate) {
+        canbus->RegisterBitrateDetectedCallback([this, bus_channel = channel_configuration.bus_channel](uint32_t bitrate) {
             BitrateUpdated(bus_channel, bitrate);
         });
 
-        canbus_.insert({canbus_configuration.bus_channel, canbus});
+        canbus_.insert({channel_configuration.bus_channel, canbus});
     }
 
     dbc_ = make_shared_ext<Dbc>();
@@ -51,17 +51,17 @@ CanbusService::CanbusService(std::shared_ptr<IFsService> fs_service, std::shared
 
 void CanbusService::BitrateUpdated(uint8_t bus_channel, uint32_t bitrate) {
     bool is_bus_found = false;
-    auto system_configuration = system_configuration_manager_->Get();
+    auto canbus_configuration = canbus_configuration_manager_->Get();
 
-    for(auto& can_bus : system_configuration->canbus_configurations) {
-        if(can_bus.bus_channel == bus_channel) {
-            can_bus.bitrate = bitrate;
+    for(auto& channel_configuration : canbus_configuration->channel_configurations) {
+        if(channel_configuration.bus_channel == bus_channel) {
+            channel_configuration.bitrate = bitrate;
             is_bus_found = true;
             break;
         }
     }
 
-    if(is_bus_found && system_configuration_manager_->Update(*system_configuration))
+    if(is_bus_found && canbus_configuration_manager_->Update(*canbus_configuration))
         LOG_INF("Bitrate for bus channel %d updated to %d bps.", bus_channel, bitrate);
     else
         LOG_ERR("Failed to update bitrate for bus channel %d.", bus_channel);

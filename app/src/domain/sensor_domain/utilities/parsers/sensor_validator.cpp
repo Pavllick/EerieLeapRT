@@ -114,7 +114,7 @@ void SensorValidator::ValidateExpression(const SensorConfiguration& sensor_confi
     }
 }
 
-void SensorValidator::ValidateSensor(
+void SensorValidator::Validate(
     const Sensor& sensor,
     uint32_t gpio_channel_count,
     uint32_t adc_channel_count) {

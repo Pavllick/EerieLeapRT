@@ -1,0 +1,17 @@
+CborCanMessageConfig = [
+  frame_id: uint,
+  send_interval_ms: uint
+]
+
+CborCanChannelConfig = [
+  type: uint,
+  bus_channel: uint,
+  bitrate: uint,
+  message_configs: [*CborCanMessageConfig]
+]
+
+CborCanbusConfig = [
+  channel_configs: [0*8 CborCanChannelConfig],
+
+  json_config_checksum: uint
+]

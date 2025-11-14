@@ -1,0 +1,124 @@
+#include <zephyr/sys/crc.h>
+
+#include "canbus_configuration_manager.h"
+
+namespace eerie_leap::domain::canbus_domain::configuration {
+
+LOG_MODULE_REGISTER(canbus_config_mngr_logger);
+
+CanbusConfigurationManager::CanbusConfigurationManager(
+    ext_unique_ptr<CborConfigurationService<CborCanbusConfig>> cbor_configuration_service,
+    ext_unique_ptr<JsonConfigurationService<JsonCanbusConfig>> json_configuration_service)
+        : cbor_configuration_service_(std::move(cbor_configuration_service)),
+        json_configuration_service_(std::move(json_configuration_service)),
+        configuration_(nullptr),
+        json_config_checksum_(0) {
+
+    cbor_parser_ = std::make_unique<CanbusConfigurationCborParser>();
+    json_parser_ = std::make_unique<CanbusConfigurationJsonParser>();
+    std::shared_ptr<CanbusConfiguration> configuration = nullptr;
+
+    try {
+        configuration = Get(true);
+    } catch(const std::exception& e) {}
+
+    if(configuration == nullptr) {
+        if(!CreateDefaultConfiguration()) {
+            LOG_ERR("Failed to create default Canbus configuration.");
+            return;
+        }
+
+        LOG_INF("Default Canbus configuration loaded successfully.");
+    }
+
+    LOG_INF("Canbus Configuration Manager initialized successfully.");
+
+    ApplyJsonConfiguration();
+}
+
+bool CanbusConfigurationManager::ApplyJsonConfiguration() {
+    if(!json_configuration_service_->IsAvailable())
+        return false;
+
+    auto json_config_loaded = json_configuration_service_->Load();
+    if(json_config_loaded.has_value()) {
+        uint32_t crc = crc32_ieee(json_config_loaded->config_raw->data(), json_config_loaded->config_raw->size());
+        if(crc == json_config_checksum_)
+            return true;
+
+        try {
+            auto configuration = json_parser_->Deserialize(*json_config_loaded->config);
+
+            if(!Update(configuration))
+                return false;
+        } catch(const std::exception& e) {
+            LOG_ERR("Failed to deserialize JSON configuration. %s", e.what());
+            return false;
+        }
+
+        LOG_INF("JSON configuration loaded successfully.");
+
+        return true;
+    }
+
+    return Update(*configuration_);
+}
+
+bool CanbusConfigurationManager::Update(const CanbusConfiguration& configuration) {
+    try {
+        if(json_configuration_service_->IsAvailable()) {
+            auto json_config = json_parser_->Serialize(configuration);
+            json_configuration_service_->Save(json_config.get());
+
+            auto json_config_loaded = json_configuration_service_->Load();
+            if(!json_config_loaded.has_value()) {
+                LOG_ERR("Failed to load newly updated JSON configuration.");
+                return false;
+            }
+
+            LOG_INF("JSON configuration updated successfully.");
+
+            uint32_t crc = crc32_ieee(json_config_loaded->config_raw->data(), json_config_loaded->config_raw->size());
+            json_config_checksum_ = crc;
+        }
+
+        auto cbor_config = cbor_parser_->Serialize(configuration);
+        cbor_config->json_config_checksum = json_config_checksum_;
+
+        if(!cbor_configuration_service_->Save(cbor_config.get()))
+            return false;
+    } catch(const std::exception& e) {
+        LOG_ERR("Failed to update System configuration. %s", e.what());
+        return false;
+    }
+
+    Get(true);
+
+    return true;
+}
+
+std::shared_ptr<CanbusConfiguration> CanbusConfigurationManager::Get(bool force_load) {
+    if(configuration_ != nullptr && !force_load)
+        return configuration_;
+
+    auto cbor_config_data = cbor_configuration_service_->Load();
+    if(!cbor_config_data.has_value())
+        return nullptr;
+
+    auto cbor_config = std::move(cbor_config_data.value().config);
+
+    auto configuration = cbor_parser_->Deserialize(*cbor_config);
+    configuration_ = std::make_shared<CanbusConfiguration>(configuration);
+
+    json_config_checksum_ = cbor_config->json_config_checksum;
+
+    return configuration_;
+}
+
+bool CanbusConfigurationManager::CreateDefaultConfiguration() {
+    auto configuration = make_unique_ext<CanbusConfiguration>();
+
+    return Update(*configuration);
+}
+
+} // namespace eerie_leap::domain::canbus_domain::configuration

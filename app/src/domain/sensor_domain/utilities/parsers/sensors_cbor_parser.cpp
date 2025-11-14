@@ -32,7 +32,7 @@ ext_unique_ptr<CborSensorsConfig> SensorsCborParser::Serialize(
 
         // NOTE: UpdateConnectionString() must be called before validation
         sensor->configuration.UpdateConnectionString();
-        SensorValidator::ValidateSensor(*sensor, gpio_channel_count, adc_channel_count);
+        SensorValidator::Validate(*sensor, gpio_channel_count, adc_channel_count);
 
         auto sensor_config = make_shared_ext<CborSensorConfig>();
         memset(sensor_config.get(), 0, sizeof(CborSensorConfig));
@@ -166,7 +166,7 @@ std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
 
         sensor->metadata.description = CborHelpers::ToStdString(sensor_config.metadata.description);
 
-        SensorValidator::ValidateSensor(*sensor, gpio_channel_count, adc_channel_count);
+        SensorValidator::Validate(*sensor, gpio_channel_count, adc_channel_count);
 
         sensors.push_back(sensor);
     }

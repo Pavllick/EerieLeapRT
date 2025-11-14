@@ -1,12 +1,10 @@
-#include <utility>
-
 #include "system_configuration_validator.h"
 #include "system_configuration_json_parser.h"
 
 namespace eerie_leap::domain::system_domain::utilities::parsers {
 
 ext_unique_ptr<JsonSystemConfig> SystemConfigurationJsonParser::Serialize(const SystemConfiguration& configuration) {
-    SystemConfigurationValidator::ValidateSystemConfiguration(configuration);
+    SystemConfigurationValidator::Validate(configuration);
 
     auto config = make_unique_ext<JsonSystemConfig>();
     memset(config.get(), 0, sizeof(JsonSystemConfig));
@@ -20,16 +18,6 @@ ext_unique_ptr<JsonSystemConfig> SystemConfigurationJsonParser::Serialize(const 
         config->com_user_configs[i].server_id = configuration.com_user_configurations[i].server_id;
 
         config->com_user_configs_len++;
-    }
-
-    config->canbus_configs_len = 0;
-
-    for(size_t i = 0; i < configuration.canbus_configurations.size() && i < 8; i++) {
-        config->canbus_configs[i].type = GetCanbusTypeName(configuration.canbus_configurations[i].type);
-        config->canbus_configs[i].bus_channel = configuration.canbus_configurations[i].bus_channel;
-        config->canbus_configs[i].bitrate = configuration.canbus_configurations[i].bitrate;
-
-        config->canbus_configs_len++;
     }
 
     return config;
@@ -58,16 +46,7 @@ SystemConfiguration SystemConfigurationJsonParser::Deserialize(
         });
     }
 
-    for(size_t i = 0; i < config.canbus_configs_len; ++i) {
-        const auto& canbus_config = config.canbus_configs[i];
-        configuration.canbus_configurations.push_back({
-            .type = GetCanbusType(canbus_config.type),
-            .bus_channel = static_cast<uint8_t>(canbus_config.bus_channel),
-            .bitrate = canbus_config.bitrate
-        });
-    }
-
-    SystemConfigurationValidator::ValidateSystemConfiguration(configuration);
+    SystemConfigurationValidator::Validate(configuration);
 
     return configuration;
 }

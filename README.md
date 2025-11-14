@@ -206,6 +206,12 @@ zcbor code -sed --default-max-qty 24 -c ./app/src/configuration/cbor/cbor_schema
 zcbor code -sed --default-max-qty 24 -c ./app/src/configuration/cbor/cbor_schemas/sensor_config.cddl -t CborSensorsConfig --output-h ./app/src/configuration/cbor/cbor_sensor_config/sensor_config_cbor.h --output-c ./app/src/configuration/cbor/cbor_sensor_config/sensor_config_cbor.c --output-h-types ./app/src/configuration/cbor/cbor_sensor_config/cbor_sensor_config.h
 ```
 
+#### Example command to generate CanbusConfig helpers:
+
+```shell
+zcbor code -sed --default-max-qty 24 -c ./app/src/configuration/cbor/cbor_schemas/canbus_config.cddl -t CborCanbusConfig --output-h ./app/src/configuration/cbor/cbor_canbus_config/canbus_config_cbor.h --output-c ./app/src/configuration/cbor/cbor_canbus_config/canbus_config_cbor.c --output-h-types ./app/src/configuration/cbor/cbor_canbus_config/cbor_canbus_config.h
+```
+
 #### Example command to generate LoggingConfig helpers:
 
 ```shell

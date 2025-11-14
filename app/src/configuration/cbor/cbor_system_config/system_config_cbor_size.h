@@ -24,15 +24,6 @@ static size_t cbor_get_size_CborSystemConfig(const CborSystemConfig& config) {
             .AddUint(config.CborComUserConfig_m[i].server_id);
     }
 
-    builder.AddIndefiniteArrayStart();
-    for(int i = 0; i < config.CborCanbusConfig_m_count; i++) {
-        builder.AddIndefiniteArrayStart();
-
-        builder.AddUint(config.CborCanbusConfig_m[i].type)
-            .AddUint(config.CborCanbusConfig_m[i].bus_channel)
-            .AddUint(config.CborCanbusConfig_m[i].bitrate);
-    }
-
     builder.AddUint(config.json_config_checksum);
 
     return builder.Build();
