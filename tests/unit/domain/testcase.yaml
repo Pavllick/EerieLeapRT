@@ -2,10 +2,9 @@ common:
   tags:
     - unit
     - domain
-    - sensor_domain
-    - unit_sensor_domain
+    - unit_domain
   platform_allow:
     - native_sim
 
 tests:
-  unit.sensor_domain: {}
+  unit.domain: {}

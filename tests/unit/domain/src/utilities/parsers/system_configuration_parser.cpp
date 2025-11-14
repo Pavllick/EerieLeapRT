@@ -24,12 +24,6 @@ SystemConfiguration system_configuration_parser_GetTestConfiguration() {
         .com_user_configurations {
             { .device_id = 1234, .server_id = 5678 },
             { .device_id = 5678, .server_id = 1234 }
-        },
-
-        .canbus_configurations {
-            { .bus_channel = 0, .bitrate = 500000 },
-            { .bus_channel = 1, .bitrate = 250000 },
-            { .bus_channel = 2, .bitrate = 125000 }
         }
     };
 
@@ -51,13 +45,6 @@ void system_configuration_parser_CompareSystemConfigurations(
     for(int i = 0; i < system_configuration.com_user_configurations.size(); i++) {
         zassert_equal(deserialized_system_configuration.com_user_configurations[i].device_id, system_configuration.com_user_configurations[i].device_id);
         zassert_equal(deserialized_system_configuration.com_user_configurations[i].server_id, system_configuration.com_user_configurations[i].server_id);
-    }
-
-    zassert_equal(deserialized_system_configuration.canbus_configurations.size(), system_configuration.canbus_configurations.size());
-
-    for(int i = 0; i < system_configuration.canbus_configurations.size(); i++) {
-        zassert_equal(deserialized_system_configuration.canbus_configurations[i].bus_channel, system_configuration.canbus_configurations[i].bus_channel);
-        zassert_equal(deserialized_system_configuration.canbus_configurations[i].bitrate, system_configuration.canbus_configurations[i].bitrate);
     }
 }
 
@@ -89,7 +76,7 @@ ZTEST(system_configuration_parser, test_JsonSerializeDeserialize) {
 
 
     // Will create file in the twister-out directory
-    std::ofstream file("../../../../../../../../system_configuration.json", std::ios::out);
+    std::ofstream file("../../../../../../../system_configuration.json", std::ios::out);
     zassert_true(file.is_open());
 
     auto json_serializer_ = std::make_unique<JsonSerializer<JsonSystemConfig>>(

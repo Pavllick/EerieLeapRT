@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(APP_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../app/src)
+set(APP_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../app/src)
 include_directories(${APP_SRC_DIR})
 
 # Path to muparser source and header
@@ -29,6 +29,7 @@ file(GLOB_RECURSE APP_SRC_SUBSYS
   ${APP_SRC_SUBSYS_DIR}/random/*.cpp
   ${APP_SRC_SUBSYS_DIR}/adc/utilities/*.cpp
   ${APP_SRC_SUBSYS_DIR}/adc/models/*.cpp
+  ${APP_SRC_SUBSYS_DIR}/canbus/*.cpp
 )
 
 set(APP_SRC_DOMAIN_DIR ${APP_SRC_DIR}/domain)
@@ -39,6 +40,8 @@ file(GLOB_RECURSE APP_SRC_DOMAIN
   ${APP_SRC_DOMAIN_DIR}/system_domain/models/*.cpp
   ${APP_SRC_DOMAIN_DIR}/logging_domain/utilities/*.cpp
   ${APP_SRC_DOMAIN_DIR}/logging_domain/models/*.cpp
+  ${APP_SRC_DOMAIN_DIR}/canbus_domain/utilities/*.cpp
+  ${APP_SRC_DOMAIN_DIR}/canbus_domain/models/*.cpp
 )
 
 set(APP_SRC_UTILITIES_DIR ${APP_SRC_DIR}/utilities)

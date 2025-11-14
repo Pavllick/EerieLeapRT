@@ -47,3 +47,7 @@ config EERIE_LEAP_ADC_CALIBRATION_SAMPLES_COUNT
 config EERIE_LEAP_ADC_CALIBRATION_SAMPLING_RATE_MS
 	int "ADC calibration sampling rate ms"
 	default 100
+
+config EERIE_LEAP_CANBUS_AUTO_DETECT_INTERVAL_MS
+	int "Canbus auto detect activity check interval ms"
+	default 5000
