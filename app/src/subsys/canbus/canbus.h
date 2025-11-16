@@ -73,6 +73,7 @@ public:
     bool Initialize();
     bool RegisterFrameReceivedHandler(uint32_t can_id, CanFrameHandler handler);
 
+    CanbusType GetType() const { return type_; }
     void SendFrame(const CanFrame& frame);
     uint32_t GetDetectedBitrate() const { return bitrate_; }
     bool IsBitrateDetected() const { return bitrate_detected_; }

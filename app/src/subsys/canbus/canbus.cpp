@@ -66,6 +66,8 @@ bool Canbus::Initialize() {
             LOG_ERR("Failed to start device [%d].", ret);
             return false;
         }
+
+        bitrate_detected_ = true;
     }
 
     LOG_INF("CANBus initialized successfully.");
@@ -86,15 +88,16 @@ bool Canbus::SetTiming(uint32_t bitrate) {
 }
 
 void Canbus::SendFrame(const CanFrame& frame) {
+    if(!is_initialized_ || !bitrate_detected_)
+        return;
+
     // TODO: Make sure this doesn't cause a memory leak
     auto can_frame = std::make_unique<struct can_frame>();
     can_frame->id = frame.id;
     can_frame->dlc = static_cast<uint8_t>(frame.data.size());
     memcpy(can_frame->data, frame.data.data(), frame.data.size());
 
-    int ret = can_send(canbus_dev_, can_frame.get(), K_NO_WAIT, SendFrameCallback, can_frame.release());
-    if(ret != 0)
-        LOG_ERR("Failed to send frame [%d].", ret);
+    can_send(canbus_dev_, can_frame.get(), K_NO_WAIT, SendFrameCallback, can_frame.release());
 }
 
 void Canbus::SendFrameCallback(const device* dev, int error, void* user_data) {
@@ -244,6 +247,9 @@ bool Canbus::AutoDetectBitrate() {
 }
 
 bool Canbus::IsBitrateSupported(CanbusType type, uint32_t bitrate) {
+    if(bitrate == 0)
+        return true;
+
     if(type == CanbusType::CANFD)
         return std::ranges::find(canfd_supported_bitrates_, bitrate) != canfd_supported_bitrates_.end();
     else

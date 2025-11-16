@@ -69,13 +69,17 @@ std::unique_ptr<ISensorReader> SensorReaderFactory::Create(std::shared_ptr<Senso
         if(canbus == nullptr)
             return nullptr;
 
+        auto dbc = canbus_service_->GetDbcForChannel(sensor->configuration.canbus_source->bus_channel);
+        if(dbc == nullptr || !dbc->IsLoaded())
+            return nullptr;
+
         sensor_reader = make_unique<CanbusSensorReader>(
             time_service_,
             guid_generator_,
             sensor_readings_frame_,
             sensor,
             canbus,
-            canbus_service_->GetDbc());
+            dbc);
     } else {
         throw std::runtime_error("Unsupported sensor type");
     }

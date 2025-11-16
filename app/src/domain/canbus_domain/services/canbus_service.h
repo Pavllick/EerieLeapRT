@@ -21,16 +21,16 @@ private:
     std::shared_ptr<CanbusConfigurationManager> canbus_configuration_manager_;
 
     std::unordered_map<uint8_t, std::shared_ptr<Canbus>> canbus_;
-    std::shared_ptr<Dbc> dbc_;
+    std::unordered_map<uint8_t, std::shared_ptr<Dbc>> dbcs_;
 
     void BitrateUpdated(uint8_t bus_channel, uint32_t bitrate);
 
 public:
     CanbusService(std::shared_ptr<IFsService> fs_service, std::shared_ptr<CanbusConfigurationManager> canbus_configuration_manager);
 
-    bool LoadDbcFile(std::streambuf& dbc_content);
+    bool LoadDbcFile(uint8_t bus_channel, std::streambuf& dbc_content);
     std::shared_ptr<Canbus> GetCanbus(uint8_t bus_channel) const;
-    std::shared_ptr<Dbc> GetDbc() const;
+    std::shared_ptr<Dbc> GetDbcForChannel(uint8_t bus_channel) const;
 };
 
 } // namespace eerie_leap::domain::canbus_domain::services

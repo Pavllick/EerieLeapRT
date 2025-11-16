@@ -32,6 +32,7 @@
 #include "domain/sensor_domain/services/processing_scheduler_service.h"
 #include "domain/sensor_domain/services/calibration_service.h"
 #include "domain/canbus_domain/services/canbus_service.h"
+#include "domain/canbus_domain/services/canbus_scheduler_service.h"
 
 #include "domain/logging_domain/services/log_writer_service.h"
 
@@ -311,6 +312,12 @@ int main(void) {
         adc_configuration_manager,
         processing_scheduler_service);
 
+    auto canbus_scheduler_service = make_shared_ext<CanbusSchedulerService>(
+        canbus_configuration_manager,
+        canbus_service,
+        sensor_readings_frame);
+    canbus_scheduler_service->Initialize();
+
 #ifdef CONFIG_NETWORKING
     http_server.Initialize(
         math_parser_service,
@@ -321,6 +328,7 @@ int main(void) {
 #endif // CONFIG_NETWORKING
 
     processing_scheduler_service->Start();
+    canbus_scheduler_service->Start();
 
     // TODO: Remove this and integrate into http server
     // calibration_service->Start(1);
@@ -351,7 +359,14 @@ void SetupCanbusConfiguration(std::shared_ptr<CanbusConfigurationManager> canbus
 
     CanChannelConfiguration canbus_channel_configuration_0 = {
         .bus_channel = 0,
-        .bitrate = 0,
+        .bitrate = 500000,
+
+        .message_configurations = {
+            {
+                .frame_id = 790,
+                .send_interval_ms = 20,
+            }
+        }
     };
     canbus_configuration->channel_configurations.push_back(canbus_channel_configuration_0);
 
