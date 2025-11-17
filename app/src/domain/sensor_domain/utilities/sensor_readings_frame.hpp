@@ -23,9 +23,9 @@ public:
     SensorReadingsFrame() = default;
 
     void AddOrUpdateReading(std::shared_ptr<SensorReading> reading) {
-        size_t sensor_id_hash = reading->sensor->id_hash;
-
         auto lock_key = k_spin_lock(&reading_lock_);
+
+        size_t sensor_id_hash = reading->sensor->id_hash;
 
         readings_[sensor_id_hash] = reading;
         if(readings_[sensor_id_hash]->status == ReadingStatus::PROCESSED && readings_[sensor_id_hash]->value.has_value())
@@ -43,6 +43,13 @@ public:
             throw std::runtime_error("Sensor ID not found");
 
         return readings_.at(sensor_id_hash);
+    }
+
+    float GetReadingValue(const size_t sensor_id_hash) const {
+        if(!HasReading(sensor_id_hash))
+            throw std::runtime_error("Sensor ID not found");
+
+        return *reading_values_.at(sensor_id_hash);
     }
 
     const std::unordered_map<size_t, std::shared_ptr<SensorReading>>& GetReadings() const {

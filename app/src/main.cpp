@@ -364,7 +364,11 @@ void SetupCanbusConfiguration(std::shared_ptr<CanbusConfigurationManager> canbus
         .message_configurations = {
             {
                 .frame_id = 790,
-                .send_interval_ms = 20,
+                .send_interval_ms = 10,
+            },
+            {
+                .frame_id = 809,
+                .send_interval_ms = 10,
             }
         }
     };

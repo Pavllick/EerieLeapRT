@@ -1,5 +1,4 @@
 #include "utilities/memory/heap_allocator.h"
-#include "domain/sensor_domain/processors/sensor_processor.h"
 
 #include "canbus_scheduler_service.h"
 
@@ -52,7 +51,7 @@ void CanbusSchedulerService::ProcessCanbusWorkTask(k_work* work) {
                 if(!task->readings_frame->HasReading(signal_name_hash))
                     return 0.0f;
 
-                return task->readings_frame->GetReading(signal_name_hash)->value.value_or(0.0f);
+                return task->readings_frame->GetReadingValue(signal_name_hash);
             });
 
         CanFrame can_frame = {

@@ -32,6 +32,7 @@ private:
     atomic_t auto_detect_running_;
     std::function<void (uint32_t bitrate)> bitrate_detected_fn_;
 
+    static constexpr k_timeout_t FRAME_SEND_TIMEOUT_MS = K_MSEC(2);
     static constexpr uint32_t AUTO_DETECT_TIMEOUT_MS = 500;
     static constexpr uint32_t MIN_FRAMES_FOR_DETECTION = 3;
 

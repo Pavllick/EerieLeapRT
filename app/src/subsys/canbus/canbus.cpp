@@ -91,29 +91,28 @@ void Canbus::SendFrame(const CanFrame& frame) {
     if(!is_initialized_ || !bitrate_detected_)
         return;
 
-    auto can_frame = std::make_unique<struct can_frame>();
-    can_frame->id = frame.id;
-    can_frame->dlc = static_cast<uint8_t>(frame.data.size());
-    memcpy(can_frame->data, frame.data.data(), frame.data.size());
+    struct can_frame can_frame = {
+        .id = frame.id,
+        .dlc = static_cast<uint8_t>(frame.data.size()),
+    };
+    memcpy(can_frame.data, frame.data.data(), frame.data.size());
 
     int res = can_send(
         canbus_dev_,
-        can_frame.get(),
-        K_NO_WAIT,
+        &can_frame,
+        FRAME_SEND_TIMEOUT_MS,
         SendFrameCallback,
-        can_frame.get());
+        nullptr);
 
-    if(res != 0)
+    if(res != 0) {
+        // LOG_ERR("Failed to send frame [%d].", res);
         return;
-
-    can_frame.release();
+    }
 }
 
 void Canbus::SendFrameCallback(const device* dev, int error, void* user_data) {
-    std::unique_ptr<struct can_frame> frame(static_cast<can_frame*>(user_data));
-
     if(error != 0)
-        LOG_ERR("Sending failed [%d]. Frame ID: %u", error, frame->id);
+        LOG_INF("SendFrameCallback error: %d", error);
 }
 
 void Canbus::CanFrameReceivedCallback(const device *dev, can_frame *frame, void *user_data) {

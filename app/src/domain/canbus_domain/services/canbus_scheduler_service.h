@@ -22,7 +22,7 @@ private:
     k_sem processing_semaphore_;
     static constexpr k_timeout_t PROCESSING_TIMEOUT = K_MSEC(200);
 
-    static constexpr int k_stack_size_ = 4096;
+    static constexpr int k_stack_size_ = 1024;
     static constexpr int k_priority_ = K_PRIO_PREEMPT(6);
 
     k_thread_stack_t* stack_area_;

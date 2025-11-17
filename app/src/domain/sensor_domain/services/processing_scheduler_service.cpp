@@ -7,6 +7,7 @@
 namespace eerie_leap::domain::sensor_domain::services {
 
 using namespace eerie_leap::utilities::memory;
+using namespace eerie_leap::subsys::time;
 using namespace eerie_leap::domain::sensor_domain::models;
 
 LOG_MODULE_REGISTER(processing_scheduler_logger);
