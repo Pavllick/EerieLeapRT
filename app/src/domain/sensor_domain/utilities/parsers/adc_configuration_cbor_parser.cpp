@@ -6,24 +6,21 @@ namespace eerie_leap::domain::sensor_domain::utilities::parsers {
 
 ext_unique_ptr<CborAdcConfig> AdcConfigurationCborParser::Serialize(const AdcConfiguration& adc_configuration) {
     auto adc_config = make_unique_ext<CborAdcConfig>();
-    memset(adc_config.get(), 0, sizeof(CborAdcConfig));
 
     adc_config->samples = adc_configuration.samples;
 
-    for(size_t i = 0; i < adc_configuration.channel_configurations->size(); ++i) {
-        auto adc_channel_config = make_shared_ext<CborAdcChannelConfig>();
-        memset(adc_channel_config.get(), 0, sizeof(CborAdcChannelConfig));
+    for(const auto& channel_configuration : *adc_configuration.channel_configurations) {
+        CborAdcChannelConfig adc_channel_config;
 
-        auto interpolation_method = adc_configuration.channel_configurations->at(i)->calibrator != nullptr
-            ? adc_configuration.channel_configurations->at(i)->calibrator->GetInterpolationMethod()
+        auto interpolation_method = channel_configuration->calibrator != nullptr
+            ? channel_configuration->calibrator->GetInterpolationMethod()
             : InterpolationMethod::NONE;
 
-        adc_channel_config->interpolation_method = static_cast<uint32_t>(interpolation_method);
+        adc_channel_config.interpolation_method = static_cast<uint32_t>(interpolation_method);
         if(interpolation_method != InterpolationMethod::NONE) {
-            adc_channel_config->calibration_table_present = true;
+            adc_channel_config.calibration_table_present = true;
 
-            auto& calibration_table = *adc_configuration.channel_configurations->at(i)->calibrator->GetCalibrationTable();
-            adc_channel_config->calibration_table.float32float_count = calibration_table.size();
+            auto& calibration_table = *channel_configuration->calibrator->GetCalibrationTable();
 
             if(calibration_table.size() < 2)
                 throw std::runtime_error("Calibration table must have at least 2 points.");
@@ -34,17 +31,16 @@ ext_unique_ptr<CborAdcConfig> AdcConfigurationCborParser::Serialize(const AdcCon
                     return a.voltage < b.voltage;
                 });
 
-            for(size_t j = 0; j < calibration_table.size(); ++j) {
-                const auto& calibration_data = calibration_table[j];
-                adc_channel_config->calibration_table.float32float[j].float32float_key = calibration_data.voltage;
-                adc_channel_config->calibration_table.float32float[j].float32float = calibration_data.value;
+            for(const auto& calibration_data : calibration_table) {
+                adc_channel_config.calibration_table.float32float.push_back({
+                    .float32float_key = calibration_data.voltage,
+                    .float32float = calibration_data.value});
             }
         } else {
             throw std::runtime_error("ADC channel configuration is invalid. Calibration table is missing.");
         }
 
-        adc_config->CborAdcChannelConfig_m[i] = *adc_channel_config;
-        adc_config->CborAdcChannelConfig_m_count++;
+        adc_config->CborAdcChannelConfig_m.push_back(adc_channel_config);
     }
 
     return adc_config;
@@ -56,19 +52,16 @@ AdcConfiguration AdcConfigurationCborParser::Deserialize(const CborAdcConfig& ad
     adc_configuration.samples = static_cast<uint16_t>(adc_config.samples);
     adc_configuration.channel_configurations = make_shared_ext<std::vector<std::shared_ptr<AdcChannelConfiguration>>>();
 
-    for(size_t i = 0; i < adc_config.CborAdcChannelConfig_m_count; ++i) {
-        const auto& adc_channel_config = adc_config.CborAdcChannelConfig_m[i];
+    for(const auto& adc_channel_config : adc_config.CborAdcChannelConfig_m) {
         auto adc_channel_configuration = make_shared_ext<AdcChannelConfiguration>();
 
         auto interpolation_method = static_cast<InterpolationMethod>(adc_channel_config.interpolation_method);
         if(interpolation_method != InterpolationMethod::NONE && adc_channel_config.calibration_table_present) {
             std::vector<CalibrationData> calibration_table;
-            for(size_t j = 0; j < adc_channel_config.calibration_table.float32float_count; ++j) {
-                const auto& calibration_data = adc_channel_config.calibration_table.float32float[j];
-
+            for(const auto& calibration_data : adc_channel_config.calibration_table.float32float) {
                 calibration_table.push_back({
-                        .voltage = calibration_data.float32float_key,
-                        .value = calibration_data.float32float});
+                    .voltage = calibration_data.float32float_key,
+                    .value = calibration_data.float32float});
             }
 
             auto calibration_table_ptr = make_shared_ext<std::vector<CalibrationData>>(calibration_table);

@@ -1,29 +1,9 @@
-/*
- * Generated using zcbor version 0.9.1
- * https://github.com/NordicSemiconductor/zcbor
- * Generated with a --default-max-qty of 24
- */
+#pragma once
 
-#ifndef CBOR_ADC_CONFIG_H__
-#define CBOR_ADC_CONFIG_H__
-
-#include <stdint.h>
-#include <stdbool.h>
-#include <stddef.h>
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/** Which value for --default-max-qty this file was created with.
- *
- *  The define is used in the other generated file to do a build-time
- *  compatibility check.
- *
- *  See `zcbor --help` for more information about --default-max-qty
- */
-#define DEFAULT_MAX_QTY 24
+#include <cstdint>
+#include <cstdbool>
+#include <cstddef>
+#include <vector>
 
 struct CborAdcCalibrationDataMap_float32float {
 	float float32float_key;
@@ -31,8 +11,7 @@ struct CborAdcCalibrationDataMap_float32float {
 };
 
 struct CborAdcCalibrationDataMap {
-	struct CborAdcCalibrationDataMap_float32float float32float[50];
-	size_t float32float_count;
+	std::vector<CborAdcCalibrationDataMap_float32float> float32float;
 };
 
 struct CborAdcChannelConfig {
@@ -43,13 +22,6 @@ struct CborAdcChannelConfig {
 
 struct CborAdcConfig {
 	uint32_t samples;
-	struct CborAdcChannelConfig CborAdcChannelConfig_m[24];
-	size_t CborAdcChannelConfig_m_count;
+	std::vector<CborAdcChannelConfig> CborAdcChannelConfig_m;
 	uint32_t json_config_checksum;
 };
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* CBOR_ADC_CONFIG_H__ */

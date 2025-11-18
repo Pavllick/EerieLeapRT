@@ -1,20 +1,10 @@
-/*
- * Generated using zcbor version 0.9.1
- * https://github.com/NordicSemiconductor/zcbor
- * Generated with a --default-max-qty of 24
- */
-
-#include <stdint.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <string.h>
+#include <cstdint>
+#include <cstdbool>
+#include <cstddef>
+#include <cstring>
 #include "zcbor_decode.h"
 #include "cbor_adc_config_cbor_decode.h"
 #include "zcbor_print.h"
-
-#if DEFAULT_MAX_QTY != 24
-#error "The type file was generated with a different default_max_qty than this file"
-#endif
 
 #define log_result(state, result, func) do { \
 	if (!result) { \
@@ -48,17 +38,26 @@ static bool decode_CborAdcCalibrationDataMap(
 {
 	zcbor_log("%s\r\n", __func__);
 
-	bool res = (((zcbor_map_start_decode(state) && ((zcbor_multi_decode(2, 50, &(*result).float32float_count, (zcbor_decoder_t *)decode_repeated_CborAdcCalibrationDataMap_float32float, state, (*&(*result).float32float), sizeof(struct CborAdcCalibrationDataMap_float32float))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_map_end_decode(state))));
-
-	if (false) {
-		/* For testing that the types of the arguments are correct.
-		 * A compiler error here means a bug in zcbor.
-		 */
-		decode_repeated_CborAdcCalibrationDataMap_float32float(state, (*&(*result).float32float));
+	if (!zcbor_map_start_decode(state)) {
+		return false;
 	}
 
-	log_result(state, res, __func__);
-	return res;
+	while (!zcbor_array_at_end(state)) {
+		result->float32float.emplace_back();
+		if (!decode_repeated_CborAdcCalibrationDataMap_float32float(state, &result->float32float.back())) {
+			result->float32float.pop_back();
+			zcbor_list_map_end_force_decode(state);
+			zcbor_map_end_decode(state);
+			return false;
+		}
+	}
+
+	if (!zcbor_map_end_decode(state)) {
+		return false;
+	}
+
+	log_result(state, true, __func__);
+	return true;
 }
 
 static bool decode_CborAdcChannelConfig(
@@ -78,19 +77,47 @@ static bool decode_CborAdcConfig(
 {
 	zcbor_log("%s\r\n", __func__);
 
-	bool res = (((zcbor_list_start_decode(state) && ((((zcbor_uint32_decode(state, (&(*result).samples))))
-	&& ((zcbor_list_start_decode(state) && ((zcbor_multi_decode(0, 24, &(*result).CborAdcChannelConfig_m_count, (zcbor_decoder_t *)decode_CborAdcChannelConfig, state, (*&(*result).CborAdcChannelConfig_m), sizeof(struct CborAdcChannelConfig))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state)))
-	&& ((zcbor_uint32_decode(state, (&(*result).json_config_checksum))))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
-
-	if (false) {
-		/* For testing that the types of the arguments are correct.
-		 * A compiler error here means a bug in zcbor.
-		 */
-		decode_CborAdcChannelConfig(state, (*&(*result).CborAdcChannelConfig_m));
+	if (!zcbor_list_start_decode(state)) {
+		return false;
 	}
 
-	log_result(state, res, __func__);
-	return res;
+	if (!zcbor_uint32_decode(state, &result->samples)) {
+		zcbor_list_end_decode(state);
+		return false;
+	}
+
+	if (!zcbor_list_start_decode(state)) {
+		zcbor_list_end_decode(state);
+		return false;
+	}
+
+	while (!zcbor_array_at_end(state)) {
+		result->CborAdcChannelConfig_m.emplace_back();
+		if (!decode_CborAdcChannelConfig(state, &result->CborAdcChannelConfig_m.back())) {
+			result->CborAdcChannelConfig_m.pop_back();
+			zcbor_list_map_end_force_decode(state);
+			zcbor_list_end_decode(state);
+			zcbor_list_end_decode(state);
+			return false;
+		}
+	}
+
+	if (!zcbor_list_end_decode(state)) {
+		zcbor_list_end_decode(state);
+		return false;
+	}
+
+	if (!zcbor_uint32_decode(state, &result->json_config_checksum)) {
+		zcbor_list_end_decode(state);
+		return false;
+	}
+
+	if (!zcbor_list_end_decode(state)) {
+		return false;
+	}
+
+	log_result(state, true, __func__);
+	return true;
 }
 
 

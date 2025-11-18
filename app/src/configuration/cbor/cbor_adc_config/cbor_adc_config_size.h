@@ -13,21 +13,21 @@ static size_t cbor_get_size_CborAdcConfig(const CborAdcConfig& config) {
     builder.AddUint(config.samples);
 
     builder.AddIndefiniteArrayStart();
-    for (size_t i = 0; i < config.CborAdcChannelConfig_m_count; i++) {
+    for (const auto& channel_config : config.CborAdcChannelConfig_m) {
         builder.AddIndefiniteArrayStart();
 
-        builder.AddUint(config.CborAdcChannelConfig_m[i].interpolation_method);
+        builder.AddUint(channel_config.interpolation_method);
 
-        builder.AddOptional(config.CborAdcChannelConfig_m[i].calibration_table_present,
-            config.CborAdcChannelConfig_m[i].calibration_table,
-            [](const CborAdcCalibrationDataMap& config) {
+        builder.AddOptional(channel_config.calibration_table_present,
+            channel_config.calibration_table,
+            [](const CborAdcCalibrationDataMap& calibration_table) {
 
             CborSizeBuilder builder;
             builder.AddIndefiniteArrayStart();
 
-            for(size_t i = 0; i < config.float32float_count; i++) {
-                builder.AddFloat(config.float32float[i].float32float_key);
-                builder.AddFloat(config.float32float[i].float32float);
+            for(const auto& calibration_data : calibration_table.float32float) {
+                builder.AddFloat(calibration_data.float32float_key);
+                builder.AddFloat(calibration_data.float32float);
             }
 
             return builder.Build();
