@@ -23,19 +23,15 @@ ext_unique_ptr<CborSensorsConfig> SensorsCborParser::Serialize(
     uint32_t adc_channel_count) {
 
     auto sensors_config = make_unique_ext<CborSensorsConfig>();
-    memset(sensors_config.get(), 0, sizeof(CborSensorsConfig));
 
     SensorsOrderResolver order_resolver;
 
-    for(size_t i = 0; i < sensors.size(); ++i) {
-        const auto& sensor = sensors.at(i);
-
+    for(const auto& sensor : sensors) {
         // NOTE: UpdateConnectionString() must be called before validation
         sensor->configuration.UpdateConnectionString();
         SensorValidator::Validate(*sensor, gpio_channel_count, adc_channel_count);
 
         auto sensor_config = make_shared_ext<CborSensorConfig>();
-        memset(sensor_config.get(), 0, sizeof(CborSensorConfig));
 
         sensor_config->id = CborHelpers::ToZcborString(&sensor->id);
         sensor_config->configuration.type = std::to_underlying(sensor->configuration.type);
@@ -60,7 +56,6 @@ ext_unique_ptr<CborSensorsConfig> SensorsCborParser::Serialize(
             sensor_config->configuration.calibration_table_present = true;
 
             auto& calibration_table = *sensor->configuration.voltage_interpolator->GetCalibrationTable();
-            sensor_config->configuration.calibration_table.float32float_count = calibration_table.size();
 
             std::ranges::sort(
                 calibration_table,
@@ -68,10 +63,10 @@ ext_unique_ptr<CborSensorsConfig> SensorsCborParser::Serialize(
                     return a.voltage < b.voltage;
                 });
 
-            for(size_t j = 0; j < calibration_table.size(); ++j) {
-                const auto& calibration_data = calibration_table[j];
-                sensor_config->configuration.calibration_table.float32float[j].float32float_key = calibration_data.voltage;
-                sensor_config->configuration.calibration_table.float32float[j].float32float = calibration_data.value;
+            for(const auto& calibration_data : calibration_table) {
+                sensor_config->configuration.calibration_table.float32float.push_back({
+                    .float32float_key = calibration_data.voltage,
+                    .float32float = calibration_data.value});
             }
         } else {
             sensor_config->configuration.calibration_table_present = false;
@@ -89,8 +84,7 @@ ext_unique_ptr<CborSensorsConfig> SensorsCborParser::Serialize(
 
         sensor_config->metadata.description = CborHelpers::ToZcborString(&sensor->metadata.description);
 
-        sensors_config->CborSensorConfig_m[i] = *sensor_config;
-        sensors_config->CborSensorConfig_m_count++;
+        sensors_config->CborSensorConfig_m.push_back(*sensor_config);
 
         order_resolver.AddSensor(sensor);
     }
@@ -108,8 +102,7 @@ std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
 
     std::vector<std::shared_ptr<Sensor>> sensors;
 
-    for(size_t i = 0; i < sensors_config.CborSensorConfig_m_count; ++i) {
-        const auto& sensor_config = sensors_config.CborSensorConfig_m[i];
+    for(const auto& sensor_config : sensors_config.CborSensorConfig_m) {
         std::shared_ptr<Sensor> sensor = make_shared_ext<Sensor>(CborHelpers::ToStdString(sensor_config.id));
 
         sensor->configuration.type = static_cast<SensorType>(sensor_config.configuration.type);
@@ -127,9 +120,8 @@ std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
         auto interpolation_method = static_cast<InterpolationMethod>(sensor_config.configuration.interpolation_method);
         if(interpolation_method != InterpolationMethod::NONE && sensor_config.configuration.calibration_table_present) {
             std::vector<CalibrationData> calibration_table;
-            for(size_t j = 0; j < sensor_config.configuration.calibration_table.float32float_count; ++j) {
-                const auto& calibration_data = sensor_config.configuration.calibration_table.float32float[j];
-
+            calibration_table.reserve(sensor_config.configuration.calibration_table.float32float.size());
+            for(const auto& calibration_data : sensor_config.configuration.calibration_table.float32float) {
                 calibration_table.push_back({
                     .voltage = calibration_data.float32float_key,
                     .value = calibration_data.float32float});

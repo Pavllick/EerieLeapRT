@@ -11,51 +11,51 @@ static size_t cbor_get_size_CborSensorsConfig(const CborSensorsConfig& config) {
     builder.AddIndefiniteArrayStart();
 
     builder.AddIndefiniteArrayStart();
-    for(int i = 0; i < config.CborSensorConfig_m_count; i++) {
+    for(const auto& sensor_config : config.CborSensorConfig_m) {
         builder.AddIndefiniteArrayStart();
 
-        builder.AddTstr(config.CborSensorConfig_m[i].id);
+        builder.AddTstr(sensor_config.id);
 
         builder.AddIndefiniteArrayStart()
-            .AddTstr(config.CborSensorConfig_m[i].metadata.name)
-            .AddTstr(config.CborSensorConfig_m[i].metadata.unit)
-            .AddTstr(config.CborSensorConfig_m[i].metadata.description);
+            .AddTstr(sensor_config.metadata.name)
+            .AddTstr(sensor_config.metadata.unit)
+            .AddTstr(sensor_config.metadata.description);
 
         builder.AddIndefiniteArrayStart()
-            .AddUint(config.CborSensorConfig_m[i].configuration.type)
-            .AddUint(config.CborSensorConfig_m[i].configuration.sampling_rate_ms)
-            .AddUint(config.CborSensorConfig_m[i].configuration.interpolation_method);
+            .AddUint(sensor_config.configuration.type)
+            .AddUint(sensor_config.configuration.sampling_rate_ms)
+            .AddUint(sensor_config.configuration.interpolation_method);
 
 
         builder.AddOptional(
-            config.CborSensorConfig_m[i].configuration.channel_present,
-            config.CborSensorConfig_m[i].configuration.channel,
+            sensor_config.configuration.channel_present,
+            sensor_config.configuration.channel,
             [](const auto& value) {
 
             return CborSizeCalc::SizeOfUint(value);
         });
 
-        builder.AddTstr(config.CborSensorConfig_m[i].configuration.connection_string);
+        builder.AddTstr(sensor_config.configuration.connection_string);
 
         builder.AddOptional(
-            config.CborSensorConfig_m[i].configuration.calibration_table_present,
-            config.CborSensorConfig_m[i].configuration.calibration_table,
+            sensor_config.configuration.calibration_table_present,
+            sensor_config.configuration.calibration_table,
             [](const auto& value) {
 
             CborSizeBuilder builder;
             builder.AddIndefiniteArrayStart();
 
-            for(int i = 0; i < value.float32float_count; i++) {
-                builder.AddFloat(value.float32float[i].float32float_key)
-                    .AddFloat(value.float32float[i].float32float);
+            for(const auto& calibration_data : value.float32float) {
+                builder.AddFloat(calibration_data.float32float_key)
+                    .AddFloat(calibration_data.float32float);
             }
 
             return builder.Build();
         });
 
         builder.AddOptional(
-            config.CborSensorConfig_m[i].configuration.expression_present,
-            config.CborSensorConfig_m[i].configuration.expression,
+            sensor_config.configuration.expression_present,
+            sensor_config.configuration.expression,
             [](const auto& value) {
 
             return CborSizeCalc::SizeOfTstr(value);

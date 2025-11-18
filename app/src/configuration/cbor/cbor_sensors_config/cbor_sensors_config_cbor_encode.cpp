@@ -1,20 +1,10 @@
-/*
- * Generated using zcbor version 0.9.1
- * https://github.com/NordicSemiconductor/zcbor
- * Generated with a --default-max-qty of 24
- */
-
-#include <stdint.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <string.h>
+#include <cstdint>
+#include <cstdbool>
+#include <cstddef>
+#include <cstring>
 #include "zcbor_encode.h"
 #include "cbor_sensors_config_cbor_encode.h"
 #include "zcbor_print.h"
-
-#if DEFAULT_MAX_QTY != 24
-#error "The type file was generated with a different default_max_qty than this file"
-#endif
 
 #define log_result(state, result, func) do { \
 	if (!result) { \
@@ -63,7 +53,9 @@ static bool encode_CborSensorCalibrationDataMap(
 {
 	zcbor_log("%s\r\n", __func__);
 
-	bool res = (((zcbor_map_start_encode(state, 50) && ((zcbor_multi_encode_minmax(2, 50, &(*input).float32float_count, (zcbor_encoder_t *)encode_repeated_CborSensorCalibrationDataMap_float32float, state, (*&(*input).float32float), sizeof(struct CborSensorCalibrationDataMap_float32float))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_map_end_encode(state, 50))));
+	size_t float32float_count = input->float32float.size();
+
+	bool res = (((zcbor_map_start_encode(state, float32float_count) && ((zcbor_multi_encode_minmax(2, float32float_count, &float32float_count, (zcbor_encoder_t *)encode_repeated_CborSensorCalibrationDataMap_float32float, state, input->float32float.data(), sizeof(struct CborSensorCalibrationDataMap_float32float))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_map_end_encode(state, float32float_count))));
 
 	log_result(state, res, __func__);
 	return res;
@@ -104,7 +96,9 @@ static bool encode_CborSensorsConfig(
 {
 	zcbor_log("%s\r\n", __func__);
 
-	bool res = (((zcbor_list_start_encode(state, 2) && ((((zcbor_list_start_encode(state, 24) && ((zcbor_multi_encode_minmax(0, 24, &(*input).CborSensorConfig_m_count, (zcbor_encoder_t *)encode_CborSensorConfig, state, (*&(*input).CborSensorConfig_m), sizeof(struct CborSensorConfig))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 24)))
+	size_t CborSensorConfig_m_count = input->CborSensorConfig_m.size();
+
+	bool res = (((zcbor_list_start_encode(state, 2) && ((((zcbor_list_start_encode(state, CborSensorConfig_m_count) && ((zcbor_multi_encode_minmax(0, CborSensorConfig_m_count, &CborSensorConfig_m_count, (zcbor_encoder_t *)encode_CborSensorConfig, state, input->CborSensorConfig_m.data(), sizeof(struct CborSensorConfig))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, CborSensorConfig_m_count)))
 	&& ((zcbor_uint32_encode(state, (&(*input).json_config_checksum))))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 2))));
 
 	log_result(state, res, __func__);
