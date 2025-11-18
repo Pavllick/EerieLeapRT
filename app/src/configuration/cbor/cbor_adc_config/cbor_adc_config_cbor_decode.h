@@ -4,14 +4,14 @@
  * Generated with a --default-max-qty of 24
  */
 
-#ifndef SYSTEM_CONFIG_CBOR_ENCODE_H__
-#define SYSTEM_CONFIG_CBOR_ENCODE_H__
+#ifndef CBOR_ADC_CONFIG_CBOR_DECODE_H__
+#define CBOR_ADC_CONFIG_CBOR_DECODE_H__
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <string.h>
-#include "cbor_system_config.h"
+#include "cbor_adc_config.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,9 +22,9 @@ extern "C" {
 #endif
 
 
-int cbor_encode_CborSystemConfig(
-		uint8_t *payload, size_t payload_len,
-		const struct CborSystemConfig *input,
+int cbor_decode_CborAdcConfig(
+		const uint8_t *payload, size_t payload_len,
+		struct CborAdcConfig *result,
 		size_t *payload_len_out);
 
 
@@ -32,4 +32,4 @@ int cbor_encode_CborSystemConfig(
 }
 #endif
 
-#endif /* SYSTEM_CONFIG_CBOR_ENCODE_H__ */
+#endif /* CBOR_ADC_CONFIG_CBOR_DECODE_H__ */

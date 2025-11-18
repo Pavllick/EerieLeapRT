@@ -4,14 +4,14 @@
  * Generated with a --default-max-qty of 24
  */
 
-#ifndef LOGGING_CONFIG_CBOR_DECODE_H__
-#define LOGGING_CONFIG_CBOR_DECODE_H__
+#ifndef CBOR_SYSTEM_CONFIG_CBOR_DECODE_H__
+#define CBOR_SYSTEM_CONFIG_CBOR_DECODE_H__
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <string.h>
-#include "cbor_logging_config.h"
+#include "cbor_system_config.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,9 +22,9 @@ extern "C" {
 #endif
 
 
-int cbor_decode_CborLoggingConfig(
+int cbor_decode_CborSystemConfig(
 		const uint8_t *payload, size_t payload_len,
-		struct CborLoggingConfig *result,
+		struct CborSystemConfig *result,
 		size_t *payload_len_out);
 
 
@@ -32,4 +32,4 @@ int cbor_decode_CborLoggingConfig(
 }
 #endif
 
-#endif /* LOGGING_CONFIG_CBOR_DECODE_H__ */
+#endif /* CBOR_SYSTEM_CONFIG_CBOR_DECODE_H__ */

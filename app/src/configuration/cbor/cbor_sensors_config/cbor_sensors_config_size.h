@@ -2,7 +2,7 @@
 
 #include "utilities/cbor/cbor_size_builder.hpp"
 
-#include "cbor_sensor_config.h"
+#include "cbor_sensors_config.h"
 
 using namespace eerie_leap::utilities::cbor;
 

@@ -1,10 +1,10 @@
 #pragma once
 
 #include "cbor_trait.h"
-#include <configuration/cbor/cbor_sensor_config/cbor_sensor_config.h>
-#include "configuration/cbor/cbor_sensor_config/sensor_config_cbor_encode.h"
-#include "configuration/cbor/cbor_sensor_config/sensor_config_cbor_decode.h"
-#include "configuration/cbor/cbor_sensor_config/sensor_config_cbor_size.h"
+#include <configuration/cbor/cbor_sensors_config/cbor_sensors_config.h>
+#include "configuration/cbor/cbor_sensors_config/cbor_sensors_config_cbor_encode.h"
+#include "configuration/cbor/cbor_sensors_config/cbor_sensors_config_cbor_decode.h"
+#include "configuration/cbor/cbor_sensors_config/cbor_sensors_config_size.h"
 
 namespace eerie_leap::configuration::cbor::traits {
 

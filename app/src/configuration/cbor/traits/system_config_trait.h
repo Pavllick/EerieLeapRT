@@ -2,9 +2,9 @@
 
 #include "cbor_trait.h"
 #include <configuration/cbor/cbor_system_config/cbor_system_config.h>
-#include "configuration/cbor/cbor_system_config/system_config_cbor_encode.h"
-#include "configuration/cbor/cbor_system_config/system_config_cbor_decode.h"
-#include "configuration/cbor/cbor_system_config/system_config_cbor_size.h"
+#include "configuration/cbor/cbor_system_config/cbor_system_config_cbor_encode.h"
+#include "configuration/cbor/cbor_system_config/cbor_system_config_cbor_decode.h"
+#include "configuration/cbor/cbor_system_config/cbor_system_config_size.h"
 
 namespace eerie_leap::configuration::cbor::traits {
 

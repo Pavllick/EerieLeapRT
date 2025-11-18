@@ -4,14 +4,14 @@
  * Generated with a --default-max-qty of 24
  */
 
-#ifndef CANBUS_CONFIG_CBOR_ENCODE_H__
-#define CANBUS_CONFIG_CBOR_ENCODE_H__
+#ifndef CBOR_SENSORS_CONFIG_CBOR_DECODE_H__
+#define CBOR_SENSORS_CONFIG_CBOR_DECODE_H__
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <string.h>
-#include "cbor_canbus_config.h"
+#include "cbor_sensors_config.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,9 +22,9 @@ extern "C" {
 #endif
 
 
-int cbor_encode_CborCanbusConfig(
-		uint8_t *payload, size_t payload_len,
-		const struct CborCanbusConfig *input,
+int cbor_decode_CborSensorsConfig(
+		const uint8_t *payload, size_t payload_len,
+		struct CborSensorsConfig *result,
 		size_t *payload_len_out);
 
 
@@ -32,4 +32,4 @@ int cbor_encode_CborCanbusConfig(
 }
 #endif
 
-#endif /* CANBUS_CONFIG_CBOR_ENCODE_H__ */
+#endif /* CBOR_SENSORS_CONFIG_CBOR_DECODE_H__ */

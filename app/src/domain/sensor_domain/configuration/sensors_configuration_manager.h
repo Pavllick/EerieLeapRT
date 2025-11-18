@@ -6,7 +6,7 @@
 
 #include "utilities/math_parser/math_parser_service.hpp"
 #include <utilities/memory/heap_allocator.h>
-#include "configuration/cbor/cbor_sensor_config/cbor_sensor_config.h"
+#include "configuration/cbor/cbor_sensors_config/cbor_sensors_config.h"
 #include "configuration/services/cbor_configuration_service.h"
 #include "configuration/json/configs/json_sensors_config.h"
 #include "configuration/services/json_configuration_service.h"

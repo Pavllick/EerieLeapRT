@@ -4,8 +4,8 @@
  * Generated with a --default-max-qty of 24
  */
 
-#ifndef CANBUS_CONFIG_CBOR_DECODE_H__
-#define CANBUS_CONFIG_CBOR_DECODE_H__
+#ifndef CBOR_CANBUS_CONFIG_CBOR_DECODE_H__
+#define CBOR_CANBUS_CONFIG_CBOR_DECODE_H__
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -32,4 +32,4 @@ int cbor_decode_CborCanbusConfig(
 }
 #endif
 
-#endif /* CANBUS_CONFIG_CBOR_DECODE_H__ */
+#endif /* CBOR_CANBUS_CONFIG_CBOR_DECODE_H__ */

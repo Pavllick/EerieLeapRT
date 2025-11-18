@@ -4,8 +4,8 @@
  * Generated with a --default-max-qty of 24
  */
 
-#ifndef CBOR_SENSOR_CONFIG_H__
-#define CBOR_SENSOR_CONFIG_H__
+#ifndef CBOR_SENSORS_CONFIG_H__
+#define CBOR_SENSORS_CONFIG_H__
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -70,4 +70,4 @@ struct CborSensorsConfig {
 }
 #endif
 
-#endif /* CBOR_SENSOR_CONFIG_H__ */
+#endif /* CBOR_SENSORS_CONFIG_H__ */

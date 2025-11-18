@@ -9,7 +9,7 @@
 #include <stddef.h>
 #include <string.h>
 #include "zcbor_encode.h"
-#include "logging_config_cbor_encode.h"
+#include "cbor_logging_config_cbor_encode.h"
 #include "zcbor_print.h"
 
 #if DEFAULT_MAX_QTY != 24

@@ -188,35 +188,8 @@ npm install -g html-minifier-terser
 
 ### Generating CBOR helpers
 
-#### Example command to generate SystemConfig helpers:
-
-```shell
-zcbor code -sed --default-max-qty 24 -c ./app/src/configuration/cbor/cbor_schemas/system_config.cddl -t CborSystemConfig --output-h ./app/src/configuration/cbor/cbor_system_config/system_config_cbor.h --output-c ./app/src/configuration/cbor/cbor_system_config/system_config_cbor.c --output-h-types ./app/src/configuration/cbor/cbor_system_config/cbor_system_config.h
-```
-
-#### Example command to generate AdcConfig helpers:
-
-```shell
-zcbor code -sed --default-max-qty 24 -c ./app/src/configuration/cbor/cbor_schemas/adc_config.cddl -t CborAdcConfig --output-h ./app/src/configuration/cbor/cbor_adc_config/adc_config_cbor.h --output-c ./app/src/configuration/cbor/cbor_adc_config/adc_config_cbor.c --output-h-types ./app/src/configuration/cbor/cbor_adc_config/cbor_adc_config.h
-```
-
-#### Example command to generate SensorConfig helpers:
-
-```shell
-zcbor code -sed --default-max-qty 24 -c ./app/src/configuration/cbor/cbor_schemas/sensor_config.cddl -t CborSensorsConfig --output-h ./app/src/configuration/cbor/cbor_sensor_config/sensor_config_cbor.h --output-c ./app/src/configuration/cbor/cbor_sensor_config/sensor_config_cbor.c --output-h-types ./app/src/configuration/cbor/cbor_sensor_config/cbor_sensor_config.h
-```
-
-#### Example command to generate CanbusConfig helpers:
-
-```shell
-zcbor code -sed --default-max-qty 24 -c ./app/src/configuration/cbor/cbor_schemas/canbus_config.cddl -t CborCanbusConfig --output-h ./app/src/configuration/cbor/cbor_canbus_config/canbus_config_cbor.h --output-c ./app/src/configuration/cbor/cbor_canbus_config/canbus_config_cbor.c --output-h-types ./app/src/configuration/cbor/cbor_canbus_config/cbor_canbus_config.h
-```
-
-#### Example command to generate LoggingConfig helpers:
-
-```shell
-zcbor code -sed --default-max-qty 24 -c ./app/src/configuration/cbor/cbor_schemas/logging_config.cddl -t CborLoggingConfig --output-h ./app/src/configuration/cbor/cbor_logging_config/logging_config_cbor.h --output-c ./app/src/configuration/cbor/cbor_logging_config/logging_config_cbor.c --output-h-types ./app/src/configuration/cbor/cbor_logging_config/cbor_logging_config.h
-```
+Use CBOR Serializer helpers in the core CMakeLists.txt file to generate CBOR helpers for the configuration schemas.
+Uncomment corresponding line in order to generate base set of serialization classes. Files will appear in the `src/configuration/cbor/generated` directory. Finalazed files expected to be placed in `src/configuration/cbor/<base_name>` directory.
 
 ### Network
 
