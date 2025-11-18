@@ -1,20 +1,10 @@
-/*
- * Generated using zcbor version 0.9.1
- * https://github.com/NordicSemiconductor/zcbor
- * Generated with a --default-max-qty of 24
- */
-
-#include <stdint.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <string.h>
+#include <cstdint>
+#include <cstdbool>
+#include <cstddef>
+#include <cstring>
 #include "zcbor_encode.h"
 #include "cbor_logging_config_cbor_encode.h"
 #include "zcbor_print.h"
-
-#if DEFAULT_MAX_QTY != 24
-#error "The type file was generated with a different default_max_qty than this file"
-#endif
 
 #define log_result(state, result, func) do { \
 	if (!result) { \
@@ -48,9 +38,11 @@ static bool encode_CborLoggingConfig(
 {
 	zcbor_log("%s\r\n", __func__);
 
+	size_t CborSensorLoggingConfig_m_count = input->CborSensorLoggingConfig_m.size();
+
 	bool res = (((zcbor_list_start_encode(state, 4) && ((((zcbor_uint32_encode(state, (&(*input).logging_interval_ms))))
 	&& ((zcbor_uint32_encode(state, (&(*input).max_log_size_mb))))
-	&& ((zcbor_list_start_encode(state, 24) && ((zcbor_multi_encode_minmax(0, 24, &(*input).CborSensorLoggingConfig_m_count, (zcbor_encoder_t *)encode_CborSensorLoggingConfig, state, (*&(*input).CborSensorLoggingConfig_m), sizeof(struct CborSensorLoggingConfig))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 24)))
+	&& ((zcbor_list_start_encode(state, CborSensorLoggingConfig_m_count) && ((zcbor_multi_encode_minmax(0, CborSensorLoggingConfig_m_count, &CborSensorLoggingConfig_m_count, (zcbor_encoder_t *)encode_CborSensorLoggingConfig, state, input->CborSensorLoggingConfig_m.data(), sizeof(struct CborSensorLoggingConfig))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, CborSensorLoggingConfig_m_count)))
 	&& ((zcbor_uint32_encode(state, (&(*input).json_config_checksum))))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 4))));
 
 	log_result(state, res, __func__);

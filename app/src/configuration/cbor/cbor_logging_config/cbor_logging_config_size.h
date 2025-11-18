@@ -14,12 +14,12 @@ static size_t cbor_get_size_CborLoggingConfig(const CborLoggingConfig& config) {
         .AddUint(config.max_log_size_mb);
 
     builder.AddIndefiniteArrayStart();
-    for(int i = 0; i < config.CborSensorLoggingConfig_m_count; i++) {
+    for(const auto& sensor_logging_config : config.CborSensorLoggingConfig_m) {
         builder.AddIndefiniteArrayStart()
-            .AddUint(config.CborSensorLoggingConfig_m[i].sensor_id_hash)
-            .AddBool(config.CborSensorLoggingConfig_m[i].is_enabled)
-            .AddBool(config.CborSensorLoggingConfig_m[i].log_raw_value)
-            .AddBool(config.CborSensorLoggingConfig_m[i].log_only_new_data);
+            .AddUint(sensor_logging_config.sensor_id_hash)
+            .AddBool(sensor_logging_config.is_enabled)
+            .AddBool(sensor_logging_config.log_raw_value)
+            .AddBool(sensor_logging_config.log_only_new_data);
     }
 
     builder.AddUint(config.json_config_checksum);

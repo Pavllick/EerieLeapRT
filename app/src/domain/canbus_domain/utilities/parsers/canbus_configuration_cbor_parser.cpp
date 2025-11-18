@@ -9,7 +9,6 @@ ext_unique_ptr<CborCanbusConfig> CanbusConfigurationCborParser::Serialize(const 
     CanbusConfigurationValidator::Validate(configuration);
 
     auto config = make_unique_ext<CborCanbusConfig>();
-    memset(config.get(), 0, sizeof(CborCanbusConfig));
 
     for(const auto& channel_configuration : configuration.channel_configurations) {
         CborCanChannelConfig channel_config = {
