@@ -65,15 +65,14 @@ private:
 
         LOG_MODULE_DECLARE(configuration_service_logger);
 
-        auto config_bytes = serializer_->Serialize(*configuration);
+        auto json_str = serializer_->Serialize(*configuration);
 
-        if (!config_bytes) {
+        if (!json_str) {
             LOG_ERR("Failed to serialize configuration %s.", configuration_file_path_.c_str());
             return false;
         }
 
-        // Remove null terminator
-        return fs_service_->WriteFile(configuration_file_path_, config_bytes->data(), config_bytes->size() - 1);
+        return fs_service_->WriteFile(configuration_file_path_, json_str->c_str(), json_str->size());
     }
 
     std::optional<LoadedConfig<T>> LoadProcessor() {
@@ -96,8 +95,8 @@ private:
             return std::nullopt;
         }
 
-        auto config_bytes = std::span<const uint8_t>(buffer->data(), out_len);
-        auto configuration = serializer_->Deserialize(config_bytes);
+        std::string_view json_str(reinterpret_cast<const char*>(buffer->data()), out_len);
+        auto configuration = serializer_->Deserialize(json_str);
 
         if (configuration == nullptr) {
             LOG_ERR("Failed to deserialize configuration %s.", configuration_file_path_.c_str());
@@ -137,8 +136,8 @@ public:
         k_work_init(&task_load_.work, WorkTaskLoad);
 
         serializer_ = make_shared_ext<JsonSerializer<T>>(
-            JsonTrait<T>::object_descriptor,
-            JsonTrait<T>::object_descriptor_size);
+            JsonTrait<T>::Encode,
+            JsonTrait<T>::Decode);
 
         if(!fs_service_)
             return;

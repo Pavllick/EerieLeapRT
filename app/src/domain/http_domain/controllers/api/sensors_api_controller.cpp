@@ -18,7 +18,7 @@ LOG_MODULE_REGISTER(sensors_api_controller_logger);
 const size_t SensorsApiController::sensors_config_post_buffer_size_;
 
 ext_unique_ptr<ExtVector> SensorsApiController::sensors_config_post_buffer_;
-ext_unique_ptr<ExtVector> SensorsApiController::sensors_config_get_buffer_;
+ext_unique_ptr<std::string> SensorsApiController::sensors_config_get_buffer_;
 
 std::unique_ptr<SensorsJsonParser> SensorsApiController::sensors_json_parser_ = nullptr;
 std::shared_ptr<MathParserService> SensorsApiController::math_parser_service_ = nullptr;
@@ -48,8 +48,8 @@ SensorsApiController::SensorsApiController(
 
     if(!json_serializer_)
         json_serializer_ = std::make_unique<JsonSerializer<JsonSensorsConfig>>(
-            JsonTrait<JsonSensorsConfig>::object_descriptor,
-            JsonTrait<JsonSensorsConfig>::object_descriptor_size);
+            JsonTrait<JsonSensorsConfig>::Encode,
+            JsonTrait<JsonSensorsConfig>::Decode);
 }
 
 int SensorsApiController::sensors_config_get_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data) {
@@ -62,7 +62,7 @@ int SensorsApiController::sensors_config_get_handler(http_client_ctx *client, en
         auto config = sensors_json_parser_->Serialize(*sensors, 16, 16);
         sensors_config_get_buffer_ = json_serializer_->Serialize(*config);
 
-        response_ctx->body = (uint8_t*)sensors_config_get_buffer_->data();
+        response_ctx->body = (uint8_t*)sensors_config_get_buffer_->c_str();
         response_ctx->body_len = sensors_config_get_buffer_->size();
         response_ctx->final_chunk = true;
     }
@@ -72,7 +72,8 @@ int SensorsApiController::sensors_config_get_handler(http_client_ctx *client, en
 
 void SensorsApiController::UpdateSensorsConfig(const std::span<const uint8_t>& buffer) {
     // TODO: Get GPIO and ADC channel count
-    auto json_sensors_config = json_serializer_->Deserialize(buffer);
+    std::string_view json_str(reinterpret_cast<const char*>(buffer.data()), buffer.size());
+    auto json_sensors_config = json_serializer_->Deserialize(json_str);
     auto sensors = sensors_json_parser_->Deserialize(*json_sensors_config, 16, 16);
 
     if(!sensors_configuration_manager_->Update(sensors))

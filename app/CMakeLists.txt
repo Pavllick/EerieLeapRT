@@ -22,14 +22,14 @@ if(NOT EXISTS "${CMAKE_SOURCE_DIR}/../modules/boost/b2")
         message(FATAL_ERROR "Failed to build Boost headers and tools")
     endif()
 
-    message(STATUS "Extracting Boost.Spirit.X3 and Boost.Fusion headers...")
+    message(STATUS "Extracting Boost.Spirit.X3, Boost.Fusion and Boost.JSON headers...")
     execute_process(
-        COMMAND ${CMAKE_SOURCE_DIR}/../modules/boost/dist/bin/bcp boost/spirit boost/fusion ${CMAKE_SOURCE_DIR}/include/boost
+        COMMAND ${CMAKE_SOURCE_DIR}/../modules/boost/dist/bin/bcp boost/spirit boost/fusion boost/json ${CMAKE_SOURCE_DIR}/include/boost
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/../modules/boost
         RESULT_VARIABLE BCP_RESULT
     )
     if(NOT BCP_RESULT EQUAL 0)
-        message(FATAL_ERROR "Failed to extract Boost.Spirit.X3 and Boost.Fusion headers")
+        message(FATAL_ERROR "Failed to extract Boost.Spirit.X3, Boost.Fusion and Boost.JSON headers")
     endif()
 endif()
 
@@ -76,6 +76,13 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Process nested HTTP domain CMake file
 add_subdirectory(src/domain/http_domain)
 
+# Create Boost.JSON library
+add_library(boost_json STATIC ../modules/boost/libs/json/src/src.cpp)
+target_include_directories(boost_json PUBLIC include/boost)
+# Copy compiler properties from app target to ensure same architecture
+target_compile_options(boost_json PRIVATE $<TARGET_PROPERTY:app,COMPILE_OPTIONS>)
+target_compile_definitions(boost_json PRIVATE $<TARGET_PROPERTY:app,COMPILE_DEFINITIONS>)
+
 # Collect all source files
 file(GLOB_RECURSE APP_SOURCES
   src/*.cpp
@@ -88,7 +95,12 @@ target_include_directories(app PRIVATE
   src
   src/libs/muparser/include
   src/libs/dbcppp/include
+  src/libs/nameof/include
 )
+
+# Link Boost.JSON library
+target_link_libraries(app PRIVATE boost_json)
+add_definitions(-DBOOST_SYSTEM_DISABLE_THREADS)
 
 # Add sources to the app target
 target_sources(app PRIVATE ${APP_SOURCES})

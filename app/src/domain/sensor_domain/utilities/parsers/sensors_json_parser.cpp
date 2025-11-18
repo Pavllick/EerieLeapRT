@@ -22,27 +22,23 @@ ext_unique_ptr<JsonSensorsConfig> SensorsJsonParser::Serialize(
     uint32_t adc_channel_count) {
 
     auto config = make_unique_ext<JsonSensorsConfig>();
-    memset(config.get(), 0, sizeof(JsonSensorsConfig));
 
     SensorsOrderResolver order_resolver;
 
-    for(size_t i = 0; i < sensors.size(); ++i) {
-        const auto& sensor = sensors.at(i);
-
+    for(auto& sensor : sensors) {
         // NOTE: UpdateConnectionString() must be called before validation
         sensor->configuration.UpdateConnectionString();
         SensorValidator::Validate(*sensor, gpio_channel_count, adc_channel_count);
 
         JsonSensorConfig sensor_json;
-        memset(&sensor_json, 0, sizeof(JsonSensorConfig));
 
-        sensor_json.id = sensor->id.c_str();
+        sensor_json.id = sensor->id;
         sensor_json.configuration.type = GetSensorTypeName(sensor->configuration.type);
 
         if(sensor->configuration.channel.has_value())
             sensor_json.configuration.channel = sensor->configuration.channel.value();
 
-        sensor_json.configuration.connection_string = sensor->configuration.connection_string.c_str();
+        sensor_json.configuration.connection_string = sensor->configuration.connection_string;
 
         sensor_json.configuration.sampling_rate_ms = sensor->configuration.sampling_rate_ms;
 
@@ -52,8 +48,6 @@ ext_unique_ptr<JsonSensorsConfig> SensorsJsonParser::Serialize(
 
         sensor_json.configuration.interpolation_method = GetInterpolationMethodName(interpolation_method);
         if(interpolation_method != InterpolationMethod::NONE) {
-            sensor_json.configuration.calibration_table_len = sensor->configuration.voltage_interpolator->GetCalibrationTable()->size();
-
             auto& calibration_table = *sensor->configuration.voltage_interpolator->GetCalibrationTable();
 
             std::ranges::sort(
@@ -62,23 +56,21 @@ ext_unique_ptr<JsonSensorsConfig> SensorsJsonParser::Serialize(
                     return a.voltage < b.voltage;
                 });
 
-            for(size_t j = 0; j < calibration_table.size(); ++j) {
-                const auto& calibration_data = calibration_table[j];
-                sensor_json.configuration.calibration_table[j].voltage = calibration_data.voltage;
-                sensor_json.configuration.calibration_table[j].value = calibration_data.value;
-                sensor_json.configuration.calibration_table_len++;
+            for(auto& calibration_data : calibration_table) {
+                sensor_json.configuration.calibration_table.push_back({
+                    .voltage = calibration_data.voltage,
+                    .value = calibration_data.value});
             }
         }
 
         if(sensor->configuration.expression_evaluator != nullptr)
-            sensor_json.configuration.expression = sensor->configuration.expression_evaluator->GetRawExpression().c_str();
+            sensor_json.configuration.expression = sensor->configuration.expression_evaluator->GetRawExpression();
 
-        sensor_json.metadata.unit = sensor->metadata.unit.c_str();
-        sensor_json.metadata.name = sensor->metadata.name.c_str();
-        sensor_json.metadata.description = sensor->metadata.description.c_str();
+        sensor_json.metadata.unit = sensor->metadata.unit;
+        sensor_json.metadata.name = sensor->metadata.name;
+        sensor_json.metadata.description = sensor->metadata.description;
 
-        config->sensors[i] = sensor_json;
-        config->sensors_len++;
+        config->sensors.push_back(sensor_json);
 
         order_resolver.AddSensor(sensor);
     }
@@ -96,31 +88,29 @@ std::vector<std::shared_ptr<Sensor>> SensorsJsonParser::Deserialize(
 
     std::vector<std::shared_ptr<Sensor>> sensors;
 
-    for(size_t i = 0; i < config.sensors_len; ++i) {
-        auto sensor = make_shared_ext<Sensor>(config.sensors[i].id);
+    for(auto& sensor_config : config.sensors) {
+        auto sensor = make_shared_ext<Sensor>(sensor_config.id);
 
-        sensor->metadata.name = config.sensors[i].metadata.name;
-        sensor->metadata.unit = config.sensors[i].metadata.unit == nullptr ? "" : config.sensors[i].metadata.unit;
-        sensor->metadata.description = config.sensors[i].metadata.description == nullptr ? "" : config.sensors[i].metadata.description;
+        sensor->metadata.name = sensor_config.metadata.name;
+        sensor->metadata.unit = sensor_config.metadata.unit;
+        sensor->metadata.description = sensor_config.metadata.description;
 
-        sensor->configuration.type = GetSensorType(config.sensors[i].configuration.type);
+        sensor->configuration.type = GetSensorType(sensor_config.configuration.type);
         sensor->configuration.channel = std::nullopt;
         if(sensor->configuration.type == SensorType::PHYSICAL_ANALOG || sensor->configuration.type == SensorType::PHYSICAL_INDICATOR)
-            sensor->configuration.channel = config.sensors[i].configuration.channel;
-        sensor->configuration.sampling_rate_ms = config.sensors[i].configuration.sampling_rate_ms;
+            sensor->configuration.channel = sensor_config.configuration.channel;
+        sensor->configuration.sampling_rate_ms = sensor_config.configuration.sampling_rate_ms;
 
-        sensor->configuration.connection_string = config.sensors[i].configuration.connection_string;
+        sensor->configuration.connection_string = sensor_config.configuration.connection_string;
         sensor->configuration.UnwrapConnectionString();
 
         InterpolationMethod interpolation_method = InterpolationMethod::NONE;
         if(sensor->configuration.type == SensorType::PHYSICAL_ANALOG)
-            interpolation_method = GetInterpolationMethod(config.sensors[i].configuration.interpolation_method);
+            interpolation_method = GetInterpolationMethod(sensor_config.configuration.interpolation_method);
 
-        if(interpolation_method != InterpolationMethod::NONE && config.sensors[i].configuration.calibration_table_len > 0) {
+        if(interpolation_method != InterpolationMethod::NONE && sensor_config.configuration.calibration_table.size() > 0) {
             std::vector<CalibrationData> calibration_table;
-            for(size_t j = 0; j < config.sensors[i].configuration.calibration_table_len; ++j) {
-                const auto& calibration_data = config.sensors[i].configuration.calibration_table[j];
-
+            for(auto& calibration_data : sensor_config.configuration.calibration_table) {
                 calibration_table.push_back({
                     .voltage = calibration_data.voltage,
                     .value = calibration_data.value});
@@ -145,10 +135,10 @@ std::vector<std::shared_ptr<Sensor>> SensorsJsonParser::Deserialize(
             sensor->configuration.voltage_interpolator = nullptr;
         }
 
-        if(config.sensors[i].configuration.expression != nullptr && strcmp(config.sensors[i].configuration.expression, "") != 0) {
+        if(!sensor_config.configuration.expression.empty()) {
             sensor->configuration.expression_evaluator = make_unique_ext<ExpressionEvaluator>(
                 math_parser_service_,
-                std::string(config.sensors[i].configuration.expression));
+                std::string(sensor_config.configuration.expression));
         } else {
             sensor->configuration.expression_evaluator = nullptr;
         }

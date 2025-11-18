@@ -11,8 +11,8 @@ using namespace eerie_leap::configuration::json::configs;
 
 template <>
 struct JsonTrait<JsonLoggingConfig> {
-    static constexpr json_obj_descr* object_descriptor = json_logging_config_descr;
-    static constexpr size_t object_descriptor_size = ARRAY_SIZE(json_logging_config_descr);
+    static constexpr auto Encode = json_encode_JsonLoggingConfig;
+    static constexpr auto Decode = json_decode_JsonLoggingConfig;
 };
 
 } // namespace eerie_leap::configuration::json::traits

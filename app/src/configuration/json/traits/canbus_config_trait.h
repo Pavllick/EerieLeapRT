@@ -11,8 +11,8 @@ using namespace eerie_leap::configuration::json::configs;
 
 template <>
 struct JsonTrait<JsonCanbusConfig> {
-    static constexpr json_obj_descr* object_descriptor = json_canbus_config_descr;
-    static constexpr size_t object_descriptor_size = ARRAY_SIZE(json_canbus_config_descr);
+    static constexpr auto Encode = json_encode_JsonCanbusConfig;
+    static constexpr auto Decode = json_decode_JsonCanbusConfig;
 };
 
 } // namespace eerie_leap::configuration::json::traits

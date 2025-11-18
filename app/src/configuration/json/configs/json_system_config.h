@@ -1,8 +1,14 @@
 #pragma once
 
+#include <vector>
+#include <boost/json.hpp>
+#include <nameof.hpp>
+
 #include <zephyr/data/json.h>
 
 namespace eerie_leap::configuration::json::configs {
+
+namespace json = boost::json;
 
 struct JsonComUserConfig {
     uint64_t device_id;
@@ -11,18 +17,47 @@ struct JsonComUserConfig {
 
 struct JsonSystemConfig {
     uint32_t com_user_refresh_rate_ms;
-    JsonComUserConfig com_user_configs[8];
-    size_t com_user_configs_len;
+    std::vector<JsonComUserConfig> com_user_configs;
 };
 
-static json_obj_descr json_com_user_config_descr[] = {
-    JSON_OBJ_DESCR_PRIM(JsonComUserConfig, device_id, JSON_TOK_UINT64),
-    JSON_OBJ_DESCR_PRIM(JsonComUserConfig, server_id, JSON_TOK_UINT),
-};
+static void tag_invoke(json::value_from_tag, json::value& jv, JsonComUserConfig const& config) {
+    jv = {
+        {NAMEOF_MEMBER(&JsonComUserConfig::device_id), config.device_id},
+        {NAMEOF_MEMBER(&JsonComUserConfig::server_id), config.server_id}
+    };
+}
 
-static json_obj_descr json_system_config_descr[] = {
-    JSON_OBJ_DESCR_PRIM(JsonSystemConfig, com_user_refresh_rate_ms, JSON_TOK_UINT),
-    JSON_OBJ_DESCR_OBJ_ARRAY(JsonSystemConfig, com_user_configs, 8, com_user_configs_len, json_com_user_config_descr, ARRAY_SIZE(json_com_user_config_descr)),
-};
+static JsonComUserConfig tag_invoke(json::value_to_tag<JsonComUserConfig>, json::value const& jv) {
+    json::object const& obj = jv.as_object();
+    return JsonComUserConfig{
+        json::value_to<uint64_t>(obj.at(NAMEOF_MEMBER(&JsonComUserConfig::device_id).c_str())),
+        json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonComUserConfig::server_id).c_str()))
+    };
+}
+
+static void tag_invoke(json::value_from_tag, json::value& jv, JsonSystemConfig const& config) {
+    jv = {
+        {NAMEOF_MEMBER(&JsonSystemConfig::com_user_refresh_rate_ms), config.com_user_refresh_rate_ms},
+        {NAMEOF_MEMBER(&JsonSystemConfig::com_user_configs), json::value_from(config.com_user_configs)}
+    };
+}
+
+static JsonSystemConfig tag_invoke(json::value_to_tag<JsonSystemConfig>, json::value const& jv) {
+    json::object const& obj = jv.as_object();
+    return JsonSystemConfig{
+        json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonSystemConfig::com_user_refresh_rate_ms).c_str())),
+        json::value_to<std::vector<JsonComUserConfig>>(obj.at(NAMEOF_MEMBER(&JsonSystemConfig::com_user_configs).c_str()))
+    };
+}
+
+static std::string json_encode_JsonSystemConfig(const JsonSystemConfig& config) {
+    return json::serialize(json::value_from(config));
+}
+
+static JsonSystemConfig json_decode_JsonSystemConfig(std::string_view json_str) {
+    json::value jv = json::parse(json_str);
+
+    return json::value_to<JsonSystemConfig>(jv);
+}
 
 } // namespace eerie_leap::configuration::json::configs
