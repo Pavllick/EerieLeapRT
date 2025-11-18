@@ -1,7 +1,6 @@
 #include <utility>
 
 #include <zephyr/logging/log.h>
-#include <zephyr/sys/crc.h>
 
 #include "sensors_configuration_manager.h"
 
@@ -50,8 +49,7 @@ bool SensorsConfigurationManager::ApplyJsonConfiguration() {
 
     auto json_config_loaded = json_configuration_service_->Load();
     if(json_config_loaded.has_value()) {
-        uint32_t crc = crc32_ieee(json_config_loaded->config_raw->data(), json_config_loaded->config_raw->size());
-        if(crc == json_config_checksum_)
+        if(json_config_loaded->checksum == json_config_checksum_)
             return true;
 
         try {
@@ -92,8 +90,7 @@ bool SensorsConfigurationManager::Update(const std::vector<std::shared_ptr<Senso
 
             LOG_INF("JSON configuration updated successfully.");
 
-            uint32_t crc = crc32_ieee(json_config_loaded->config_raw->data(), json_config_loaded->config_raw->size());
-            json_config_checksum_ = crc;
+            json_config_checksum_ = json_config_loaded->checksum;
         }
 
         auto cbor_config = cbor_parser_->Serialize(

@@ -8,6 +8,7 @@
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
+#include <zephyr/sys/crc.h>
 
 #include "utilities/memory/heap_allocator.h"
 #include "subsys/fs/services/i_fs_service.h"
@@ -97,9 +98,12 @@ private:
             return std::nullopt;
         }
 
+        uint32_t crc = crc32_ieee(buffer->data(), buffer_size);
+
         LoadedConfig<T> loaded_config {
             .config_raw = std::move(buffer),
-            .config = std::move(configuration)
+            .config = std::move(configuration),
+            .checksum = crc
         };
 
         LOG_INF("%s configuration loaded successfully.", configuration_file_path_.c_str());

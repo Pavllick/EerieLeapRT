@@ -1,10 +1,9 @@
 #pragma once
 
 #include <vector>
+#include <string>
 #include <boost/json.hpp>
 #include <nameof.hpp>
-
-#include <zephyr/data/json.h>
 
 namespace eerie_leap::configuration::json::configs {
 

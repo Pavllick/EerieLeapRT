@@ -76,16 +76,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Process nested HTTP domain CMake file
 add_subdirectory(src/domain/http_domain)
 
-# Create Boost.JSON library
-add_library(boost_json STATIC ../modules/boost/libs/json/src/src.cpp)
-target_include_directories(boost_json PUBLIC include/boost)
-# Copy compiler properties from app target to ensure same architecture
-target_compile_options(boost_json PRIVATE $<TARGET_PROPERTY:app,COMPILE_OPTIONS>)
-target_compile_definitions(boost_json PRIVATE $<TARGET_PROPERTY:app,COMPILE_DEFINITIONS>)
-
-# Link Boost.JSON library
-target_link_libraries(app PRIVATE boost_json)
 add_definitions(-DBOOST_SYSTEM_DISABLE_THREADS)
+add_definitions(-DBOOST_JSON_STACK_BUFFER_SIZE=1024)
 
 # Collect all source files
 file(GLOB_RECURSE APP_SOURCES

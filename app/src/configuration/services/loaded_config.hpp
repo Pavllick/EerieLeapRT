@@ -12,6 +12,7 @@ struct LoadedConfig {
 public:
     ext_unique_ptr<ExtVector> config_raw;
     ext_unique_ptr<T> config;
+    uint32_t checksum;
 };
 
 }

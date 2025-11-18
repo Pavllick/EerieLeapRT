@@ -12,6 +12,12 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(APP_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../app/src)
 include_directories(${APP_SRC_DIR})
 
+# Path to boost include directory
+set(BOOST_INCLUDE_DIR ${APP_SRC_DIR}/../include/boost)
+include_directories(${BOOST_INCLUDE_DIR})
+
+add_definitions(-DBOOST_SYSTEM_DISABLE_THREADS)
+
 # Path to muparser source and header
 set(MUPARSER_SRC_DIR ${APP_SRC_DIR}/libs/muparser/src)
 set(MUPARSER_INCLUDE_DIR ${APP_SRC_DIR}/libs/muparser/include)
