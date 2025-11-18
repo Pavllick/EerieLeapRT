@@ -14,12 +14,30 @@ add_compile_options(-DCMAKE_EXPORT_COMPILE_COMMANDS=1)
 set(APP_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../app/src)
 include_directories(${APP_SRC_DIR})
 
+# Path to boost include directory
+set(BOOST_INCLUDE_DIR ${APP_SRC_DIR}/../include/boost)
+include_directories(${BOOST_INCLUDE_DIR})
+
+# Create Boost.JSON library
+add_library(boost_json STATIC ${APP_SRC_DIR}/../../modules/boost/libs/json/src/src.cpp)
+target_include_directories(boost_json PUBLIC include/boost)
+# Copy compiler properties from app target to ensure same architecture
+target_compile_options(boost_json PRIVATE $<TARGET_PROPERTY:app,COMPILE_OPTIONS>)
+target_compile_definitions(boost_json PRIVATE $<TARGET_PROPERTY:app,COMPILE_DEFINITIONS>)
+
+# Link Boost.JSON library
+target_link_libraries(app PRIVATE boost_json)
+add_definitions(-DBOOST_SYSTEM_DISABLE_THREADS)
+
 # Path to muparser source and header
 set(MUPARSER_SRC_DIR ${APP_SRC_DIR}/libs/muparser/src)
 set(MUPARSER_INCLUDE_DIR ${APP_SRC_DIR}/libs/muparser/include)
 file(GLOB_RECURSE MUPARSER_SOURCES ${MUPARSER_SRC_DIR}/*.cpp)
-
 include_directories(${MUPARSER_INCLUDE_DIR})
+
+# Path to nameof source and header
+set(NAMEOF_INCLUDE_DIR ${APP_SRC_DIR}/libs/nameof/include)
+include_directories(${NAMEOF_INCLUDE_DIR})
 
 set(APP_SRC_CONFIGURATION_DIR ${APP_SRC_DIR}/configuration)
 file(GLOB_RECURSE APP_SRC_CONFIGURATION

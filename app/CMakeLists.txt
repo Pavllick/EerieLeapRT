@@ -83,6 +83,10 @@ target_include_directories(boost_json PUBLIC include/boost)
 target_compile_options(boost_json PRIVATE $<TARGET_PROPERTY:app,COMPILE_OPTIONS>)
 target_compile_definitions(boost_json PRIVATE $<TARGET_PROPERTY:app,COMPILE_DEFINITIONS>)
 
+# Link Boost.JSON library
+target_link_libraries(app PRIVATE boost_json)
+add_definitions(-DBOOST_SYSTEM_DISABLE_THREADS)
+
 # Collect all source files
 file(GLOB_RECURSE APP_SOURCES
   src/*.cpp
@@ -97,10 +101,6 @@ target_include_directories(app PRIVATE
   src/libs/dbcppp/include
   src/libs/nameof/include
 )
-
-# Link Boost.JSON library
-target_link_libraries(app PRIVATE boost_json)
-add_definitions(-DBOOST_SYSTEM_DISABLE_THREADS)
 
 # Add sources to the app target
 target_sources(app PRIVATE ${APP_SOURCES})

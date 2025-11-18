@@ -80,12 +80,12 @@ ZTEST(system_configuration_parser, test_JsonSerializeDeserialize) {
     zassert_true(file.is_open());
 
     auto json_serializer_ = std::make_unique<JsonSerializer<JsonSystemConfig>>(
-        JsonTrait<JsonSystemConfig>::object_descriptor,
-        JsonTrait<JsonSystemConfig>::object_descriptor_size);
+        JsonTrait<JsonSystemConfig>::Encode,
+        JsonTrait<JsonSystemConfig>::Decode);
 
     auto system_config_buffer = json_serializer_->Serialize(*json_system_config);
 
-    file << system_config_buffer->data();
+    file << system_config_buffer->c_str();
 
     file.close();
 }
