@@ -1,20 +1,10 @@
-/*
- * Generated using zcbor version 0.9.1
- * https://github.com/NordicSemiconductor/zcbor
- * Generated with a --default-max-qty of 24
- */
-
-#include <stdint.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <string.h>
+#include <cstdint>
+#include <cstdbool>
+#include <cstddef>
+#include <cstring>
 #include "zcbor_encode.h"
 #include "cbor_canbus_config_cbor_encode.h"
 #include "zcbor_print.h"
-
-#if DEFAULT_MAX_QTY != 24
-#error "The type file was generated with a different default_max_qty than this file"
-#endif
 
 #define log_result(state, result, func) do { \
 	if (!result) { \
@@ -47,10 +37,12 @@ static bool encode_CborCanChannelConfig(
 {
 	zcbor_log("%s\r\n", __func__);
 
+	size_t CborCanMessageConfig_m_count = input->CborCanMessageConfig_m.size();
+
 	bool res = (((zcbor_list_start_encode(state, 4) && ((((zcbor_uint32_encode(state, (&(*input).type))))
 	&& ((zcbor_uint32_encode(state, (&(*input).bus_channel))))
 	&& ((zcbor_uint32_encode(state, (&(*input).bitrate))))
-	&& ((zcbor_list_start_encode(state, 24) && ((zcbor_multi_encode_minmax(0, 24, &(*input).CborCanMessageConfig_m_count, (zcbor_encoder_t *)encode_CborCanMessageConfig, state, (*&(*input).CborCanMessageConfig_m), sizeof(struct CborCanMessageConfig))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 24)))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 4))));
+	&& ((zcbor_list_start_encode(state, CborCanMessageConfig_m_count) && ((zcbor_multi_encode_minmax(0, CborCanMessageConfig_m_count, &CborCanMessageConfig_m_count, (zcbor_encoder_t *)encode_CborCanMessageConfig, state, input->CborCanMessageConfig_m.data(), sizeof(struct CborCanMessageConfig))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, CborCanMessageConfig_m_count)))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 4))));
 
 	log_result(state, res, __func__);
 	return res;
@@ -61,7 +53,9 @@ static bool encode_CborCanbusConfig(
 {
 	zcbor_log("%s\r\n", __func__);
 
-	bool res = (((zcbor_list_start_encode(state, 2) && ((((zcbor_list_start_encode(state, 8) && ((zcbor_multi_encode_minmax(0, 8, &(*input).CborCanChannelConfig_m_count, (zcbor_encoder_t *)encode_CborCanChannelConfig, state, (*&(*input).CborCanChannelConfig_m), sizeof(struct CborCanChannelConfig))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 8)))
+	size_t CborCanChannelConfig_m_count = input->CborCanChannelConfig_m.size();
+
+	bool res = (((zcbor_list_start_encode(state, 2) && ((((zcbor_list_start_encode(state, CborCanChannelConfig_m_count) && ((zcbor_multi_encode_minmax(0, CborCanChannelConfig_m_count, &CborCanChannelConfig_m_count, (zcbor_encoder_t *)encode_CborCanChannelConfig, state, input->CborCanChannelConfig_m.data(), sizeof(struct CborCanChannelConfig))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, CborCanChannelConfig_m_count)))
 	&& ((zcbor_uint32_encode(state, (&(*input).json_config_checksum))))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 2))));
 
 	log_result(state, res, __func__);

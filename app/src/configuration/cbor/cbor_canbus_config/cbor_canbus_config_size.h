@@ -11,19 +11,19 @@ static size_t cbor_get_size_CborCanbusConfig(const CborCanbusConfig& config) {
     builder.AddIndefiniteArrayStart();
 
     builder.AddIndefiniteArrayStart();
-    for(int i = 0; i < config.CborCanChannelConfig_m_count; i++) {
+    for(const auto& channel_configuration : config.CborCanChannelConfig_m) {
         builder.AddIndefiniteArrayStart();
 
-        builder.AddUint(config.CborCanChannelConfig_m[i].type)
-            .AddUint(config.CborCanChannelConfig_m[i].bus_channel)
-            .AddUint(config.CborCanChannelConfig_m[i].bitrate);
+        builder.AddUint(channel_configuration.type)
+            .AddUint(channel_configuration.bus_channel)
+            .AddUint(channel_configuration.bitrate);
 
         builder.AddIndefiniteArrayStart();
-        for(int j = 0; j < config.CborCanChannelConfig_m[i].CborCanMessageConfig_m_count; j++) {
+        for(const auto& message_configuration : channel_configuration.CborCanMessageConfig_m) {
             builder.AddIndefiniteArrayStart();
 
-            builder.AddUint(config.CborCanChannelConfig_m[i].CborCanMessageConfig_m[j].frame_id)
-                .AddUint(config.CborCanChannelConfig_m[i].CborCanMessageConfig_m[j].send_interval_ms);
+            builder.AddUint(message_configuration.frame_id)
+                .AddUint(message_configuration.send_interval_ms);
         }
     }
 
