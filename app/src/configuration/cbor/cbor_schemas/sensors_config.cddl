@@ -12,6 +12,7 @@ CborSensorConfigurationConfig = [
   interpolation_method: uint,
   ? channel: uint,
   connection_string: tstr,
+  script_path: tstr,
   ? calibration_table: CborSensorCalibrationDataMap,
   ? expression: tstr
 ]

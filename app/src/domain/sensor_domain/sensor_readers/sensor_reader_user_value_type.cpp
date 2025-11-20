@@ -14,22 +14,25 @@ SensorReaderUserValueType::SensorReaderUserValueType(
     std::shared_ptr<ITimeService> time_service,
     std::shared_ptr<GuidGenerator> guid_generator,
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame,
-    std::shared_ptr<Sensor> sensor,
-    std::shared_ptr<LuaScript> lua_script)
+    std::shared_ptr<Sensor> sensor)
         : SensorReaderBase(
             std::move(time_service),
             std::move(guid_generator),
             std::move(sensor_readings_frame),
-            std::move(sensor)),
-        lua_script_(std::move(lua_script)) {
+            std::move(sensor)) {
 
     if(sensor_->configuration.type != SensorType::USER_ANALOG && sensor_->configuration.type != SensorType::USER_INDICATOR)
         throw std::runtime_error("Unsupported sensor type");
 
-    lua_getglobal(lua_script_->GetState(), "create_reading");
+    has_create_reading_function_ = false;
 
-    has_create_reading_function_ = lua_isfunction(lua_script_->GetState(), -1);
-    lua_pop(lua_script_->GetState(), 1);
+    if(sensor_->configuration.lua_script == nullptr)
+        return;
+
+    lua_getglobal(sensor_->configuration.lua_script->GetState(), "create_reading");
+
+    has_create_reading_function_ = lua_isfunction(sensor_->configuration.lua_script->GetState(), -1);
+    lua_pop(sensor_->configuration.lua_script->GetState(), 1);
 }
 
 void SensorReaderUserValueType::Read() {
@@ -43,27 +46,29 @@ void SensorReaderUserValueType::Read() {
         return;
     }
 
-    lua_getglobal(lua_script_->GetState(), "create_reading");
+    auto lua_script = sensor_->configuration.lua_script;
 
-    if(!lua_isfunction(lua_script_->GetState(), -1)) {
-        lua_pop(lua_script_->GetState(), 1);
+    lua_getglobal(lua_script->GetState(), "create_reading");
+
+    if(!lua_isfunction(lua_script->GetState(), -1)) {
+        lua_pop(lua_script->GetState(), 1);
         return;
     }
 
-    lua_pushstring(lua_script_->GetState(), sensor_->id.c_str());
+    lua_pushstring(lua_script->GetState(), sensor_->id.c_str());
 
-    if(lua_pcall(lua_script_->GetState(), 1, 1, 0) != LUA_OK) {
-        lua_pop(lua_script_->GetState(), 1);
+    if(lua_pcall(lua_script->GetState(), 1, 1, 0) != LUA_OK) {
+        lua_pop(lua_script->GetState(), 1);
         throw std::runtime_error("Failed to call create_reading function");
     }
 
-    if(!lua_isnumber(lua_script_->GetState(), -1)) {
-        lua_pop(lua_script_->GetState(), 1);
+    if(!lua_isnumber(lua_script->GetState(), -1)) {
+        lua_pop(lua_script->GetState(), 1);
         throw std::runtime_error("create_reading function didn't return a number.");
     }
 
-    auto value = static_cast<float>(lua_tonumber(lua_script_->GetState(), -1));
-    lua_pop(lua_script_->GetState(), 1);
+    auto value = static_cast<float>(lua_tonumber(lua_script->GetState(), -1));
+    lua_pop(lua_script->GetState(), 1);
 
     reading->value = value;
     reading->status = ReadingStatus::RAW;

@@ -1,8 +1,11 @@
 #include <utility>
 
+#include <zephyr/kernel.h>
+
 #include "utilities/cbor/cbor_helpers.hpp"
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
+#include "subsys/lua_script/lua_script.h"
 #include "domain/sensor_domain/utilities/sensors_order_resolver.h"
 #include "sensor_validator.h"
 
@@ -12,10 +15,14 @@ namespace eerie_leap::domain::sensor_domain::utilities::parsers {
 
 using namespace eerie_leap::utilities::cbor;
 using namespace eerie_leap::utilities::voltage_interpolator;
+using namespace eerie_leap::subsys::lua_script;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 
-SensorsCborParser::SensorsCborParser(std::shared_ptr<MathParserService> math_parser_service)
-    : math_parser_service_(std::move(math_parser_service)) {}
+SensorsCborParser::SensorsCborParser(
+    std::shared_ptr<MathParserService> math_parser_service,
+    std::shared_ptr<IFsService> fs_service)
+        : math_parser_service_(std::move(math_parser_service)),
+        fs_service_(std::move(fs_service)) {}
 
 ext_unique_ptr<CborSensorsConfig> SensorsCborParser::Serialize(
     const std::vector<std::shared_ptr<Sensor>>& sensors,
@@ -44,7 +51,7 @@ ext_unique_ptr<CborSensorsConfig> SensorsCborParser::Serialize(
         }
 
         sensor_config->configuration.connection_string = CborHelpers::ToZcborString(&sensor->configuration.connection_string);
-
+        sensor_config->configuration.script_path = CborHelpers::ToZcborString(&sensor->configuration.script_path);
         sensor_config->configuration.sampling_rate_ms = sensor->configuration.sampling_rate_ms;
 
         auto interpolation_method = sensor->configuration.voltage_interpolator != nullptr
@@ -114,6 +121,23 @@ std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
 
         sensor->configuration.connection_string = CborHelpers::ToStdString(sensor_config.configuration.connection_string);
         sensor->configuration.UnwrapConnectionString();
+
+        sensor->configuration.script_path = CborHelpers::ToStdString(sensor_config.configuration.script_path);
+        if(!sensor->configuration.script_path.empty() && fs_service_->Exists(sensor->configuration.script_path)) {
+            size_t script_size = fs_service_->GetFileSize(sensor->configuration.script_path);
+
+            if(script_size != 0) {
+                ext_unique_ptr<ExtVector> buffer = make_unique_ext<ExtVector>(script_size + 1);
+                buffer->back() = '\0';
+
+                size_t out_len = 0;
+                fs_service_->ReadFile(sensor->configuration.script_path, buffer->data(), script_size, out_len);
+                std::string_view script_str(reinterpret_cast<const char*>(buffer->data()), buffer->size());
+
+                sensor->configuration.lua_script = std::make_shared<LuaScript>();
+                sensor->configuration.lua_script->Run(script_str);
+            }
+        }
 
         sensor->configuration.sampling_rate_ms = sensor_config.configuration.sampling_rate_ms;
 

@@ -35,7 +35,7 @@ SensorsApiController::SensorsApiController(
         sensors_config_post_buffer_ = make_unique_ext<ExtVector>(sensors_config_post_buffer_size_);
 
     if(!sensors_json_parser_)
-        sensors_json_parser_ = std::make_unique<SensorsJsonParser>(math_parser_service);
+        sensors_json_parser_ = std::make_unique<SensorsJsonParser>(math_parser_service, nullptr);
 
     if(!math_parser_service_)
         math_parser_service_ = std::move(math_parser_service);

@@ -6,6 +6,7 @@
 #include "utilities/memory/heap_allocator.h"
 #include "utilities/math_parser/expression_evaluator.h"
 #include "utilities/voltage_interpolator/i_voltage_interpolator.h"
+#include "subsys/lua_script/lua_script.h"
 #include "domain/sensor_domain/models/sources/canbus_source.h"
 
 #include "sensor_type.h"
@@ -15,6 +16,7 @@ namespace eerie_leap::domain::sensor_domain::models {
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::math_parser;
 using namespace eerie_leap::utilities::voltage_interpolator;
+using namespace eerie_leap::subsys::lua_script;
 using namespace eerie_leap::domain::sensor_domain::models::sources;
 
 struct SensorConfiguration {
@@ -22,10 +24,12 @@ struct SensorConfiguration {
 
     std::optional<uint32_t> channel = std::nullopt;
     std::string connection_string;
+    std::string script_path;
     uint32_t sampling_rate_ms = 100;
 
     ext_unique_ptr<IVoltageInterpolator> voltage_interpolator = nullptr;
     ext_unique_ptr<ExpressionEvaluator> expression_evaluator = nullptr;
+    std::shared_ptr<LuaScript> lua_script = nullptr;
 
     // connection_string data source decomposition objects
     ext_unique_ptr<CanbusSource> canbus_source = nullptr;

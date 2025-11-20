@@ -10,18 +10,20 @@ LOG_MODULE_REGISTER(sensors_config_ctrl_logger);
 
 SensorsConfigurationManager::SensorsConfigurationManager(
     std::shared_ptr<MathParserService> math_parser_service,
+    std::shared_ptr<IFsService> sd_fs_service,
     ext_unique_ptr<CborConfigurationService<CborSensorsConfig>> cbor_configuration_service,
     ext_unique_ptr<JsonConfigurationService<JsonSensorsConfig>> json_configuration_service,
     int gpio_channel_count,
     int adc_channel_count)
         : math_parser_service_(std::move(math_parser_service)),
+        sd_fs_service_(std::move(sd_fs_service)),
         cbor_configuration_service_(std::move(cbor_configuration_service)),
         json_configuration_service_(std::move(json_configuration_service)),
         gpio_channel_count_(gpio_channel_count),
         adc_channel_count_(adc_channel_count) {
 
-    cbor_parser_ = std::make_unique<SensorsCborParser>(math_parser_service_);
-    json_parser_ = std::make_unique<SensorsJsonParser>(math_parser_service_);
+    cbor_parser_ = std::make_unique<SensorsCborParser>(math_parser_service_, sd_fs_service_);
+    json_parser_ = std::make_unique<SensorsJsonParser>(math_parser_service_, sd_fs_service_);
 
     const std::vector<std::shared_ptr<Sensor>>* sensors = nullptr;
 
@@ -124,10 +126,6 @@ const std::vector<std::shared_ptr<Sensor>>* SensorsConfigurationManager::Get(boo
     sensors_ = cbor_parser_->Deserialize(
         *cbor_config.get(), gpio_channel_count_, adc_channel_count_);
 
-    sensors_map_.clear();
-    for(const auto& sensor : sensors_)
-        sensors_map_.insert({sensor->id, sensor});
-
     json_config_checksum_ = cbor_config->json_config_checksum;
 
     return &sensors_;
@@ -137,13 +135,6 @@ bool SensorsConfigurationManager::CreateDefaultConfiguration() {
     auto sensors = std::vector<std::shared_ptr<Sensor>>();
 
     return Update(sensors);
-}
-
-std::shared_ptr<Sensor> SensorsConfigurationManager::GetSensor(const std::string& sensor_id) {
-    if(!sensors_map_.contains(sensor_id))
-        return nullptr;
-
-    return sensors_map_[sensor_id];
 }
 
 } // namespace eerie_leap::domain::sensor_domain::configuration

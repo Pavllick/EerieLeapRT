@@ -20,8 +20,7 @@ public:
         std::shared_ptr<ITimeService> time_service,
         std::shared_ptr<GuidGenerator> guid_generator,
         std::shared_ptr<SensorReadingsFrame> readings_frame,
-        std::shared_ptr<Sensor> sensor,
-        std::shared_ptr<LuaScript> lua_script);
+        std::shared_ptr<Sensor> sensor);
 
     ~SensorReaderUserValueType() override = default;
 

@@ -29,6 +29,7 @@ struct CborSensorConfigurationConfig {
 	uint32_t channel;
 	bool channel_present;
 	struct zcbor_string connection_string;
+	struct zcbor_string script_path;
 	struct CborSensorCalibrationDataMap calibration_table;
 	bool calibration_table_present;
 	struct zcbor_string expression;

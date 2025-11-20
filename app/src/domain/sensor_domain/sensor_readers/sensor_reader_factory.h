@@ -5,7 +5,6 @@
 #include "utilities/guid/guid_generator.h"
 #include "subsys/time/i_time_service.h"
 #include "subsys/gpio/i_gpio.h"
-#include "subsys/lua_script/lua_script.h"
 
 #include "domain/sensor_domain/configuration/adc_configuration_manager.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
@@ -18,7 +17,6 @@ namespace eerie_leap::domain::sensor_domain::sensor_readers {
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::subsys::time;
 using namespace eerie_leap::subsys::gpio;
-using namespace eerie_leap::subsys::lua_script;
 
 using namespace eerie_leap::domain::sensor_domain::configuration;
 using namespace eerie_leap::domain::sensor_domain::utilities;
@@ -45,7 +43,7 @@ public:
 
     virtual ~SensorReaderFactory() = default;
 
-    std::unique_ptr<ISensorReader> Create(std::shared_ptr<Sensor> sensor, std::shared_ptr<LuaScript> lua_script);
+    std::unique_ptr<ISensorReader> Create(std::shared_ptr<Sensor> sensor);
 };
 
 } // namespace eerie_leap::domain::sensor_domain::sensor_readers

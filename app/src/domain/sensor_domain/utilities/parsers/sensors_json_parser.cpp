@@ -1,6 +1,7 @@
 #include "utilities/voltage_interpolator/interpolation_method.h"
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
+#include "subsys/lua_script/lua_script.h"
 #include "domain/sensor_domain/utilities/sensors_order_resolver.h"
 #include "sensor_validator.h"
 
@@ -10,11 +11,14 @@ namespace eerie_leap::domain::sensor_domain::utilities::parsers {
 
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::voltage_interpolator;
+using namespace eerie_leap::subsys::lua_script;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 
 SensorsJsonParser::SensorsJsonParser(
-    std::shared_ptr<MathParserService> math_parser_service)
-    : math_parser_service_(std::move(math_parser_service)) {}
+    std::shared_ptr<MathParserService> math_parser_service,
+    std::shared_ptr<IFsService> fs_service)
+        : math_parser_service_(std::move(math_parser_service)),
+        fs_service_(std::move(fs_service)) {}
 
 ext_unique_ptr<JsonSensorsConfig> SensorsJsonParser::Serialize(
     const std::vector<std::shared_ptr<Sensor>>& sensors,
@@ -39,7 +43,7 @@ ext_unique_ptr<JsonSensorsConfig> SensorsJsonParser::Serialize(
             sensor_json.configuration.channel = sensor->configuration.channel.value();
 
         sensor_json.configuration.connection_string = sensor->configuration.connection_string;
-
+        sensor_json.configuration.script_path = sensor->configuration.script_path;
         sensor_json.configuration.sampling_rate_ms = sensor->configuration.sampling_rate_ms;
 
         auto interpolation_method = sensor->configuration.voltage_interpolator != nullptr
@@ -103,6 +107,23 @@ std::vector<std::shared_ptr<Sensor>> SensorsJsonParser::Deserialize(
 
         sensor->configuration.connection_string = sensor_config.configuration.connection_string;
         sensor->configuration.UnwrapConnectionString();
+
+        sensor->configuration.script_path = sensor_config.configuration.script_path;
+        if(!sensor->configuration.script_path.empty() && fs_service_->Exists(sensor->configuration.script_path)) {
+            size_t script_size = fs_service_->GetFileSize(sensor->configuration.script_path);
+
+            if(script_size != 0) {
+                ext_unique_ptr<ExtVector> buffer = make_unique_ext<ExtVector>(script_size + 1);
+                buffer->back() = '\0';
+
+                size_t out_len = 0;
+                fs_service_->ReadFile(sensor->configuration.script_path, buffer->data(), script_size, out_len);
+                std::string_view script_str(reinterpret_cast<const char*>(buffer->data()), buffer->size());
+
+                sensor->configuration.lua_script = std::make_shared<LuaScript>();
+                sensor->configuration.lua_script->Run(script_str);
+            }
+        }
 
         InterpolationMethod interpolation_method = InterpolationMethod::NONE;
         if(sensor->configuration.type == SensorType::PHYSICAL_ANALOG)

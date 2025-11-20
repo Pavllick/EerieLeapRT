@@ -25,7 +25,7 @@ SensorReaderFactory::SensorReaderFactory(
         sensor_readings_frame_(std::move(sensor_readings_frame)),
         canbus_service_(std::move(canbus_service)) {}
 
-std::unique_ptr<ISensorReader> SensorReaderFactory::Create(std::shared_ptr<Sensor> sensor, std::shared_ptr<LuaScript> lua_script) {
+std::unique_ptr<ISensorReader> SensorReaderFactory::Create(std::shared_ptr<Sensor> sensor) {
     std::unique_ptr<ISensorReader> sensor_reader;
 
     if(sensor->configuration.type == SensorType::PHYSICAL_ANALOG) {
@@ -86,8 +86,7 @@ std::unique_ptr<ISensorReader> SensorReaderFactory::Create(std::shared_ptr<Senso
             time_service_,
             guid_generator_,
             sensor_readings_frame_,
-            sensor,
-            lua_script);
+            sensor);
     } else {
         throw std::runtime_error("Unsupported sensor type");
     }

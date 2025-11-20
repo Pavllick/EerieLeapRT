@@ -42,7 +42,7 @@ private:
     std::shared_ptr<SensorTask> CreateSensorTask(std::shared_ptr<Sensor> sensor);
     static void ProcessSensorWorkTask(k_work* work);
 
-    std::shared_ptr<LuaScript> CreateLuaScript();
+    void InitializeLuaScript(std::shared_ptr<Sensor> sensor);
     static int LuaGetReadingValue(lua_State* state);
     static int LuaUpdateReading(lua_State* state);
     static void LuaProcessReading(lua_State* state, const std::string& function_name, const std::string& sensor_id);

@@ -36,6 +36,7 @@ static size_t cbor_get_size_CborSensorsConfig(const CborSensorsConfig& config) {
         });
 
         builder.AddTstr(sensor_config.configuration.connection_string);
+        builder.AddTstr(sensor_config.configuration.script_path);
 
         builder.AddOptional(
             sensor_config.configuration.calibration_table_present,

@@ -222,6 +222,7 @@ int main(void) {
 
     auto sensors_configuration_manager = make_shared_ext<SensorsConfigurationManager>(
         math_parser_service,
+        sd_fs_service,
         std::move(cbor_sensors_config_service),
         std::move(json_sensors_config_service),
         gpio->GetChannelCount(),
@@ -422,14 +423,15 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
 
     auto sensor_1 = make_shared_ext<Sensor>("sensor_1");
     sensor_1->metadata = {
-            .name = "Sensor 1",
-            .unit = "km/h",
-            .description = "Test Sensor 1"
+        .name = "Sensor 1",
+        .unit = "km/h",
+        .description = "Test Sensor 1"
     };
     sensor_1->configuration = {
-            .type = SensorType::PHYSICAL_ANALOG,
-            .channel = 0,
-            .sampling_rate_ms = 10,
+        .type = SensorType::PHYSICAL_ANALOG,
+        .channel = 0,
+        .script_path = "scripts/sensor_1.lua",
+        .sampling_rate_ms = 10,
         .voltage_interpolator = make_unique_ext<LinearVoltageInterpolator>(calibration_data_1_ptr),
         // .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_1)
     };
@@ -447,13 +449,13 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
 
     auto sensor_2 = make_shared_ext<Sensor>("sensor_2");
     sensor_2->metadata = {
-            .name = "Sensor 2",
-            .unit = "km/h",
-            .description = "Test Sensor 2"
+        .name = "Sensor 2",
+        .unit = "km/h",
+        .description = "Test Sensor 2"
     };
     sensor_2->configuration = {
-            .type = SensorType::PHYSICAL_ANALOG,
-            .channel = 1,
+        .type = SensorType::PHYSICAL_ANALOG,
+        .channel = 1,
         .sampling_rate_ms = 1000,
         .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
         .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_2)
@@ -463,39 +465,39 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
 
     auto sensor_3 = make_shared_ext<Sensor>("sensor_3");
     sensor_3->metadata = {
-            .name = "Sensor 3",
-            .unit = "km/h",
-            .description = "Test Sensor 3"
+        .name = "Sensor 3",
+        .unit = "km/h",
+        .description = "Test Sensor 3"
     };
     sensor_3->configuration = {
-            .type = SensorType::VIRTUAL_ANALOG,
-            .sampling_rate_ms = 2000,
+        .type = SensorType::VIRTUAL_ANALOG,
+        .sampling_rate_ms = 2000,
         .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_3)
     };
 
     auto sensor_4 = make_shared_ext<Sensor>("sensor_4");
     sensor_4->metadata = {
-            .name = "Sensor 4",
-            .unit = "",
-            .description = "Test Sensor 4"
+        .name = "Sensor 4",
+        .unit = "",
+        .description = "Test Sensor 4"
     };
     sensor_4->configuration = {
-            .type = SensorType::PHYSICAL_INDICATOR,
-            .channel = 1,
-            .sampling_rate_ms = 1000
+        .type = SensorType::PHYSICAL_INDICATOR,
+        .channel = 1,
+        .sampling_rate_ms = 1000
     };
 
     ExpressionEvaluator expression_evaluator_5(math_parser_service, "{sensor_1} < 400");
 
     auto sensor_5 = make_shared_ext<Sensor>("sensor_5");
     sensor_5->metadata = {
-            .name = "Sensor 5",
-            .unit = "",
-            .description = "Test Sensor 5"
+        .name = "Sensor 5",
+        .unit = "",
+        .description = "Test Sensor 5"
     };
     sensor_5->configuration = {
-            .type = SensorType::VIRTUAL_INDICATOR,
-            .sampling_rate_ms = 1000,
+        .type = SensorType::VIRTUAL_INDICATOR,
+        .sampling_rate_ms = 1000,
         .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_5)
     };
 
@@ -533,6 +535,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
     };
     sensor_8->configuration = {
         .type = SensorType::USER_ANALOG,
+        .script_path = "scripts/sensor_8.lua",
         .sampling_rate_ms = 500,
         .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_8)
     };

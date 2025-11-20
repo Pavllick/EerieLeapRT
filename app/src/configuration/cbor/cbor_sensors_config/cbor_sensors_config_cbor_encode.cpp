@@ -71,6 +71,7 @@ static bool encode_CborSensorConfigurationConfig(
 	&& ((zcbor_uint32_encode(state, (&(*input).interpolation_method))))
 	&& (!(*input).channel_present || zcbor_uint32_encode(state, (&(*input).channel)))
 	&& ((zcbor_tstr_encode(state, (&(*input).connection_string))))
+	&& ((zcbor_tstr_encode(state, (&(*input).script_path))))
 	&& (!(*input).calibration_table_present || encode_CborSensorCalibrationDataMap(state, (&(*input).calibration_table)))
 	&& (!(*input).expression_present || zcbor_tstr_encode(state, (&(*input).expression)))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 7))));
 

@@ -3,7 +3,6 @@
 #include <memory>
 #include <zephyr/kernel.h>
 
-#include "subsys/lua_script/lua_script.h"
 #include "domain/sensor_domain/models/sensor.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 #include "domain/sensor_domain/sensor_readers/i_sensor_reader.h"
@@ -11,7 +10,6 @@
 
 namespace eerie_leap::domain::sensor_domain::services {
 
-using namespace eerie_leap::subsys::lua_script;
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::domain::sensor_domain::processors;
 using namespace eerie_leap::domain::sensor_domain::sensor_readers;
@@ -27,7 +25,6 @@ struct SensorTask {
     std::shared_ptr<SensorReadingsFrame> readings_frame;
     std::unique_ptr<ISensorReader> reader;
     std::shared_ptr<std::vector<std::shared_ptr<IReadingProcessor>>> reading_processors;
-    std::shared_ptr<LuaScript> lua_script;
 };
 
 } // namespace eerie_leap::domain::sensor_domain::services

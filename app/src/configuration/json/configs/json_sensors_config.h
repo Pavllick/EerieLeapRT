@@ -24,6 +24,7 @@ struct JsonSensorConfigurationConfig {
     std::string type;
     int32_t channel;
     std::string connection_string;
+    std::string script_path;
     uint32_t sampling_rate_ms;
     std::string interpolation_method;
     std::vector<JsonSensorCalibrationDataConfig> calibration_table;
@@ -77,6 +78,7 @@ static void tag_invoke(json::value_from_tag, json::value& jv, JsonSensorConfigur
         {NAMEOF_MEMBER(&JsonSensorConfigurationConfig::type), config.type},
         {NAMEOF_MEMBER(&JsonSensorConfigurationConfig::channel), config.channel},
         {NAMEOF_MEMBER(&JsonSensorConfigurationConfig::connection_string), config.connection_string},
+        {NAMEOF_MEMBER(&JsonSensorConfigurationConfig::script_path), config.script_path},
         {NAMEOF_MEMBER(&JsonSensorConfigurationConfig::sampling_rate_ms), config.sampling_rate_ms},
         {NAMEOF_MEMBER(&JsonSensorConfigurationConfig::interpolation_method), config.interpolation_method},
         {NAMEOF_MEMBER(&JsonSensorConfigurationConfig::calibration_table), json::value_from(config.calibration_table)},
@@ -90,6 +92,7 @@ static JsonSensorConfigurationConfig tag_invoke(json::value_to_tag<JsonSensorCon
         json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonSensorConfigurationConfig::type).c_str())),
         json::value_to<int32_t>(obj.at(NAMEOF_MEMBER(&JsonSensorConfigurationConfig::channel).c_str())),
         json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonSensorConfigurationConfig::connection_string).c_str())),
+        json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonSensorConfigurationConfig::script_path).c_str())),
         json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonSensorConfigurationConfig::sampling_rate_ms).c_str())),
         json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonSensorConfigurationConfig::interpolation_method).c_str())),
         json::value_to<std::vector<JsonSensorCalibrationDataConfig>>(obj.at(NAMEOF_MEMBER(&JsonSensorConfigurationConfig::calibration_table).c_str())),
