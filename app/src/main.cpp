@@ -19,6 +19,7 @@
 #include "subsys/time/time_service.h"
 #include "subsys/time/rtc_provider.h"
 #include "subsys/time/boot_elapsed_time_provider.h"
+#include "subsys/lua/lua_wrapper.h"
 
 #include "configuration/services/cbor_configuration_service.h"
 #include "configuration/services/json_configuration_service.h"
@@ -76,6 +77,7 @@ using namespace eerie_leap::subsys::gpio;
 using namespace eerie_leap::subsys::cfb;
 using namespace eerie_leap::subsys::modbus;
 using namespace eerie_leap::subsys::time;
+using namespace eerie_leap::subsys::lua;
 
 using namespace eerie_leap::configuration::json::configs;
 using namespace eerie_leap::configuration::services;
@@ -336,8 +338,8 @@ int main(void) {
     // calibration_service->Stop();
 
     while(true) {
-        SystemInfo::print_heap_info();
-        SystemInfo::print_stack_info();
+        // SystemInfo::print_heap_info();
+        // SystemInfo::print_stack_info();
         k_msleep(SLEEP_TIME_MS);
     }
 

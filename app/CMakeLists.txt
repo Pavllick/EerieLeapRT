@@ -122,6 +122,9 @@ endfunction()
 # generate_zcbor_configuration("sensors_config.cddl" "cbor_sensors_config")
 # generate_zcbor_configuration("system_config.cddl" "cbor_system_config")
 
+# Add the Lua Zephyr module
+set(EXTRA_ZEPHYR_MODULES "${CMAKE_CURRENT_SOURCE_DIR}/../modules/lua_zephyr")
+
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(errie_leap)
 

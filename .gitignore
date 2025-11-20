@@ -32,7 +32,6 @@ __pycache__/
 /tools
 
 #libs
-/modules
 /app/include
 
 # boost
