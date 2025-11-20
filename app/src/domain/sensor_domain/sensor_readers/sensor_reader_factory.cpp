@@ -5,6 +5,7 @@
 #include "domain/sensor_domain/sensor_readers/sensor_reader_virtual_indicator.h"
 #include "domain/sensor_domain/sensor_readers/canbus_sensor_reader_raw.h"
 #include "domain/sensor_domain/sensor_readers/canbus_sensor_reader.h"
+#include "domain/sensor_domain/sensor_readers/sensor_reader_user_value_type.h"
 
 #include "sensor_reader_factory.h"
 
@@ -24,7 +25,7 @@ SensorReaderFactory::SensorReaderFactory(
         sensor_readings_frame_(std::move(sensor_readings_frame)),
         canbus_service_(std::move(canbus_service)) {}
 
-std::unique_ptr<ISensorReader> SensorReaderFactory::Create(std::shared_ptr<Sensor> sensor) {
+std::unique_ptr<ISensorReader> SensorReaderFactory::Create(std::shared_ptr<Sensor> sensor, std::shared_ptr<LuaScript> lua_script) {
     std::unique_ptr<ISensorReader> sensor_reader;
 
     if(sensor->configuration.type == SensorType::PHYSICAL_ANALOG) {
@@ -80,6 +81,13 @@ std::unique_ptr<ISensorReader> SensorReaderFactory::Create(std::shared_ptr<Senso
             sensor,
             canbus,
             dbc);
+    } else if(sensor->configuration.type == SensorType::USER_ANALOG || sensor->configuration.type == SensorType::USER_INDICATOR) {
+        sensor_reader = make_unique<SensorReaderUserValueType>(
+            time_service_,
+            guid_generator_,
+            sensor_readings_frame_,
+            sensor,
+            lua_script);
     } else {
         throw std::runtime_error("Unsupported sensor type");
     }

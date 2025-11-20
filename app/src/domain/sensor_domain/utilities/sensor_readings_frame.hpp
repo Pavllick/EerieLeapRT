@@ -6,18 +6,28 @@
 
 #include <zephyr/spinlock.h>
 
+#include "utilities/string/string_helpers.h"
 #include "domain/sensor_domain/models/sensor_reading.h"
 
 namespace eerie_leap::domain::sensor_domain::utilities {
 
+using namespace eerie_leap::utilities::string;
 using namespace eerie_leap::domain::sensor_domain::models;
 
 class SensorReadingsFrame {
 private:
     std::unordered_map<size_t, std::shared_ptr<SensorReading>> readings_;
     std::unordered_map<size_t, float*> reading_values_;
+    std::unordered_map<std::string, size_t> sensor_id_hash_map_;
 
     k_spinlock reading_lock_;
+
+    size_t GetSensorIdHash(const std::string& sensor_id) {
+        if(!sensor_id_hash_map_.contains(sensor_id))
+            sensor_id_hash_map_.emplace(sensor_id, StringHelpers::GetHash(sensor_id));
+
+        return sensor_id_hash_map_.at(sensor_id);
+    }
 
 public:
     SensorReadingsFrame() = default;
@@ -38,6 +48,10 @@ public:
         return readings_.contains(sensor_id_hash);
     }
 
+    bool HasReading(const std::string& sensor_id) {
+        return readings_.contains(GetSensorIdHash(sensor_id));
+    }
+
     std::shared_ptr<SensorReading> GetReading(const size_t sensor_id_hash) const {
         if(!HasReading(sensor_id_hash))
             throw std::runtime_error("Sensor ID not found");
@@ -45,7 +59,25 @@ public:
         return readings_.at(sensor_id_hash);
     }
 
+    std::shared_ptr<SensorReading> GetReading(const std::string& sensor_id) {
+        const size_t sensor_id_hash = GetSensorIdHash(sensor_id);
+
+        if(!HasReading(sensor_id_hash))
+            throw std::runtime_error("Sensor ID not found");
+
+        return readings_.at(sensor_id_hash);
+    }
+
     float GetReadingValue(const size_t sensor_id_hash) const {
+        if(!HasReading(sensor_id_hash))
+            throw std::runtime_error("Sensor ID not found");
+
+        return *reading_values_.at(sensor_id_hash);
+    }
+
+    float GetReadingValue(const std::string& sensor_id) {
+        const size_t sensor_id_hash = GetSensorIdHash(sensor_id);
+
         if(!HasReading(sensor_id_hash))
             throw std::runtime_error("Sensor ID not found");
 

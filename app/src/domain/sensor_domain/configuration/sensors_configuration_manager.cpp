@@ -124,6 +124,10 @@ const std::vector<std::shared_ptr<Sensor>>* SensorsConfigurationManager::Get(boo
     sensors_ = cbor_parser_->Deserialize(
         *cbor_config.get(), gpio_channel_count_, adc_channel_count_);
 
+    sensors_map_.clear();
+    for(const auto& sensor : sensors_)
+        sensors_map_.insert({sensor->id, sensor});
+
     json_config_checksum_ = cbor_config->json_config_checksum;
 
     return &sensors_;
@@ -133,6 +137,13 @@ bool SensorsConfigurationManager::CreateDefaultConfiguration() {
     auto sensors = std::vector<std::shared_ptr<Sensor>>();
 
     return Update(sensors);
+}
+
+std::shared_ptr<Sensor> SensorsConfigurationManager::GetSensor(const std::string& sensor_id) {
+    if(!sensors_map_.contains(sensor_id))
+        return nullptr;
+
+    return sensors_map_[sensor_id];
 }
 
 } // namespace eerie_leap::domain::sensor_domain::configuration

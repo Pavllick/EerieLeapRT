@@ -17,7 +17,9 @@ enum class SensorType : std::uint32_t {
     VIRTUAL_INDICATOR,
     CANBUS_RAW,
     CANBUS_ANALOG,
-    CANBUS_INDICATOR
+    CANBUS_INDICATOR,
+    USER_ANALOG,
+    USER_INDICATOR
 };
 
 constexpr const std::array SensorTypeNames = {
@@ -27,7 +29,9 @@ constexpr const std::array SensorTypeNames = {
     "VIRTUAL_INDICATOR"sv,
     "CANBUS_RAW"sv,
     "CANBUS_ANALOG"sv,
-    "CANBUS_INDICATOR"sv
+    "CANBUS_INDICATOR"sv,
+    "USER_ANALOG"sv,
+    "USER_INDICATOR"sv
 };
 
 inline const char* GetSensorTypeName(SensorType type) {

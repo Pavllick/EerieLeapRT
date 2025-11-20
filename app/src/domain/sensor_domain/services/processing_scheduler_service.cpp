@@ -1,3 +1,4 @@
+#include "lua.h"
 #include "utilities/memory/heap_allocator.h"
 #include "subsys/time/time_helpers.hpp"
 #include "domain/sensor_domain/processors/sensor_processor.h"
@@ -41,6 +42,25 @@ void ProcessingSchedulerService::Initialize() {
     k_thread_name_set(&work_q_.thread, "processing_scheduler_service");
 }
 
+const std::string test_script = R"(
+    state = {
+        counter = 0
+    }
+
+    function create_reading(sensor_id)
+        return 8.1234
+    end
+
+    function pre_process_reading(sensor_id)
+        state.counter = state.counter + 1
+        print("Counter: " .. state.counter)
+    end
+
+    function post_process_reading(sensor_id)
+        print("Sensor ID: " .. sensor_id .. ", Reading Value: " .. get_reading_value(sensor_id))
+    end
+)";
+
 void ProcessingSchedulerService::ProcessSensorWorkTask(k_work* work) {
     SensorTask* task = CONTAINER_OF(work, SensorTask, work);
 
@@ -51,16 +71,21 @@ void ProcessingSchedulerService::ProcessSensorWorkTask(k_work* work) {
 
     try {
         task->reader->Read();
+        LuaProcessReading(task->lua_script->GetState(), "pre_process_reading", task->sensor->id);
         auto reading = task->readings_frame->GetReading(task->sensor->id_hash);
 
         for(auto processor : *task->reading_processors)
             processor->ProcessReading(reading);
+
+        LuaProcessReading(task->lua_script->GetState(), "post_process_reading", task->sensor->id);
 
         LOG_DBG("Sensor Reading - ID: %s, Guid: %llu, Value: %.3f, Time: %s",
             task->sensor->id.c_str(),
             reading->id.AsUint64(),
             reading->value.value_or(0.0f),
             TimeHelpers::GetFormattedString(*reading->timestamp).c_str());
+
+        LOG_INF("%s", task->sensor->id.c_str());
     } catch (const std::exception& e) {
         LOG_DBG("Error processing sensor: %s, Error: %s", task->sensor->id.c_str(), e.what());
     }
@@ -70,8 +95,13 @@ void ProcessingSchedulerService::ProcessSensorWorkTask(k_work* work) {
 }
 
 std::shared_ptr<SensorTask> ProcessingSchedulerService::CreateSensorTask(std::shared_ptr<Sensor> sensor) {
-    auto reader = sensor_reader_factory_->Create(sensor);
+    auto lua_script = CreateLuaScript();
+    auto reader = sensor_reader_factory_->Create(sensor, lua_script);
+
     if(reader == nullptr)
+        return nullptr;
+
+    if(sensor->configuration.sampling_rate_ms == 0)
         return nullptr;
 
     auto task = make_shared_ext<SensorTask>();
@@ -81,7 +111,7 @@ std::shared_ptr<SensorTask> ProcessingSchedulerService::CreateSensorTask(std::sh
     task->sensor = sensor;
     task->readings_frame = sensor_readings_frame_;
     task->reading_processors = reading_processors_;
-
+    task->lua_script = lua_script;
     task->reader = std::move(reader);
 
     return task;
@@ -164,6 +194,75 @@ void ProcessingSchedulerService::Pause() {
 
 void ProcessingSchedulerService::Resume() {
     StartTasks();
+}
+
+std::shared_ptr<LuaScript> ProcessingSchedulerService::CreateLuaScript() {
+    auto lua_script = std::make_shared<LuaScript>();
+    lua_script->RegisterGlobalFunction("get_reading_value", &ProcessingSchedulerService::LuaGetReadingValue, this);
+    lua_script->RegisterGlobalFunction("update_reading", &ProcessingSchedulerService::LuaUpdateReading, this);
+
+    lua_script->Run(test_script);
+
+    return lua_script;
+}
+
+int ProcessingSchedulerService::LuaGetReadingValue(lua_State* state) {
+    if(lua_gettop(state) != 1)
+        return luaL_error(state, "Expected 1 argument");
+
+    const auto* this_ptr = static_cast<ProcessingSchedulerService*>(lua_touserdata(state, lua_upvalueindex(1)));
+
+    const char* sensor_id = luaL_checkstring(state, 1);
+
+    if(!this_ptr->sensor_readings_frame_->HasReading(sensor_id)) {
+        lua_pushnil(state);
+        return 1;
+    }
+
+    float result = this_ptr->sensor_readings_frame_->GetReading(sensor_id)->value.value_or(0.0f);
+    lua_pushnumber(state, result);
+
+    return 1;
+}
+
+int ProcessingSchedulerService::LuaUpdateReading(lua_State* state) {
+    if(lua_gettop(state) != 2)
+        return luaL_error(state, "Expected 2 arguments");
+
+    const auto* this_ptr = static_cast<ProcessingSchedulerService*>(lua_touserdata(state, lua_upvalueindex(1)));
+
+    const char* sensor_id = luaL_checkstring(state, 1);
+    float value = luaL_checknumber(state, 2);
+
+    if(!this_ptr->sensor_readings_frame_->HasReading(sensor_id)) {
+        lua_pushboolean(state, false);
+        return 1;
+    }
+
+    auto reading = this_ptr->sensor_readings_frame_->GetReading(sensor_id);
+    reading->value = value;
+
+    this_ptr->sensor_readings_frame_->AddOrUpdateReading(reading);
+
+    lua_pushboolean(state, true);
+
+    return 1;
+}
+
+void ProcessingSchedulerService::LuaProcessReading(lua_State* state, const std::string& function_name, const std::string& sensor_id) {
+    lua_getglobal(state, function_name.c_str());
+
+    if(!lua_isfunction(state, -1)) {
+        lua_pop(state, 1);
+        return;
+    }
+
+    lua_pushstring(state, sensor_id.c_str());
+
+    if(lua_pcall(state, 1, 0, 0) != LUA_OK) {
+        LOG_ERR("Lua error: %s", lua_tostring(state, -1));
+        lua_pop(state, 1);
+    }
 }
 
 } // namespace eerie_leap::domain::sensor_domain::services

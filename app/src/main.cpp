@@ -19,7 +19,6 @@
 #include "subsys/time/time_service.h"
 #include "subsys/time/rtc_provider.h"
 #include "subsys/time/boot_elapsed_time_provider.h"
-#include "subsys/lua/lua_wrapper.h"
 
 #include "configuration/services/cbor_configuration_service.h"
 #include "configuration/services/json_configuration_service.h"
@@ -77,7 +76,6 @@ using namespace eerie_leap::subsys::gpio;
 using namespace eerie_leap::subsys::cfb;
 using namespace eerie_leap::subsys::modbus;
 using namespace eerie_leap::subsys::time;
-using namespace eerie_leap::subsys::lua;
 
 using namespace eerie_leap::configuration::json::configs;
 using namespace eerie_leap::configuration::services;
@@ -525,6 +523,20 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
         .canbus_source = make_unique_ext<CanbusSource>(0, 790)
     };
 
+    ExpressionEvaluator expression_evaluator_8(math_parser_service, "x * 2");
+
+    auto sensor_8 = make_shared_ext<Sensor>("sensor_8");
+    sensor_8->metadata = {
+        .name = "Sensor 8",
+        .unit = "",
+        .description = "Test Sensor 8"
+    };
+    sensor_8->configuration = {
+        .type = SensorType::USER_ANALOG,
+        .sampling_rate_ms = 500,
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_8)
+    };
+
     std::vector<std::shared_ptr<Sensor>> sensors = {
         sensor_1,
         sensor_2,
@@ -532,7 +544,8 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
         sensor_4,
         sensor_5,
         sensor_6,
-        sensor_7
+        sensor_7,
+        sensor_8
     };
 
     sensors_configuration_manager->Update(sensors);

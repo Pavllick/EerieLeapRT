@@ -25,7 +25,9 @@ void SensorValidator::ValidateType(const SensorConfiguration& sensor_configurati
         && sensor_configuration.type != SensorType::VIRTUAL_INDICATOR
         && sensor_configuration.type != SensorType::CANBUS_RAW
         && sensor_configuration.type != SensorType::CANBUS_ANALOG
-        && sensor_configuration.type != SensorType::CANBUS_INDICATOR) {
+        && sensor_configuration.type != SensorType::CANBUS_INDICATOR
+        && sensor_configuration.type != SensorType::USER_ANALOG
+        && sensor_configuration.type != SensorType::USER_INDICATOR) {
 
             throw std::runtime_error("Invalid sensor type.");
         }

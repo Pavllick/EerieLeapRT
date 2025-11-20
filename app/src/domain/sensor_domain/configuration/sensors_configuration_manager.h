@@ -1,8 +1,8 @@
 #pragma once
 
-#include <vector>
 #include <memory>
-#include <span>
+#include <vector>
+#include <unordered_map>
 
 #include "utilities/math_parser/math_parser_service.hpp"
 #include <utilities/memory/heap_allocator.h>
@@ -33,6 +33,7 @@ private:
     std::unique_ptr<SensorsJsonParser> json_parser_;
 
     std::vector<std::shared_ptr<Sensor>> sensors_;
+    std::unordered_map<std::string, std::shared_ptr<Sensor>> sensors_map_;
     int gpio_channel_count_;
     int adc_channel_count_;
 
@@ -51,6 +52,7 @@ public:
 
     bool Update(const std::vector<std::shared_ptr<Sensor>>& sensors);
     const std::vector<std::shared_ptr<Sensor>>* Get(bool force_load = false);
+    std::shared_ptr<Sensor> GetSensor(const std::string& sensor_id);
 };
 
 } // namespace eerie_leap::domain::sensor_domain::configuration

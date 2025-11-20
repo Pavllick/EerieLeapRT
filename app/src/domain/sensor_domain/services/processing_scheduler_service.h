@@ -5,8 +5,8 @@
 
 #include <zephyr/kernel.h>
 
+#include "subsys/lua_script/lua_script.h"
 #include "domain/sensor_domain/configuration/sensors_configuration_manager.h"
-
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 #include "domain/sensor_domain/sensor_readers/sensor_reader_factory.h"
 #include "domain/sensor_domain/processors/i_reading_processor.h"
@@ -15,6 +15,7 @@
 
 namespace eerie_leap::domain::sensor_domain::services {
 
+using namespace eerie_leap::subsys::lua_script;
 using namespace eerie_leap::domain::sensor_domain::configuration;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 using namespace eerie_leap::domain::sensor_domain::processors;
@@ -40,6 +41,11 @@ private:
     void StartTasks();
     std::shared_ptr<SensorTask> CreateSensorTask(std::shared_ptr<Sensor> sensor);
     static void ProcessSensorWorkTask(k_work* work);
+
+    std::shared_ptr<LuaScript> CreateLuaScript();
+    static int LuaGetReadingValue(lua_State* state);
+    static int LuaUpdateReading(lua_State* state);
+    static void LuaProcessReading(lua_State* state, const std::string& function_name, const std::string& sensor_id);
 
 public:
     ProcessingSchedulerService(

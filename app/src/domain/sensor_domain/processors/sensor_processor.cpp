@@ -20,6 +20,9 @@ SensorProcessor::SensorProcessor(std::shared_ptr<SensorReadingsFrame> sensor_rea
 
 void SensorProcessor::ProcessReading(std::shared_ptr<SensorReading> reading) {
     try {
+        if(reading->status != ReadingStatus::RAW)
+            throw std::runtime_error("Reading is not in raw state");
+
         if(reading->sensor->configuration.type == SensorType::PHYSICAL_ANALOG) {
             float voltage = reading->value.value();
             float raw_value = reading->sensor->configuration.voltage_interpolator->Interpolate(voltage, true);
@@ -58,7 +61,7 @@ void SensorProcessor::ProcessReading(std::shared_ptr<SensorReading> reading) {
                 sensor_readings_frame_->GetReadingValues());
             reading->status = ReadingStatus::PROCESSED;
         } else if(reading->sensor->configuration.type == SensorType::CANBUS_RAW) {
-
+            // No processing needed
         } else if(reading->sensor->configuration.type == SensorType::CANBUS_ANALOG) {
             float raw_value = reading->value.value();
             float value = raw_value;
@@ -86,6 +89,21 @@ void SensorProcessor::ProcessReading(std::shared_ptr<SensorReading> reading) {
             }
 
             reading->value = value;
+            reading->status = ReadingStatus::PROCESSED;
+        } else if(reading->sensor->configuration.type == SensorType::USER_ANALOG ||
+            reading->sensor->configuration.type == SensorType::USER_INDICATOR) {
+
+            if(reading->sensor->configuration.expression_evaluator != nullptr) {
+                if(reading->value.has_value()) {
+                reading->value = reading->sensor->configuration.expression_evaluator->Evaluate(
+                    sensor_readings_frame_->GetReadingValues(),
+                    reading->value.value());
+                } else {
+                    reading->value = reading->sensor->configuration.expression_evaluator->Evaluate(
+                        sensor_readings_frame_->GetReadingValues());
+                }
+            }
+
             reading->status = ReadingStatus::PROCESSED;
         } else {
             throw std::runtime_error("Unsupported sensor type");

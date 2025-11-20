@@ -9,7 +9,6 @@ namespace eerie_leap::domain::sensor_domain::sensor_readers {
 
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::domain::sensor_domain::models;
-using namespace eerie_leap::subsys::adc::utilities;
 
 SensorReaderVirtualAnalog::SensorReaderVirtualAnalog(
     std::shared_ptr<ITimeService> time_service,
