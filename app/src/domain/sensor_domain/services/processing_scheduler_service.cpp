@@ -2,6 +2,7 @@
 #include "utilities/memory/heap_allocator.h"
 #include "subsys/time/time_helpers.hpp"
 #include "domain/sensor_domain/processors/sensor_processor.h"
+#include "domain/sensor_domain/processors/script_processor.h"
 
 #include "processing_scheduler_service.h"
 
@@ -22,7 +23,10 @@ ProcessingSchedulerService::ProcessingSchedulerService(
         sensor_reader_factory_(std::move(sensor_reader_factory)),
         reading_processors_(std::make_shared<std::vector<std::shared_ptr<IReadingProcessor>>>()) {
 
+    reading_processors_->push_back(make_shared_ext<ScriptProcessor>("pre_process_reading"));
     reading_processors_->push_back(make_shared_ext<SensorProcessor>(sensor_readings_frame_));
+    reading_processors_->push_back(make_shared_ext<ScriptProcessor>("post_process_reading"));
+
     k_sem_init(&processing_semaphore_, 1, 1);
 };
 
@@ -182,24 +186,31 @@ void ProcessingSchedulerService::InitializeLuaScript(std::shared_ptr<Sensor> sen
     if(lua_script == nullptr)
         return;
 
-    lua_script->RegisterGlobalFunction("get_reading_value", &ProcessingSchedulerService::LuaGetReadingValue, this);
-    lua_script->RegisterGlobalFunction("update_reading", &ProcessingSchedulerService::LuaUpdateReading, this);
+    lua_script->RegisterGlobalFunction(
+        "get_reading_value",
+        &ProcessingSchedulerService::LuaGetReadingValue,
+        sensor_readings_frame_.get());
+    lua_script->RegisterGlobalFunction(
+        "update_reading",
+        &ProcessingSchedulerService::LuaUpdateReading,
+        sensor_readings_frame_.get());
 }
 
 int ProcessingSchedulerService::LuaGetReadingValue(lua_State* state) {
     if(lua_gettop(state) != 1)
         return luaL_error(state, "Expected 1 argument");
 
-    const auto* this_ptr = static_cast<ProcessingSchedulerService*>(lua_touserdata(state, lua_upvalueindex(1)));
+    auto* sensor_readings_frame =
+        static_cast<SensorReadingsFrame*>(lua_touserdata(state, lua_upvalueindex(1)));
 
     const char* sensor_id = luaL_checkstring(state, 1);
 
-    if(!this_ptr->sensor_readings_frame_->HasReading(sensor_id)) {
+    if(!sensor_readings_frame->HasReading(sensor_id)) {
         lua_pushnil(state);
         return 1;
     }
 
-    float result = this_ptr->sensor_readings_frame_->GetReading(sensor_id)->value.value_or(0.0f);
+    float result = sensor_readings_frame->GetReading(sensor_id)->value.value_or(0.0f);
     lua_pushnumber(state, result);
 
     return 1;
@@ -209,40 +220,25 @@ int ProcessingSchedulerService::LuaUpdateReading(lua_State* state) {
     if(lua_gettop(state) != 2)
         return luaL_error(state, "Expected 2 arguments");
 
-    const auto* this_ptr = static_cast<ProcessingSchedulerService*>(lua_touserdata(state, lua_upvalueindex(1)));
+    auto* sensor_readings_frame =
+        static_cast<SensorReadingsFrame*>(lua_touserdata(state, lua_upvalueindex(1)));
 
     const char* sensor_id = luaL_checkstring(state, 1);
     float value = luaL_checknumber(state, 2);
 
-    if(!this_ptr->sensor_readings_frame_->HasReading(sensor_id)) {
+    if(!sensor_readings_frame->HasReading(sensor_id)) {
         lua_pushboolean(state, false);
         return 1;
     }
 
-    auto reading = this_ptr->sensor_readings_frame_->GetReading(sensor_id);
+    auto reading = sensor_readings_frame->GetReading(sensor_id);
     reading->value = value;
 
-    this_ptr->sensor_readings_frame_->AddOrUpdateReading(reading);
+    sensor_readings_frame->AddOrUpdateReading(reading);
 
     lua_pushboolean(state, true);
 
     return 1;
-}
-
-void ProcessingSchedulerService::LuaProcessReading(lua_State* state, const std::string& function_name, const std::string& sensor_id) {
-    lua_getglobal(state, function_name.c_str());
-
-    if(!lua_isfunction(state, -1)) {
-        lua_pop(state, 1);
-        return;
-    }
-
-    lua_pushstring(state, sensor_id.c_str());
-
-    if(lua_pcall(state, 1, 0, 0) != LUA_OK) {
-        LOG_ERR("Lua error: %s", lua_tostring(state, -1));
-        lua_pop(state, 1);
-    }
 }
 
 } // namespace eerie_leap::domain::sensor_domain::services

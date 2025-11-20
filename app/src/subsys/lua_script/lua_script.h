@@ -1,7 +1,9 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include <vector>
+#include <span>
 #include <unordered_map>
 
 #include <lua.h>
@@ -25,7 +27,7 @@ public:
     ~LuaScript();
 
     lua_State* GetState() { return state_; }
-    void Run(std::string_view script);
+    void Load(const std::span<const uint8_t>& script);
     void RegisterGlobalFunction(const std::string& name, lua_CFunction func, void* object = nullptr);
 };
 

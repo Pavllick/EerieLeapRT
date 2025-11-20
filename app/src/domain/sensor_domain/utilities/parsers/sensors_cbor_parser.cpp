@@ -123,19 +123,21 @@ std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
         sensor->configuration.UnwrapConnectionString();
 
         sensor->configuration.script_path = CborHelpers::ToStdString(sensor_config.configuration.script_path);
-        if(!sensor->configuration.script_path.empty() && fs_service_->Exists(sensor->configuration.script_path)) {
+        if(fs_service_ != nullptr
+            && fs_service_->IsAvailable()
+            && !sensor->configuration.script_path.empty()
+            && fs_service_->Exists(sensor->configuration.script_path)) {
+
             size_t script_size = fs_service_->GetFileSize(sensor->configuration.script_path);
 
             if(script_size != 0) {
-                ext_unique_ptr<ExtVector> buffer = make_unique_ext<ExtVector>(script_size + 1);
-                buffer->back() = '\0';
+                ext_unique_ptr<ExtVector> buffer = make_unique_ext<ExtVector>(script_size);
 
                 size_t out_len = 0;
                 fs_service_->ReadFile(sensor->configuration.script_path, buffer->data(), script_size, out_len);
-                std::string_view script_str(reinterpret_cast<const char*>(buffer->data()), buffer->size());
 
                 sensor->configuration.lua_script = std::make_shared<LuaScript>();
-                sensor->configuration.lua_script->Run(script_str);
+                sensor->configuration.lua_script->Load(std::span<const uint8_t>(buffer->data(), buffer->size()));
             }
         }
 

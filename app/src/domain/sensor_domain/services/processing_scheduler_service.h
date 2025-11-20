@@ -45,7 +45,6 @@ private:
     void InitializeLuaScript(std::shared_ptr<Sensor> sensor);
     static int LuaGetReadingValue(lua_State* state);
     static int LuaUpdateReading(lua_State* state);
-    static void LuaProcessReading(lua_State* state, const std::string& function_name, const std::string& sensor_id);
 
 public:
     ProcessingSchedulerService(

@@ -17,10 +17,19 @@ LuaScript::~LuaScript() {
 	lua_close(state_);
 }
 
-void LuaScript::Run(std::string_view script) {
-	if(luaL_dostring(state_, script.data()) != LUA_OK) {
-		LOG_ERR("Error running script: %s", lua_tostring(state_, -1));
+void LuaScript::Load(const std::span<const uint8_t>& script) {
+	if(luaL_loadbuffer(state_, reinterpret_cast<const char*>(script.data()), script.size(), "script") != LUA_OK) {
+		LOG_ERR("Error loading script: %s", lua_tostring(state_, -1));
 		lua_pop(state_, 1);
+
+		return;
+	}
+
+	if(lua_pcall(state_, 0, 0, 0) != LUA_OK) {
+		LOG_ERR("Error executing script: %s", lua_tostring(state_, -1));
+		lua_pop(state_, 1);
+
+		return;
 	}
 }
 
