@@ -1,13 +1,13 @@
 #pragma once
 
-#include <vector>
+#include <unordered_map>
 
 #include "can_channel_configuration.h"
 
 namespace eerie_leap::domain::canbus_domain::models {
 
 struct CanbusConfiguration {
-    std::vector<CanChannelConfiguration> channel_configurations;
+    std::unordered_map<uint8_t, CanChannelConfiguration> channel_configurations;
 };
 
 } // namespace eerie_leap::domain::canbus_domain::models

@@ -68,13 +68,13 @@ void CanbusSchedulerService::ProcessCanbusWorkTask(k_work* work) {
     k_work_reschedule_for_queue(task->work_q, &task->work, task->send_interval_ms);
 }
 
-std::shared_ptr<CanbusTask> CanbusSchedulerService::CreateTask(uint8_t bus_channel, const CanMessageConfiguration& message_configuration) {
+std::shared_ptr<CanbusTask> CanbusSchedulerService::CreateTask(uint8_t bus_channel, std::shared_ptr<Dbc> dbc, const CanMessageConfiguration& message_configuration) {
     auto task = make_shared_ext<CanbusTask>();
     task->work_q = &work_q_;
     task->processing_semaphore = &processing_semaphore_;
     task->send_interval_ms = K_MSEC(message_configuration.send_interval_ms);
     task->canbus = canbus_service_->GetCanbus(bus_channel);
-    task->dbc = canbus_service_->GetDbcForChannel(bus_channel);
+    task->dbc = dbc;
     task->readings_frame = sensor_readings_frame_;
     task->message_configuration = message_configuration;
 
@@ -102,9 +102,9 @@ void CanbusSchedulerService::StartTasks() {
 void CanbusSchedulerService::Start() {
     auto canbus_configuration = canbus_configuration_manager_->Get();
 
-    for(const auto& channel_configuration : canbus_configuration->channel_configurations) {
+    for(const auto& [bus_channel, channel_configuration] : canbus_configuration->channel_configurations) {
         for(const auto& message_configuration : channel_configuration.message_configurations) {
-            auto task = CreateTask(channel_configuration.bus_channel, message_configuration);
+            auto task = CreateTask(bus_channel, channel_configuration.dbc, message_configuration);
             if(task == nullptr)
                 continue;
 

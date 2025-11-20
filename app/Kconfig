@@ -36,10 +36,6 @@ config EERIE_LEAP_SD_CARD_USER_CONFIG_DIR
 	string "User config directory"
 	default "configuration"
 
-config EERIE_LEAP_CANBUS_DBC_FILE_NAME
-	string "Canbus DBC file name"
-	default "canbus_"
-
 config EERIE_LEAP_LOG_METADATA_FILE_VERSION
 	int "Log metadata file version"
 	range 0 65535

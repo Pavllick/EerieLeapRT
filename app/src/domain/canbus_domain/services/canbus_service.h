@@ -2,7 +2,9 @@
 
 #include <memory>
 #include <unordered_map>
+#include <streambuf>
 
+#include "domain/canbus_domain/models/can_channel_configuration.h"
 #include "subsys/fs/services/i_fs_service.h"
 #include "subsys/canbus/canbus.h"
 #include "subsys/dbc/dbc.h"
@@ -21,16 +23,15 @@ private:
     std::shared_ptr<CanbusConfigurationManager> canbus_configuration_manager_;
 
     std::unordered_map<uint8_t, std::shared_ptr<Canbus>> canbus_;
-    std::unordered_map<uint8_t, std::shared_ptr<Dbc>> dbcs_;
 
     void BitrateUpdated(uint8_t bus_channel, uint32_t bitrate);
 
 public:
     CanbusService(std::shared_ptr<IFsService> fs_service, std::shared_ptr<CanbusConfigurationManager> canbus_configuration_manager);
 
-    bool LoadDbcFile(uint8_t bus_channel, std::streambuf& dbc_content);
+    bool LoadDbcFile(Dbc& dbc, std::streambuf& dbc_content);
     std::shared_ptr<Canbus> GetCanbus(uint8_t bus_channel) const;
-    std::shared_ptr<Dbc> GetDbcForChannel(uint8_t bus_channel) const;
+    const CanChannelConfiguration* GetChannelConfiguration(uint8_t bus_channel) const;
 };
 
 } // namespace eerie_leap::domain::canbus_domain::services

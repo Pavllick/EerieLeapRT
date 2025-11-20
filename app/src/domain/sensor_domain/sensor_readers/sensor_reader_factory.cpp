@@ -70,8 +70,8 @@ std::unique_ptr<ISensorReader> SensorReaderFactory::Create(std::shared_ptr<Senso
         if(canbus == nullptr)
             return nullptr;
 
-        auto dbc = canbus_service_->GetDbcForChannel(sensor->configuration.canbus_source->bus_channel);
-        if(dbc == nullptr || !dbc->IsLoaded())
+        auto channel_configuration = canbus_service_->GetChannelConfiguration(sensor->configuration.canbus_source->bus_channel);
+        if(channel_configuration == nullptr || !channel_configuration->dbc->IsLoaded())
             return nullptr;
 
         sensor_reader = make_unique<CanbusSensorReader>(
@@ -80,7 +80,7 @@ std::unique_ptr<ISensorReader> SensorReaderFactory::Create(std::shared_ptr<Senso
             sensor_readings_frame_,
             sensor,
             canbus,
-            dbc);
+            channel_configuration->dbc);
     } else if(sensor->configuration.type == SensorType::USER_ANALOG || sensor->configuration.type == SensorType::USER_INDICATOR) {
         sensor_reader = make_unique<SensorReaderUserValueType>(
             time_service_,

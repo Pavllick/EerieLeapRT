@@ -361,6 +361,7 @@ void SetupCanbusConfiguration(std::shared_ptr<CanbusConfigurationManager> canbus
     CanChannelConfiguration canbus_channel_configuration_0 = {
         .bus_channel = 0,
         .bitrate = 500000,
+        .dbc_file_path = "configuration/canbus_0.dbc",
 
         .message_configurations = {
             {
@@ -373,7 +374,9 @@ void SetupCanbusConfiguration(std::shared_ptr<CanbusConfigurationManager> canbus
             }
         }
     };
-    canbus_configuration->channel_configurations.push_back(canbus_channel_configuration_0);
+    canbus_configuration->channel_configurations.emplace(
+        canbus_channel_configuration_0.bus_channel,
+        canbus_channel_configuration_0);
 
     canbus_configuration_manager->Update(*canbus_configuration);
 }

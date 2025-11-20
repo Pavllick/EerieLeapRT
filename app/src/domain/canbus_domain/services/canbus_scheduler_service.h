@@ -35,7 +35,7 @@ private:
     std::vector<std::shared_ptr<CanbusTask>> tasks_;
 
     void StartTasks();
-    std::shared_ptr<CanbusTask> CreateTask(uint8_t bus_channel, const CanMessageConfiguration& message_configuration);
+    std::shared_ptr<CanbusTask> CreateTask(uint8_t bus_channel, std::shared_ptr<Dbc> dbc, const CanMessageConfiguration& message_configuration);
     static void ProcessCanbusWorkTask(k_work* work);
 
 public:

@@ -8,10 +8,10 @@ ext_unique_ptr<JsonCanbusConfig> CanbusConfigurationJsonParser::Serialize(const 
 
     auto config = make_unique_ext<JsonCanbusConfig>();
 
-    for(const auto& channel_configuration : configuration.channel_configurations) {
+    for(const auto& [bus_channel, channel_configuration] : configuration.channel_configurations) {
         JsonCanChannelConfig channel_config {
             .type = GetCanbusTypeName(channel_configuration.type),
-            .bus_channel = channel_configuration.bus_channel,
+            .bus_channel = bus_channel,
             .bitrate = channel_configuration.bitrate
         };
 
@@ -32,18 +32,20 @@ CanbusConfiguration CanbusConfigurationJsonParser::Deserialize(const JsonCanbusC
     CanbusConfiguration configuration;
 
     for(const auto& canbus_config : config.channel_configs) {
-        configuration.channel_configurations.push_back({
+        CanChannelConfiguration channel_configuration = {
             .type = GetCanbusType(canbus_config.type),
             .bus_channel = static_cast<uint8_t>(canbus_config.bus_channel),
             .bitrate = canbus_config.bitrate
-        });
+        };
 
         for(const auto& message_config : canbus_config.message_configs) {
-            configuration.channel_configurations.back().message_configurations.push_back({
+            channel_configuration.message_configurations.push_back({
                 .frame_id = message_config.frame_id,
                 .send_interval_ms = message_config.send_interval_ms
             });
         }
+
+        configuration.channel_configurations.emplace(canbus_config.bus_channel, channel_configuration);
     }
 
     CanbusConfigurationValidator::Validate(configuration);

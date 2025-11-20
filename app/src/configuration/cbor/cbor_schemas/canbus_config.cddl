@@ -7,6 +7,7 @@ CborCanChannelConfig = [
   type: uint,
   bus_channel: uint,
   bitrate: uint,
+  dbc_file_path: tstr,
   message_configs: [*CborCanMessageConfig]
 ]
 
