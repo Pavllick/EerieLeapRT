@@ -80,6 +80,9 @@ std::shared_ptr<CanbusTask> CanbusSchedulerService::CreateTask(uint8_t bus_chann
         return nullptr;
     }
 
+    if(message_configuration.send_interval_ms == 0)
+        return nullptr;
+
     InitializeScript(message_configuration);
 
     auto task = make_shared_ext<CanbusTask>();
