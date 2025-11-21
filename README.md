@@ -2,11 +2,62 @@
 
 EerieLeap is an open-source sensor monitoring system built with [Zephyr RTOS](https://github.com/zephyrproject-rtos/zephyr). It provides a robust platform for reading, processing, and managing sensor data, supporting digital, analog, and CAN Bus data inputs.
 
+## Architecture
+
+EerieLeap implements a layered architecture designed for real-time sensor monitoring with clear separation of concerns:
+
+### System Overview
+
+The system follows a pipeline architecture where sensor data flows from hardware inputs through processing stages to independent outputs:
+
+**Hardware Input → ProcessingSchedulerService → [LogWriterService | Controllers/Views]**
+
+**Hardware Output ← CanbusSchedulerService**
+
+### Core Layers
+
+**Hardware Abstraction Layer**
+- Zephyr device drivers provide standardized interfaces to hardware peripherals
+- Device tree configuration defines available sensors, buses, and interfaces
+- Subsystem adapters (`app/src/subsys`) wrap third-party APIs with project-specific abstractions
+- Hardware-agnostic design allows the same codebase to run across different platforms
+
+**Domain Layer** (`app/src/domain`)
+- **ProcessingSchedulerService**: Collects and processes sensor data from all sources (digital inputs, analog inputs, CAN Bus messages). Each sensor operates on an independent schedule with configurable sample rates.
+- **CanbusSchedulerService**: Streams processed data to external devices over CAN Bus. Each outgoing message operates on an independent schedule.
+- **LogWriterService**: Handles persistent storage of sensor data in ASAM MDF format, operating independently from other outputs
+- Domain services coordinate data flow and implement core business logic
+
+**Controller Layer** (`app/src/controllers`)
+- Provides interfaces for external control and data access
+- Exposes device functionality to network services and user interfaces
+- Includes optional display UI (`app/src/views`) for devices with screen support
+
+### Configuration System
+
+The system employs a dual-format configuration architecture:
+- **JSON**: Human-readable format for user-supplied device configuration and persistence
+- **CBOR**: Compact binary format for efficient runtime configuration management
+- Configuration Managers bridge user settings with domain service initialization
+
+### Data Flow
+
+1. **Data Collection**: ProcessingSchedulerService coordinates sensor readings from all sources (digital, analog, CAN Bus). Each sensor operates on an independent schedule based on its configured sample rate.
+2. **Processing**: Raw data is collected from hardware through Zephyr device APIs, then processed and validated by domain services
+3. **Parallel Outputs**:
+   - LogWriterService writes processed data to persistent storage independently
+   - Controllers provide real-time access to current sensor values
+   - Optional display and web interfaces enable monitoring capabilities
+4. **Data Streaming**: CanbusSchedulerService transmits selected sensor data to external devices over CAN Bus, with each outgoing message operating on its own independent schedule
+
+### Concurrency Model
+
+The system leverages Zephyr RTOS threading primitives:
+- Scheduler services run in separate threads
+- Data handoff between collection and processing stages is synchronized through semaphores/locks
+- Hardware access is synchronized through Zephyr's device API locking mechanisms
+
 ## Project Structure
-
-The project aims to be hardware agnostic, taking advantage of Zephyr's Linux-like device tree system used to describe hardware configuration. This allows the same codebase to be used across different hardware platforms, extending or narrowing capabilities as needed—such as defining the number of digital inputs or available ADCs according to the hardware platform, and enabling SD MMC storage or CAN Bus interfaces.
-
-The codebase is designed with a high level of separation of concerns in mind. Key components are:
 
 - `app/src` - main application source code
     - `app/src/configuration` - JSON and CBOR device configuration related services and schemas
