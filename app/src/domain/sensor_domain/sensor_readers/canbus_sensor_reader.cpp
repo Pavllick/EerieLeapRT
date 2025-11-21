@@ -18,12 +18,7 @@ CanbusSensorReader::CanbusSensorReader(
             std::move(sensor),
             std::move(canbus)
         ),
-        dbc_(std::move(dbc)) {
-
-    dbc_->RegisterSignal(
-        sensor_->configuration.canbus_source->frame_id,
-        sensor_->configuration.canbus_source->signal_name);
-}
+        dbc_(std::move(dbc)) {}
 
 void CanbusSensorReader::Read() {
     auto reading = CreateRawReading();

@@ -31,7 +31,7 @@ public:
 
    bool IsLoaded() const { return is_loaded_; }
    bool LoadDbcFile(std::streambuf& dbc_content);
-   void RegisterSignal(uint64_t frame_id, const std::string& signal_name);
+   bool TryRegisterSignal(uint64_t frame_id, const std::string& signal_name);
    void RegisterAllSignalsForFrame(uint64_t frame_id);
    double GetSignalValue(uint64_t frame_id, size_t signal_name_hash, const void* bytes);
    std::vector<uint8_t> EncodeMessage(uint64_t frame_id, const SignalReader& signal_reader);

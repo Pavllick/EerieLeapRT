@@ -46,14 +46,14 @@ DbcMessage* Dbc::GetOrRegisterMessage(uint64_t frame_id) {
    return &messages_.at(frame_id);
 }
 
-void Dbc::RegisterSignal(uint64_t frame_id, const std::string& signal_name) {
+bool Dbc::TryRegisterSignal(uint64_t frame_id, const std::string& signal_name) {
    DbcMessage* dbc_message = GetOrRegisterMessage(frame_id);
 
    const dbcppp::ISignal* signal = nullptr;
    size_t signal_name_hash = StringHelpers::GetHash(signal_name);
 
    if(dbc_message->signals.contains(signal_name_hash))
-      return;
+      return false;
 
    for(const dbcppp::ISignal& sig : dbc_message->message->Signals()) {
       if(sig.Name() == signal_name) {
@@ -63,16 +63,18 @@ void Dbc::RegisterSignal(uint64_t frame_id, const std::string& signal_name) {
    }
 
    if(signal == nullptr)
-      throw std::runtime_error("Invalid DBC Signal name.");
+      return false;
 
    dbc_message->signals.emplace(signal_name_hash, signal);
+
+   return true;
 }
 
 void Dbc::RegisterAllSignalsForFrame(uint64_t frame_id) {
    DbcMessage* dbc_message = GetOrRegisterMessage(frame_id);
 
    for(const dbcppp::ISignal& sig : dbc_message->message->Signals())
-      RegisterSignal(frame_id, sig.Name());
+      TryRegisterSignal(frame_id, sig.Name());
 }
 
 double Dbc::GetSignalValue(uint64_t frame_id, size_t signal_name_hash, const void* bytes) {

@@ -17,8 +17,8 @@ struct CanbusSource {
     std::string signal_name;
     size_t signal_name_hash = 0;
 
-    CanbusSource(uint8_t bus_channel, uint32_t frame_id, const std::string& signal_name)
-        : bus_channel(bus_channel), frame_id(frame_id), signal_name(signal_name) {
+    CanbusSource(uint8_t bus_channel, uint32_t frame_id, std::string signal_name)
+        : bus_channel(bus_channel), frame_id(frame_id), signal_name(std::move(signal_name)) {
 
         if(!signal_name.empty())
             signal_name_hash = StringHelpers::GetHash(signal_name);

@@ -74,6 +74,13 @@ std::unique_ptr<ISensorReader> SensorReaderFactory::Create(std::shared_ptr<Senso
         if(channel_configuration == nullptr || !channel_configuration->dbc->IsLoaded())
             return nullptr;
 
+        if(!channel_configuration->dbc->TryRegisterSignal(
+            sensor->configuration.canbus_source->frame_id,
+            sensor->configuration.canbus_source->signal_name)) {
+
+            return nullptr;
+        }
+
         sensor_reader = make_unique<CanbusSensorReader>(
             time_service_,
             guid_generator_,
