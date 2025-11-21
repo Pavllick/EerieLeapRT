@@ -1,9 +1,9 @@
 #include <zephyr/ztest.h>
 
-#include "domain/sensor_domain/utilities/parsers/adc_configuration_cbor_parser.h"
-#include "domain/sensor_domain/utilities/parsers/adc_configuration_json_parser.h"
+#include "domain/sensor_domain/configuration/utilities/parsers/adc_configuration_cbor_parser.h"
+#include "domain/sensor_domain/configuration/utilities/parsers/adc_configuration_json_parser.h"
 
-using namespace eerie_leap::domain::sensor_domain::utilities::parsers;
+using namespace eerie_leap::domain::sensor_domain::configuration::utilities::parsers;
 
 ZTEST_SUITE(adc_configuration_parser, NULL, NULL, NULL, NULL, NULL);
 

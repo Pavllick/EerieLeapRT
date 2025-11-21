@@ -1,7 +1,6 @@
 #include <zephyr/logging/log.h>
 
 #include "logging_configuration_manager.h"
-#include "domain/logging_domain/utilities/parsers/logging_configuration_cbor_parser.h"
 
 namespace eerie_leap::domain::logging_domain::configuration {
 

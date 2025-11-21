@@ -20,7 +20,7 @@ SensorProcessor::SensorProcessor(std::shared_ptr<SensorReadingsFrame> sensor_rea
 
 void SensorProcessor::ProcessReading(std::shared_ptr<SensorReading> reading) {
     try {
-        if(reading->status != ReadingStatus::RAW)
+        if(reading->status != ReadingStatus::RAW && reading->status != ReadingStatus::UNINITIALIZED)
             throw std::runtime_error("Reading is not in raw state");
 
         if(reading->sensor->configuration.type == SensorType::PHYSICAL_ANALOG) {

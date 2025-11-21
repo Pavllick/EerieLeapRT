@@ -105,8 +105,7 @@ ZTEST(configuration_service, test_CborSensorsConfig_Save_config_successfully_sav
             { 1.1, 2.1 },
             { 1.2, 2.2 },
             { 1.3, 2.3 }
-        },
-        .float32float_count = 4
+        }
     };
 
     std::string sensor_2_expression = "({x} - 8 * {var_d}) / {f}";
@@ -129,7 +128,8 @@ ZTEST(configuration_service, test_CborSensorsConfig_Save_config_successfully_sav
         .configuration = configuration_config_2
     };
 
-    CborSensorsConfig sensors_config = { sensor_config_1, sensor_config_2 };
+    CborSensorsConfig sensors_config;
+    sensors_config.CborSensorConfig_m = { sensor_config_1, sensor_config_2 };
 
     DtFs::InitInternalFs();
     auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
@@ -187,8 +187,7 @@ ZTEST(configuration_service, test_CborSensorsConfig_Load_config_successfully_sav
             { 1.1, 2.1 },
             { 1.2, 2.2 },
             { 1.3, 2.3 }
-        },
-        .float32float_count = 4
+        }
     };
 
     std::string sensor_2_expression = "({x} - 8 * {var_d}) / {f}";
@@ -213,8 +212,7 @@ ZTEST(configuration_service, test_CborSensorsConfig_Load_config_successfully_sav
 
     // Create sensors config with both sensors
     CborSensorsConfig sensors_config = {
-        .CborSensorConfig_m = { sensor_config_1, sensor_config_2 },
-        .CborSensorConfig_m_count = 2
+        .CborSensorConfig_m = { sensor_config_1, sensor_config_2 }
     };
 
     // Initialize services
@@ -233,7 +231,7 @@ ZTEST(configuration_service, test_CborSensorsConfig_Load_config_successfully_sav
     zassert_true(loaded_config.has_value());
 
     auto loaded_sensors_config = std::move(loaded_config.value().config);
-    zassert_equal(loaded_sensors_config->CborSensorConfig_m_count, 2);
+    zassert_equal(loaded_sensors_config->CborSensorConfig_m.size(), 2);
 
     // Verify first sensor
     zassert_str_equal(CborHelpers::ToStdString(loaded_sensors_config->CborSensorConfig_m[0].id).c_str(), sensor_1_id.c_str());
@@ -262,7 +260,7 @@ ZTEST(configuration_service, test_CborSensorsConfig_Load_config_successfully_sav
     zassert_true(loaded_sensors_config->CborSensorConfig_m[1].configuration.channel_present);
     zassert_equal(loaded_sensors_config->CborSensorConfig_m[1].configuration.sampling_rate_ms, 250);
     zassert_true(loaded_sensors_config->CborSensorConfig_m[1].configuration.calibration_table_present);
-    zassert_equal(loaded_sensors_config->CborSensorConfig_m[1].configuration.calibration_table.float32float_count, 4);
+    zassert_equal(loaded_sensors_config->CborSensorConfig_m[1].configuration.calibration_table.float32float.size(), 4);
     zassert_equal(loaded_sensors_config->CborSensorConfig_m[1].configuration.calibration_table.float32float[0].float32float_key, 1.0);
     zassert_equal(loaded_sensors_config->CborSensorConfig_m[1].configuration.calibration_table.float32float[0].float32float, 2.0);
     zassert_between_inclusive(loaded_sensors_config->CborSensorConfig_m[1].configuration.calibration_table.float32float[1].float32float_key, 1.09, 1.11);

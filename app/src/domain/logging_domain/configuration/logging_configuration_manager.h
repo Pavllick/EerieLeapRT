@@ -6,15 +6,15 @@
 #include "configuration/cbor/cbor_logging_config/cbor_logging_config.h"
 #include "configuration/services/cbor_configuration_service.h"
 #include "configuration/services/json_configuration_service.h"
-#include "domain/logging_domain/utilities/parsers/logging_configuration_cbor_parser.h"
-#include "domain/logging_domain/utilities/parsers/logging_configuration_json_parser.h"
+#include "domain/logging_domain/configuration/utilities/parsers/logging_configuration_cbor_parser.h"
+#include "domain/logging_domain/configuration/utilities/parsers/logging_configuration_json_parser.h"
 #include "domain/logging_domain/models/logging_configuration.h"
 
 namespace eerie_leap::domain::logging_domain::configuration {
 
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::configuration::services;
-using namespace eerie_leap::domain::logging_domain::utilities::parsers;
+using namespace eerie_leap::domain::logging_domain::configuration::utilities::parsers;
 using namespace eerie_leap::domain::logging_domain::models;
 
 class LoggingConfigurationManager {

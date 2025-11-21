@@ -124,6 +124,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
     auto math_parser_service = std::make_shared<MathParserService>();
     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
         math_parser_service,
+        nullptr,
         std::move(cbor_sensors_configuration_service),
         std::move(json_sensors_configuration_service),
         16,
@@ -176,6 +177,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
     auto math_parser_service = std::make_shared<MathParserService>();
     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
         math_parser_service,
+        nullptr,
         std::move(cbor_sensors_configuration_service),
         std::move(json_sensors_configuration_service),
         16,
@@ -189,6 +191,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
     sensors_configuration_manager = nullptr;
     sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
         math_parser_service,
+        nullptr,
         std::move(cbor_sensors_configuration_service),
         std::move(json_sensors_configuration_service),
         16,
@@ -238,6 +241,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
     auto math_parser_service = std::make_shared<MathParserService>();
     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
         math_parser_service,
+        nullptr,
         std::move(cbor_sensors_configuration_service),
         std::move(json_sensors_configuration_service),
         16,
@@ -307,6 +311,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
     auto math_parser_service = std::make_shared<MathParserService>();
     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
         math_parser_service,
+        nullptr,
         std::move(cbor_sensors_configuration_service),
         std::move(json_sensors_configuration_service),
         16,

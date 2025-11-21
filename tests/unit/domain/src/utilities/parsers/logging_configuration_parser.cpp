@@ -1,9 +1,9 @@
 #include <zephyr/ztest.h>
 
-#include "domain/logging_domain/utilities/parsers/logging_configuration_cbor_parser.h"
-#include "domain/logging_domain/utilities/parsers/logging_configuration_json_parser.h"
+#include "domain/logging_domain/configuration/utilities/parsers/logging_configuration_cbor_parser.h"
+#include "domain/logging_domain/configuration/utilities/parsers/logging_configuration_json_parser.h"
 
-using namespace eerie_leap::domain::logging_domain::utilities::parsers;
+using namespace eerie_leap::domain::logging_domain::configuration::utilities::parsers;
 
 ZTEST_SUITE(logging_configuration_parser, NULL, NULL, NULL, NULL, NULL);
 

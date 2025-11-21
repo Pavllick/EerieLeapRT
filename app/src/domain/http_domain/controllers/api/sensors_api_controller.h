@@ -9,7 +9,7 @@
 #include "utilities/memory/heap_allocator.h"
 #include "configuration/json/configs/json_sensors_config.h"
 #include "configuration/json/json_serializer.h"
-#include "domain/sensor_domain/utilities/parsers/sensors_json_parser.h"
+#include "domain/sensor_domain/configuration/utilities/parsers/sensors_json_parser.h"
 #include "domain/sensor_domain/configuration/sensors_configuration_manager.h"
 #include "domain/sensor_domain/services/processing_scheduler_service.h"
 
@@ -19,7 +19,7 @@ using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::configuration::json::configs;
 using namespace eerie_leap::configuration::json;
 
-using namespace eerie_leap::domain::sensor_domain::utilities::parsers;
+using namespace eerie_leap::domain::sensor_domain::configuration::utilities::parsers;
 using namespace eerie_leap::domain::sensor_domain::configuration;
 using namespace eerie_leap::domain::sensor_domain::services;
 

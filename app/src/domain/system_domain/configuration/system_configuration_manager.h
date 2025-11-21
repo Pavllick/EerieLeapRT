@@ -7,8 +7,8 @@
 #include "configuration/json/configs/json_system_config.h"
 #include "configuration/services/cbor_configuration_service.h"
 #include "configuration/services/json_configuration_service.h"
-#include "domain/system_domain/utilities/parsers/system_configuration_cbor_parser.h"
-#include "domain/system_domain/utilities/parsers/system_configuration_json_parser.h"
+#include "domain/system_domain/configuration/utilities/parsers/system_configuration_cbor_parser.h"
+#include "domain/system_domain/configuration/utilities/parsers/system_configuration_json_parser.h"
 #include "domain/system_domain/models/system_configuration.h"
 
 namespace eerie_leap::domain::system_domain::configuration {
@@ -16,7 +16,7 @@ namespace eerie_leap::domain::system_domain::configuration {
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::configuration::json::configs;
 using namespace eerie_leap::configuration::services;
-using namespace eerie_leap::domain::system_domain::utilities::parsers;
+using namespace eerie_leap::domain::system_domain::configuration::utilities::parsers;
 using namespace eerie_leap::domain::system_domain::models;
 
 class SystemConfigurationManager {

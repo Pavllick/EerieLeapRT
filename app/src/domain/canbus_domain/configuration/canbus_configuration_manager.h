@@ -8,8 +8,8 @@
 #include "configuration/services/cbor_configuration_service.h"
 #include "configuration/services/json_configuration_service.h"
 #include "subsys/fs/services/i_fs_service.h"
-#include "domain/canbus_domain/utilities/parsers/canbus_configuration_cbor_parser.h"
-#include "domain/canbus_domain/utilities/parsers/canbus_configuration_json_parser.h"
+#include "domain/canbus_domain/configuration/utilities/parsers/canbus_configuration_cbor_parser.h"
+#include "domain/canbus_domain/configuration/utilities/parsers/canbus_configuration_json_parser.h"
 #include "domain/canbus_domain/models/canbus_configuration.h"
 
 namespace eerie_leap::domain::canbus_domain::configuration {
@@ -18,7 +18,7 @@ using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::configuration::json::configs;
 using namespace eerie_leap::configuration::services;
 using namespace eerie_leap::subsys::fs::services;
-using namespace eerie_leap::domain::canbus_domain::utilities::parsers;
+using namespace eerie_leap::domain::canbus_domain::configuration::utilities::parsers;
 using namespace eerie_leap::domain::canbus_domain::models;
 
 class CanbusConfigurationManager {
