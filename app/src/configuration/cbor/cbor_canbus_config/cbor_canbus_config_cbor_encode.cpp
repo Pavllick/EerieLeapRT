@@ -25,8 +25,9 @@ static bool encode_CborCanMessageConfig(
 {
 	zcbor_log("%s\r\n", __func__);
 
-	bool res = (((zcbor_list_start_encode(state, 2) && ((((zcbor_uint32_encode(state, (&(*input).frame_id))))
-	&& ((zcbor_uint32_encode(state, (&(*input).send_interval_ms))))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 2))));
+	bool res = (((zcbor_list_start_encode(state, 3) && ((((zcbor_uint32_encode(state, (&(*input).frame_id))))
+	&& ((zcbor_uint32_encode(state, (&(*input).send_interval_ms))))
+	&& ((zcbor_tstr_encode(state, (&(*input).script_path))))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 3))));
 
 	log_result(state, res, __func__);
 	return res;
@@ -43,7 +44,6 @@ static bool encode_CborCanChannelConfig(
 	&& ((zcbor_uint32_encode(state, (&(*input).bus_channel))))
 	&& ((zcbor_uint32_encode(state, (&(*input).bitrate))))
 	&& ((zcbor_tstr_encode(state, (&(*input).dbc_file_path))))
-	&& ((zcbor_tstr_encode(state, (&(*input).script_path))))
 	&& ((zcbor_list_start_encode(state, CborCanMessageConfig_m_count) && ((zcbor_multi_encode_minmax(0, CborCanMessageConfig_m_count, &CborCanMessageConfig_m_count, (zcbor_encoder_t *)encode_CborCanMessageConfig, state, input->CborCanMessageConfig_m.data(), sizeof(struct CborCanMessageConfig))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, CborCanMessageConfig_m_count)))) || (zcbor_list_map_end_force_encode(state), false)) && zcbor_list_end_encode(state, 4))));
 
 	log_result(state, res, __func__);

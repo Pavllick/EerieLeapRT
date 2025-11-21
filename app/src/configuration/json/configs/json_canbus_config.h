@@ -12,6 +12,7 @@ namespace json = boost::json;
 struct JsonCanMessageConfig {
     uint32_t frame_id;
     uint32_t send_interval_ms;
+    std::string script_path;
 };
 
 struct JsonCanChannelConfig {
@@ -19,7 +20,6 @@ struct JsonCanChannelConfig {
     uint32_t bus_channel;
     uint32_t bitrate;
     std::string dbc_file_path;
-    std::string script_path;
     std::vector<JsonCanMessageConfig> message_configs;
 };
 
@@ -30,15 +30,17 @@ struct JsonCanbusConfig {
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonCanMessageConfig const& config) {
     jv = {
         {NAMEOF_MEMBER(&JsonCanMessageConfig::frame_id), config.frame_id},
-        {NAMEOF_MEMBER(&JsonCanMessageConfig::send_interval_ms), config.send_interval_ms}
+        {NAMEOF_MEMBER(&JsonCanMessageConfig::send_interval_ms), config.send_interval_ms},
+        {NAMEOF_MEMBER(&JsonCanMessageConfig::script_path), config.script_path}
     };
 }
 
 static JsonCanMessageConfig tag_invoke(json::value_to_tag<JsonCanMessageConfig>, json::value const& jv) {
     json::object const& obj = jv.as_object();
-    return JsonCanMessageConfig{
+    return {
         .frame_id = json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonCanMessageConfig::frame_id).c_str())),
-        .send_interval_ms = json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonCanMessageConfig::send_interval_ms).c_str()))
+        .send_interval_ms = json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonCanMessageConfig::send_interval_ms).c_str())),
+        .script_path = json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonCanMessageConfig::script_path).c_str()))
     };
 }
 
@@ -48,19 +50,17 @@ static void tag_invoke(json::value_from_tag, json::value& jv, JsonCanChannelConf
         {NAMEOF_MEMBER(&JsonCanChannelConfig::bus_channel), config.bus_channel},
         {NAMEOF_MEMBER(&JsonCanChannelConfig::bitrate), config.bitrate},
         {NAMEOF_MEMBER(&JsonCanChannelConfig::dbc_file_path), config.dbc_file_path},
-        {NAMEOF_MEMBER(&JsonCanChannelConfig::script_path), config.script_path},
         {NAMEOF_MEMBER(&JsonCanChannelConfig::message_configs), json::value_from(config.message_configs)}
     };
 }
 
 static JsonCanChannelConfig tag_invoke(json::value_to_tag<JsonCanChannelConfig>, json::value const& jv) {
     json::object const& obj = jv.as_object();
-    return JsonCanChannelConfig{
+    return {
         .type = json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonCanChannelConfig::type).c_str())),
         .bus_channel = json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonCanChannelConfig::bus_channel).c_str())),
         .bitrate = json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonCanChannelConfig::bitrate).c_str())),
         .dbc_file_path = json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonCanChannelConfig::dbc_file_path).c_str())),
-        .script_path = json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonCanChannelConfig::script_path).c_str())),
         .message_configs = json::value_to<std::vector<JsonCanMessageConfig>>(obj.at(NAMEOF_MEMBER(&JsonCanChannelConfig::message_configs).c_str()))
     };
 }
@@ -73,8 +73,8 @@ static void tag_invoke(json::value_from_tag, json::value& jv, JsonCanbusConfig c
 
 static JsonCanbusConfig tag_invoke(json::value_to_tag<JsonCanbusConfig>, json::value const& jv) {
     json::object const& obj = jv.as_object();
-    return JsonCanbusConfig{
-        json::value_to<std::vector<JsonCanChannelConfig>>(obj.at(NAMEOF_MEMBER(&JsonCanbusConfig::channel_configs).c_str()))
+    return {
+        .channel_configs = json::value_to<std::vector<JsonCanChannelConfig>>(obj.at(NAMEOF_MEMBER(&JsonCanbusConfig::channel_configs).c_str()))
     };
 }
 

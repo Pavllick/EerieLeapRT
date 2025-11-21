@@ -30,7 +30,8 @@ static bool decode_CborCanMessageConfig(
 	zcbor_log("%s\r\n", __func__);
 
 	bool res = (((zcbor_list_start_decode(state) && ((((zcbor_uint32_decode(state, (&(*result).frame_id))))
-	&& ((zcbor_uint32_decode(state, (&(*result).send_interval_ms))))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
+	&& ((zcbor_uint32_decode(state, (&(*result).send_interval_ms))))
+	&& ((zcbor_tstr_decode(state, (&(*result).script_path))))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
 
 	log_result(state, res, __func__);
 	return res;
@@ -61,11 +62,6 @@ static bool decode_CborCanChannelConfig(
     }
 
     if (!zcbor_tstr_decode(state, &result->dbc_file_path)) {
-        zcbor_list_end_decode(state);
-        return false;
-    }
-
-    if (!zcbor_tstr_decode(state, &result->script_path)) {
         zcbor_list_end_decode(state);
         return false;
     }

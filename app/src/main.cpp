@@ -372,6 +372,11 @@ void SetupCanbusConfiguration(std::shared_ptr<CanbusConfigurationManager> canbus
             {
                 .frame_id = 809,
                 .send_interval_ms = 10,
+            },
+            {
+                .frame_id = 1087,
+                .send_interval_ms = 10,
+                .script_path = "scripts/e46_smg_gear.lua",
             }
         }
     };

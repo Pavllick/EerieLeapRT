@@ -7,6 +7,14 @@
 
 namespace eerie_leap::domain::sensor_domain::processors {
 
+// NOTE: calls lua function named according to function_name_ argument
+// with reading string sensor id as argument
+// and returns float reading value
+//
+// function process_reading(sensor_id)
+//     return 8.1234
+// end
+
 class ScriptProcessor : public IReadingProcessor {
 private:
     std::string function_name_;

@@ -180,7 +180,7 @@ void ProcessingSchedulerService::Resume() {
     StartTasks();
 }
 
-void ProcessingSchedulerService::InitializeLuaScript(std::shared_ptr<Sensor> sensor) {
+void ProcessingSchedulerService::InitializeScript(std::shared_ptr<Sensor> sensor) {
     auto lua_script = sensor->configuration.lua_script;
 
     if(lua_script == nullptr)

@@ -5,10 +5,14 @@
 
 #include <zephyr/kernel.h>
 
+#include "domain/canbus_domain/can_frame_builders/can_frame_dbc_builder.h"
+#include "domain/canbus_domain/models/can_channel_configuration.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 #include "domain/canbus_domain/configuration/canbus_configuration_manager.h"
 #include "domain/canbus_domain/models/can_message_configuration.h"
 #include "domain/canbus_domain/services/canbus_service.h"
+#include "domain/canbus_domain/can_frame_builders/can_frame_dbc_builder.h"
+#include "domain/canbus_domain/processors/i_can_frame_processor.h"
 
 #include "canbus_task.hpp"
 
@@ -16,13 +20,15 @@ namespace eerie_leap::domain::canbus_domain::services {
 
 using namespace eerie_leap::domain::sensor_domain::utilities;
 using namespace eerie_leap::domain::canbus_domain::configuration;
+using namespace eerie_leap::domain::canbus_domain::can_frame_builders;
+using namespace eerie_leap::domain::canbus_domain::processors;
 
 class CanbusSchedulerService {
 private:
     k_sem processing_semaphore_;
     static constexpr k_timeout_t PROCESSING_TIMEOUT = K_MSEC(200);
 
-    static constexpr int k_stack_size_ = 1024;
+    static constexpr int k_stack_size_ = 8192;
     static constexpr int k_priority_ = K_PRIO_PREEMPT(6);
 
     k_thread_stack_t* stack_area_;
@@ -33,10 +39,14 @@ private:
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame_;
 
     std::vector<std::shared_ptr<CanbusTask>> tasks_;
+    std::shared_ptr<CanFrameDbcBuilder> can_frame_dbc_builder_;
+    std::shared_ptr<std::vector<std::shared_ptr<ICanFrameProcessor>>> can_frame_processors_;
 
     void StartTasks();
-    std::shared_ptr<CanbusTask> CreateTask(uint8_t bus_channel, std::shared_ptr<Dbc> dbc, const CanMessageConfiguration& message_configuration);
+    std::shared_ptr<CanbusTask> CreateTask(uint8_t bus_channel, const CanMessageConfiguration& message_configuration);
     static void ProcessCanbusWorkTask(k_work* work);
+
+    void InitializeScript(const CanMessageConfiguration& message_configuration);
 
 public:
     CanbusSchedulerService(

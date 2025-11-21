@@ -19,8 +19,11 @@ private:
     static int sleep_ms_func(lua_State *state);
     static int print_func(lua_State *state);
 
-    static const std::vector<luaL_Reg> static_global_functions_;
+    static const luaL_Reg lua_std_libs_[];
+    static const luaL_Reg static_global_functions_[];
     std::unordered_map<std::string, lua_CFunction> global_functions_;
+
+    void OpenLuaStdLibs(lua_State *L);
 
 public:
     LuaScript();
