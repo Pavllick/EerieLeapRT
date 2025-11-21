@@ -1,29 +1,74 @@
-# Eerie Leap Real-Time
+# EerieLeap Real-Time
 
-EerieLeap is an open-source sensor monitoring system built with [Zephyr RTOS](https://github.com/zephyrproject-rtos/zephyr). It provides a robust platform for reading, processing, and managing sensor data, supporting both physical ADC sensors and virtual calculated sensors.
+EerieLeap is an open-source sensor monitoring system built with [Zephyr RTOS](https://github.com/zephyrproject-rtos/zephyr). It provides a robust platform for reading, processing, and managing sensor data, supporting digital, analog, and CAN Bus data inputs.
+
+## Project Structure
+
+The project aims to be hardware agnostic, taking advantage of Zephyr's Linux-like device tree system used to describe hardware configuration. This allows the same codebase to be used across different hardware platforms, extending or narrowing capabilities as needed—such as defining the number of digital inputs or available ADCs according to the hardware platform, and enabling SD MMC storage or CAN Bus interfaces.
+
+The codebase is designed with a high level of separation of concerns in mind. Key components are:
+
+- `app/src` - main application source code
+    - `app/src/configuration` - JSON and CBOR device configuration related services and schemas
+    - `app/src/controllers` - interfaces for device control and data access
+    - `app/src/domain` - business logic layer
+    - `app/src/subsys` - independent subsystems and adapters
+    - `app/src/utilities` - utility functions and classes
+    - `app/src/views` - UI for optionally supported display
+- `app/boards` - board-specific configuration
+- `app/libs` - external libraries
+- `boards` - custom board definitions
+- `tests` - functional and unit tests
+- `modules` - external Zephyr modules
+
+### Configuration
+
+The configuration system employs two separate subsystems: JSON and CBOR. JSON is used for user-supplied device configuration. CBOR is used for internal configuration management, as the binary format is more compact and faster to manipulate.
+
+[Boost.JSON](https://www.boost.org/doc/libs/latest/libs/json/doc/html/index.html) is used for JSON parsing and serialization.
+
+[zcbor](https://github.com/NordicSemiconductor/zcbor) is used for CBOR parsing and serialization. The **zcbor** library provides helper methods to set up serializers and deserializers, and helper scripts can be used to generate them. The project's main CMake file contains helper scripts to generate CBOR serializers and deserializers. However, since the generated code doesn't support the C++ features this project requires, the current implementation uses the generated helper methods only as reference for defining C++ feature-rich versions.
+
+### Subsystems
+
+With seldom exceptions, the core codebase does not rely on third-party library APIs. Instead, it provides its own abstractions and interfaces, typically defined in the `app/src/subsys` directory.
+
+### Domain
+
+The domain layer is responsible for business logic and data processing. It is located in the `app/src/domain` directory. Two main components are **ProcessingSchedulerService** and **CanbusSchedulerService**.
+
+**ProcessingSchedulerService** is responsible for collection and processing of sensor data. It is located in `app/src/domain/sensor_domain/services` directory.
+
+**CanbusSchedulerService** is responsible for collection and processing of CAN Bus data. It is located in `app/src/domain/canbus_domain/services` directory.
+
+Another key domain component is **LogWriterService**, located in `app/src/domain/logging_domain/services` directory. It is responsible for logging sensor data to a file. The main log file format currently used is [ASAM MDF](https://www.asam.net/standards/detail/mdf/) version 4. Logging format-specific implementations are located in `app/src/domain/logging_domain/loggers` directory.
+
+### Configuration Managers
+
+The domain layer includes **Configuration Managers**, components responsible for loading, saving, and configuring the corresponding domain components. Configuration manager implementations are located in `app/src/domain/domain_component/configuration` directory.
 
 ## Getting Started
 
-Project uses submodules for external dependencies. To initialize submodules, run:
+The project uses submodules for external dependencies. To initialize submodules, run:
 ```shell
 git submodule update --init --recursive
 ```
 
-Development environment is based on [Docker](https://www.docker.com/). Use `example.docker-compose.yml` as an example. Rename to `docker-compose.yml` to use it.
+The development environment is based on [Docker](https://www.docker.com/). Use `example.docker-compose.yml` as an example. Rename it to `docker-compose.yml` to use it.
 
 ### Hardware Access From Container
 
-By default, the container will be run with `privileged` mode enabled and `pid` mode set to `host`, to allow access to devices connected to the host. Device have to be connected to the host before running the container.
+By default, the container will run with `privileged` mode enabled and `pid` mode set to `host` to allow access to devices connected to the host. Devices must be connected to the host before running the container.
 
-If using Docker for Windows with Docker using WSL2 engine, make sure to attach device to WSL container. It can be done with help of [usbipd-win](https://github.com/dorssel/usbipd-win) tool. Example:
+If using Docker for Windows with Docker using the WSL2 engine, make sure to attach the device to the WSL container. This can be done with the help of the [usbipd-win](https://github.com/dorssel/usbipd-win) tool. Example:
 
 ```shell
 usbipd attach --wsl --busid <busid>
 ```
 
-Where `<busid>` is the bus id of the device that can be found with `usbipd list` command.
+Where `<busid>` is the bus ID of the device, which can be found with the `usbipd list` command.
 
-Connected device should be visible in the container as `/dev/ttyACM0`. Test presence of the device in the container with `ls /dev/ttyACM0` command.
+The connected device should be visible in the container as `/dev/ttyACM0`. Test the presence of the device in the container with the `ls /dev/ttyACM0` command.
 
 ### Building
 
@@ -37,11 +82,11 @@ where `$BOARD` is the target board.
 
 Currently, the following boards are supported:
 
-#### Simulated boards:
+#### Simulated Boards:
 - `native_sim`
 - `qemu_cortex_m3`
 
-#### SoC boards:
+#### SoC Boards:
 - `esp32s3_devkitc_procpu`
 
 ### Running and Debugging in a Simulator
@@ -78,7 +123,6 @@ west build -p auto -b native_sim ./app
 
 </details>
 
-
 <details>
 <summary>
     QEMU Cortex M3
@@ -92,7 +136,6 @@ west build -p auto -b qemu_cortex_m3 ./app
 ```
 
 </details>
-
 
 <details>
 <summary>
@@ -118,9 +161,9 @@ west espressif monitor
 
 **Debugging**
 
-Debugging works to some extent <a href="https://github.com/Marus/cortex-debug">Cortex-Debug</a> extension for <a href="https://marketplace.visualstudio.com/items?itemName=marus25.cortex-debug">VS Code</a> can be used for that purpose, config example set up for Docker container can be found in [.vscode_example/launch.json](.vscode_example/launch.json).
+Debugging works to some extent. The <a href="https://github.com/Marus/cortex-debug">Cortex-Debug</a> extension for <a href="https://marketplace.visualstudio.com/items?itemName=marus25.cortex-debug">VS Code</a> can be used for this purpose. A config example set up for a Docker container can be found in [.vscode_example/launch.json](.vscode_example/launch.json).
 
-For manual GDB run use ether `west debug` or run OpenOCD in one terminal:
+For manual GDB, run either `west debug` or run OpenOCD in one terminal:
 ```shell
 /home/ubuntu/zephyr/workspace/utilities/openocd-esp32/bin/openocd \
 -f /home/ubuntu/zephyr/workspace/utilities/openocd-esp32/share/openocd/scripts/board/esp32s3-builtin.cfg \
@@ -136,7 +179,8 @@ And GDB in another:
 /home/ubuntu/zephyr-sdk-0.17.4/xtensa-espressif_esp32s3_zephyr-elf/bin/xtensa-espressif_esp32s3_zephyr-elf-gdb \
 -ex 'target extended-remote :3333' \
 -ex 'symbol-file build/zephyr/zephyr.elf' \
--ex 'mon reset halt'   -ex 'maintenance flush register-cache' \
+-ex 'mon reset halt' \
+-ex 'maintenance flush register-cache' \
 -ex 'break main' \
 -ex 'continue'
 ```
@@ -150,25 +194,24 @@ And GDB in another:
 </summary>
 <br>
 
-**Required tools**
+**Required Tools**
 
-STM32CubeProgrammer needs to be installed on the host machine. If using Docker, you can take an advantate of build script expecting to find STM32CubeCLT in `tools/st-stm32cubeclt_1.19.0.sh`, source the tool from [STM Website](https://www.st.com/en/development-tools/stm32cubeclt.html) and unpack it to `tools/st-stm32cubeclt_1.19.0.sh`. Dockerfile will take care of installing it during build process.
+STM32CubeProgrammer needs to be installed on the host machine. If using Docker, you can take advantage of the build script expecting to find STM32CubeCLT in `tools/st-stm32cubeclt_1.19.0.sh`. Source the tool from the [ST Website](https://www.st.com/en/development-tools/stm32cubeclt.html) and unpack it to `tools/st-stm32cubeclt_1.19.0.sh`. The Dockerfile will take care of installing it during the build process.
 
-**Build**  
+**Build:**  
 ```shell
 west build -p auto -b mcudev_devebox_stm32h743_hw_20 ./app
 ```
 
-**Debug**
+**Debug:**
 
-<a href="https://github.com/Marus/cortex-debug">Cortex-Debug</a> extension for <a href="https://marketplace.visualstudio.com/items?itemName=marus25.cortex-debug">VS Code</a> can be used for debugging, example configuration valid for Docker container in combination with ST-Link connected over SWD can be found in `.vscode_example/launch.json`.
-
+The <a href="https://github.com/Marus/cortex-debug">Cortex-Debug</a> extension for <a href="https://marketplace.visualstudio.com/items?itemName=marus25.cortex-debug">VS Code</a> can be used for debugging. An example configuration valid for a Docker container in combination with ST-Link connected over SWD can be found in `.vscode_example/launch.json`.
 
 </details>
 
 ## Development
 
-### Required tools
+### Required Tools
 
 #### CBOR Schemas
 
@@ -186,24 +229,26 @@ The project uses [html-minifier-terser](https://github.com/terser/html-minifier-
 npm install -g html-minifier-terser
 ```
 
-### Generating CBOR helpers
+### Generating CBOR Helpers
 
-Use CBOR Serializer helpers in the core CMakeLists.txt file to generate CBOR helpers for the configuration schemas.
-Uncomment corresponding line in order to generate base set of serialization classes. Files will appear in the `src/configuration/cbor/generated` directory. Finalazed files expected to be placed in `src/configuration/cbor/<base_name>` directory.
+Use CBOR Serializer helpers in the core CMakeLists.txt file to generate CBOR helpers for the configuration schemas. Uncomment the corresponding line to generate the base set of serialization classes. Files will appear in the `src/configuration/cbor/generated` directory. Finalized files are expected to be placed in the `src/configuration/cbor/<base_name>` directory.
 
 ### Network
 
 #### ESP32S3 DevKitC v1.3
 
-To access web interface, connect to the WiFi network with SSID `EerieLeap` and use address `192.168.4.1:8080` in the browser.
+To access the web interface, connect to the WiFi network with SSID `EerieLeap` and use the address `192.168.4.1:8080` in your browser.
 
 #### NativeSim
 
-In order to access web interface while running in the simulator, follow the instructions in the [Networking with native_sim board](https://docs.zephyrproject.org/latest/connectivity/networking/native_sim_setup.html) documentation. Run `./net-setup.sh up` script first, then start the simulator, in Docker container `net-tools` can be found in `~/zephyr/net-tools` directory. In order to gain access to the web interface, port needs to be forwarded from the loopback interface to the TAP IP, `socat` tool can be used for this purpose. Run the following command:
+To access the web interface while running in the simulator, follow the instructions in the [Networking with native_sim board](https://docs.zephyrproject.org/latest/connectivity/networking/native_sim_setup.html) documentation. Run the `./net-setup.sh up` script first, then start the simulator. In a Docker container, `net-tools` can be found in `~/zephyr/net-tools` directory. 
+
+To gain access to the web interface, the port needs to be forwarded from the loopback interface to the TAP IP. The `socat` tool can be used for this purpose. Run the following command:
 
 ```shell
 socat TCP-LISTEN:8080,fork TCP:192.0.2.1:8080
 ```
 
 where `192.0.2.1` is the TAP IP address.
+
 Once the port is forwarded, the web interface can be accessed at `http://localhost:8080`.
