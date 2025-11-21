@@ -22,9 +22,11 @@ if(NOT EXISTS "${CMAKE_SOURCE_DIR}/../modules/boost/b2")
         message(FATAL_ERROR "Failed to build Boost headers and tools")
     endif()
 
+    file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/libs/boost)
+
     message(STATUS "Extracting Boost.Spirit.X3, Boost.Fusion and Boost.JSON headers...")
     execute_process(
-        COMMAND ${CMAKE_SOURCE_DIR}/../modules/boost/dist/bin/bcp boost/spirit boost/fusion boost/json ${CMAKE_SOURCE_DIR}/include/boost
+        COMMAND ${CMAKE_SOURCE_DIR}/../modules/boost/dist/bin/bcp boost/spirit boost/fusion boost/json ${CMAKE_SOURCE_DIR}/libs/boost
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/../modules/boost
         RESULT_VARIABLE BCP_RESULT
     )
@@ -148,13 +150,20 @@ file(GLOB_RECURSE APP_SOURCES
   src/*.c
 )
 
+add_subdirectory(libs/dbcppp)
+add_subdirectory(libs/muparser)
+add_subdirectory(libs/nameof)
+
+target_link_libraries(app PRIVATE
+    dbcppp
+    muparser
+    nameof
+)
+
 # Include headers
 target_include_directories(app PRIVATE
-  include/boost
   src
-  src/libs/muparser/include
-  src/libs/dbcppp/include
-  src/libs/nameof/include
+  libs/boost
 )
 
 # Add sources to the app target
