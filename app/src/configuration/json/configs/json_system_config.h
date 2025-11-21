@@ -29,8 +29,8 @@ static void tag_invoke(json::value_from_tag, json::value& jv, JsonComUserConfig 
 static JsonComUserConfig tag_invoke(json::value_to_tag<JsonComUserConfig>, json::value const& jv) {
     json::object const& obj = jv.as_object();
     return JsonComUserConfig{
-        json::value_to<uint64_t>(obj.at(NAMEOF_MEMBER(&JsonComUserConfig::device_id).c_str())),
-        json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonComUserConfig::server_id).c_str()))
+        .device_id = json::value_to<uint64_t>(obj.at(NAMEOF_MEMBER(&JsonComUserConfig::device_id).c_str())),
+        .server_id = json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonComUserConfig::server_id).c_str()))
     };
 }
 
@@ -44,8 +44,8 @@ static void tag_invoke(json::value_from_tag, json::value& jv, JsonSystemConfig c
 static JsonSystemConfig tag_invoke(json::value_to_tag<JsonSystemConfig>, json::value const& jv) {
     json::object const& obj = jv.as_object();
     return JsonSystemConfig{
-        json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonSystemConfig::com_user_refresh_rate_ms).c_str())),
-        json::value_to<std::vector<JsonComUserConfig>>(obj.at(NAMEOF_MEMBER(&JsonSystemConfig::com_user_configs).c_str()))
+        .com_user_refresh_rate_ms = json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonSystemConfig::com_user_refresh_rate_ms).c_str())),
+        .com_user_configs = json::value_to<std::vector<JsonComUserConfig>>(obj.at(NAMEOF_MEMBER(&JsonSystemConfig::com_user_configs).c_str()))
     };
 }
 

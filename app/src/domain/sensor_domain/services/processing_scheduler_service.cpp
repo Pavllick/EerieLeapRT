@@ -1,8 +1,11 @@
-#include "lua.h"
+#include <span>
+
 #include "utilities/memory/heap_allocator.h"
 #include "subsys/time/time_helpers.hpp"
+#include "subsys/lua_script/lua_script.h"
 #include "domain/sensor_domain/processors/sensor_processor.h"
 #include "domain/sensor_domain/processors/script_processor.h"
+#include "domain/script_domain/utilities/global_fuctions_registry.h"
 
 #include "processing_scheduler_service.h"
 
@@ -10,7 +13,9 @@ namespace eerie_leap::domain::sensor_domain::services {
 
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::subsys::time;
+using namespace eerie_leap::subsys::lua_script;
 using namespace eerie_leap::domain::sensor_domain::models;
+using namespace eerie_leap::domain::script_domain::utilities;
 
 LOG_MODULE_REGISTER(processing_scheduler_logger);
 
@@ -23,9 +28,9 @@ ProcessingSchedulerService::ProcessingSchedulerService(
         sensor_reader_factory_(std::move(sensor_reader_factory)),
         reading_processors_(std::make_shared<std::vector<std::shared_ptr<IReadingProcessor>>>()) {
 
-    reading_processors_->push_back(make_shared_ext<ScriptProcessor>("pre_process_reading"));
+    reading_processors_->push_back(make_shared_ext<ScriptProcessor>("pre_process_sensor_value"));
     reading_processors_->push_back(make_shared_ext<SensorProcessor>(sensor_readings_frame_));
-    reading_processors_->push_back(make_shared_ext<ScriptProcessor>("post_process_reading"));
+    reading_processors_->push_back(make_shared_ext<ScriptProcessor>("post_process_sensor_value"));
 
     k_sem_init(&processing_semaphore_, 1, 1);
 };
@@ -56,15 +61,10 @@ void ProcessingSchedulerService::ProcessSensorWorkTask(k_work* work) {
 
     try {
         task->reader->Read();
-        if(task->sensor->configuration.lua_script != nullptr)
-            LuaProcessReading(task->sensor->configuration.lua_script->GetState(), "pre_process_reading", task->sensor->id);
         auto reading = task->readings_frame->GetReading(task->sensor->id_hash);
 
         for(auto processor : *task->reading_processors)
             processor->ProcessReading(reading);
-
-        if(task->sensor->configuration.lua_script != nullptr)
-            LuaProcessReading(task->sensor->configuration.lua_script->GetState(), "post_process_reading", task->sensor->id);
 
         LOG_DBG("Sensor Reading - ID: %s, Guid: %llu, Value: %.3f, Time: %s",
             task->sensor->id.c_str(),
@@ -80,7 +80,7 @@ void ProcessingSchedulerService::ProcessSensorWorkTask(k_work* work) {
 }
 
 std::shared_ptr<SensorTask> ProcessingSchedulerService::CreateSensorTask(std::shared_ptr<Sensor> sensor) {
-    InitializeLuaScript(sensor);
+    InitializeScript(sensor);
     auto reader = sensor_reader_factory_->Create(sensor);
 
     if(reader == nullptr)
@@ -186,59 +186,8 @@ void ProcessingSchedulerService::InitializeLuaScript(std::shared_ptr<Sensor> sen
     if(lua_script == nullptr)
         return;
 
-    lua_script->RegisterGlobalFunction(
-        "get_reading_value",
-        &ProcessingSchedulerService::LuaGetReadingValue,
-        sensor_readings_frame_.get());
-    lua_script->RegisterGlobalFunction(
-        "update_reading",
-        &ProcessingSchedulerService::LuaUpdateReading,
-        sensor_readings_frame_.get());
-}
-
-int ProcessingSchedulerService::LuaGetReadingValue(lua_State* state) {
-    if(lua_gettop(state) != 1)
-        return luaL_error(state, "Expected 1 argument");
-
-    auto* sensor_readings_frame =
-        static_cast<SensorReadingsFrame*>(lua_touserdata(state, lua_upvalueindex(1)));
-
-    const char* sensor_id = luaL_checkstring(state, 1);
-
-    if(!sensor_readings_frame->HasReading(sensor_id)) {
-        lua_pushnil(state);
-        return 1;
-    }
-
-    float result = sensor_readings_frame->GetReading(sensor_id)->value.value_or(0.0f);
-    lua_pushnumber(state, result);
-
-    return 1;
-}
-
-int ProcessingSchedulerService::LuaUpdateReading(lua_State* state) {
-    if(lua_gettop(state) != 2)
-        return luaL_error(state, "Expected 2 arguments");
-
-    auto* sensor_readings_frame =
-        static_cast<SensorReadingsFrame*>(lua_touserdata(state, lua_upvalueindex(1)));
-
-    const char* sensor_id = luaL_checkstring(state, 1);
-    float value = luaL_checknumber(state, 2);
-
-    if(!sensor_readings_frame->HasReading(sensor_id)) {
-        lua_pushboolean(state, false);
-        return 1;
-    }
-
-    auto reading = sensor_readings_frame->GetReading(sensor_id);
-    reading->value = value;
-
-    sensor_readings_frame->AddOrUpdateReading(reading);
-
-    lua_pushboolean(state, true);
-
-    return 1;
+    GlobalFunctionsRegistry::RegisterGetSensorValue(*lua_script, *sensor_readings_frame_);
+    GlobalFunctionsRegistry::RegisterUpdateSensorValue(*lua_script, *sensor_readings_frame_);
 }
 
 } // namespace eerie_leap::domain::sensor_domain::services

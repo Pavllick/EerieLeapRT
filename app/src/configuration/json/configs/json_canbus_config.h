@@ -19,6 +19,7 @@ struct JsonCanChannelConfig {
     uint32_t bus_channel;
     uint32_t bitrate;
     std::string dbc_file_path;
+    std::string script_path;
     std::vector<JsonCanMessageConfig> message_configs;
 };
 
@@ -36,8 +37,8 @@ static void tag_invoke(json::value_from_tag, json::value& jv, JsonCanMessageConf
 static JsonCanMessageConfig tag_invoke(json::value_to_tag<JsonCanMessageConfig>, json::value const& jv) {
     json::object const& obj = jv.as_object();
     return JsonCanMessageConfig{
-        json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonCanMessageConfig::frame_id).c_str())),
-        json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonCanMessageConfig::send_interval_ms).c_str()))
+        .frame_id = json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonCanMessageConfig::frame_id).c_str())),
+        .send_interval_ms = json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonCanMessageConfig::send_interval_ms).c_str()))
     };
 }
 
@@ -47,6 +48,7 @@ static void tag_invoke(json::value_from_tag, json::value& jv, JsonCanChannelConf
         {NAMEOF_MEMBER(&JsonCanChannelConfig::bus_channel), config.bus_channel},
         {NAMEOF_MEMBER(&JsonCanChannelConfig::bitrate), config.bitrate},
         {NAMEOF_MEMBER(&JsonCanChannelConfig::dbc_file_path), config.dbc_file_path},
+        {NAMEOF_MEMBER(&JsonCanChannelConfig::script_path), config.script_path},
         {NAMEOF_MEMBER(&JsonCanChannelConfig::message_configs), json::value_from(config.message_configs)}
     };
 }
@@ -54,11 +56,12 @@ static void tag_invoke(json::value_from_tag, json::value& jv, JsonCanChannelConf
 static JsonCanChannelConfig tag_invoke(json::value_to_tag<JsonCanChannelConfig>, json::value const& jv) {
     json::object const& obj = jv.as_object();
     return JsonCanChannelConfig{
-        json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonCanChannelConfig::type).c_str())),
-        json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonCanChannelConfig::bus_channel).c_str())),
-        json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonCanChannelConfig::bitrate).c_str())),
-        json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonCanChannelConfig::dbc_file_path).c_str())),
-        json::value_to<std::vector<JsonCanMessageConfig>>(obj.at(NAMEOF_MEMBER(&JsonCanChannelConfig::message_configs).c_str()))
+        .type = json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonCanChannelConfig::type).c_str())),
+        .bus_channel = json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonCanChannelConfig::bus_channel).c_str())),
+        .bitrate = json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonCanChannelConfig::bitrate).c_str())),
+        .dbc_file_path = json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonCanChannelConfig::dbc_file_path).c_str())),
+        .script_path = json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonCanChannelConfig::script_path).c_str())),
+        .message_configs = json::value_to<std::vector<JsonCanMessageConfig>>(obj.at(NAMEOF_MEMBER(&JsonCanChannelConfig::message_configs).c_str()))
     };
 }
 

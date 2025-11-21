@@ -34,10 +34,10 @@ static void tag_invoke(json::value_from_tag, json::value& jv, JsonSensorLoggingC
 static JsonSensorLoggingConfig tag_invoke(json::value_to_tag<JsonSensorLoggingConfig>, json::value const& jv) {
     json::object const& obj = jv.as_object();
     return JsonSensorLoggingConfig{
-        json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonSensorLoggingConfig::sensor_id_hash).c_str())),
-        json::value_to<bool>(obj.at(NAMEOF_MEMBER(&JsonSensorLoggingConfig::is_enabled).c_str())),
-        json::value_to<bool>(obj.at(NAMEOF_MEMBER(&JsonSensorLoggingConfig::log_raw_value).c_str())),
-        json::value_to<bool>(obj.at(NAMEOF_MEMBER(&JsonSensorLoggingConfig::log_only_new_data).c_str()))
+        .sensor_id_hash = json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonSensorLoggingConfig::sensor_id_hash).c_str())),
+        .is_enabled = json::value_to<bool>(obj.at(NAMEOF_MEMBER(&JsonSensorLoggingConfig::is_enabled).c_str())),
+        .log_raw_value = json::value_to<bool>(obj.at(NAMEOF_MEMBER(&JsonSensorLoggingConfig::log_raw_value).c_str())),
+        .log_only_new_data = json::value_to<bool>(obj.at(NAMEOF_MEMBER(&JsonSensorLoggingConfig::log_only_new_data).c_str()))
     };
 }
 
@@ -52,9 +52,9 @@ static void tag_invoke(json::value_from_tag, json::value& jv, JsonLoggingConfig 
 static JsonLoggingConfig tag_invoke(json::value_to_tag<JsonLoggingConfig>, json::value const& jv) {
     json::object const& obj = jv.as_object();
     return JsonLoggingConfig{
-        json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonLoggingConfig::logging_interval_ms).c_str())),
-        json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonLoggingConfig::max_log_size_mb).c_str())),
-        json::value_to<std::vector<JsonSensorLoggingConfig>>(obj.at(NAMEOF_MEMBER(&JsonLoggingConfig::sensor_configurations).c_str()))
+        .logging_interval_ms = json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonLoggingConfig::logging_interval_ms).c_str())),
+        .max_log_size_mb = json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonLoggingConfig::max_log_size_mb).c_str())),
+        .sensor_configurations = json::value_to<std::vector<JsonSensorLoggingConfig>>(obj.at(NAMEOF_MEMBER(&JsonLoggingConfig::sensor_configurations).c_str()))
     };
 }
 

@@ -36,7 +36,7 @@ void SensorReaderPhysicalAnalog::Read() {
     auto reading = make_shared_ext<SensorReading>(guid_generator_->Generate(), sensor_);
     reading->timestamp = time_service_->GetCurrentTime();
 
-    float voltage = (Rng::Get32() / static_cast<float>(UINT32_MAX)) * 3.3F;
+    float voltage = AdcChannelReader();
     float voltage_calibrated = adc_channel_configuration_->calibrator->InterpolateToCalibratedRange(voltage);
 
     reading->value = voltage_calibrated;

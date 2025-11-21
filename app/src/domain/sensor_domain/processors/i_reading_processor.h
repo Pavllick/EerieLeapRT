@@ -10,6 +10,8 @@ using namespace eerie_leap::domain::sensor_domain::models;
 
 class IReadingProcessor {
 public:
+    virtual ~IReadingProcessor() = default;
+
     virtual void ProcessReading(std::shared_ptr<SensorReading> reading) = 0;
 };
 

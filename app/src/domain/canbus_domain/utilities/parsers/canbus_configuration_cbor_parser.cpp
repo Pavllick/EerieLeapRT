@@ -9,6 +9,9 @@ namespace eerie_leap::domain::canbus_domain::utilities::parsers {
 
 using namespace eerie_leap::utilities::cbor;
 
+CanbusConfigurationCborParser::CanbusConfigurationCborParser(std::shared_ptr<IFsService> fs_service)
+    : fs_service_(std::move(fs_service)) {}
+
 ext_unique_ptr<CborCanbusConfig> CanbusConfigurationCborParser::Serialize(const CanbusConfiguration& configuration) {
     CanbusConfigurationValidator::Validate(configuration);
 
@@ -19,7 +22,8 @@ ext_unique_ptr<CborCanbusConfig> CanbusConfigurationCborParser::Serialize(const 
             .type = std::to_underlying(channel_configuration.type),
             .bus_channel = bus_channel,
             .bitrate = channel_configuration.bitrate,
-            .dbc_file_path = CborHelpers::ToZcborString(&channel_configuration.dbc_file_path)
+            .dbc_file_path = CborHelpers::ToZcborString(&channel_configuration.dbc_file_path),
+            .script_path = CborHelpers::ToZcborString(&channel_configuration.script_path)
         };
 
         for(const auto& message_configuration : channel_configuration.message_configurations) {
@@ -43,8 +47,27 @@ CanbusConfiguration CanbusConfigurationCborParser::Deserialize(const CborCanbusC
             .type = static_cast<CanbusType>(canbus_config.type),
             .bus_channel = static_cast<uint8_t>(canbus_config.bus_channel),
             .bitrate = canbus_config.bitrate,
-            .dbc_file_path = CborHelpers::ToStdString(canbus_config.dbc_file_path)
+            .dbc_file_path = CborHelpers::ToStdString(canbus_config.dbc_file_path),
+            .script_path = CborHelpers::ToStdString(canbus_config.script_path)
         };
+
+        if(fs_service_ != nullptr
+            && fs_service_->IsAvailable()
+            && !channel_configuration.script_path.empty()
+            && fs_service_->Exists(channel_configuration.script_path)) {
+
+            size_t script_size = fs_service_->GetFileSize(channel_configuration.script_path);
+
+            if(script_size != 0) {
+                ext_unique_ptr<ExtVector> buffer = make_unique_ext<ExtVector>(script_size);
+
+                size_t out_len = 0;
+                fs_service_->ReadFile(channel_configuration.script_path, buffer->data(), script_size, out_len);
+
+                channel_configuration.lua_script = std::make_shared<LuaScript>();
+                channel_configuration.lua_script->Load(std::span<const uint8_t>(buffer->data(), buffer->size()));
+            }
+        }
 
         for(const auto& message_configuration : canbus_config.CborCanMessageConfig_m) {
             channel_configuration.message_configurations.push_back({

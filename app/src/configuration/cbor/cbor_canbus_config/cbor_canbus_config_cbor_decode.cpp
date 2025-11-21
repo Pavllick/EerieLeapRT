@@ -65,6 +65,11 @@ static bool decode_CborCanChannelConfig(
         return false;
     }
 
+    if (!zcbor_tstr_decode(state, &result->script_path)) {
+        zcbor_list_end_decode(state);
+        return false;
+    }
+
     if (!zcbor_list_start_decode(state)) {
         zcbor_list_end_decode(state);
         return false;

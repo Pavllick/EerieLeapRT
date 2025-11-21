@@ -17,6 +17,7 @@ struct CborCanChannelConfig {
 	uint32_t bus_channel;
 	uint32_t bitrate;
 	struct zcbor_string dbc_file_path;
+	struct zcbor_string script_path;
 	std::vector<CborCanMessageConfig> CborCanMessageConfig_m;
 };
 

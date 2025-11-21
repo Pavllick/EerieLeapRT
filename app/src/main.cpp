@@ -215,7 +215,7 @@ int main(void) {
     // SetupSystemConfiguration(system_configuration_manager);
 
     auto canbus_configuration_manager = make_shared_ext<CanbusConfigurationManager>(
-        std::move(cbor_canbus_config_service), std::move(json_canbus_config_service));
+        std::move(cbor_canbus_config_service), std::move(json_canbus_config_service), sd_fs_service);
 
     // TODO: For test purposes only
     // SetupCanbusConfiguration(canbus_configuration_manager);
@@ -362,6 +362,7 @@ void SetupCanbusConfiguration(std::shared_ptr<CanbusConfigurationManager> canbus
         .bus_channel = 0,
         .bitrate = 500000,
         .dbc_file_path = "configuration/canbus_0.dbc",
+        // .script_path = "scripts/canbus_0.lua",
 
         .message_configurations = {
             {

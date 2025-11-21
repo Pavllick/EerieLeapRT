@@ -29,7 +29,7 @@ SensorReaderUserValueType::SensorReaderUserValueType(
     if(sensor_->configuration.lua_script == nullptr)
         return;
 
-    lua_getglobal(sensor_->configuration.lua_script->GetState(), "create_reading");
+    lua_getglobal(sensor_->configuration.lua_script->GetState(), "create_sensor_value");
 
     has_create_reading_function_ = lua_isfunction(sensor_->configuration.lua_script->GetState(), -1);
     lua_pop(sensor_->configuration.lua_script->GetState(), 1);
@@ -48,7 +48,7 @@ void SensorReaderUserValueType::Read() {
 
     auto lua_script = sensor_->configuration.lua_script;
 
-    lua_getglobal(lua_script->GetState(), "create_reading");
+    lua_getglobal(lua_script->GetState(), "create_sensor_value");
 
     if(!lua_isfunction(lua_script->GetState(), -1)) {
         lua_pop(lua_script->GetState(), 1);
@@ -59,12 +59,12 @@ void SensorReaderUserValueType::Read() {
 
     if(lua_pcall(lua_script->GetState(), 1, 1, 0) != LUA_OK) {
         lua_pop(lua_script->GetState(), 1);
-        throw std::runtime_error("Failed to call create_reading function");
+        throw std::runtime_error("Failed to call create_sensor_value function");
     }
 
     if(!lua_isnumber(lua_script->GetState(), -1)) {
         lua_pop(lua_script->GetState(), 1);
-        throw std::runtime_error("create_reading function didn't return a number.");
+        throw std::runtime_error("create_sensor_value function didn't return a number.");
     }
 
     auto value = static_cast<float>(lua_tonumber(lua_script->GetState(), -1));

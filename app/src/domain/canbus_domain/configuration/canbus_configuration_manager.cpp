@@ -8,14 +8,16 @@ LOG_MODULE_REGISTER(canbus_config_mngr_logger);
 
 CanbusConfigurationManager::CanbusConfigurationManager(
     ext_unique_ptr<CborConfigurationService<CborCanbusConfig>> cbor_configuration_service,
-    ext_unique_ptr<JsonConfigurationService<JsonCanbusConfig>> json_configuration_service)
+    ext_unique_ptr<JsonConfigurationService<JsonCanbusConfig>> json_configuration_service,
+    std::shared_ptr<IFsService> sd_fs_service)
         : cbor_configuration_service_(std::move(cbor_configuration_service)),
         json_configuration_service_(std::move(json_configuration_service)),
+        sd_fs_service_(std::move(sd_fs_service)),
         configuration_(nullptr),
         json_config_checksum_(0) {
 
-    cbor_parser_ = std::make_unique<CanbusConfigurationCborParser>();
-    json_parser_ = std::make_unique<CanbusConfigurationJsonParser>();
+    cbor_parser_ = std::make_unique<CanbusConfigurationCborParser>(sd_fs_service_);
+    json_parser_ = std::make_unique<CanbusConfigurationJsonParser>(sd_fs_service_);
     std::shared_ptr<CanbusConfiguration> configuration = nullptr;
 
     try {

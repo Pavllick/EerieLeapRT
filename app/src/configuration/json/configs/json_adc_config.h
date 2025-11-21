@@ -34,8 +34,8 @@ static void tag_invoke(json::value_from_tag, json::value& jv, JsonAdcCalibration
 static JsonAdcCalibrationDataConfig tag_invoke(json::value_to_tag<JsonAdcCalibrationDataConfig>, json::value const& jv) {
     json::object const& obj = jv.as_object();
     return JsonAdcCalibrationDataConfig{
-        json::value_to<float>(obj.at(NAMEOF_MEMBER(&JsonAdcCalibrationDataConfig::voltage).c_str())),
-        json::value_to<float>(obj.at(NAMEOF_MEMBER(&JsonAdcCalibrationDataConfig::value).c_str()))
+        .voltage = json::value_to<float>(obj.at(NAMEOF_MEMBER(&JsonAdcCalibrationDataConfig::voltage).c_str())),
+        .value = json::value_to<float>(obj.at(NAMEOF_MEMBER(&JsonAdcCalibrationDataConfig::value).c_str()))
     };
 }
 
@@ -49,8 +49,8 @@ static void tag_invoke(json::value_from_tag, json::value& jv, JsonAdcChannelConf
 static JsonAdcChannelConfig tag_invoke(json::value_to_tag<JsonAdcChannelConfig>, json::value const& jv) {
     json::object const& obj = jv.as_object();
     return JsonAdcChannelConfig{
-        json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonAdcChannelConfig::interpolation_method).c_str())),
-        json::value_to<std::vector<JsonAdcCalibrationDataConfig>>(obj.at(NAMEOF_MEMBER(&JsonAdcChannelConfig::calibration_table).c_str()))
+        .interpolation_method = json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonAdcChannelConfig::interpolation_method).c_str())),
+        .calibration_table = json::value_to<std::vector<JsonAdcCalibrationDataConfig>>(obj.at(NAMEOF_MEMBER(&JsonAdcChannelConfig::calibration_table).c_str()))
     };
 }
 
@@ -64,8 +64,8 @@ static void tag_invoke(json::value_from_tag, json::value& jv, JsonAdcConfig cons
 static JsonAdcConfig tag_invoke(json::value_to_tag<JsonAdcConfig>, json::value const& jv) {
     json::object const& obj = jv.as_object();
     return JsonAdcConfig{
-        json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonAdcConfig::samples).c_str())),
-        json::value_to<std::vector<JsonAdcChannelConfig>>(obj.at(NAMEOF_MEMBER(&JsonAdcConfig::channel_configurations).c_str()))
+        .samples = json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonAdcConfig::samples).c_str())),
+        .channel_configurations = json::value_to<std::vector<JsonAdcChannelConfig>>(obj.at(NAMEOF_MEMBER(&JsonAdcConfig::channel_configurations).c_str()))
     };
 }
 
