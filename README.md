@@ -2,6 +2,20 @@
 
 EerieLeap is an open-source sensor monitoring system built with [Zephyr RTOS](https://github.com/zephyrproject-rtos/zephyr). It provides a robust platform for reading, processing, and managing sensor data, supporting digital, analog, and CAN Bus data inputs.
 
+### [Please refer to the Wiki for more information, configuration details, and usage examples](https://github.com/Pavllick/EerieLeapRT/wiki).
+
+## Features
+
+Core features of the system include:
+
+- Real-time sensor data collection and processing
+- CAN Bus data collection and streaming
+- Data logging
+- Custom expressions for sensor value calculation
+- Lua scripts for sensor values and CAN messages custom logic
+
+EerieLeap is highly configurable system, allowing not just collection and streaming of data, but also custom logic for sensor values and CAN messages. Only imagination limits the possibilities.
+
 ## Architecture
 
 EerieLeap implements a layered architecture designed for real-time sensor monitoring with clear separation of concerns:
