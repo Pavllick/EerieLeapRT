@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <stdexcept>
 #include <memory>
+#include <string>
 
 #include <zephyr/spinlock.h>
 
@@ -18,15 +19,19 @@ class SensorReadingsFrame {
 private:
     std::unordered_map<size_t, std::shared_ptr<SensorReading>> readings_;
     std::unordered_map<size_t, float*> reading_values_;
-    std::unordered_map<std::string, size_t> sensor_id_hash_map_;
+    mutable std::unordered_map<std::string, size_t> sensor_id_hash_map_;
 
     k_spinlock reading_lock_;
 
-    size_t GetSensorIdHash(const std::string& sensor_id) {
+    size_t GetSensorIdHash(const std::string& sensor_id) const {
         if(!sensor_id_hash_map_.contains(sensor_id))
             sensor_id_hash_map_.emplace(sensor_id, StringHelpers::GetHash(sensor_id));
 
         return sensor_id_hash_map_.at(sensor_id);
+    }
+
+    static constexpr void ErrorSensorIdNotFound() {
+        throw std::runtime_error("Sensor ID not found");
     }
 
 public:
@@ -48,38 +53,38 @@ public:
         return readings_.contains(sensor_id_hash);
     }
 
-    bool HasReading(const std::string& sensor_id) {
+    bool HasReading(const std::string& sensor_id) const {
         return readings_.contains(GetSensorIdHash(sensor_id));
     }
 
     std::shared_ptr<SensorReading> GetReading(const size_t sensor_id_hash) const {
         if(!HasReading(sensor_id_hash))
-            throw std::runtime_error("Sensor ID not found");
+            ErrorSensorIdNotFound();
 
         return readings_.at(sensor_id_hash);
     }
 
-    std::shared_ptr<SensorReading> GetReading(const std::string& sensor_id) {
+    std::shared_ptr<SensorReading> GetReading(const std::string& sensor_id) const {
         const size_t sensor_id_hash = GetSensorIdHash(sensor_id);
 
         if(!HasReading(sensor_id_hash))
-            throw std::runtime_error("Sensor ID not found");
+            ErrorSensorIdNotFound();
 
         return readings_.at(sensor_id_hash);
     }
 
     float GetReadingValue(const size_t sensor_id_hash) const {
         if(!HasReading(sensor_id_hash))
-            throw std::runtime_error("Sensor ID not found");
+            ErrorSensorIdNotFound();
 
         return *reading_values_.at(sensor_id_hash);
     }
 
-    float GetReadingValue(const std::string& sensor_id) {
+    float GetReadingValue(const std::string& sensor_id) const {
         const size_t sensor_id_hash = GetSensorIdHash(sensor_id);
 
         if(!HasReading(sensor_id_hash))
-            throw std::runtime_error("Sensor ID not found");
+            ErrorSensorIdNotFound();
 
         return *reading_values_.at(sensor_id_hash);
     }
