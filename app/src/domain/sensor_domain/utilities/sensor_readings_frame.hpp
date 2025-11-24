@@ -30,7 +30,7 @@ private:
         return sensor_id_hash_map_.at(sensor_id);
     }
 
-    static constexpr void ErrorSensorIdNotFound() {
+    static inline void ErrorSensorIdNotFound() {
         throw std::runtime_error("Sensor ID not found");
     }
 

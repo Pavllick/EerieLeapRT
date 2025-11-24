@@ -13,7 +13,9 @@ namespace eerie_leap::utilities::math_parser {
 
 class ExpressionEvaluator {
 private:
-    std::shared_ptr<MathParserService> math_parser_service_;
+    // std::shared_ptr<MathParserService> math_parser_service_;
+
+    mutable MathParserService math_parser_service_;
 
     std::string expression_raw_;
     std::string expression_;

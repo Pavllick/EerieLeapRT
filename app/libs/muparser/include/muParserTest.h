@@ -34,7 +34,6 @@
 #include <cstdint>
 #include <numeric> // for accumulate
 #include "muParser.h"
-#include "muParserInt.h"
 
 #if defined(_MSC_VER)
 	#pragma warning(push)
@@ -186,38 +185,38 @@ namespace mu
 			}
 
 			// postfix operator callback
-			static value_type Mega(value_type a_fVal) 
+			static value_type Mega(value_type a_fVal)
 			{
-				return a_fVal * (value_type)1e6; 
-			}
-			
-			static value_type Micro(value_type a_fVal)
-			{
-				return a_fVal * (value_type)1e-6; 
+				return a_fVal * (value_type)1e6;
 			}
 
-			static value_type Milli(value_type a_fVal) 
+			static value_type Micro(value_type a_fVal)
 			{
-				return a_fVal / (value_type)1e3; 
+				return a_fVal * (value_type)1e-6;
+			}
+
+			static value_type Milli(value_type a_fVal)
+			{
+				return a_fVal / (value_type)1e3;
 			}
 
 			// Custom value recognition
 			static int IsHexVal(const char_type* a_szExpr, int* a_iPos, value_type* a_fVal);
 
 			// With user data
-			static value_type FunUd0(void* data) 
+			static value_type FunUd0(void* data)
 			{
-				return reinterpret_cast<std::intptr_t>(data); 
+				return reinterpret_cast<std::intptr_t>(data);
 			}
 
-			static value_type FunUd1(void* data, value_type v) 
+			static value_type FunUd1(void* data, value_type v)
 			{
-				return reinterpret_cast<std::intptr_t>(data) + v; 
+				return reinterpret_cast<std::intptr_t>(data) + v;
 			}
-			
-			static value_type FunUd2(void* data, value_type v1, value_type v2) 
+
+			static value_type FunUd2(void* data, value_type v1, value_type v2)
 			{
-				return reinterpret_cast<std::intptr_t>(data) + v1 + v2; 
+				return reinterpret_cast<std::intptr_t>(data) + v1 + v2;
 			}
 
 			static value_type FunUd10(void* data, value_type v1, value_type v2, value_type v3, value_type v4, value_type v5, value_type v6, value_type v7, value_type v8, value_type v9, value_type v10)
@@ -238,7 +237,7 @@ namespace mu
 					throw mu::Parser::exception_type(_T("too few arguments for function sum."));
 
 				value_type fRes = 0;
-				for (int i = 0; i < a_iArgc; ++i) 
+				for (int i = 0; i < a_iArgc; ++i)
 					fRes += a_afArg[i];
 
 				return reinterpret_cast<std::intptr_t>(data) + fRes;
@@ -260,7 +259,7 @@ namespace mu
 			int TestOssFuzzTestCases();
 			int TestOptimizer();
 			int TestLocalization();
-			
+
 			void Abort() const;
 
 		public:
@@ -279,9 +278,6 @@ namespace mu
 			int EqnTestLocalized(const string_type& a_str, double a_fRes, bool a_fPass);
 			int ThrowTest(const string_type& a_str, int a_iErrc, bool a_bFail = true);
 
-			// Test Int Parser
-			int EqnTestInt(const string_type& a_str, double a_fRes, bool a_fPass);
-
 			// Test Bulkmode
 			int EqnTestBulk(const string_type& a_str, double a_fRes[4], bool a_fPass);
 
@@ -295,4 +291,3 @@ namespace mu
 #endif
 
 #endif
-

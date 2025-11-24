@@ -37,7 +37,7 @@
 
 #if defined(_MSC_VER)
 	#pragma warning(push)
-	#pragma warning(disable : 26812) 
+	#pragma warning(disable : 26812)
 #endif
 
 /** \file
@@ -47,6 +47,8 @@
 
 namespace mu
 {
+
+	std::list<identfun_type> ParserTokenReader::m_vIdentFun;
 
 	// Forward declaration
 	class ParserBase;
@@ -99,7 +101,6 @@ namespace mu
 		m_pInfixOprtDef = a_Reader.m_pInfixOprtDef;
 		m_pOprtDef = a_Reader.m_pOprtDef;
 		m_bIgnoreUndefVar = a_Reader.m_bIgnoreUndefVar;
-		m_vIdentFun = a_Reader.m_vIdentFun;
 		m_pFactory = a_Reader.m_pFactory;
 		m_pFactoryData = a_Reader.m_pFactoryData;
 		m_bracketStack = a_Reader.m_bracketStack;
@@ -132,7 +133,6 @@ namespace mu
 		, m_pVarDef(nullptr)
 		, m_pFactory(nullptr)
 		, m_pFactoryData(nullptr)
-		, m_vIdentFun()
 		, m_UsedVar()
 		, m_fZero(0)
 		, m_bracketStack()
@@ -171,7 +171,7 @@ namespace mu
 	{
 		// Use push_front is used to give user defined callbacks a higher priority than
 		// the built in ones. Otherwise reading hex numbers would not work
-		// since the "0" in "0xff" would always be read first making parsing of 
+		// since the "0" in "0xff" would always be read first making parsing of
 		// the rest impossible.
 		// reference:
 		// http://sourceforge.net/projects/muparser/forums/forum/462843/topic/4824956
@@ -322,20 +322,20 @@ namespace mu
 		if (IsPostOpTok(tok))
 			return SaveBeforeReturn(tok);
 
-		// Check String for undefined variable token. Done only if a 
+		// Check String for undefined variable token. Done only if a
 		// flag is set indicating to ignore undefined variables.
-		// This is a way to conditionally avoid an error if 
-		// undefined variables occur. 
+		// This is a way to conditionally avoid an error if
+		// undefined variables occur.
 		// (The GetUsedVar function must suppress the error for
-		// undefined variables in order to collect all variable 
+		// undefined variables in order to collect all variable
 		// names including the undefined ones.)
 		if ((m_bIgnoreUndefVar || m_pFactory) && IsUndefVarTok(tok))
 			return SaveBeforeReturn(tok);
 
 		// Check for unknown token
-		// 
+		//
 		// !!! From this point on there is no exit without an exception possible...
-		// 
+		//
 		string_type strTok;
 		auto iEnd = ExtractToken(m_pParser->ValidNameChars(), strTok, (std::size_t)m_iPos);
 		if (iEnd != m_iPos)
@@ -451,7 +451,7 @@ namespace mu
 					if (m_iSynFlags & noOPT)
 					{
 						// Maybe its an infix operator not an operator
-						// Both operator types can share characters in 
+						// Both operator types can share characters in
 						// their identifiers
 						if (IsInfixOpTok(a_Tok))
 							return true;
@@ -666,7 +666,7 @@ namespace mu
 		// Note:
 		// All tokens in oprt_bin_maptype are have been sorted by their length
 		// Long operators must come first! Otherwise short names (like: "add") that
-		// are part of long token names (like: "add123") will be found instead 
+		// are part of long token names (like: "add123") will be found instead
 		// of the long ones.
 		// Length sorting is done with ascending length so we use a reverse iterator here.
 		funmap_type::const_reverse_iterator it = m_pOprtDef->rbegin();
@@ -681,7 +681,7 @@ namespace mu
 				if (m_iSynFlags & noOPT)
 				{
 					// An operator was found but is not expected to occur at
-					// this position of the formula, maybe it is an infix 
+					// this position of the formula, maybe it is an infix
 					// operator, not a binary operator. Both operator types
 					// can share characters in their identifiers.
 					if (IsInfixOpTok(a_Tok))
@@ -690,7 +690,7 @@ namespace mu
 					{
 						// nope, no infix operator
 						return false;
-						//Error(ecUNEXPECTED_OPERATOR, m_iPos, a_Tok.GetAsString()); 
+						//Error(ecUNEXPECTED_OPERATOR, m_iPos, a_Tok.GetAsString());
 					}
 
 				}
@@ -711,7 +711,7 @@ namespace mu
 		// <ibg 20110629> Do not check for postfix operators if they are not allowed at
 		//                the current expression index.
 		//
-		//  This will fix the bug reported here:  
+		//  This will fix the bug reported here:
 		//
 		//  http://sourceforge.net/tracker/index.php?func=detail&aid=3343891&group_id=137191&atid=737979
 		//
@@ -720,10 +720,10 @@ namespace mu
 		// </ibg>
 
 		// Tricky problem with equations like "3m+5":
-		//     m is a postfix operator, + is a valid sign for postfix operators and 
-		//     for binary operators parser detects "m+" as operator string and 
+		//     m is a postfix operator, + is a valid sign for postfix operators and
+		//     for binary operators parser detects "m+" as operator string and
 		//     finds no matching postfix operator.
-		// 
+		//
 		// This is a special case so this routine slightly differs from the other
 		// token readers.
 
@@ -839,7 +839,7 @@ namespace mu
 		m_iSynFlags = noVAL | noVAR | noFUN | noBO | noINFIXOP | noSTR;
 
 		//  Zur Info hier die SynFlags von IsVal():
-		//    m_iSynFlags = noVAL | noVAR | noFUN | noBO | noINFIXOP | noSTR | noASSIGN; 
+		//    m_iSynFlags = noVAL | noVAR | noFUN | noBO | noINFIXOP | noSTR | noASSIGN;
 		return true;
 	}
 
@@ -888,8 +888,8 @@ namespace mu
 
 		if (m_iSynFlags & noVAR)
 		{
-			// <ibg/> 20061021 added token string strTok instead of a_Tok.GetAsString() as the 
-			//                 token identifier. 
+			// <ibg/> 20061021 added token string strTok instead of a_Tok.GetAsString() as the
+			//                 token identifier.
 			// related bug report:
 			// http://sourceforge.net/tracker/index.php?func=detail&aid=1578779&group_id=137191&atid=737979
 			Error(ecUNEXPECTED_VAR, m_iPos - (int)a_Tok.GetAsString().length(), strTok);
@@ -958,7 +958,7 @@ namespace mu
 		m_pParser->m_vStringBuf.push_back(strTok); // Store string in internal buffer
 		a_Tok.SetString(strTok, m_pParser->m_vStringBuf.size());
 
-		m_iPos += (int)strTok.length() + 2 + (int)iSkip;  // +2 for quotes; +iSkip for escape characters 
+		m_iPos += (int)strTok.length() + 2 + (int)iSkip;  // +2 for quotes; +iSkip for escape characters
 		m_iSynFlags = noANY ^ (noARG_SEP | noBC | noOPT | noEND);
 
 		return true;

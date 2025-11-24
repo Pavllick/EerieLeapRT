@@ -19,29 +19,30 @@ K_MUTEX_DEFINE(expression_eval_mutex_);
 using namespace mu;
 
 ExpressionEvaluator::ExpressionEvaluator(std::shared_ptr<MathParserService> math_parser_service, const std::string& expression_raw)
-    : math_parser_service_(std::move(math_parser_service)), expression_raw_(expression_raw) {
+    : expression_raw_(expression_raw) {
 
     expression_ = UnwrapVariables();
     variables_ = ExtractVariables();
+
+    math_parser_service_.SetExpression(expression_);
 }
 
 float ExpressionEvaluator::Evaluate(const std::unordered_map<size_t, float*>& variables, std::optional<float> x) const {
 
     k_mutex_lock(&expression_eval_mutex_, K_FOREVER);
 
-    math_parser_service_->SetExpression(expression_);
 
     if(x.has_value())
-        math_parser_service_->DefineVariable("x", &x.value());
+        math_parser_service_.DefineVariable("x", &x.value());
 
     for(const auto& [hash, name] : variables_) {
         if(!variables.contains(hash))
             throw std::runtime_error("Variable '" + name + "' required for evaluation not found.");
 
-        math_parser_service_->DefineVariable(name, variables.at(hash));
+        math_parser_service_.DefineVariable(name, variables.at(hash));
     }
 
-    float res = math_parser_service_->Evaluate();
+    float res = math_parser_service_.Evaluate();
 
     k_mutex_unlock(&expression_eval_mutex_);
 

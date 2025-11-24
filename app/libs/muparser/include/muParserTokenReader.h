@@ -62,13 +62,13 @@ namespace mu
 		ParserTokenReader(ParserBase* a_pParent);
 		ParserTokenReader* Clone(ParserBase* a_pParent) const;
 
-		void AddValIdent(identfun_type a_pCallback);
+		static void AddValIdent(identfun_type a_pCallback);
 		void SetVarCreator(facfun_type a_pFactory, void* pUserData);
 		void SetFormula(const string_type& a_strFormula);
 		void SetArgSep(char_type cArgSep);
 
-		/** \brief Check whether a variable factory is installed. 
-		 
+		/** \brief Check whether a variable factory is installed.
+
 			Variable factories automatically create new variables when a unknown variable is found in an expression.
 		*/
 		bool HasVarCreator() const
@@ -95,12 +95,12 @@ namespace mu
 		*/
 		enum ESynCodes
 		{
-			noBO = 1 << 0,			///< to avoid i.e. "cos(7)(" 
+			noBO = 1 << 0,			///< to avoid i.e. "cos(7)("
 			noBC = 1 << 1,			///< to avoid i.e. "sin)" or "()"
 			noVAL = 1 << 2,			///< to avoid i.e. "tan 2" or "sin(8)3.14"
 			noVAR = 1 << 3,			///< to avoid i.e. "sin a" or "sin(8)a"
 			noARG_SEP = 1 << 4,		///< to avoid i.e. ",," or "+," ...
-			noFUN = 1 << 5,			///< to avoid i.e. "sqrt cos" or "(1)sin"	
+			noFUN = 1 << 5,			///< to avoid i.e. "sqrt cos" or "(1)sin"
 			noOPT = 1 << 6,			///< to avoid i.e. "(+)"
 			noPOSTOP = 1 << 7,		///< to avoid i.e. "(5!!)" "sin!"
 			noINFIXOP = 1 << 8,		///< to avoid i.e. "++4" "!!4"
@@ -153,10 +153,10 @@ namespace mu
 		varmap_type* m_pVarDef;  ///< The only non const pointer to parser internals
 		facfun_type m_pFactory;
 		void* m_pFactoryData;
-		std::list<identfun_type> m_vIdentFun; ///< Value token identification function
+		static std::list<identfun_type> m_vIdentFun; ///< Value token identification function
 		varmap_type m_UsedVar;
 		value_type m_fZero;      ///< Dummy value of zero, referenced by undefined variables
-		
+
 		std::stack<int> m_bracketStack;
 
 		token_type m_lastTok;
@@ -165,5 +165,3 @@ namespace mu
 } // namespace mu
 
 #endif
-
-

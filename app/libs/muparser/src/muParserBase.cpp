@@ -48,7 +48,7 @@
 
 #if defined(_MSC_VER)
 	#pragma warning(push)
-	#pragma warning(disable : 26812) 
+	#pragma warning(disable : 26812)
 #endif
 
 using namespace std;
@@ -60,6 +60,15 @@ using namespace std;
 namespace mu
 {
 	std::locale ParserBase::s_locale = std::locale(std::locale::classic(), new change_dec_sep<char_type>('.'));
+
+	funmap_type  ParserBase::m_FunDef;
+	funmap_type  ParserBase::m_PostOprtDef;
+	funmap_type  ParserBase::m_InfixOprtDef;
+	funmap_type  ParserBase::m_OprtDef;
+
+	const string_type ParserBase::m_sNameChars = "0123456789_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	const string_type ParserBase::m_sOprtChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+-*^/?<>=#!$%&|~'_{}";
+	const string_type ParserBase::m_sInfixOprtChars = "/+-*^?<>=#!$%&|~'_";
 
 	bool ParserBase::g_DbgDumpCmdCode = false;
 	bool ParserBase::g_DbgDumpStack = false;
@@ -92,17 +101,10 @@ namespace mu
 		, m_vRPN()
 		, m_vStringBuf()
 		, m_pTokenReader()
-		, m_FunDef()
-		, m_PostOprtDef()
-		, m_InfixOprtDef()
-		, m_OprtDef()
 		, m_ConstDef()
 		, m_StrVarDef()
 		, m_VarDef()
 		, m_bBuiltInOp(true)
-		, m_sNameChars()
-		, m_sOprtChars()
-		, m_sInfixOprtChars()
 		, m_vStackBuffer()
 		, m_nFinalResultIdx(0)
 	{
@@ -120,18 +122,10 @@ namespace mu
 		, m_vRPN()
 		, m_vStringBuf()
 		, m_pTokenReader()
-		, m_FunDef()
-		, m_PostOprtDef()
-		, m_InfixOprtDef()
-		, m_OprtDef()
 		, m_ConstDef()
 		, m_StrVarDef()
 		, m_VarDef()
-		, m_bBuiltInOp(true)
-		, m_sNameChars()
-		, m_sOprtChars()
-		, m_sInfixOprtChars()
-	{
+		, m_bBuiltInOp(true)	{
 		m_pTokenReader.reset(new token_reader_type(this));
 		Assign(a_Parser);
 	}
@@ -181,16 +175,6 @@ namespace mu
 		m_StrVarDef = a_Parser.m_StrVarDef;
 		m_vStringVarBuf = a_Parser.m_vStringVarBuf;
 		m_pTokenReader.reset(a_Parser.m_pTokenReader->Clone(this));
-
-		// Copy function and operator callbacks
-		m_FunDef = a_Parser.m_FunDef;             // Copy function definitions
-		m_PostOprtDef = a_Parser.m_PostOprtDef;   // post value unary operators
-		m_InfixOprtDef = a_Parser.m_InfixOprtDef; // unary operators for infix notation
-		m_OprtDef = a_Parser.m_OprtDef;           // binary operators
-
-		m_sNameChars = a_Parser.m_sNameChars;
-		m_sOprtChars = a_Parser.m_sOprtChars;
-		m_sInfixOprtChars = a_Parser.m_sInfixOprtChars;
 	}
 
 	//---------------------------------------------------------------------------
@@ -270,8 +254,8 @@ namespace mu
 	*/
 	const ParserByteCode& ParserBase::GetByteCode() const
 	{
-		// If a variable factory is defined the bytecode may contain references to implicitely 
-		// created variables. 
+		// If a variable factory is defined the bytecode may contain references to implicitely
+		// created variables.
 //		if (m_pTokenReader->HasVarCreator())
 //			Error(ecBYTECODE_IMPORT_EXPORT_DISABLED);
 
@@ -283,7 +267,7 @@ namespace mu
 	void ParserBase::SetByteCode(const ParserByteCode& a_ByteCode)
 	{
 		// If a variable factory is defined the bytecode may contain references to dynamically
-		// created variables. 
+		// created variables.
 //		if (m_pTokenReader->HasVarCreator())
 //			Error(ecBYTECODE_IMPORT_EXPORT_DISABLED);
 
@@ -318,7 +302,7 @@ namespace mu
 
 #ifdef _DEBUG
 			ss << _T("; DEBUG");
-#else 
+#else
 			ss << _T("; RELEASE");
 #endif
 
@@ -351,7 +335,7 @@ namespace mu
 	*/
 	void ParserBase::AddValIdent(identfun_type a_pCallback)
 	{
-		m_pTokenReader->AddValIdent(a_pCallback);
+		ParserTokenReader::AddValIdent(a_pCallback);
 	}
 
 	//---------------------------------------------------------------------------
@@ -462,33 +446,6 @@ namespace mu
 	}
 
 	//---------------------------------------------------------------------------
-	/** \brief Define the set of valid characters to be used in names of
-			   functions, variables, constants.
-	*/
-	void ParserBase::DefineNameChars(const char_type* a_szCharset)
-	{
-		m_sNameChars = a_szCharset;
-	}
-
-	//---------------------------------------------------------------------------
-	/** \brief Define the set of valid characters to be used in names of
-			   binary operators and postfix operators.
-	*/
-	void ParserBase::DefineOprtChars(const char_type* a_szCharset)
-	{
-		m_sOprtChars = a_szCharset;
-	}
-
-	//---------------------------------------------------------------------------
-	/** \brief Define the set of valid characters to be used in names of
-			   infix operators.
-	*/
-	void ParserBase::DefineInfixOprtChars(const char_type* a_szCharset)
-	{
-		m_sInfixOprtChars = a_szCharset;
-	}
-
-	//---------------------------------------------------------------------------
 	/** \brief Virtual function that defines the characters allowed in name identifiers.
 		\sa #ValidOprtChars, #ValidPrefixOprtChars
 	*/
@@ -537,7 +494,6 @@ namespace mu
 	*/
 	void ParserBase::Init()
 	{
-		InitCharSets();
 		InitFun();
 		InitConst();
 		InitOprt();
@@ -679,7 +635,7 @@ namespace mu
 		// user defined binary operators
 		case cmOPRT_INFIX:
 		case cmOPRT_BIN: return a_Tok.GetPri();
-		default:  
+		default:
 			throw exception_type(ecINTERNAL_ERROR, 5, _T(""));
 		}
 	}
@@ -838,7 +794,7 @@ namespace mu
 		// binary operators do not have commas in their expression
 		int iArgCount = (funTok.GetCode() == cmOPRT_BIN) ? funTok.GetArgCount() : a_iArgCount;
 
-		// determine how many parameters the function needs. To remember iArgCount includes the 
+		// determine how many parameters the function needs. To remember iArgCount includes the
 		// string parameter whilst GetArgCount() counts only numeric parameters.
 		int iArgRequired = funTok.GetArgCount() + ((funTok.GetType() == tpSTR) ? 1 : 0);
 
@@ -925,7 +881,7 @@ namespace mu
 			token_type vVal2 = a_stVal.top();
 			if (vVal2.GetType() != tpDBL)
 				Error(ecUNEXPECTED_STR, m_pTokenReader->GetPos());
-			
+
 			a_stVal.pop();
 
 			// it then else is a ternary operator Pop all three values from the value s
@@ -1067,24 +1023,24 @@ namespace mu
 
 		switch (tok->Cmd)
 		{
-		case cmVAL:		
+		case cmVAL:
 			return tok->Val.data2;
 
-		case cmVAR:		
+		case cmVAR:
 			return *tok->Val.ptr;
 
-		case cmVARMUL:	
+		case cmVARMUL:
 			return *tok->Val.ptr * tok->Val.data + tok->Val.data2;
 
-		case cmVARPOW2: 
+		case cmVARPOW2:
 			buf = *(tok->Val.ptr);
 			return buf * buf;
 
-		case  cmVARPOW3: 				
+		case  cmVARPOW3:
 			buf = *(tok->Val.ptr);
 			return buf * buf * buf;
 
-		case  cmVARPOW4: 				
+		case  cmVARPOW4:
 			buf = *(tok->Val.ptr);
 			return buf * buf * buf * buf;
 
@@ -1110,7 +1066,7 @@ namespace mu
 	{
 		assert(nThreadID <= s_MaxNumOpenMPThreads);
 
-		// Note: The check for nOffset==0 and nThreadID here is not necessary but 
+		// Note: The check for nOffset==0 and nThreadID here is not necessary but
 		//       brings a minor performance gain when not in bulk mode.
 		value_type *stack = ((nOffset == 0) && (nThreadID == 0)) ? &m_vStackBuffer[0] : &m_vStackBuffer[nThreadID * (m_vStackBuffer.size() / s_MaxNumOpenMPThreads)];
 		value_type buf;
@@ -1144,8 +1100,8 @@ namespace mu
 				// Bugfix for Bulkmode:
 				// for details see:
 				//    https://groups.google.com/forum/embed/?place=forum/muparser-dev&showsearch=true&showpopout=true&showtabs=false&parenturl=http://muparser.beltoforion.de/mup_forum.html&afterlogin&pli=1#!topic/muparser-dev/szgatgoHTws
-				--sidx; 
-				stack[sidx] = *(pTok->Oprt.ptr + nOffset) = stack[sidx + 1]; 
+				--sidx;
+				stack[sidx] = *(pTok->Oprt.ptr + nOffset) = stack[sidx + 1];
 				continue;
 				// original code:
 				//--sidx; Stack[sidx] = *pTok->Oprt.ptr = Stack[sidx+1]; continue;
@@ -1181,7 +1137,7 @@ namespace mu
 				stack[++sidx] = buf * buf * buf * buf;
 				continue;
 
-			case  cmVARMUL:  
+			case  cmVARMUL:
 				stack[++sidx] = *(pTok->Val.ptr + nOffset) * pTok->Val.data + pTok->Val.data2;
 				continue;
 
@@ -1311,7 +1267,7 @@ namespace mu
 				if (stOpt.empty())
 					Error(ecSTR_RESULT, m_pTokenReader->GetPos(), opt.GetAsString());
 
-				opt.SetIdx((int)m_vStringBuf.size());      // Assign buffer index to token 
+				opt.SetIdx((int)m_vStringBuf.size());      // Assign buffer index to token
 				stVal.push(opt);
 				m_vStringBuf.push_back(opt.GetAsString()); // Store string in internal buffer
 				break;
@@ -1377,7 +1333,7 @@ namespace mu
 					// if there is either a function or a sign pending
 					// neither the opening nor the closing bracket will be pushed back to
 					// the operator stack
-					// Check if a function is standing in front of the opening bracket, 
+					// Check if a function is standing in front of the opening bracket,
 					// if yes evaluate it afterwards check for infix operators
 					MUP_ASSERT(stArgCount.size());
 					int iArgCount = stArgCount.top();
@@ -1429,7 +1385,7 @@ namespace mu
 			case cmASSIGN:
 			case cmOPRT_BIN:
 
-				// A binary operator (user defined or built in) has been found. 
+				// A binary operator (user defined or built in) has been found.
 				while (
 					stOpt.size() &&
 					stOpt.top().GetCode() != cmBO &&
@@ -1526,7 +1482,7 @@ namespace mu
 			Error(ecEMPTY_EXPRESSION);
 
 		// 2020-09-17; fix for https://oss-fuzz.com/testcase-detail/5758791700971520
-		// I don't need the value stack any more. Destructively check if all values in the value 
+		// I don't need the value stack any more. Destructively check if all values in the value
 		// stack represent floating point values
 		while (stVal.size())
 		{
@@ -1946,4 +1902,3 @@ namespace mu
 #if defined(_MSC_VER)
 	#pragma warning(pop)
 #endif
-

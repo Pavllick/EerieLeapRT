@@ -53,7 +53,6 @@ namespace mu
 
 		Parser();
 
-		void InitCharSets() override;
 		void InitFun() override;
 		void InitConst() override;
 		void InitOprt() override;
@@ -64,8 +63,10 @@ namespace mu
 	protected:
 
 		static int IsVal(const char_type* a_szExpr, int* a_iPos, value_type* a_fVal);
+
+	private:
+		static bool is_initialized;
 	};
 } // namespace mu
 
 #endif
-

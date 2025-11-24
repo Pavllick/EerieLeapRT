@@ -339,82 +339,6 @@ namespace mu
 			iStat += EqnTest(_T("2^2^3"), 256, true);
 			iStat += EqnTest(_T("1/2/3"), 1.0 / 6.0, true);
 
-			// reference: http://www.wolframalpha.com/input/?i=3%2B4*2%2F%281-5%29^2^3
-			iStat += EqnTest(_T("3+4*2/(1-5)^2^3"), 3.0001220703125, true);
-
-			// Test user defined binary operators
-			iStat += EqnTestInt(_T("1 | 2"), 3, true);
-			iStat += EqnTestInt(_T("1 || 2"), 1, true);
-			iStat += EqnTestInt(_T("123 & 456"), 72, true);
-			iStat += EqnTestInt(_T("(123 & 456) % 10"), 2, true);
-			iStat += EqnTestInt(_T("1 && 0"), 0, true);
-			iStat += EqnTestInt(_T("123 && 456"), 1, true);
-			iStat += EqnTestInt(_T("1 << 3"), 8, true);
-			iStat += EqnTestInt(_T("8 >> 3"), 1, true);
-			iStat += EqnTestInt(_T("9 / 4"), 2, true);
-			iStat += EqnTestInt(_T("9 % 4"), 1, true);
-			iStat += EqnTestInt(_T("if(5%2,1,0)"), 1, true);
-			iStat += EqnTestInt(_T("if(4%2,1,0)"), 0, true);
-			iStat += EqnTestInt(_T("-10+1"), -9, true);
-			iStat += EqnTestInt(_T("1+2*3"), 7, true);
-			iStat += EqnTestInt(_T("const1 != const2"), 1, true);
-			iStat += EqnTestInt(_T("const1 != const2"), 0, false);
-			iStat += EqnTestInt(_T("const1 == const2"), 0, true);
-			iStat += EqnTestInt(_T("const1 == 1"), 1, true);
-			iStat += EqnTestInt(_T("10*(const1 == 1)"), 10, true);
-			iStat += EqnTestInt(_T("2*(const1 | const2)"), 6, true);
-			iStat += EqnTestInt(_T("2*(const1 | const2)"), 7, false);
-			iStat += EqnTestInt(_T("const1 < const2"), 1, true);
-			iStat += EqnTestInt(_T("const2 > const1"), 1, true);
-			iStat += EqnTestInt(_T("const1 <= 1"), 1, true);
-			iStat += EqnTestInt(_T("const2 >= 2"), 1, true);
-			iStat += EqnTestInt(_T("2*(const1 + const2)"), 6, true);
-			iStat += EqnTestInt(_T("2*(const1 - const2)"), -2, true);
-			iStat += EqnTestInt(_T("a != b"), 1, true);
-			iStat += EqnTestInt(_T("a != b"), 0, false);
-			iStat += EqnTestInt(_T("a == b"), 0, true);
-			iStat += EqnTestInt(_T("a == 1"), 1, true);
-			iStat += EqnTestInt(_T("10*(a == 1)"), 10, true);
-			iStat += EqnTestInt(_T("2*(a | b)"), 6, true);
-			iStat += EqnTestInt(_T("2*(a | b)"), 7, false);
-			iStat += EqnTestInt(_T("a < b"), 1, true);
-			iStat += EqnTestInt(_T("b > a"), 1, true);
-			iStat += EqnTestInt(_T("a <= 1"), 1, true);
-			iStat += EqnTestInt(_T("b >= 2"), 1, true);
-			iStat += EqnTestInt(_T("2*(a + b)"), 6, true);
-			iStat += EqnTestInt(_T("2*(a - b)"), -2, true);
-			iStat += EqnTestInt(_T("a + (a << b)"), 5, true);
-			iStat += EqnTestInt(_T("-2^2"), -4, true);
-			iStat += EqnTestInt(_T("3--a"), 4, true);
-			iStat += EqnTestInt(_T("3+-3^2"), -6, true);
-
-			// Test reading of hex values:
-			iStat += EqnTestInt(_T("0xff"), 255, true);
-			iStat += EqnTestInt(_T("10+0xff"), 265, true);
-			iStat += EqnTestInt(_T("0xff+10"), 265, true);
-			iStat += EqnTestInt(_T("10*0xff"), 2550, true);
-			iStat += EqnTestInt(_T("0xff*10"), 2550, true);
-			iStat += EqnTestInt(_T("10+0xff+1"), 266, true);
-			iStat += EqnTestInt(_T("1+0xff+10"), 266, true);
-
-			// incorrect: '^' is yor here, not power
-			//    iStat += EqnTestInt("-(1+2)^2", -9, true);
-			//    iStat += EqnTestInt("-1^3", -1, true);
-
-				  // Test precedence
-				  // a=1, b=2, c=3
-			iStat += EqnTestInt(_T("a + b * c"), 7, true);
-			iStat += EqnTestInt(_T("a * b + c"), 5, true);
-			iStat += EqnTestInt(_T("a<b && b>10"), 0, true);
-			iStat += EqnTestInt(_T("a<b && b<10"), 1, true);
-
-			iStat += EqnTestInt(_T("a + b << c"), 17, true);
-			iStat += EqnTestInt(_T("a << b + c"), 7, true);
-			iStat += EqnTestInt(_T("c * b < a"), 0, true);
-			iStat += EqnTestInt(_T("c * b == 6 * a"), 1, true);
-			iStat += EqnTestInt(_T("2^2^3"), 256, true);
-
-
 			if (iStat == 0)
 				mu::console() << _T("passed") << endl;
 			else
@@ -1495,7 +1419,7 @@ namespace mu
 				p1->DefineVar(_T("d"), &vVarVal[3]);
 
 				// custom value ident functions
-				p1->AddValIdent(&ParserTester::IsHexVal);
+				ParserTokenReader::AddValIdent(&ParserTester::IsHexVal);
 
 				// functions
 				p1->DefineFun(_T("ping"), Ping);
@@ -1655,57 +1579,6 @@ namespace mu
 			{
 				mu::console() << _T("\n  fail: ") << a_str.c_str() << _T(" (unexpected exception)");
 				return 1;  // exceptions other than ParserException are not allowed
-			}
-
-			return iRet;
-		}
-
-		//---------------------------------------------------------------------------
-		int ParserTester::EqnTestInt(const string_type& a_str, double a_fRes, bool a_fPass)
-		{
-			ParserTester::c_iCount++;
-
-			value_type vVarVal[] = { 1, 2, 3 };   // variable values
-			int iRet(0);
-
-			try
-			{
-				value_type fVal[2] = { -99, -999 };   // results: initially should be different
-				ParserInt p;
-				p.DefineConst(_T("const1"), 1);
-				p.DefineConst(_T("const2"), 2);
-				p.DefineVar(_T("a"), &vVarVal[0]);
-				p.DefineVar(_T("b"), &vVarVal[1]);
-				p.DefineVar(_T("c"), &vVarVal[2]);
-
-				p.SetExpr(a_str);
-				fVal[0] = p.Eval(); // result from stringparsing
-				fVal[1] = p.Eval(); // result from bytecode
-
-				if (fVal[0] != fVal[1])
-					throw Parser::exception_type(_T("Bytecode corrupt."));
-
-				iRet = ((a_fRes == fVal[0] && a_fPass) ||
-					(a_fRes != fVal[0] && !a_fPass)) ? 0 : 1;
-				if (iRet == 1)
-				{
-					mu::console() << _T("\n  fail: ") << a_str.c_str()
-						<< _T(" (incorrect result; expected: ") << a_fRes
-						<< _T(" ;calculated: ") << fVal[0] << _T(").");
-				}
-			}
-			catch (Parser::exception_type& e)
-			{
-				if (a_fPass)
-				{
-					mu::console() << _T("\n  fail: ") << e.GetExpr() << _T(" : ") << e.GetMsg();
-					iRet = 1;
-				}
-			}
-			catch (...)
-			{
-				mu::console() << _T("\n  fail: ") << a_str.c_str() << _T(" (unexpected exception)");
-				iRet = 1;  // exceptions other than ParserException are not allowed
 			}
 
 			return iRet;

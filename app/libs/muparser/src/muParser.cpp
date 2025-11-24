@@ -47,6 +47,8 @@ using namespace std;
 /** \brief Namespace for mathematical applications. */
 namespace mu
 {
+	bool Parser::is_initialized = false;
+
 	//---------------------------------------------------------------------------
 	/** \brief Default value recognition callback.
 		\param [in] a_szExpr Pointer to the expression
@@ -96,7 +98,7 @@ namespace mu
 		*a_iPos += (int)iEnd;
 		*a_fVal = fVal;
 		return 1;
-#endif		
+#endif
 	}
 
 
@@ -108,78 +110,56 @@ namespace mu
 	Parser::Parser()
 		:ParserBase()
 	{
-		AddValIdent(IsVal);
+		if (!is_initialized)
+		{
+			AddValIdent(IsVal);
+			InitFun();
+			InitConst();
+			InitOprt();
 
-		InitCharSets();
-		InitFun();
-		InitConst();
-		InitOprt();
-	}
-
-	//---------------------------------------------------------------------------
-	/** \brief Define the character sets.
-		\sa DefineNameChars, DefineOprtChars, DefineInfixOprtChars
-
-	  This function is used for initializing the default character sets that define
-	  the characters to be useable in function and variable names and operators.
-	*/
-	void Parser::InitCharSets()
-	{
-		DefineNameChars(_T("0123456789_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"));
-		DefineOprtChars(_T("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+-*^/?<>=#!$%&|~'_{}"));
-		DefineInfixOprtChars(_T("/+-*^?<>=#!$%&|~'_"));
+			is_initialized = true;
+		}
 	}
 
 	//---------------------------------------------------------------------------
 	/** \brief Initialize the default functions. */
 	void Parser::InitFun()
 	{
-		if (mu::TypeInfo<mu::value_type>::IsInteger())
-		{
-			// When setting MUP_BASETYPE to an integer type
-			// Place functions for dealing with integer values here
-			// ...
-			// ...
-			// ...
-		}
-		else
-		{
-			// trigonometric functions
-			DefineFun(_T("sin"), MathImpl<value_type>::Sin);
-			DefineFun(_T("cos"), MathImpl<value_type>::Cos);
-			DefineFun(_T("tan"), MathImpl<value_type>::Tan);
-			// arcus functions
-			DefineFun(_T("asin"), MathImpl<value_type>::ASin);
-			DefineFun(_T("acos"), MathImpl<value_type>::ACos);
-			DefineFun(_T("atan"), MathImpl<value_type>::ATan);
-			DefineFun(_T("atan2"), MathImpl<value_type>::ATan2);
-			// hyperbolic functions
-			DefineFun(_T("sinh"), MathImpl<value_type>::Sinh);
-			DefineFun(_T("cosh"), MathImpl<value_type>::Cosh);
-			DefineFun(_T("tanh"), MathImpl<value_type>::Tanh);
-			// arcus hyperbolic functions
-			DefineFun(_T("asinh"), MathImpl<value_type>::ASinh);
-			DefineFun(_T("acosh"), MathImpl<value_type>::ACosh);
-			DefineFun(_T("atanh"), MathImpl<value_type>::ATanh);
-			// Logarithm functions
-			DefineFun(_T("log2"), MathImpl<value_type>::Log2);
-			DefineFun(_T("log10"), MathImpl<value_type>::Log10);
-			DefineFun(_T("log"), MathImpl<value_type>::Log);
-			DefineFun(_T("ln"), MathImpl<value_type>::Log);
-			// misc
-			DefineFun(_T("exp"), MathImpl<value_type>::Exp);
-			DefineFun(_T("sqrt"), MathImpl<value_type>::Sqrt);
-			DefineFun(_T("sign"), MathImpl<value_type>::Sign);
-			DefineFun(_T("rint"), MathImpl<value_type>::Rint);
-			DefineFun(_T("abs"), MathImpl<value_type>::Abs);
-			// Functions with variable number of arguments
-			DefineFun(_T("sum"), MathImpl<value_type>::Sum);
-			DefineFun(_T("avg"), MathImpl<value_type>::Avg);
-			DefineFun(_T("min"), MathImpl<value_type>::Min);
-			DefineFun(_T("max"), MathImpl<value_type>::Max);
-			// Random number
-			DefineFun(_T("rnd"), MathImpl<value_type>::Rnd, false);
-		}
+		// trigonometric functions
+		DefineFun(_T("sin"), MathImpl<value_type>::Sin);
+		DefineFun(_T("cos"), MathImpl<value_type>::Cos);
+		DefineFun(_T("tan"), MathImpl<value_type>::Tan);
+		// arcus functions
+		DefineFun(_T("asin"), MathImpl<value_type>::ASin);
+		DefineFun(_T("acos"), MathImpl<value_type>::ACos);
+		DefineFun(_T("atan"), MathImpl<value_type>::ATan);
+		DefineFun(_T("atan2"), MathImpl<value_type>::ATan2);
+		// hyperbolic functions
+		DefineFun(_T("sinh"), MathImpl<value_type>::Sinh);
+		DefineFun(_T("cosh"), MathImpl<value_type>::Cosh);
+		DefineFun(_T("tanh"), MathImpl<value_type>::Tanh);
+		// arcus hyperbolic functions
+		DefineFun(_T("asinh"), MathImpl<value_type>::ASinh);
+		DefineFun(_T("acosh"), MathImpl<value_type>::ACosh);
+		DefineFun(_T("atanh"), MathImpl<value_type>::ATanh);
+		// Logarithm functions
+		DefineFun(_T("log2"), MathImpl<value_type>::Log2);
+		DefineFun(_T("log10"), MathImpl<value_type>::Log10);
+		DefineFun(_T("log"), MathImpl<value_type>::Log);
+		DefineFun(_T("ln"), MathImpl<value_type>::Log);
+		// misc
+		DefineFun(_T("exp"), MathImpl<value_type>::Exp);
+		DefineFun(_T("sqrt"), MathImpl<value_type>::Sqrt);
+		DefineFun(_T("sign"), MathImpl<value_type>::Sign);
+		DefineFun(_T("rint"), MathImpl<value_type>::Rint);
+		DefineFun(_T("abs"), MathImpl<value_type>::Abs);
+		// Functions with variable number of arguments
+		DefineFun(_T("sum"), MathImpl<value_type>::Sum);
+		DefineFun(_T("avg"), MathImpl<value_type>::Avg);
+		DefineFun(_T("min"), MathImpl<value_type>::Min);
+		DefineFun(_T("max"), MathImpl<value_type>::Max);
+		// Random number
+		DefineFun(_T("rnd"), MathImpl<value_type>::Rnd, false);
 	}
 
 	//---------------------------------------------------------------------------
