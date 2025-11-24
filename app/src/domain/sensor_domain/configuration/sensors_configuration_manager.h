@@ -10,8 +10,8 @@
 #include "configuration/services/cbor_configuration_service.h"
 #include "configuration/json/configs/json_sensors_config.h"
 #include "configuration/services/json_configuration_service.h"
-#include "domain/sensor_domain/configuration/utilities/parsers/sensors_cbor_parser.h"
-#include "domain/sensor_domain/configuration/utilities/parsers/sensors_json_parser.h"
+#include "domain/sensor_domain/configuration/parsers/sensors_cbor_parser.h"
+#include "domain/sensor_domain/configuration/parsers/sensors_json_parser.h"
 #include "domain/sensor_domain/models/sensor.h"
 
 namespace eerie_leap::domain::sensor_domain::configuration {
@@ -21,7 +21,7 @@ using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::configuration::services;
 using namespace eerie_leap::domain::sensor_domain::models;
-using namespace eerie_leap::domain::sensor_domain::configuration::utilities::parsers;
+using namespace eerie_leap::domain::sensor_domain::configuration::parsers;
 
 class SensorsConfigurationManager {
 private:

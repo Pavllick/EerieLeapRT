@@ -9,8 +9,8 @@
 #include "configuration/services/json_configuration_service.h"
 #include "subsys/adc/models/adc_configuration.h"
 #include "subsys/adc/i_adc_manager.h"
-#include "domain/sensor_domain/configuration/utilities/parsers/adc_configuration_cbor_parser.h"
-#include "domain/sensor_domain/configuration/utilities/parsers/adc_configuration_json_parser.h"
+#include "domain/sensor_domain/configuration/parsers/adc_configuration_cbor_parser.h"
+#include "domain/sensor_domain/configuration/parsers/adc_configuration_json_parser.h"
 
 namespace eerie_leap::domain::sensor_domain::configuration {
 
@@ -18,7 +18,7 @@ using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::configuration::services;
 using namespace eerie_leap::subsys::adc;
 using namespace eerie_leap::subsys::adc::models;
-using namespace eerie_leap::domain::sensor_domain::configuration::utilities::parsers;
+using namespace eerie_leap::domain::sensor_domain::configuration::parsers;
 
 class AdcConfigurationManager {
 private:

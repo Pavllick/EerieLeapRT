@@ -5,14 +5,14 @@
 #include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
 #include "utilities/math_parser/expression_evaluator.h"
 
-#include "domain/sensor_domain/configuration/utilities/parsers/sensors_cbor_parser.h"
-#include "domain/sensor_domain/configuration/utilities/parsers/sensors_json_parser.h"
+#include "domain/sensor_domain/configuration/parsers/sensors_cbor_parser.h"
+#include "domain/sensor_domain/configuration/parsers/sensors_json_parser.h"
 #include "domain/sensor_domain/models/sensor.h"
 
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::math_parser;
 
-using namespace eerie_leap::domain::sensor_domain::configuration::utilities::parsers;
+using namespace eerie_leap::domain::sensor_domain::configuration::parsers;
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::utilities::voltage_interpolator;
 

@@ -55,14 +55,14 @@ file(GLOB_RECURSE APP_SRC_SUBSYS
 
 set(APP_SRC_DOMAIN_DIR ${APP_SRC_DIR}/domain)
 file(GLOB_RECURSE APP_SRC_DOMAIN
-  ${APP_SRC_DOMAIN_DIR}/sensor_domain/configuration/utilities/*.cpp
+  ${APP_SRC_DOMAIN_DIR}/sensor_domain/configuration/parsers/*.cpp
   ${APP_SRC_DOMAIN_DIR}/sensor_domain/utilities/*.cpp
   ${APP_SRC_DOMAIN_DIR}/sensor_domain/models/*.cpp
-  ${APP_SRC_DOMAIN_DIR}/system_domain/configuration/utilities/*.cpp
+  ${APP_SRC_DOMAIN_DIR}/system_domain/configuration/parsers/*.cpp
   ${APP_SRC_DOMAIN_DIR}/system_domain/models/*.cpp
-  ${APP_SRC_DOMAIN_DIR}/logging_domain/configuration/utilities/*.cpp
+  ${APP_SRC_DOMAIN_DIR}/logging_domain/configuration/parsers/*.cpp
   ${APP_SRC_DOMAIN_DIR}/logging_domain/models/*.cpp
-  ${APP_SRC_DOMAIN_DIR}/canbus_domain/configuration/utilities/*.cpp
+  ${APP_SRC_DOMAIN_DIR}/canbus_domain/configuration/parsers/*.cpp
   ${APP_SRC_DOMAIN_DIR}/canbus_domain/models/*.cpp
 )
 
