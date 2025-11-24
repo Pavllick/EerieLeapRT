@@ -17,7 +17,6 @@ using namespace eerie_leap::domain::sensor_domain::services;
 
 class HttpServer {
 private:
-    std::shared_ptr<MathParserService> math_parser_service_;
     std::shared_ptr<SystemConfigurationManager> system_configuration_manager_;
     std::shared_ptr<AdcConfigurationManager> adc_configuration_manager_;
     std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager_;
@@ -28,7 +27,6 @@ public:
     ~HttpServer() = default;
 
     void Initialize(
-        std::shared_ptr<MathParserService> math_parser_service,
         std::shared_ptr<SystemConfigurationManager> system_configuration_manager,
         std::shared_ptr<AdcConfigurationManager> adc_configuration_manager,
         std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager,

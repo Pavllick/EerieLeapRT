@@ -1,12 +1,12 @@
 #include <zephyr/ztest.h>
 
 #include "utilities/guid/guid_generator.h"
+#include "utilities/math_parser/expression_evaluator.h"
 #include "domain/sensor_domain/models/sensor.h"
 #include "domain/sensor_domain/models/sensor_reading.h"
 #include "domain/sensor_domain/models/reading_status.h"
 #include "utilities/string/string_helpers.h"
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
-#include "utilities/math_parser/math_parser_service.hpp"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 
 using namespace eerie_leap::utilities::guid;
@@ -18,14 +18,14 @@ using namespace eerie_leap::utilities::voltage_interpolator;
 
 ZTEST_SUITE(sensor_readings_frame, NULL, NULL, NULL, NULL, NULL);
 
-std::vector<std::shared_ptr<Sensor>> sensor_readings_frame_GetTestSensors(std::shared_ptr<MathParserService> math_parser_service) {
+std::vector<std::shared_ptr<Sensor>> sensor_readings_frame_GetTestSensors() {
     std::vector<CalibrationData> calibration_data_1 {
         {0.0, 0.0},
         {3.3, 100.0}
     };
     auto calibration_data_1_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_1);
 
-    ExpressionEvaluator expression_evaluator_1(math_parser_service, "{x} * 2 + {sensor_2} + 1");
+    ExpressionEvaluator expression_evaluator_1("{x} * 2 + {sensor_2} + 1");
 
     auto sensor_1 = std::make_shared<Sensor>("sensor_1");
     sensor_1->metadata = {
@@ -38,7 +38,7 @@ std::vector<std::shared_ptr<Sensor>> sensor_readings_frame_GetTestSensors(std::s
         .channel = 0,
         .sampling_rate_ms = 1000,
         .voltage_interpolator = make_unique_ext<LinearVoltageInterpolator>(calibration_data_1_ptr),
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_1)
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_1))
     };
 
     std::vector<CalibrationData> calibration_data_2 {
@@ -50,7 +50,7 @@ std::vector<std::shared_ptr<Sensor>> sensor_readings_frame_GetTestSensors(std::s
     };
     auto calibration_data_2_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_2);
 
-    ExpressionEvaluator expression_evaluator_2(math_parser_service, "x * 4 + 1.6");
+    ExpressionEvaluator expression_evaluator_2("x * 4 + 1.6");
 
     auto sensor_2 = std::make_shared<Sensor>("sensor_2");
     sensor_2->metadata = {
@@ -63,10 +63,10 @@ std::vector<std::shared_ptr<Sensor>> sensor_readings_frame_GetTestSensors(std::s
         .channel = 1,
         .sampling_rate_ms = 500,
         .voltage_interpolator = make_unique_ext<LinearVoltageInterpolator>(calibration_data_2_ptr),
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_2)
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_2))
     };
 
-    ExpressionEvaluator expression_evaluator_3(math_parser_service, "{sensor_1} + 8.34");
+    ExpressionEvaluator expression_evaluator_3("{sensor_1} + 8.34");
 
     auto sensor_3 = std::make_shared<Sensor>("sensor_3");
     sensor_3->metadata = {
@@ -77,7 +77,7 @@ std::vector<std::shared_ptr<Sensor>> sensor_readings_frame_GetTestSensors(std::s
     sensor_3->configuration = {
         .type = SensorType::VIRTUAL_ANALOG,
         .sampling_rate_ms = 2000,
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_3)
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_3))
     };
 
     std::vector<std::shared_ptr<Sensor>> sensors = {
@@ -88,18 +88,15 @@ std::vector<std::shared_ptr<Sensor>> sensor_readings_frame_GetTestSensors(std::s
 
 struct sensor_readings_frame_GetTestSensors_HelperInstances {
     std::shared_ptr<GuidGenerator> guid_generator;
-    std::shared_ptr<MathParserService> math_parser_service;
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame;
 };
 
 sensor_readings_frame_GetTestSensors_HelperInstances sensor_readings_frame_GetHelperInstances() {
     auto guid_generator = std::make_shared<GuidGenerator>();
-    auto math_parser_service = std::make_shared<MathParserService>();
     auto sensor_readings_frame = std::make_shared<SensorReadingsFrame>();
 
     return sensor_readings_frame_GetTestSensors_HelperInstances {
         .guid_generator = guid_generator,
-        .math_parser_service = math_parser_service,
         .sensor_readings_frame = sensor_readings_frame
     };
 }
@@ -108,9 +105,8 @@ ZTEST(sensor_readings_frame, test_AddOrUpdateReading) {
         auto helper = sensor_readings_frame_GetHelperInstances();
 
         auto guid_generator = helper.guid_generator;
-        auto math_parser_service = helper.math_parser_service;
         auto sensor_readings_frame = helper.sensor_readings_frame;
-        auto sensors = sensor_readings_frame_GetTestSensors(math_parser_service);
+        auto sensors = sensor_readings_frame_GetTestSensors();
 
         auto readings = sensor_readings_frame->GetReadings();
         zassert_equal(readings.size(), 0);
@@ -148,9 +144,8 @@ ZTEST(sensor_readings_frame, test_GetReading) {
     auto helper = sensor_readings_frame_GetHelperInstances();
 
     auto guid_generator = helper.guid_generator;
-    auto math_parser_service = helper.math_parser_service;
     auto sensor_readings_frame = helper.sensor_readings_frame;
-    auto sensors = sensor_readings_frame_GetTestSensors(math_parser_service);
+    auto sensors = sensor_readings_frame_GetTestSensors();
 
     auto reading1 = std::make_shared<SensorReading>(guid_generator->Generate(), sensors[1]);
     sensor_readings_frame->AddOrUpdateReading(reading1);
@@ -169,9 +164,8 @@ ZTEST(sensor_readings_frame, test_GetReading_no_sensor) {
     auto helper = sensor_readings_frame_GetHelperInstances();
 
     auto guid_generator = helper.guid_generator;
-    auto math_parser_service = helper.math_parser_service;
     auto sensor_readings_frame = helper.sensor_readings_frame;
-    auto sensors = sensor_readings_frame_GetTestSensors(math_parser_service);
+    auto sensors = sensor_readings_frame_GetTestSensors();
 
     try {
         sensor_readings_frame->GetReading(StringHelpers::GetHash("sensor_2"));
@@ -203,9 +197,8 @@ ZTEST(sensor_readings_frame, test_GetReadings) {
     auto helper = sensor_readings_frame_GetHelperInstances();
 
     auto guid_generator = helper.guid_generator;
-    auto math_parser_service = helper.math_parser_service;
     auto sensor_readings_frame = helper.sensor_readings_frame;
-    auto sensors = sensor_readings_frame_GetTestSensors(math_parser_service);
+    auto sensors = sensor_readings_frame_GetTestSensors();
 
     auto readings = sensor_readings_frame->GetReadings();
     zassert_equal(readings.size(), 0);
@@ -234,9 +227,8 @@ ZTEST(sensor_readings_frame, test_GetReadingValues) {
     auto helper = sensor_readings_frame_GetHelperInstances();
 
     auto guid_generator = helper.guid_generator;
-    auto math_parser_service = helper.math_parser_service;
     auto sensor_readings_frame = helper.sensor_readings_frame;
-    auto sensors = sensor_readings_frame_GetTestSensors(math_parser_service);
+    auto sensors = sensor_readings_frame_GetTestSensors();
 
     auto reading1 = std::make_shared<SensorReading>(guid_generator->Generate(), sensors[0]);
     reading1->value = 2.4;
@@ -263,9 +255,8 @@ ZTEST(sensor_readings_frame, test_ClearReadings) {
     auto helper = sensor_readings_frame_GetHelperInstances();
 
     auto guid_generator = helper.guid_generator;
-    auto math_parser_service = helper.math_parser_service;
     auto sensor_readings_frame = helper.sensor_readings_frame;
-    auto sensors = sensor_readings_frame_GetTestSensors(math_parser_service);
+    auto sensors = sensor_readings_frame_GetTestSensors();
 
     auto readings = sensor_readings_frame->GetReadings();
     zassert_equal(readings.size(), 0);

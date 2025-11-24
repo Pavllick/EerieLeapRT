@@ -3,8 +3,6 @@
 #include <algorithm>
 #include <zephyr/logging/log.h>
 
-#include <muParser.h>
-
 #include "utilities/string/string_helpers.h"
 
 #include "expression_evaluator.h"
@@ -14,39 +12,29 @@ namespace eerie_leap::utilities::math_parser {
 using namespace eerie_leap::utilities::string;
 
 LOG_MODULE_REGISTER(expression_evaluator_logger);
-K_MUTEX_DEFINE(expression_eval_mutex_);
 
 using namespace mu;
 
-ExpressionEvaluator::ExpressionEvaluator(std::shared_ptr<MathParserService> math_parser_service, const std::string& expression_raw)
-    : expression_raw_(expression_raw) {
-
+ExpressionEvaluator::ExpressionEvaluator(std::string expression_raw)
+    : expression_raw_(std::move(expression_raw)) {
     expression_ = UnwrapVariables();
     variables_ = ExtractVariables();
 
-    math_parser_service_.SetExpression(expression_);
+    math_parser_ = make_unique_ext<MathParser>(expression_);
 }
 
 float ExpressionEvaluator::Evaluate(const std::unordered_map<size_t, float*>& variables, std::optional<float> x) const {
-
-    k_mutex_lock(&expression_eval_mutex_, K_FOREVER);
-
-
     if(x.has_value())
-        math_parser_service_.DefineVariable("x", &x.value());
+        math_parser_->DefineVariable("x", &x.value());
 
     for(const auto& [hash, name] : variables_) {
         if(!variables.contains(hash))
             throw std::runtime_error("Variable '" + name + "' required for evaluation not found.");
 
-        math_parser_service_.DefineVariable(name, variables.at(hash));
+        math_parser_->DefineVariable(name, variables.at(hash));
     }
 
-    float res = math_parser_service_.Evaluate();
-
-    k_mutex_unlock(&expression_eval_mutex_);
-
-    return res;
+    return math_parser_->Evaluate();
 }
 
 std::string ExpressionEvaluator::SanitizeExpression(const std::string& expression) const {

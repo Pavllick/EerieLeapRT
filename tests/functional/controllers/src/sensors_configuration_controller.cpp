@@ -5,7 +5,6 @@
 
 #include "utilities/cbor/cbor_helpers.hpp"
 #include "utilities/math_parser/expression_evaluator.h"
-#include "utilities/math_parser/math_parser_service.hpp"
 #include "configuration/cbor/cbor_system_config/cbor_system_config.h"
 #include "configuration/cbor/cbor_sensors_config/cbor_sensors_config.h"
 #include "configuration/services/cbor_configuration_service.h"
@@ -30,14 +29,14 @@ using namespace eerie_leap::subsys::device_tree;
 
 ZTEST_SUITE(sensors_configuration_manager, NULL, NULL, NULL, NULL, NULL);
 
-std::vector<std::shared_ptr<Sensor>> sensors_configuration_manager_SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service) {
+std::vector<std::shared_ptr<Sensor>> sensors_configuration_manager_SetupTestSensors() {
     std::vector<CalibrationData> calibration_data_1 {
         {0.0, 0.0},
         {3.3, 100.0}
     };
     auto calibration_data_1_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_1);
 
-    ExpressionEvaluator expression_evaluator_1(math_parser_service, "{x} * 2 + {sensor_2} + 1");
+    ExpressionEvaluator expression_evaluator_1("{x} * 2 + {sensor_2} + 1");
 
     auto sensor_1 = std::make_shared<Sensor>("sensor_1");
     sensor_1->metadata = {
@@ -50,7 +49,7 @@ std::vector<std::shared_ptr<Sensor>> sensors_configuration_manager_SetupTestSens
         .channel = 0,
         .sampling_rate_ms = 1000,
         .voltage_interpolator = make_unique_ext<LinearVoltageInterpolator>(calibration_data_1_ptr),
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_1)
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_1))
     };
 
     std::vector<CalibrationData> calibration_data_2 {
@@ -62,7 +61,7 @@ std::vector<std::shared_ptr<Sensor>> sensors_configuration_manager_SetupTestSens
     };
     auto calibration_data_2_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_2);
 
-    ExpressionEvaluator expression_evaluator_2(math_parser_service, "x * 4 + 1.6");
+    ExpressionEvaluator expression_evaluator_2("x * 4 + 1.6");
 
     auto sensor_2 = std::make_shared<Sensor>("sensor_2");
     sensor_2->metadata = {
@@ -75,10 +74,10 @@ std::vector<std::shared_ptr<Sensor>> sensors_configuration_manager_SetupTestSens
         .channel = 1,
         .sampling_rate_ms = 500,
         .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_2)
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_2))
     };
 
-    ExpressionEvaluator expression_evaluator_3(math_parser_service, "{sensor_1} + 8.34");
+    ExpressionEvaluator expression_evaluator_3("{sensor_1} + 8.34");
 
     auto sensor_3 = std::make_shared<Sensor>("sensor_3");
     sensor_3->metadata = {
@@ -90,7 +89,7 @@ std::vector<std::shared_ptr<Sensor>> sensors_configuration_manager_SetupTestSens
         .type = SensorType::VIRTUAL_ANALOG,
         .channel = std::nullopt,
         .sampling_rate_ms = 2000,
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_3)
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_3))
     };
 
     auto sensor_4 = std::make_shared<Sensor>("sensor_4");
@@ -121,16 +120,14 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
     auto cbor_sensors_configuration_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
     auto json_sensors_configuration_service = make_unique_ext<JsonConfigurationService<JsonSensorsConfig>>("sensors_config", fs_service);
 
-    auto math_parser_service = std::make_shared<MathParserService>();
     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
-        math_parser_service,
         nullptr,
         std::move(cbor_sensors_configuration_service),
         std::move(json_sensors_configuration_service),
         16,
         16);
 
-    auto sensors = sensors_configuration_manager_SetupTestSensors(math_parser_service);
+    auto sensors = sensors_configuration_manager_SetupTestSensors();
     sensors_configuration_manager->Update(sensors);
 
     auto saved_sensors = *sensors_configuration_manager->Get();
@@ -174,23 +171,20 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
     auto cbor_sensors_configuration_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
     auto json_sensors_configuration_service = make_unique_ext<JsonConfigurationService<JsonSensorsConfig>>("sensors_config", fs_service);
 
-    auto math_parser_service = std::make_shared<MathParserService>();
     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
-        math_parser_service,
         nullptr,
         std::move(cbor_sensors_configuration_service),
         std::move(json_sensors_configuration_service),
         16,
         16);
 
-    auto sensors = sensors_configuration_manager_SetupTestSensors(math_parser_service);
+    auto sensors = sensors_configuration_manager_SetupTestSensors();
     sensors_configuration_manager->Update(sensors);
 
     cbor_sensors_configuration_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
     json_sensors_configuration_service = make_unique_ext<JsonConfigurationService<JsonSensorsConfig>>("sensors_config", fs_service);
     sensors_configuration_manager = nullptr;
     sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
-        math_parser_service,
         nullptr,
         std::move(cbor_sensors_configuration_service),
         std::move(json_sensors_configuration_service),
@@ -238,9 +232,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
     auto cbor_sensors_configuration_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
     auto json_sensors_configuration_service = make_unique_ext<JsonConfigurationService<JsonSensorsConfig>>("sensors_config", fs_service);
 
-    auto math_parser_service = std::make_shared<MathParserService>();
     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
-        math_parser_service,
         nullptr,
         std::move(cbor_sensors_configuration_service),
         std::move(json_sensors_configuration_service),
@@ -308,9 +300,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
     auto cbor_sensors_configuration_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
     auto json_sensors_configuration_service = make_unique_ext<JsonConfigurationService<JsonSensorsConfig>>("sensors_config", fs_service);
 
-    auto math_parser_service = std::make_shared<MathParserService>();
     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
-        math_parser_service,
         nullptr,
         std::move(cbor_sensors_configuration_service),
         std::move(json_sensors_configuration_service),

@@ -5,7 +5,6 @@
 
 #include "utilities/string/string_helpers.h"
 #include "utilities/math_parser/expression_evaluator.h"
-#include "utilities/math_parser/math_parser_service.hpp"
 
 using namespace eerie_leap::utilities::string;
 using namespace eerie_leap::utilities::math_parser;
@@ -13,8 +12,7 @@ using namespace eerie_leap::utilities::math_parser;
 ZTEST_SUITE(expression_evaluator, NULL, NULL, NULL, NULL, NULL);
 
 ZTEST(expression_evaluator, test_Evaluate_x_returns_x) {
-    auto math_parser_service = std::make_shared<MathParserService>();
-    ExpressionEvaluator expression_evaluator(math_parser_service, "x");
+    ExpressionEvaluator expression_evaluator("x");
 
     std::unordered_map<size_t, float*> vars;
     float res = expression_evaluator.Evaluate(vars, 8.0);
@@ -23,8 +21,7 @@ ZTEST(expression_evaluator, test_Evaluate_x_returns_x) {
 }
 
 ZTEST(expression_evaluator, test_Evaluate_braced_x_returns_correct_value) {
-    auto math_parser_service = std::make_shared<MathParserService>();
-    ExpressionEvaluator expression_evaluator(math_parser_service, "({x} + {y}) * 4");
+    ExpressionEvaluator expression_evaluator("({x} + {y}) * 4");
 
     std::unordered_map<size_t, float*> vars;
     float y = 2.0;
@@ -35,8 +32,7 @@ ZTEST(expression_evaluator, test_Evaluate_braced_x_returns_correct_value) {
 }
 
 ZTEST(expression_evaluator, test_Evaluate_not_braced_x_returns_correct_value) {
-    auto math_parser_service = std::make_shared<MathParserService>();
-    ExpressionEvaluator expression_evaluator(math_parser_service, "(x + {y}) * 4");
+    ExpressionEvaluator expression_evaluator("(x + {y}) * 4");
 
     std::unordered_map<size_t, float*> vars;
     float y = 2.0;
@@ -48,8 +44,7 @@ ZTEST(expression_evaluator, test_Evaluate_not_braced_x_returns_correct_value) {
 
 ZTEST_EXPECT_FAIL(expression_evaluator, test_Evaluate_empty_expression_throws_exception);
 ZTEST(expression_evaluator, test_Evaluate_empty_expression_throws_exception) {
-    auto math_parser_service = std::make_shared<MathParserService>();
-    ExpressionEvaluator expression_evaluator(math_parser_service, "");
+    ExpressionEvaluator expression_evaluator("");
 
     std::unordered_map<size_t, float*> vars;
 
@@ -62,9 +57,8 @@ ZTEST(expression_evaluator, test_Evaluate_empty_expression_throws_exception) {
 }
 
 ZTEST(expression_evaluator, test_multiple_ExpressionEvaluator_eval_correctly) {
-    auto math_parser_service = std::make_shared<MathParserService>();
-    ExpressionEvaluator expression_evaluator_1(math_parser_service, "({x} + {y}) * 4");
-    ExpressionEvaluator expression_evaluator_2(math_parser_service, "({x} - 8 * {var_d}) / {f}");
+    ExpressionEvaluator expression_evaluator_1("({x} + {y}) * 4");
+    ExpressionEvaluator expression_evaluator_2("({x} - 8 * {var_d}) / {f}");
 
     std::unordered_map<size_t, float*> vars1;
     float y = 2.0;
@@ -82,29 +76,26 @@ ZTEST(expression_evaluator, test_multiple_ExpressionEvaluator_eval_correctly) {
 }
 
 ZTEST(expression_evaluator, test_GetExpression_returns_sanitized_expression) {
-    auto math_parser_service = std::make_shared<MathParserService>();
-    ExpressionEvaluator expression_evaluator_1(math_parser_service, "(x + {y}) * 4");
-    ExpressionEvaluator expression_evaluator_2(math_parser_service, "({x} - 8 * {var_d}) / {f}");
+    ExpressionEvaluator expression_evaluator_1("(x + {y}) * 4");
+    ExpressionEvaluator expression_evaluator_2("({x} - 8 * {var_d}) / {f}");
 
     zassert_equal(expression_evaluator_1.GetExpression(), "(x+y)*4");
     zassert_equal(expression_evaluator_2.GetExpression(), "(x-8*var_d)/f");
 }
 
 ZTEST(expression_evaluator, test_GetRawExpression_returns_original_expression) {
-    auto math_parser_service = std::make_shared<MathParserService>();
-    ExpressionEvaluator expression_evaluator_1(math_parser_service, "(x + {y}) * 4");
-    ExpressionEvaluator expression_evaluator_2(math_parser_service, "({x} - 8 * {var_d}) / {f}");
+    ExpressionEvaluator expression_evaluator_1("(x + {y}) * 4");
+    ExpressionEvaluator expression_evaluator_2("({x} - 8 * {var_d}) / {f}");
 
     zassert_equal(expression_evaluator_1.GetRawExpression(), "(x + {y}) * 4");
     zassert_equal(expression_evaluator_2.GetRawExpression(), "({x} - 8 * {var_d}) / {f}");
 }
 
 ZTEST(expression_evaluator, test_ExtractVariables_returns_list_of_vars) {
-    auto math_parser_service = std::make_shared<MathParserService>();
-    ExpressionEvaluator expression_evaluator_1(math_parser_service, "");
-    ExpressionEvaluator expression_evaluator_2(math_parser_service, "x - 16");
-    ExpressionEvaluator expression_evaluator_3(math_parser_service, "(x + {y}) * 4");
-    ExpressionEvaluator expression_evaluator_4(math_parser_service, "({x} - 8 * {var_d}) / {f}");
+    ExpressionEvaluator expression_evaluator_1("");
+    ExpressionEvaluator expression_evaluator_2("x - 16");
+    ExpressionEvaluator expression_evaluator_3("(x + {y}) * 4");
+    ExpressionEvaluator expression_evaluator_4("({x} - 8 * {var_d}) / {f}");
 
     auto vars1_hashes = expression_evaluator_1.GetVariableNameHashes();
     zassert_equal(vars1_hashes.size(), 0);

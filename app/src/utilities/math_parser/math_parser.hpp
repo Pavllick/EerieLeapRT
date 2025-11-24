@@ -7,14 +7,13 @@ namespace eerie_leap::utilities::math_parser {
 
 using namespace mu;
 
-class MathParserService {
+class MathParser {
 private:
     mu::Parser parser_;
 
 public:
-    void SetExpression(const std::string& expression) {
+    explicit MathParser(const std::string& expression) {
         parser_.SetExpr(expression);
-        parser_.ClearVar();
     }
 
     float Evaluate() const {

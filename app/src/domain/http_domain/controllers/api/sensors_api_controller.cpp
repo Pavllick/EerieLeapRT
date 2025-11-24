@@ -21,13 +21,11 @@ ext_unique_ptr<ExtVector> SensorsApiController::sensors_config_post_buffer_;
 ext_unique_ptr<std::string> SensorsApiController::sensors_config_get_buffer_;
 
 std::unique_ptr<SensorsJsonParser> SensorsApiController::sensors_json_parser_ = nullptr;
-std::shared_ptr<MathParserService> SensorsApiController::math_parser_service_ = nullptr;
 std::shared_ptr<SensorsConfigurationManager> SensorsApiController::sensors_configuration_manager_ = nullptr;
 std::shared_ptr<ProcessingSchedulerService> SensorsApiController::processing_scheduler_service_ = nullptr;
 std::unique_ptr<JsonSerializer<JsonSensorsConfig>> SensorsApiController::json_serializer_ = nullptr;
 
 SensorsApiController::SensorsApiController(
-    std::shared_ptr<MathParserService> math_parser_service,
     std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager,
     std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service) {
 
@@ -35,10 +33,7 @@ SensorsApiController::SensorsApiController(
         sensors_config_post_buffer_ = make_unique_ext<ExtVector>(sensors_config_post_buffer_size_);
 
     if(!sensors_json_parser_)
-        sensors_json_parser_ = std::make_unique<SensorsJsonParser>(math_parser_service, nullptr);
-
-    if(!math_parser_service_)
-        math_parser_service_ = std::move(math_parser_service);
+        sensors_json_parser_ = std::make_unique<SensorsJsonParser>(nullptr);
 
     if(!sensors_configuration_manager_)
         sensors_configuration_manager_ = std::move(sensors_configuration_manager);

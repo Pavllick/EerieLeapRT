@@ -6,7 +6,6 @@
 #include <zephyr/data/json.h>
 
 #include "utilities/memory/heap_allocator.h"
-#include "utilities/math_parser/math_parser_service.hpp"
 #include "subsys/fs/services/i_fs_service.h"
 #include "configuration/json/configs/json_sensors_config.h"
 #include "domain/sensor_domain/models/sensor.h"
@@ -21,13 +20,10 @@ using namespace eerie_leap::domain::sensor_domain::models;
 
 class SensorsJsonParser {
 private:
-    std::shared_ptr<MathParserService> math_parser_service_;
     std::shared_ptr<IFsService> fs_service_;
 
 public:
-    explicit SensorsJsonParser(
-        std::shared_ptr<MathParserService> math_parser_service,
-        std::shared_ptr<IFsService> fs_service);
+    explicit SensorsJsonParser(std::shared_ptr<IFsService> fs_service);
 
     ext_unique_ptr<JsonSensorsConfig> Serialize(
         const std::vector<std::shared_ptr<Sensor>>& sensors,

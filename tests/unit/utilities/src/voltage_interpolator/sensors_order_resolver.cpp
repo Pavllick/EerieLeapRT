@@ -2,7 +2,7 @@
 
 #include "domain/sensor_domain/models/sensor.h"
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
-#include "utilities/math_parser/math_parser_service.hpp"
+#include "utilities/math_parser/expression_evaluator.h"
 #include "domain/sensor_domain/utilities/sensors_order_resolver.h"
 
 using namespace eerie_leap::utilities::math_parser;
@@ -12,14 +12,14 @@ using namespace eerie_leap::utilities::voltage_interpolator;
 
 ZTEST_SUITE(sensors_order_resolver, NULL, NULL, NULL, NULL, NULL);
 
-std::vector<std::shared_ptr<Sensor>> sensors_order_resolver_GetTestSensors(std::shared_ptr<MathParserService> math_parser_service) {
+std::vector<std::shared_ptr<Sensor>> sensors_order_resolver_GetTestSensors() {
     std::vector<CalibrationData> calibration_data_1 {
         {0.0, 0.0},
         {3.3, 100.0}
     };
     auto calibration_data_1_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_1);
 
-    ExpressionEvaluator expression_evaluator_1(math_parser_service, "{x} * 2 + {sensor_2} + 1");
+    ExpressionEvaluator expression_evaluator_1("{x} * 2 + {sensor_2} + 1");
 
     auto sensor_1 = std::make_shared<Sensor>("sensor_1");
     sensor_1->metadata = {
@@ -32,7 +32,7 @@ std::vector<std::shared_ptr<Sensor>> sensors_order_resolver_GetTestSensors(std::
         .channel = 0,
         .sampling_rate_ms = 1000,
         .voltage_interpolator = make_unique_ext<LinearVoltageInterpolator>(calibration_data_1_ptr),
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_1)
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_1))
     };
 
     std::vector<CalibrationData> calibration_data_2 {
@@ -44,7 +44,7 @@ std::vector<std::shared_ptr<Sensor>> sensors_order_resolver_GetTestSensors(std::
     };
     auto calibration_data_2_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_2);
 
-    ExpressionEvaluator expression_evaluator_2(math_parser_service, "x * 4 + 1.6");
+    ExpressionEvaluator expression_evaluator_2("x * 4 + 1.6");
 
     auto sensor_2 = std::make_shared<Sensor>("sensor_2");
     sensor_2->metadata = {
@@ -57,10 +57,10 @@ std::vector<std::shared_ptr<Sensor>> sensors_order_resolver_GetTestSensors(std::
         .channel = 1,
         .sampling_rate_ms = 500,
         .voltage_interpolator = make_unique_ext<LinearVoltageInterpolator>(calibration_data_2_ptr),
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_2)
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_2))
     };
 
-    ExpressionEvaluator expression_evaluator_3(math_parser_service, "{sensor_1} + 8.34");
+    ExpressionEvaluator expression_evaluator_3("{sensor_1} + 8.34");
 
     auto sensor_3 = std::make_shared<Sensor>("sensor_3");
     sensor_3->metadata = {
@@ -71,7 +71,7 @@ std::vector<std::shared_ptr<Sensor>> sensors_order_resolver_GetTestSensors(std::
     sensor_3->configuration = {
         .type = SensorType::VIRTUAL_ANALOG,
         .sampling_rate_ms = 2000,
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_3)
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_3))
     };
 
     auto sensor_4 = std::make_shared<Sensor>("sensor_4");
@@ -86,7 +86,7 @@ std::vector<std::shared_ptr<Sensor>> sensors_order_resolver_GetTestSensors(std::
         .sampling_rate_ms = 2000
     };
 
-    ExpressionEvaluator expression_evaluator_5(math_parser_service, "{sensor_6} + 2.34");
+    ExpressionEvaluator expression_evaluator_5("{sensor_6} + 2.34");
     auto sensor_5 = std::make_shared<Sensor>("sensor_5");
     sensor_5->metadata = {
         .name = "Sensor 5",
@@ -97,10 +97,10 @@ std::vector<std::shared_ptr<Sensor>> sensors_order_resolver_GetTestSensors(std::
         .type = SensorType::PHYSICAL_ANALOG,
         .channel = 4,
         .sampling_rate_ms = 2000,
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_5)
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_5))
     };
 
-    ExpressionEvaluator expression_evaluator_6(math_parser_service, "{sensor_5} + 4.34");
+    ExpressionEvaluator expression_evaluator_6("{sensor_5} + 4.34");
     auto sensor_6 = std::make_shared<Sensor>("sensor_6");
     sensor_6->metadata = {
         .name = "Sensor 6",
@@ -111,7 +111,7 @@ std::vector<std::shared_ptr<Sensor>> sensors_order_resolver_GetTestSensors(std::
         .type = SensorType::PHYSICAL_ANALOG,
         .channel = 4,
         .sampling_rate_ms = 2000,
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_6)
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_6))
     };
 
     std::vector<std::shared_ptr<Sensor>> sensors = {
@@ -121,8 +121,7 @@ std::vector<std::shared_ptr<Sensor>> sensors_order_resolver_GetTestSensors(std::
 }
 
 ZTEST(sensors_order_resolver, test_GetProcessingOrder) {
-    auto math_parser_service = std::make_shared<MathParserService>();
-    auto sensors = sensors_order_resolver_GetTestSensors(math_parser_service);
+    auto sensors = sensors_order_resolver_GetTestSensors();
 
     auto sensors_order_resolver = std::make_shared<SensorsOrderResolver>();
 
@@ -152,8 +151,7 @@ ZTEST(sensors_order_resolver, test_GetProcessingOrder) {
 
 ZTEST_EXPECT_FAIL(sensors_order_resolver, test_GetProcessingOrder_missing_dependency);
 ZTEST(sensors_order_resolver, test_GetProcessingOrder_missing_dependency) {
-    auto math_parser_service = std::make_shared<MathParserService>();
-    auto sensors = sensors_order_resolver_GetTestSensors(math_parser_service);
+    auto sensors = sensors_order_resolver_GetTestSensors();
 
     auto sensors_order_resolver = std::make_shared<SensorsOrderResolver>();
 
@@ -173,8 +171,7 @@ ZTEST(sensors_order_resolver, test_GetProcessingOrder_missing_dependency) {
 
 ZTEST_EXPECT_FAIL(sensors_order_resolver, test_GetProcessingOrder_has_cyclic_dependency);
 ZTEST(sensors_order_resolver, test_GetProcessingOrder_has_cyclic_dependency) {
-    auto math_parser_service = std::make_shared<MathParserService>();
-    auto sensors = sensors_order_resolver_GetTestSensors(math_parser_service);
+    auto sensors = sensors_order_resolver_GetTestSensors();
 
     auto sensors_order_resolver = std::make_shared<SensorsOrderResolver>();
 

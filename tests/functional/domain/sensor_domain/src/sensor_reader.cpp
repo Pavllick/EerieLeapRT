@@ -3,7 +3,7 @@
 #include "utilities/memory/heap_allocator.h"
 #include "utilities/guid/guid_generator.h"
 #include "utilities/string/string_helpers.h"
-#include "utilities/math_parser/math_parser_service.hpp"
+#include "utilities/math_parser/expression_evaluator.h"
 
 #include "configuration/cbor/cbor_adc_config/cbor_adc_config.h"
 #include "configuration/services/cbor_configuration_service.h"
@@ -51,14 +51,14 @@ using namespace eerie_leap::utilities::voltage_interpolator;
 
 ZTEST_SUITE(sensors_reader, NULL, NULL, NULL, NULL, NULL);
 
-std::vector<std::shared_ptr<Sensor>> sensors_reader_GetTestSensors(std::shared_ptr<MathParserService> math_parser_service) {
+std::vector<std::shared_ptr<Sensor>> sensors_reader_GetTestSensors() {
     std::vector<CalibrationData> calibration_data_1 {
         {0.0, 0.0},
         {3.3, 100.0}
     };
     auto calibration_data_1_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_1);
 
-    ExpressionEvaluator expression_evaluator_1(math_parser_service, "{x} * 2 + {sensor_2} + 1");
+    ExpressionEvaluator expression_evaluator_1("{x} * 2 + {sensor_2} + 1");
 
     auto sensor_1 = std::make_shared<Sensor>("sensor_1");
     sensor_1->metadata = {
@@ -71,7 +71,7 @@ std::vector<std::shared_ptr<Sensor>> sensors_reader_GetTestSensors(std::shared_p
         .channel = 0,
         .sampling_rate_ms = 1000,
         .voltage_interpolator = make_unique_ext<LinearVoltageInterpolator>(calibration_data_1_ptr),
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_1)
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_1))
     };
 
     std::vector<CalibrationData> calibration_data_2 {
@@ -83,7 +83,7 @@ std::vector<std::shared_ptr<Sensor>> sensors_reader_GetTestSensors(std::shared_p
     };
     auto calibration_data_2_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_2);
 
-    ExpressionEvaluator expression_evaluator_2(math_parser_service, "x * 4 + 1.6");
+    ExpressionEvaluator expression_evaluator_2("x * 4 + 1.6");
 
     auto sensor_2 = std::make_shared<Sensor>("sensor_2");
     sensor_2->metadata = {
@@ -96,10 +96,10 @@ std::vector<std::shared_ptr<Sensor>> sensors_reader_GetTestSensors(std::shared_p
         .channel = 1,
         .sampling_rate_ms = 500,
         .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_2)
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_2))
     };
 
-    ExpressionEvaluator expression_evaluator_3(math_parser_service, "{sensor_1} + 8.34");
+    ExpressionEvaluator expression_evaluator_3("{sensor_1} + 8.34");
 
     auto sensor_3 = std::make_shared<Sensor>("sensor_3");
     sensor_3->metadata = {
@@ -110,7 +110,7 @@ std::vector<std::shared_ptr<Sensor>> sensors_reader_GetTestSensors(std::shared_p
     sensor_3->configuration = {
         .type = SensorType::VIRTUAL_ANALOG,
         .sampling_rate_ms = 2000,
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_3)
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_3))
     };
 
     auto sensor_4 = std::make_shared<Sensor>("sensor_4");
@@ -125,7 +125,7 @@ std::vector<std::shared_ptr<Sensor>> sensors_reader_GetTestSensors(std::shared_p
         .sampling_rate_ms = 1000
     };
 
-    ExpressionEvaluator expression_evaluator_5(math_parser_service, "{sensor_1} < 400");
+    ExpressionEvaluator expression_evaluator_5("{sensor_1} < 400");
 
     auto sensor_5 = std::make_shared<Sensor>("sensor_5");
     sensor_5->metadata = {
@@ -136,7 +136,7 @@ std::vector<std::shared_ptr<Sensor>> sensors_reader_GetTestSensors(std::shared_p
     sensor_5->configuration = {
         .type = SensorType::VIRTUAL_INDICATOR,
         .sampling_rate_ms = 1000,
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_5)
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_5))
     };
 
     std::vector<std::shared_ptr<Sensor>> sensors = {
@@ -185,7 +185,6 @@ sensors_reader_HelperInstances sensors_reader_GetReadingInstances() {
     auto time_service = std::make_shared<TimeService>(time_provider, rtc_provider);
 
     std::shared_ptr<GuidGenerator> guid_generator = std::make_shared<GuidGenerator>();
-    std::shared_ptr<MathParserService> math_parser_service = std::make_shared<MathParserService>();
 
     const auto adc_configuration = sensors_reader_GetTestConfiguration();
 
@@ -198,7 +197,7 @@ sensors_reader_HelperInstances sensors_reader_GetReadingInstances() {
     gpio->Initialize();
 
     auto sensor_readings_frame = std::make_shared<SensorReadingsFrame>();
-    auto sensors = sensors_reader_GetTestSensors(math_parser_service);
+    auto sensors = sensors_reader_GetTestSensors();
 
     auto sensor_readers = std::make_shared<std::vector<std::shared_ptr<ISensorReader>>>();
     for(int i = 0; i < sensors.size(); i++) {

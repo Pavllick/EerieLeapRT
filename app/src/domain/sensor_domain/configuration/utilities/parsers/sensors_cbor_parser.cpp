@@ -18,11 +18,8 @@ using namespace eerie_leap::utilities::voltage_interpolator;
 using namespace eerie_leap::subsys::lua_script;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 
-SensorsCborParser::SensorsCborParser(
-    std::shared_ptr<MathParserService> math_parser_service,
-    std::shared_ptr<IFsService> fs_service)
-        : math_parser_service_(std::move(math_parser_service)),
-        fs_service_(std::move(fs_service)) {}
+SensorsCborParser::SensorsCborParser(std::shared_ptr<IFsService> fs_service)
+    : fs_service_(std::move(fs_service)) {}
 
 ext_unique_ptr<CborSensorsConfig> SensorsCborParser::Serialize(
     const std::vector<std::shared_ptr<Sensor>>& sensors,
@@ -174,7 +171,6 @@ std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
 
         if(sensor_config.configuration.expression_present)
             sensor->configuration.expression_evaluator = make_unique_ext<ExpressionEvaluator>(
-                math_parser_service_,
                 CborHelpers::ToStdString(sensor_config.configuration.expression));
         else
             sensor->configuration.expression_evaluator = nullptr;

@@ -4,7 +4,6 @@
 #include "utilities/memory/heap_allocator.h"
 #include "utilities/dev_tools/system_info.h"
 #include "utilities/guid/guid_generator.h"
-#include "utilities/math_parser/math_parser_service.hpp"
 
 #include "subsys/device_tree/dt_configurator.h"
 #include "subsys/device_tree/dt_fs.h"
@@ -104,7 +103,7 @@ constexpr uint32_t SLEEP_TIME_MS = 10000;
 void SetupSystemConfiguration(std::shared_ptr<SystemConfigurationManager> system_configuration_manager);
 void SetupCanbusConfiguration(std::shared_ptr<CanbusConfigurationManager> canbus_configuration_manager);
 void SetupAdcConfiguration(std::shared_ptr<AdcConfigurationManager> adc_configuration_manager);
-void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager);
+void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager);
 void SetupLoggingConfiguration(std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager,
     std::shared_ptr<LoggingConfigurationManager> logging_configuration_manager);
 
@@ -179,7 +178,6 @@ int main(void) {
     time_service->Initialize();
 
     auto guid_generator = make_shared_ext<GuidGenerator>();
-    auto math_parser_service = make_shared_ext<MathParserService>();
 
     auto cbor_system_config_service = make_unique_ext<CborConfigurationService<CborSystemConfig>>(
         "system_config", fs_service);
@@ -221,7 +219,6 @@ int main(void) {
     // SetupCanbusConfiguration(canbus_configuration_manager);
 
     auto sensors_configuration_manager = make_shared_ext<SensorsConfigurationManager>(
-        math_parser_service,
         sd_fs_service,
         std::move(cbor_sensors_config_service),
         std::move(json_sensors_config_service),
@@ -231,7 +228,7 @@ int main(void) {
     auto canbus_service = make_shared_ext<CanbusService>(sd_fs_service, canbus_configuration_manager);
 
     // TODO: For test purposes only
-    // SetupTestSensors(math_parser_service, sensors_configuration_manager);
+    // SetupTestSensors(sensors_configuration_manager);
 
     auto sensor_readings_frame = make_shared_ext<SensorReadingsFrame>();
 
@@ -321,7 +318,6 @@ int main(void) {
 
 #ifdef CONFIG_NETWORKING
     http_server.Initialize(
-        math_parser_service,
         system_configuration_manager,
         adc_configuration_manager,
         sensors_configuration_manager,
@@ -419,7 +415,7 @@ void SetupAdcConfiguration(std::shared_ptr<AdcConfigurationManager> adc_configur
     adc_configuration_manager->Update(*adc_configuration.get());
 }
 
-void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager) {
+void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager) {
     // Test Sensors
 
     std::vector<CalibrationData> calibration_data_1 {
@@ -428,7 +424,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
     };
     auto calibration_data_1_ptr = make_shared_ext<std::vector<CalibrationData>>(calibration_data_1);
 
-    // ExpressionEvaluator expression_evaluator_1(math_parser_service, "{x} * 2 + {sensor_2} + 1");
+    // ExpressionEvaluator expression_evaluator_1("{x} * 2 + {sensor_2} + 1");
 
     auto sensor_1 = make_shared_ext<Sensor>("sensor_1");
     sensor_1->metadata = {
@@ -454,7 +450,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
     };
     auto calibration_data_2_ptr = make_shared_ext<std::vector<CalibrationData>>(calibration_data_2);
 
-    ExpressionEvaluator expression_evaluator_2(math_parser_service, "x * 4 + 1.6");
+    ExpressionEvaluator expression_evaluator_2("x * 4 + 1.6");
 
     auto sensor_2 = make_shared_ext<Sensor>("sensor_2");
     sensor_2->metadata = {
@@ -467,10 +463,10 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
         .channel = 1,
         .sampling_rate_ms = 1000,
         .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_2)
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_2))
     };
 
-    ExpressionEvaluator expression_evaluator_3(math_parser_service, "{sensor_1} + 8.34");
+    ExpressionEvaluator expression_evaluator_3("{sensor_1} + 8.34");
 
     auto sensor_3 = make_shared_ext<Sensor>("sensor_3");
     sensor_3->metadata = {
@@ -481,7 +477,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
     sensor_3->configuration = {
         .type = SensorType::VIRTUAL_ANALOG,
         .sampling_rate_ms = 2000,
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_3)
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_3))
     };
 
     auto sensor_4 = make_shared_ext<Sensor>("sensor_4");
@@ -496,7 +492,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
         .sampling_rate_ms = 1000
     };
 
-    ExpressionEvaluator expression_evaluator_5(math_parser_service, "{sensor_1} < 400");
+    ExpressionEvaluator expression_evaluator_5("{sensor_1} < 400");
 
     auto sensor_5 = make_shared_ext<Sensor>("sensor_5");
     sensor_5->metadata = {
@@ -507,7 +503,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
     sensor_5->configuration = {
         .type = SensorType::VIRTUAL_INDICATOR,
         .sampling_rate_ms = 1000,
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_5)
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_5))
     };
 
     auto sensor_6 = make_shared_ext<Sensor>("sensor_6");
@@ -534,7 +530,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
         .canbus_source = make_unique_ext<CanbusSource>(0, 790)
     };
 
-    ExpressionEvaluator expression_evaluator_8(math_parser_service, "x * 2");
+    ExpressionEvaluator expression_evaluator_8("x * 2");
 
     auto sensor_8 = make_shared_ext<Sensor>("sensor_8");
     sensor_8->metadata = {
@@ -546,7 +542,7 @@ void SetupTestSensors(std::shared_ptr<MathParserService> math_parser_service, st
         .type = SensorType::USER_ANALOG,
         .script_path = "scripts/sensor_8.lua",
         .sampling_rate_ms = 500,
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_8)
+        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_8))
     };
 
     std::vector<std::shared_ptr<Sensor>> sensors = {

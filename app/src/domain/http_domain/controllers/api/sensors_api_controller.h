@@ -31,7 +31,6 @@ private:
     static ext_unique_ptr<std::string> sensors_config_get_buffer_;
 
     static std::unique_ptr<SensorsJsonParser> sensors_json_parser_;
-    static std::shared_ptr<MathParserService> math_parser_service_;
     static std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager_;
     static std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service_;
     static std::unique_ptr<JsonSerializer<JsonSensorsConfig>> json_serializer_;
@@ -46,7 +45,6 @@ public:
     static http_resource_detail_dynamic sensors_config_resource_detail;
 
     SensorsApiController(
-        std::shared_ptr<MathParserService> math_parser_service,
         std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager,
         std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service);
 };
