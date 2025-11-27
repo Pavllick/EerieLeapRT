@@ -19,7 +19,9 @@ LoggingConfigurationManager::LoggingConfigurationManager(
 
     try {
         configuration = Get(true);
-    } catch(const std::exception& e) {}
+    } catch(...) {
+        LOG_ERR("Failed to load Logging configuration.");
+    }
 
     if(configuration == nullptr) {
         if(!CreateDefaultConfiguration()) {

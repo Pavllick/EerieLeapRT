@@ -78,7 +78,7 @@ ext_unique_ptr<CborSensorsConfig> SensorsCborParser::Serialize(
 
         if(sensor->configuration.expression_evaluator != nullptr) {
             sensor_config->configuration.expression_present = true;
-            sensor_config->configuration.expression = CborHelpers::ToZcborString(&sensor->configuration.expression_evaluator->GetRawExpression());
+            sensor_config->configuration.expression = CborHelpers::ToZcborString(&sensor->configuration.expression_evaluator->GetExpression());
         } else {
             sensor_config->configuration.expression_present = false;
         }

@@ -36,8 +36,6 @@ std::vector<std::shared_ptr<Sensor>> sensors_configuration_manager_SetupTestSens
     };
     auto calibration_data_1_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_1);
 
-    ExpressionEvaluator expression_evaluator_1("{x} * 2 + {sensor_2} + 1");
-
     auto sensor_1 = std::make_shared<Sensor>("sensor_1");
     sensor_1->metadata = {
         .name = "Sensor 1",
@@ -49,7 +47,7 @@ std::vector<std::shared_ptr<Sensor>> sensors_configuration_manager_SetupTestSens
         .channel = 0,
         .sampling_rate_ms = 1000,
         .voltage_interpolator = std::make_unique<LinearVoltageInterpolator>(calibration_data_1_ptr),
-        .expression_evaluator = std::make_unique<ExpressionEvaluator>(std::move(expression_evaluator_1))
+        .expression_evaluator = std::make_unique<ExpressionEvaluator>("x * 2 + sensor_2 + 1")
     };
 
     std::vector<CalibrationData> calibration_data_2 {
@@ -60,8 +58,6 @@ std::vector<std::shared_ptr<Sensor>> sensors_configuration_manager_SetupTestSens
         {3.3, 200.0}
     };
     auto calibration_data_2_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_2);
-
-    ExpressionEvaluator expression_evaluator_2("x * 4 + 1.6");
 
     auto sensor_2 = std::make_shared<Sensor>("sensor_2");
     sensor_2->metadata = {
@@ -74,10 +70,8 @@ std::vector<std::shared_ptr<Sensor>> sensors_configuration_manager_SetupTestSens
         .channel = 1,
         .sampling_rate_ms = 500,
         .voltage_interpolator = std::make_unique<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
-        .expression_evaluator = std::make_unique<ExpressionEvaluator>(std::move(expression_evaluator_2))
+        .expression_evaluator = std::make_unique<ExpressionEvaluator>("x * 4 + 1.6")
     };
-
-    ExpressionEvaluator expression_evaluator_3("{sensor_1} + 8.34");
 
     auto sensor_3 = std::make_shared<Sensor>("sensor_3");
     sensor_3->metadata = {
@@ -89,7 +83,7 @@ std::vector<std::shared_ptr<Sensor>> sensors_configuration_manager_SetupTestSens
         .type = SensorType::VIRTUAL_ANALOG,
         .channel = std::nullopt,
         .sampling_rate_ms = 2000,
-        .expression_evaluator = std::make_unique<ExpressionEvaluator>(std::move(expression_evaluator_3))
+        .expression_evaluator = std::make_unique<ExpressionEvaluator>("sensor_1 + 8.34")
     };
 
     auto sensor_4 = std::make_shared<Sensor>("sensor_4");

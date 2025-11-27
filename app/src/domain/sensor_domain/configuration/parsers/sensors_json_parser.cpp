@@ -65,7 +65,7 @@ ext_unique_ptr<JsonSensorsConfig> SensorsJsonParser::Serialize(
         }
 
         if(sensor->configuration.expression_evaluator != nullptr)
-            sensor_json.configuration.expression = sensor->configuration.expression_evaluator->GetRawExpression();
+            sensor_json.configuration.expression = sensor->configuration.expression_evaluator->GetExpression();
 
         sensor_json.metadata.unit = sensor->metadata.unit;
         sensor_json.metadata.name = sensor->metadata.name;

@@ -436,7 +436,7 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
         .script_path = "scripts/sensor_1.lua",
         .sampling_rate_ms = 10,
         .voltage_interpolator = std::make_unique<LinearVoltageInterpolator>(calibration_data_1_ptr),
-        // .expression_evaluator = std::make_unique<ExpressionEvaluator>("{x} * 2 + {sensor_2} + 1")
+        // .expression_evaluator = std::make_unique<ExpressionEvaluator>("x * 2 + sensor_2 + 1")
     };
 
     std::vector<CalibrationData> calibration_data_2 {
@@ -471,7 +471,7 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
     sensor_3->configuration = {
         .type = SensorType::VIRTUAL_ANALOG,
         .sampling_rate_ms = 2000,
-        .expression_evaluator = std::make_unique<ExpressionEvaluator>("{sensor_1} + 8.34")
+        .expression_evaluator = std::make_unique<ExpressionEvaluator>("sensor_1 + 8.34")
     };
 
     auto sensor_4 = std::make_shared<Sensor>("sensor_4");
@@ -495,7 +495,7 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
     sensor_5->configuration = {
         .type = SensorType::VIRTUAL_INDICATOR,
         .sampling_rate_ms = 1000,
-        .expression_evaluator = std::make_unique<ExpressionEvaluator>("{sensor_1} < 400")
+        .expression_evaluator = std::make_unique<ExpressionEvaluator>("sensor_1 < 400")
     };
 
     auto sensor_6 = std::make_shared<Sensor>("sensor_6");

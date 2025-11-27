@@ -33,7 +33,9 @@ AdcConfigurationManager::AdcConfigurationManager(
 
     try {
         adc_manager = Get(true);
-    } catch(const std::exception& e) {}
+    } catch(...) {
+        LOG_ERR("Failed to load ADC configuration.");
+    }
 
     if(adc_manager == nullptr) {
         LOG_ERR("Failed to load ADC configuration.");

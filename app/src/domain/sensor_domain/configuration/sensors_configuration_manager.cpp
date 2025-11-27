@@ -27,9 +27,13 @@ SensorsConfigurationManager::SensorsConfigurationManager(
 
     try {
         sensors = Get(true);
-    } catch(const std::exception& e) {}
+    } catch(...) {
+        LOG_ERR("Failed to load Sensors configuration.");
+    }
 
     if(sensors == nullptr) {
+        LOG_ERR("Failed to load Sensors configuration.");
+
         if(!CreateDefaultConfiguration()) {
             LOG_ERR("Failed to create default sensors configuration.");
             return;

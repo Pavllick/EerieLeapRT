@@ -9,6 +9,8 @@ void SensorsOrderResolver::AddSensor(std::shared_ptr<Sensor> sensor) {
 
     if(sensor->configuration.expression_evaluator != nullptr) {
         auto sensor_ids = sensor->configuration.expression_evaluator->GetVariableNames();
+        sensor_ids.erase("x");
+
         dependencies_.emplace(sensor->id, std::unordered_set<std::string>(sensor_ids.begin(), sensor_ids.end()));
     } else {
         dependencies_.emplace(sensor->id, std::unordered_set<std::string>());
