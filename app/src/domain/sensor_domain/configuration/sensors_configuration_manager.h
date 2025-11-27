@@ -50,7 +50,7 @@ public:
         int gpio_channel_count,
         int adc_channel_count);
 
-    bool Update(const std::vector<std::shared_ptr<Sensor>>& sensors);
+    bool Update(const std::vector<std::shared_ptr<Sensor>>& sensors, bool internal_only = false);
     const std::vector<std::shared_ptr<Sensor>>* Get(bool force_load = false);
 };
 

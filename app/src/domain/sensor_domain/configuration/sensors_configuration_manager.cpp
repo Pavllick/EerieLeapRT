@@ -58,7 +58,9 @@ bool SensorsConfigurationManager::ApplyJsonConfiguration() {
                 gpio_channel_count_,
                 adc_channel_count_);
 
-            if(!Update(sensors))
+            json_config_checksum_ = json_config_loaded->checksum;
+
+            if(!Update(sensors, true))
                 return false;
         } catch(const std::exception& e) {
             LOG_ERR("Failed to deserialize JSON configuration. %s", e.what());
@@ -70,12 +72,12 @@ bool SensorsConfigurationManager::ApplyJsonConfiguration() {
         return true;
     }
 
-    return Update(sensors_);
+    return true;
 }
 
-bool SensorsConfigurationManager::Update(const std::vector<std::shared_ptr<Sensor>>& sensors) {
+bool SensorsConfigurationManager::Update(const std::vector<std::shared_ptr<Sensor>>& sensors, bool internal_only) {
     try {
-        if(json_configuration_service_->IsAvailable()) {
+        if(!internal_only && json_configuration_service_->IsAvailable()) {
             auto json_config = json_parser_->Serialize(
                 sensors,
                 gpio_channel_count_,

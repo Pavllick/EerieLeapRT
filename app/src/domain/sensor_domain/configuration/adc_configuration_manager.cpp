@@ -63,7 +63,9 @@ bool AdcConfigurationManager::ApplyJsonConfiguration() {
         try {
             auto configuration = json_parser_->Deserialize(*json_config_loaded->config);
 
-            if(!Update(configuration))
+            json_config_checksum_ = json_config_loaded->checksum;
+
+            if(!Update(configuration, true))
                 return false;
         } catch(const std::exception& e) {
             LOG_ERR("Failed to deserialize JSON configuration. %s", e.what());
@@ -75,12 +77,12 @@ bool AdcConfigurationManager::ApplyJsonConfiguration() {
         return true;
     }
 
-    return Update(*configuration_);
+    return true;
 }
 
-bool AdcConfigurationManager::Update(const AdcConfiguration& configuration) {
+bool AdcConfigurationManager::Update(const AdcConfiguration& configuration, bool internal_only) {
     try {
-        if(json_configuration_service_->IsAvailable()) {
+        if(!internal_only && json_configuration_service_->IsAvailable()) {
             auto json_config = json_parser_->Serialize(configuration);
             json_configuration_service_->Save(json_config.get());
 

@@ -21,7 +21,7 @@ using namespace eerie_leap::domain::sensor_domain::processors;
 class ProcessingSchedulerService {
 private:
     k_sem processing_semaphore_;
-    static constexpr k_timeout_t PROCESSING_TIMEOUT = K_MSEC(200);
+    static constexpr k_timeout_t PROCESSING_TIMEOUT = K_MSEC(5);
 
     static constexpr int k_stack_size_ = 8192;
     static constexpr int k_priority_ = K_PRIO_PREEMPT(6);

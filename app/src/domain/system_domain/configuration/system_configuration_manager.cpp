@@ -64,7 +64,9 @@ bool SystemConfigurationManager::ApplyJsonConfiguration() {
                 configuration_->sw_version,
                 configuration_->build_number);
 
-            if(!Update(configuration))
+            json_config_checksum_ = json_config_loaded->checksum;
+
+            if(!Update(configuration, true))
                 return false;
         } catch(const std::exception& e) {
             LOG_ERR("Failed to deserialize JSON configuration. %s", e.what());
@@ -76,7 +78,7 @@ bool SystemConfigurationManager::ApplyJsonConfiguration() {
         return true;
     }
 
-    return Update(*configuration_);
+    return true;
 }
 
 bool SystemConfigurationManager::UpdateBuildNumber(uint32_t build_number) {
@@ -87,7 +89,7 @@ bool SystemConfigurationManager::UpdateBuildNumber(uint32_t build_number) {
     if(build_number != configuration->build_number) {
         configuration->build_number = build_number;
 
-        bool result = Update(*configuration);
+        bool result = Update(*configuration, true);
         if(!result)
             return false;
 
@@ -104,7 +106,7 @@ bool SystemConfigurationManager::UpdateComUsers(const std::vector<ComUserConfigu
 
     configuration->com_user_configurations = com_user_configurations;
 
-    bool result = Update(*configuration);
+    bool result = Update(*configuration, true);
     if(!result)
         return false;
 
@@ -122,7 +124,7 @@ bool SystemConfigurationManager::UpdateHwVersion(uint32_t hw_version) {
     if(hw_version != config_hw_version) {
         configuration->hw_version = config_hw_version;
 
-        bool result = Update(*configuration);
+        bool result = Update(*configuration, true);
         if(!result)
             return false;
 
@@ -142,7 +144,7 @@ bool SystemConfigurationManager::UpdateSwVersion(uint32_t sw_version) {
         configuration->sw_version = config_sw_version;
         configuration->build_number = 0;
 
-        bool result = Update(*configuration);
+        bool result = Update(*configuration, true);
         if(!result)
             return false;
 
@@ -152,9 +154,9 @@ bool SystemConfigurationManager::UpdateSwVersion(uint32_t sw_version) {
     return true;
 }
 
-bool SystemConfigurationManager::Update(const SystemConfiguration& configuration) {
+bool SystemConfigurationManager::Update(const SystemConfiguration& configuration, bool internal_only) {
     try {
-        if(json_configuration_service_->IsAvailable()) {
+        if(!internal_only && json_configuration_service_->IsAvailable()) {
             auto json_config = json_parser_->Serialize(configuration);
             json_configuration_service_->Save(json_config.get());
 

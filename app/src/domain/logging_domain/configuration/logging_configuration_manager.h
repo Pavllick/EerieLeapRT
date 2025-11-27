@@ -37,7 +37,7 @@ public:
         ext_unique_ptr<CborConfigurationService<CborLoggingConfig>> cbor_configuration_service,
         ext_unique_ptr<JsonConfigurationService<JsonLoggingConfig>> json_configuration_service);
 
-    bool Update(const LoggingConfiguration& configuration);
+    bool Update(const LoggingConfiguration& configuration, bool internal_only = false);
     std::shared_ptr<LoggingConfiguration> Get(bool force_load = false);
 };
 

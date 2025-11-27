@@ -41,7 +41,7 @@ public:
         ext_unique_ptr<CborConfigurationService<CborAdcConfig>> cbor_configuration_service,
         ext_unique_ptr<JsonConfigurationService<JsonAdcConfig>> json_configuration_service);
 
-    bool Update(const AdcConfiguration& configuration);
+    bool Update(const AdcConfiguration& configuration, bool internal_only = false);
     std::shared_ptr<IAdcManager> Get(bool force_load = false);
 };
 
