@@ -54,10 +54,10 @@ AdcConfiguration AdcConfigurationJsonParser::Deserialize(const JsonAdcConfig& co
     AdcConfiguration configuration;
 
     configuration.samples = static_cast<uint16_t>(config.samples);
-    configuration.channel_configurations = make_shared_ext<std::vector<std::shared_ptr<AdcChannelConfiguration>>>();
+    configuration.channel_configurations = std::make_shared<std::vector<std::shared_ptr<AdcChannelConfiguration>>>();
 
     for(auto& adc_channel_config : config.channel_configurations) {
-        auto adc_channel_configuration = make_shared_ext<AdcChannelConfiguration>();
+        auto adc_channel_configuration = std::make_shared<AdcChannelConfiguration>();
 
         auto interpolation_method = GetInterpolationMethod(adc_channel_config.interpolation_method);
 
@@ -74,8 +74,8 @@ AdcConfiguration AdcConfigurationJsonParser::Deserialize(const JsonAdcConfig& co
                 .value = calibration_data.value});
         }
 
-        auto calibration_table_ptr = make_shared_ext<std::vector<CalibrationData>>(calibration_table);
-        adc_channel_configuration->calibrator = make_shared_ext<AdcCalibrator>(interpolation_method, calibration_table_ptr);
+        auto calibration_table_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_table);
+        adc_channel_configuration->calibrator = std::make_shared<AdcCalibrator>(interpolation_method, calibration_table_ptr);
 
         configuration.channel_configurations->push_back(adc_channel_configuration);
     }

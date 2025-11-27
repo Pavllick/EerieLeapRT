@@ -3,7 +3,6 @@
 #include <memory>
 #include <optional>
 
-#include "utilities/memory/heap_allocator.h"
 #include "utilities/math_parser/expression_evaluator.h"
 #include "utilities/voltage_interpolator/i_voltage_interpolator.h"
 #include "subsys/lua_script/lua_script.h"
@@ -13,7 +12,6 @@
 
 namespace eerie_leap::domain::sensor_domain::models {
 
-using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::math_parser;
 using namespace eerie_leap::utilities::voltage_interpolator;
 using namespace eerie_leap::subsys::lua_script;
@@ -27,12 +25,12 @@ struct SensorConfiguration {
     std::string script_path;
     uint32_t sampling_rate_ms = 100;
 
-    ext_unique_ptr<IVoltageInterpolator> voltage_interpolator = nullptr;
-    ext_unique_ptr<ExpressionEvaluator> expression_evaluator = nullptr;
+    std::unique_ptr<IVoltageInterpolator> voltage_interpolator = nullptr;
+    std::unique_ptr<ExpressionEvaluator> expression_evaluator = nullptr;
     std::shared_ptr<LuaScript> lua_script = nullptr;
 
     // connection_string data source decomposition objects
-    ext_unique_ptr<CanbusSource> canbus_source = nullptr;
+    std::unique_ptr<CanbusSource> canbus_source = nullptr;
 
     void UpdateConnectionString() {
         if(type == SensorType::CANBUS_RAW || type == SensorType::CANBUS_ANALOG || type == SensorType::CANBUS_INDICATOR)
@@ -43,7 +41,7 @@ struct SensorConfiguration {
 
     void UnwrapConnectionString() {
         if(type == SensorType::CANBUS_RAW || type == SensorType::CANBUS_ANALOG || type == SensorType::CANBUS_INDICATOR)
-            canbus_source = make_unique_ext<CanbusSource>(CanbusSource::FromConnectionString(connection_string));
+            canbus_source = std::make_unique<CanbusSource>(CanbusSource::FromConnectionString(connection_string));
     }
 };
 

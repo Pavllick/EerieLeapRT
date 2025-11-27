@@ -50,10 +50,10 @@ AdcConfiguration AdcConfigurationCborParser::Deserialize(const CborAdcConfig& ad
     AdcConfiguration adc_configuration;
 
     adc_configuration.samples = static_cast<uint16_t>(adc_config.samples);
-    adc_configuration.channel_configurations = make_shared_ext<std::vector<std::shared_ptr<AdcChannelConfiguration>>>();
+    adc_configuration.channel_configurations = std::make_shared<std::vector<std::shared_ptr<AdcChannelConfiguration>>>();
 
     for(const auto& adc_channel_config : adc_config.CborAdcChannelConfig_m) {
-        auto adc_channel_configuration = make_shared_ext<AdcChannelConfiguration>();
+        auto adc_channel_configuration = std::make_shared<AdcChannelConfiguration>();
 
         auto interpolation_method = static_cast<InterpolationMethod>(adc_channel_config.interpolation_method);
         if(interpolation_method != InterpolationMethod::NONE && adc_channel_config.calibration_table_present) {
@@ -64,8 +64,8 @@ AdcConfiguration AdcConfigurationCborParser::Deserialize(const CborAdcConfig& ad
                     .value = calibration_data.float32float});
             }
 
-            auto calibration_table_ptr = make_shared_ext<std::vector<CalibrationData>>(calibration_table);
-            adc_channel_configuration->calibrator = make_shared_ext<AdcCalibrator>(interpolation_method, calibration_table_ptr);
+            auto calibration_table_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_table);
+            adc_channel_configuration->calibrator = std::make_shared<AdcCalibrator>(interpolation_method, calibration_table_ptr);
         } else {
             throw std::runtime_error("ADC channel configuration is invalid. Calibration table is missing.");
         }

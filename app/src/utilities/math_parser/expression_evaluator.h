@@ -7,16 +7,13 @@
 #include <unordered_map>
 #include <zephyr/kernel.h>
 
-#include "utilities/memory/heap_allocator.h"
 #include "math_parser.hpp"
 
 namespace eerie_leap::utilities::math_parser {
 
-using namespace eerie_leap::utilities::memory;
-
 class ExpressionEvaluator {
 private:
-    ext_unique_ptr<MathParser> math_parser_;
+    std::unique_ptr<MathParser> math_parser_;
 
     std::string expression_raw_;
     std::string expression_;

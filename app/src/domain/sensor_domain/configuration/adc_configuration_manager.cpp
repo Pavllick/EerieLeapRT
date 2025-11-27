@@ -122,7 +122,7 @@ std::shared_ptr<IAdcManager> AdcConfigurationManager::Get(bool force_load) {
     auto cbor_config = std::move(cbor_config_data.value().config);
 
     auto configuration = cbor_parser_->Deserialize(*cbor_config);
-    configuration_ = make_shared_ext<AdcConfiguration>(configuration);
+    configuration_ = std::make_shared<AdcConfiguration>(configuration);
     adc_manager_->UpdateConfiguration(configuration_);
 
     json_config_checksum_ = cbor_config->json_config_checksum;
@@ -141,20 +141,20 @@ bool AdcConfigurationManager::CreateDefaultConfiguration() {
         {5.0, 5.0}
     };
 
-    auto adc_calibration_data_samples_ptr = make_shared_ext<std::vector<CalibrationData>>(adc_calibration_data_samples);
-    auto adc_calibrator = make_shared_ext<AdcCalibrator>(InterpolationMethod::LINEAR, adc_calibration_data_samples_ptr);
+    auto adc_calibration_data_samples_ptr = std::make_shared<std::vector<CalibrationData>>(adc_calibration_data_samples);
+    auto adc_calibrator = std::make_shared<AdcCalibrator>(InterpolationMethod::LINEAR, adc_calibration_data_samples_ptr);
 
     std::vector<std::shared_ptr<AdcChannelConfiguration>> channel_configurations;
     channel_configurations.reserve(adc_manager_->GetChannelCount());
     for(size_t i = 0; i < adc_manager_->GetChannelCount(); ++i)
-        channel_configurations.push_back(make_shared_ext<AdcChannelConfiguration>(adc_calibrator));
+        channel_configurations.push_back(std::make_shared<AdcChannelConfiguration>(adc_calibrator));
 
-    auto configuration = make_shared_ext<AdcConfiguration>();
+    auto configuration = std::make_shared<AdcConfiguration>();
     configuration->samples = 40;
     configuration->channel_configurations =
-        make_shared_ext<std::vector<std::shared_ptr<AdcChannelConfiguration>>>(channel_configurations);
+        std::make_shared<std::vector<std::shared_ptr<AdcChannelConfiguration>>>(channel_configurations);
 
-    return Update(*configuration.get());
+    return Update(*configuration);
 }
 
 } // namespace eerie_leap::domain::sensor_domain::configuration

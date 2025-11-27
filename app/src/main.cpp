@@ -407,10 +407,10 @@ void SetupAdcConfiguration(std::shared_ptr<AdcConfigurationManager> adc_configur
         // make_shared_ext<AdcChannelConfiguration>(adc_calibrator),
     };
 
-    auto adc_configuration = make_shared_ext<AdcConfiguration>();
+    auto adc_configuration = std::make_shared<AdcConfiguration>();
     adc_configuration->samples = 40;
     adc_configuration->channel_configurations =
-        make_shared_ext<std::vector<std::shared_ptr<AdcChannelConfiguration>>>(channel_configurations);
+        std::make_shared<std::vector<std::shared_ptr<AdcChannelConfiguration>>>(channel_configurations);
 
     adc_configuration_manager->Update(*adc_configuration.get());
 }
@@ -422,11 +422,9 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
         {0.0, 0.0},
         {5.0, 100.0}
     };
-    auto calibration_data_1_ptr = make_shared_ext<std::vector<CalibrationData>>(calibration_data_1);
+    auto calibration_data_1_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_1);
 
-    // ExpressionEvaluator expression_evaluator_1("{x} * 2 + {sensor_2} + 1");
-
-    auto sensor_1 = make_shared_ext<Sensor>("sensor_1");
+    auto sensor_1 = std::make_shared<Sensor>("sensor_1");
     sensor_1->metadata = {
         .name = "Sensor 1",
         .unit = "km/h",
@@ -437,8 +435,8 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
         .channel = 0,
         .script_path = "scripts/sensor_1.lua",
         .sampling_rate_ms = 10,
-        .voltage_interpolator = make_unique_ext<LinearVoltageInterpolator>(calibration_data_1_ptr),
-        // .expression_evaluator = make_unique_ext<ExpressionEvaluator>(expression_evaluator_1)
+        .voltage_interpolator = std::make_unique<LinearVoltageInterpolator>(calibration_data_1_ptr),
+        // .expression_evaluator = std::make_unique<ExpressionEvaluator>("{x} * 2 + {sensor_2} + 1")
     };
 
     std::vector<CalibrationData> calibration_data_2 {
@@ -448,11 +446,9 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
         {2.5, 162.0},
         {3.3, 200.0}
     };
-    auto calibration_data_2_ptr = make_shared_ext<std::vector<CalibrationData>>(calibration_data_2);
+    auto calibration_data_2_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_2);
 
-    ExpressionEvaluator expression_evaluator_2("x * 4 + 1.6");
-
-    auto sensor_2 = make_shared_ext<Sensor>("sensor_2");
+    auto sensor_2 = std::make_shared<Sensor>("sensor_2");
     sensor_2->metadata = {
         .name = "Sensor 2",
         .unit = "km/h",
@@ -462,13 +458,11 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
         .type = SensorType::PHYSICAL_ANALOG,
         .channel = 1,
         .sampling_rate_ms = 1000,
-        .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_2))
+        .voltage_interpolator = std::make_unique<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
+        .expression_evaluator = std::make_unique<ExpressionEvaluator>("x * 4 + 1.6")
     };
 
-    ExpressionEvaluator expression_evaluator_3("{sensor_1} + 8.34");
-
-    auto sensor_3 = make_shared_ext<Sensor>("sensor_3");
+    auto sensor_3 = std::make_shared<Sensor>("sensor_3");
     sensor_3->metadata = {
         .name = "Sensor 3",
         .unit = "km/h",
@@ -477,10 +471,10 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
     sensor_3->configuration = {
         .type = SensorType::VIRTUAL_ANALOG,
         .sampling_rate_ms = 2000,
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_3))
+        .expression_evaluator = std::make_unique<ExpressionEvaluator>("{sensor_1} + 8.34")
     };
 
-    auto sensor_4 = make_shared_ext<Sensor>("sensor_4");
+    auto sensor_4 = std::make_shared<Sensor>("sensor_4");
     sensor_4->metadata = {
         .name = "Sensor 4",
         .unit = "",
@@ -492,9 +486,7 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
         .sampling_rate_ms = 1000
     };
 
-    ExpressionEvaluator expression_evaluator_5("{sensor_1} < 400");
-
-    auto sensor_5 = make_shared_ext<Sensor>("sensor_5");
+    auto sensor_5 = std::make_shared<Sensor>("sensor_5");
     sensor_5->metadata = {
         .name = "Sensor 5",
         .unit = "",
@@ -503,10 +495,10 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
     sensor_5->configuration = {
         .type = SensorType::VIRTUAL_INDICATOR,
         .sampling_rate_ms = 1000,
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_5))
+        .expression_evaluator = std::make_unique<ExpressionEvaluator>("{sensor_1} < 400")
     };
 
-    auto sensor_6 = make_shared_ext<Sensor>("sensor_6");
+    auto sensor_6 = std::make_shared<Sensor>("sensor_6");
     sensor_6->metadata = {
         .name = "Sensor 6",
         .unit = "",
@@ -515,10 +507,10 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
     sensor_6->configuration = {
         .type = SensorType::CANBUS_ANALOG,
         .sampling_rate_ms = 1000,
-        .canbus_source = make_unique_ext<CanbusSource>(0, 790, "RPM")
+        .canbus_source = std::make_unique<CanbusSource>(0, 790, "RPM")
     };
 
-    auto sensor_7 = make_shared_ext<Sensor>("sensor_7");
+    auto sensor_7 = std::make_shared<Sensor>("sensor_7");
     sensor_7->metadata = {
         .name = "Sensor 7",
         .unit = "",
@@ -527,12 +519,10 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
     sensor_7->configuration = {
         .type = SensorType::CANBUS_RAW,
         .sampling_rate_ms = 300,
-        .canbus_source = make_unique_ext<CanbusSource>(0, 790)
+        .canbus_source = std::make_unique<CanbusSource>(0, 790)
     };
 
-    ExpressionEvaluator expression_evaluator_8("x * 2");
-
-    auto sensor_8 = make_shared_ext<Sensor>("sensor_8");
+    auto sensor_8 = std::make_shared<Sensor>("sensor_8");
     sensor_8->metadata = {
         .name = "Sensor 8",
         .unit = "",
@@ -542,7 +532,7 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
         .type = SensorType::USER_ANALOG,
         .script_path = "scripts/sensor_8.lua",
         .sampling_rate_ms = 500,
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_8))
+        .expression_evaluator = std::make_unique<ExpressionEvaluator>("x * 2")
     };
 
     std::vector<std::shared_ptr<Sensor>> sensors = {
@@ -557,6 +547,7 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
     };
 
     sensors_configuration_manager->Update(sensors);
+    sensors_configuration_manager->Get(true);
 }
 
 void SetupLoggingConfiguration(std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager,
@@ -564,7 +555,7 @@ void SetupLoggingConfiguration(std::shared_ptr<SensorsConfigurationManager> sens
 
     auto sensors = sensors_configuration_manager->Get();
 
-    auto logging_configuration = make_unique_ext<LoggingConfiguration>();
+    auto logging_configuration = std::make_unique<LoggingConfiguration>();
     logging_configuration->logging_interval_ms = 100;
 
     SensorLoggingConfiguration sensor_logging_config_1 = {

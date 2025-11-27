@@ -20,7 +20,7 @@ ExpressionEvaluator::ExpressionEvaluator(std::string expression_raw)
     expression_ = UnwrapVariables();
     variables_ = ExtractVariables();
 
-    math_parser_ = make_unique_ext<MathParser>(expression_);
+    math_parser_ = std::make_unique<MathParser>(expression_);
 }
 
 float ExpressionEvaluator::Evaluate(const std::unordered_map<size_t, float*>& variables, std::optional<float> x) const {

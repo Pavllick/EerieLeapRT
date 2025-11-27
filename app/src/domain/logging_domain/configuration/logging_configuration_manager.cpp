@@ -106,7 +106,7 @@ std::shared_ptr<LoggingConfiguration> LoggingConfigurationManager::Get(bool forc
     auto cbor_config = std::move(cbor_config_data.value().config);
 
     auto configuration = cbor_parser_->Deserialize(*cbor_config);
-    configuration_ = make_shared_ext<LoggingConfiguration>(configuration);
+    configuration_ = std::make_shared<LoggingConfiguration>(configuration);
 
     json_config_checksum_ = cbor_config->json_config_checksum;
 
@@ -114,7 +114,7 @@ std::shared_ptr<LoggingConfiguration> LoggingConfigurationManager::Get(bool forc
 }
 
 bool LoggingConfigurationManager::CreateDefaultConfiguration() {
-    auto configuration = make_unique_ext<LoggingConfiguration>();
+    auto configuration = std::make_unique<LoggingConfiguration>();
 
     return Update(*configuration);
 }
