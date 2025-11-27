@@ -133,7 +133,7 @@ std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
                 size_t out_len = 0;
                 fs_service_->ReadFile(sensor->configuration.script_path, buffer->data(), script_size, out_len);
 
-                sensor->configuration.lua_script = std::make_shared<LuaScript>();
+                sensor->configuration.lua_script = std::make_shared<LuaScript>(LuaScript::CreateExt());
                 sensor->configuration.lua_script->Load(std::span<const uint8_t>(buffer->data(), buffer->size()));
             }
         }

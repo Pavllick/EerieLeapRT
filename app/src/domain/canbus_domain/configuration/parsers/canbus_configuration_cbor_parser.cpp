@@ -70,7 +70,7 @@ CanbusConfiguration CanbusConfigurationCborParser::Deserialize(const CborCanbusC
                     size_t out_len = 0;
                     fs_service_->ReadFile(message_configuration.script_path, buffer->data(), script_size, out_len);
 
-                    message_configuration.lua_script = std::make_shared<LuaScript>();
+                    message_configuration.lua_script = std::make_shared<LuaScript>(LuaScript::CreateExt());
                     message_configuration.lua_script->Load(std::span<const uint8_t>(buffer->data(), buffer->size()));
                 }
             }

@@ -125,10 +125,10 @@ int main(void) {
     if(DtDisplay::Get() != nullptr) {
         cfb = make_shared_ext<Cfb>();
 
-    if(!cfb->Initialize()) {
-        LOG_ERR("Failed to initialize CFB.");
-        return -1;
-    }
+        if(!cfb->Initialize()) {
+            LOG_ERR("Failed to initialize CFB.");
+            return -1;
+        }
     }
 
     auto display_controller = make_shared_ext<DisplayController>(cfb);
