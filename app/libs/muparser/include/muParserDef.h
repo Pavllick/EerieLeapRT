@@ -32,6 +32,7 @@
 #include <string>
 #include <sstream>
 #include <map>
+#include <functional>
 
 #include "muParserFixes.h"
 
@@ -495,7 +496,7 @@ namespace mu
 	typedef int (*identfun_type)(const char_type* sExpr, int* nPos, value_type* fVal);
 
 	/** \brief Callback used for variable creation factory functions. */
-	typedef value_type* (*facfun_type)(const char_type*, void*);
+	using facfun_type = std::function<value_type*(string_type&, void*)>;
 
 	static const int MaxLenExpression = 20000;
 	static const int MaxLenIdentifier = 100;

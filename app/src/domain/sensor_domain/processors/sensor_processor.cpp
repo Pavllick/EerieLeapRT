@@ -1,7 +1,6 @@
 #include <memory>
 #include <stdexcept>
 
-#include "utilities/memory/heap_allocator.h"
 #include "domain/sensor_domain/models/reading_status.h"
 #include "domain/sensor_domain/models/reading_metadata.h"
 
@@ -9,8 +8,6 @@
 
 namespace eerie_leap::domain::sensor_domain::processors {
 
-using namespace eerie_leap::utilities;
-using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 using namespace eerie_leap::utilities::voltage_interpolator;
@@ -30,17 +27,13 @@ void SensorProcessor::ProcessReading(std::shared_ptr<SensorReading> reading) {
 
             reading->metadata.AddTag<float>(ReadingMetadataTag::RAW_VALUE, raw_value);
 
-            if(reading->sensor->configuration.expression_evaluator != nullptr) {
-                value = reading->sensor->configuration.expression_evaluator->Evaluate(
-                    sensor_readings_frame_->GetReadingValues(),
-                    value);
-            }
+            if(reading->sensor->configuration.expression_evaluator != nullptr)
+                value = reading->sensor->configuration.expression_evaluator->Evaluate(value);
 
             reading->value = value;
             reading->status = ReadingStatus::PROCESSED;
         } else if(reading->sensor->configuration.type == SensorType::VIRTUAL_ANALOG) {
-            reading->value = reading->sensor->configuration.expression_evaluator->Evaluate(
-                sensor_readings_frame_->GetReadingValues());
+            reading->value = reading->sensor->configuration.expression_evaluator->Evaluate();
             reading->status = ReadingStatus::PROCESSED;
         } else if(reading->sensor->configuration.type == SensorType::PHYSICAL_INDICATOR) {
             bool raw_value = reading->value.value();
@@ -48,17 +41,13 @@ void SensorProcessor::ProcessReading(std::shared_ptr<SensorReading> reading) {
 
             reading->metadata.AddTag<bool>(ReadingMetadataTag::RAW_VALUE, raw_value > 0);
 
-            if(reading->sensor->configuration.expression_evaluator != nullptr) {
-                value = reading->sensor->configuration.expression_evaluator->Evaluate(
-                    sensor_readings_frame_->GetReadingValues(),
-                    value);
-            }
+            if(reading->sensor->configuration.expression_evaluator != nullptr)
+                value = reading->sensor->configuration.expression_evaluator->Evaluate(value);
 
             reading->value = value;
             reading->status = ReadingStatus::PROCESSED;
         } else if(reading->sensor->configuration.type == SensorType::VIRTUAL_INDICATOR) {
-            reading->value = reading->sensor->configuration.expression_evaluator->Evaluate(
-                sensor_readings_frame_->GetReadingValues());
+            reading->value = reading->sensor->configuration.expression_evaluator->Evaluate();
             reading->status = ReadingStatus::PROCESSED;
         } else if(reading->sensor->configuration.type == SensorType::CANBUS_RAW) {
             // No processing needed
@@ -68,11 +57,8 @@ void SensorProcessor::ProcessReading(std::shared_ptr<SensorReading> reading) {
 
             reading->metadata.AddTag<float>(ReadingMetadataTag::RAW_VALUE, raw_value);
 
-            if(reading->sensor->configuration.expression_evaluator != nullptr) {
-                value = reading->sensor->configuration.expression_evaluator->Evaluate(
-                    sensor_readings_frame_->GetReadingValues(),
-                    value);
-            }
+            if(reading->sensor->configuration.expression_evaluator != nullptr)
+                value = reading->sensor->configuration.expression_evaluator->Evaluate(value);
 
             reading->value = value;
             reading->status = ReadingStatus::PROCESSED;
@@ -82,27 +68,16 @@ void SensorProcessor::ProcessReading(std::shared_ptr<SensorReading> reading) {
 
             reading->metadata.AddTag<bool>(ReadingMetadataTag::RAW_VALUE, raw_value > 0);
 
-            if(reading->sensor->configuration.expression_evaluator != nullptr) {
-                value = reading->sensor->configuration.expression_evaluator->Evaluate(
-                    sensor_readings_frame_->GetReadingValues(),
-                    value);
-            }
+            if(reading->sensor->configuration.expression_evaluator != nullptr)
+                value = reading->sensor->configuration.expression_evaluator->Evaluate(value);
 
             reading->value = value;
             reading->status = ReadingStatus::PROCESSED;
         } else if(reading->sensor->configuration.type == SensorType::USER_ANALOG ||
             reading->sensor->configuration.type == SensorType::USER_INDICATOR) {
 
-            if(reading->sensor->configuration.expression_evaluator != nullptr) {
-                if(reading->value.has_value()) {
-                reading->value = reading->sensor->configuration.expression_evaluator->Evaluate(
-                    sensor_readings_frame_->GetReadingValues(),
-                    reading->value.value());
-                } else {
-                    reading->value = reading->sensor->configuration.expression_evaluator->Evaluate(
-                        sensor_readings_frame_->GetReadingValues());
-                }
-            }
+            if(reading->sensor->configuration.expression_evaluator != nullptr)
+                reading->value = reading->sensor->configuration.expression_evaluator->Evaluate(reading->value);
 
             reading->status = ReadingStatus::PROCESSED;
         } else {

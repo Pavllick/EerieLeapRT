@@ -18,7 +18,7 @@ using namespace eerie_leap::domain::sensor_domain::models;
 class SensorReadingsFrame {
 private:
     std::unordered_map<size_t, std::shared_ptr<SensorReading>> readings_;
-    std::unordered_map<size_t, float*> reading_values_;
+    std::unordered_map<size_t, float> reading_values_;
     mutable std::unordered_map<std::string, size_t> sensor_id_hash_map_;
 
     k_spinlock reading_lock_;
@@ -44,7 +44,7 @@ public:
 
         readings_[sensor_id_hash] = reading;
         if(readings_[sensor_id_hash]->status == ReadingStatus::PROCESSED && readings_[sensor_id_hash]->value.has_value())
-            reading_values_[sensor_id_hash] = &readings_[sensor_id_hash]->value.value();
+            reading_values_[sensor_id_hash] = readings_[sensor_id_hash]->value.value();
 
         k_spin_unlock(&reading_lock_, lock_key);
     }
@@ -55,6 +55,14 @@ public:
 
     bool HasReading(const std::string& sensor_id) const {
         return readings_.contains(GetSensorIdHash(sensor_id));
+    }
+
+    bool HasReadingValue(const size_t sensor_id_hash) const {
+        return reading_values_.contains(sensor_id_hash);
+    }
+
+    bool HasReadingValue(const std::string& sensor_id) const {
+        return reading_values_.contains(GetSensorIdHash(sensor_id));
     }
 
     std::shared_ptr<SensorReading> GetReading(const size_t sensor_id_hash) const {
@@ -74,27 +82,32 @@ public:
     }
 
     float GetReadingValue(const size_t sensor_id_hash) const {
-        if(!HasReading(sensor_id_hash))
+        if(!HasReadingValue(sensor_id_hash))
             ErrorSensorIdNotFound();
 
-        return *reading_values_.at(sensor_id_hash);
+        return reading_values_.at(sensor_id_hash);
     }
 
     float GetReadingValue(const std::string& sensor_id) const {
         const size_t sensor_id_hash = GetSensorIdHash(sensor_id);
 
-        if(!HasReading(sensor_id_hash))
+        if(!HasReadingValue(sensor_id_hash))
             ErrorSensorIdNotFound();
 
-        return *reading_values_.at(sensor_id_hash);
+        return reading_values_.at(sensor_id_hash);
+    }
+
+    float* GetReadingValuePtr(const std::string& sensor_id) {
+        const size_t sensor_id_hash = GetSensorIdHash(sensor_id);
+
+        if(!HasReadingValue(sensor_id_hash))
+            ErrorSensorIdNotFound();
+
+        return &reading_values_.at(sensor_id_hash);
     }
 
     const std::unordered_map<size_t, std::shared_ptr<SensorReading>>& GetReadings() const {
         return readings_;
-    }
-
-    const std::unordered_map<size_t, float*>& GetReadingValues() const {
-        return reading_values_;
     }
 
     void ClearReadings() {

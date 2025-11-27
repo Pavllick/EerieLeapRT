@@ -3,13 +3,9 @@
 #include <algorithm>
 #include <zephyr/logging/log.h>
 
-#include "utilities/string/string_helpers.h"
-
 #include "expression_evaluator.h"
 
 namespace eerie_leap::utilities::math_parser {
-
-using namespace eerie_leap::utilities::string;
 
 LOG_MODULE_REGISTER(expression_evaluator_logger);
 
@@ -18,21 +14,18 @@ using namespace mu;
 ExpressionEvaluator::ExpressionEvaluator(std::string expression_raw)
     : expression_raw_(std::move(expression_raw)) {
     expression_ = UnwrapVariables();
-    variables_ = ExtractVariables();
+    variable_names_ = ExtractVariables();
 
     math_parser_ = std::make_unique<MathParser>(expression_);
 }
 
-float ExpressionEvaluator::Evaluate(const std::unordered_map<size_t, float*>& variables, std::optional<float> x) const {
+void ExpressionEvaluator::RegisterVariableValueHandler(const MathParser::VariableFactoryHandler& handler) {
+    math_parser_->SetVariableFactory(handler);
+}
+
+float ExpressionEvaluator::Evaluate(std::optional<float> x) const {
     if(x.has_value())
         math_parser_->DefineVariable("x", &x.value());
-
-    for(const auto& [hash, name] : variables_) {
-        if(!variables.contains(hash))
-            throw std::runtime_error("Variable '" + name + "' required for evaluation not found.");
-
-        math_parser_->DefineVariable(name, variables.at(hash));
-    }
 
     return math_parser_->Evaluate();
 }
@@ -73,9 +66,9 @@ bool ExpressionEvaluator::IsValidVariableName(const std::string& str) const {
     });
 }
 
-std::unordered_map<size_t, std::string> ExpressionEvaluator::ExtractVariables() const {
+std::unordered_set<std::string> ExpressionEvaluator::ExtractVariables() const {
     std::string sanitized_expression = SanitizeExpression(expression_raw_);
-    std::unordered_map<size_t, std::string> variables;
+    std::unordered_set<std::string> variables;
 
     std::size_t close_brace_i = 0;
 
@@ -99,7 +92,7 @@ std::unordered_map<size_t, std::string> ExpressionEvaluator::ExtractVariables() 
         if(!IsValidVariableName(var))
             throw std::runtime_error("Invalid variable name");
 
-        variables.insert({StringHelpers::GetHash(var), var});
+        variables.insert(var);
     }
 
     return variables;
@@ -113,24 +106,8 @@ const std::string& ExpressionEvaluator::GetRawExpression() const {
     return expression_raw_;
 }
 
-const std::unordered_set<size_t> ExpressionEvaluator::GetVariableNameHashes() const {
-    std::unordered_set<size_t> result;
-    for(const auto& [hash, _] : variables_)
-        result.insert(hash);
-
-    return result;
-}
-
 const std::unordered_set<std::string> ExpressionEvaluator::GetVariableNames() const {
-    std::unordered_set<std::string> result;
-    for(const auto& [_, name] : variables_)
-        result.insert(name);
-
-    return result;
-}
-
-const std::string& ExpressionEvaluator::GetVariableName(size_t hash) const {
-    return variables_.at(hash);
+    return variable_names_;
 }
 
 } // namespace eerie_leap::utilities::math_parser

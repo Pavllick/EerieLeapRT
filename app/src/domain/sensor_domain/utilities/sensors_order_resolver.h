@@ -14,17 +14,17 @@ using namespace eerie_leap::domain::sensor_domain::models;
 // NOTE: Cureently only used for dependency validation.
 class SensorsOrderResolver {
 private:
-    std::unordered_map<size_t, std::unordered_set<size_t>> dependencies_;
-    std::unordered_map<size_t, std::shared_ptr<Sensor>> sensors_;
+    std::unordered_map<std::string, std::unordered_set<std::string>> dependencies_;
+    std::unordered_map<std::string, std::shared_ptr<Sensor>> sensors_;
 
     bool HasCyclicDependency(
-        const size_t sensor_id,
-        std::unordered_set<size_t>& visited,
-        std::unordered_set<size_t>& temp);
+        const std::string& sensor_id,
+        std::unordered_set<std::string>& visited,
+        std::unordered_set<std::string>& temp);
 
     void ResolveDependencies(
-        const size_t sensor_id,
-        std::unordered_set<size_t>& visited,
+        const std::string& sensor_id,
+        std::unordered_set<std::string>& visited,
         std::vector<std::shared_ptr<Sensor>>& ordered_sensors);
 
 public:

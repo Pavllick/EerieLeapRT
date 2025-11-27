@@ -37,8 +37,8 @@ std::vector<std::shared_ptr<Sensor>> sensor_readings_frame_GetTestSensors() {
         .type = SensorType::PHYSICAL_ANALOG,
         .channel = 0,
         .sampling_rate_ms = 1000,
-        .voltage_interpolator = make_unique_ext<LinearVoltageInterpolator>(calibration_data_1_ptr),
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_1))
+        .voltage_interpolator = std::make_unique<LinearVoltageInterpolator>(calibration_data_1_ptr),
+        .expression_evaluator = std::make_unique<ExpressionEvaluator>(std::move(expression_evaluator_1))
     };
 
     std::vector<CalibrationData> calibration_data_2 {
@@ -62,8 +62,8 @@ std::vector<std::shared_ptr<Sensor>> sensor_readings_frame_GetTestSensors() {
         .type = SensorType::PHYSICAL_ANALOG,
         .channel = 1,
         .sampling_rate_ms = 500,
-        .voltage_interpolator = make_unique_ext<LinearVoltageInterpolator>(calibration_data_2_ptr),
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_2))
+        .voltage_interpolator = std::make_unique<LinearVoltageInterpolator>(calibration_data_2_ptr),
+        .expression_evaluator = std::make_unique<ExpressionEvaluator>(std::move(expression_evaluator_2))
     };
 
     ExpressionEvaluator expression_evaluator_3("{sensor_1} + 8.34");
@@ -77,7 +77,7 @@ std::vector<std::shared_ptr<Sensor>> sensor_readings_frame_GetTestSensors() {
     sensor_3->configuration = {
         .type = SensorType::VIRTUAL_ANALOG,
         .sampling_rate_ms = 2000,
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_3))
+        .expression_evaluator = std::make_unique<ExpressionEvaluator>(std::move(expression_evaluator_3))
     };
 
     std::vector<std::shared_ptr<Sensor>> sensors = {
@@ -223,34 +223,6 @@ ZTEST(sensor_readings_frame, test_GetReadings) {
     zassert_str_equal(fr_reading2->sensor->id.c_str(), "sensor_3");
 }
 
-ZTEST(sensor_readings_frame, test_GetReadingValues) {
-    auto helper = sensor_readings_frame_GetHelperInstances();
-
-    auto guid_generator = helper.guid_generator;
-    auto sensor_readings_frame = helper.sensor_readings_frame;
-    auto sensors = sensor_readings_frame_GetTestSensors();
-
-    auto reading1 = std::make_shared<SensorReading>(guid_generator->Generate(), sensors[0]);
-    reading1->value = 2.4;
-    reading1->status = ReadingStatus::PROCESSED;
-    sensor_readings_frame->AddOrUpdateReading(reading1);
-    auto reading2 = std::make_shared<SensorReading>(guid_generator->Generate(), sensors[1]);
-    reading2->status = ReadingStatus::ERROR;
-    sensor_readings_frame->AddOrUpdateReading(reading2);
-    auto reading3 = std::make_shared<SensorReading>(guid_generator->Generate(), sensors[2]);
-    reading3->value = 2.6;
-    reading3->status = ReadingStatus::PROCESSED;
-    sensor_readings_frame->AddOrUpdateReading(reading3);
-
-    auto readings = sensor_readings_frame->GetReadingValues();
-    zassert_equal(readings.size(), 2);
-
-    float fr_reading1 = *readings.at(StringHelpers::GetHash("sensor_1"));
-    zassert_between_inclusive(fr_reading1, 2.39, 2.41);
-    float fr_reading2 = *readings.at(StringHelpers::GetHash("sensor_3"));
-    zassert_between_inclusive(fr_reading2, 2.59, 2.61);
-}
-
 ZTEST(sensor_readings_frame, test_ClearReadings) {
     auto helper = sensor_readings_frame_GetHelperInstances();
 
@@ -260,7 +232,7 @@ ZTEST(sensor_readings_frame, test_ClearReadings) {
 
     auto readings = sensor_readings_frame->GetReadings();
     zassert_equal(readings.size(), 0);
-    auto reading_values = sensor_readings_frame->GetReadingValues();
+    auto reading_values = sensor_readings_frame->GetReadings();
     zassert_equal(reading_values.size(), 0);
 
     auto reading1 = std::make_shared<SensorReading>(guid_generator->Generate(), sensors[0]);
@@ -277,13 +249,15 @@ ZTEST(sensor_readings_frame, test_ClearReadings) {
 
     readings = sensor_readings_frame->GetReadings();
     zassert_equal(readings.size(), 3);
-    reading_values = sensor_readings_frame->GetReadingValues();
-    zassert_equal(reading_values.size(), 2);
+
+    zassert_equal(sensor_readings_frame->HasReadingValue(StringHelpers::GetHash("sensor_1")), true);
+    zassert_equal(sensor_readings_frame->HasReadingValue(StringHelpers::GetHash("sensor_2")), false);
+    zassert_equal(sensor_readings_frame->HasReadingValue(StringHelpers::GetHash("sensor_3")), true);
 
     sensor_readings_frame->ClearReadings();
 
     readings = sensor_readings_frame->GetReadings();
     zassert_equal(readings.size(), 0);
-    reading_values = sensor_readings_frame->GetReadingValues();
+    reading_values = sensor_readings_frame->GetReadings();
     zassert_equal(reading_values.size(), 0);
 }

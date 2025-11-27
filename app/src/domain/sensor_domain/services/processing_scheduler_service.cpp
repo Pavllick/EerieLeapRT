@@ -98,6 +98,13 @@ std::shared_ptr<SensorTask> ProcessingSchedulerService::CreateSensorTask(std::sh
     task->reading_processors = reading_processors_;
     task->reader = std::move(reader);
 
+    if(sensor->configuration.expression_evaluator != nullptr) {
+        sensor->configuration.expression_evaluator->RegisterVariableValueHandler(
+            [&sensor_readings_frame = sensor_readings_frame_](const std::string& sensor_id) {
+                return sensor_readings_frame->GetReadingValuePtr(sensor_id);
+            });
+    }
+
     return task;
 }
 

@@ -898,7 +898,7 @@ namespace mu
 		// If a factory is available implicitely create new variables
 		if (m_pFactory)
 		{
-			value_type* fVar = m_pFactory(strTok.c_str(), m_pFactoryData);
+			value_type* fVar = m_pFactory(strTok, m_pFactoryData);
 			a_Tok.SetVar(fVar, strTok);
 
 			// Do not use m_pParser->DefineVar( strTok, fVar );

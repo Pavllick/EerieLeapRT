@@ -48,8 +48,8 @@ std::vector<std::shared_ptr<Sensor>> sensors_configuration_manager_SetupTestSens
         .type = SensorType::PHYSICAL_ANALOG,
         .channel = 0,
         .sampling_rate_ms = 1000,
-        .voltage_interpolator = make_unique_ext<LinearVoltageInterpolator>(calibration_data_1_ptr),
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_1))
+        .voltage_interpolator = std::make_unique<LinearVoltageInterpolator>(calibration_data_1_ptr),
+        .expression_evaluator = std::make_unique<ExpressionEvaluator>(std::move(expression_evaluator_1))
     };
 
     std::vector<CalibrationData> calibration_data_2 {
@@ -73,8 +73,8 @@ std::vector<std::shared_ptr<Sensor>> sensors_configuration_manager_SetupTestSens
         .type = SensorType::PHYSICAL_ANALOG,
         .channel = 1,
         .sampling_rate_ms = 500,
-        .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_2))
+        .voltage_interpolator = std::make_unique<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
+        .expression_evaluator = std::make_unique<ExpressionEvaluator>(std::move(expression_evaluator_2))
     };
 
     ExpressionEvaluator expression_evaluator_3("{sensor_1} + 8.34");
@@ -89,7 +89,7 @@ std::vector<std::shared_ptr<Sensor>> sensors_configuration_manager_SetupTestSens
         .type = SensorType::VIRTUAL_ANALOG,
         .channel = std::nullopt,
         .sampling_rate_ms = 2000,
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_3))
+        .expression_evaluator = std::make_unique<ExpressionEvaluator>(std::move(expression_evaluator_3))
     };
 
     auto sensor_4 = std::make_shared<Sensor>("sensor_4");
@@ -102,7 +102,7 @@ std::vector<std::shared_ptr<Sensor>> sensors_configuration_manager_SetupTestSens
         .type = SensorType::PHYSICAL_ANALOG,
         .channel = 2,
         .sampling_rate_ms = 2000,
-        .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_2_ptr)
+        .voltage_interpolator = std::make_unique<CubicSplineVoltageInterpolator>(calibration_data_2_ptr)
     };
 
     std::vector<std::shared_ptr<Sensor>> sensors = {
@@ -255,7 +255,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
         .type = SensorType::PHYSICAL_ANALOG,
         .channel = 0,
         .sampling_rate_ms = 100,
-        .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
+        .voltage_interpolator = std::make_unique<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
     };
 
     auto sensor_2 = std::make_shared<Sensor>("_sensor_2");
@@ -268,7 +268,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
         .type = SensorType::PHYSICAL_ANALOG,
         .channel = 0,
         .sampling_rate_ms = 100,
-        .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
+        .voltage_interpolator = std::make_unique<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
     };
 
     auto sensor_3 = std::make_shared<Sensor>("_");
@@ -281,7 +281,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
         .type = SensorType::PHYSICAL_ANALOG,
         .channel = 0,
         .sampling_rate_ms = 100,
-        .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
+        .voltage_interpolator = std::make_unique<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
     };
 
     std::vector<std::shared_ptr<Sensor>> sensors {
@@ -323,7 +323,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
         .type = SensorType::PHYSICAL_ANALOG,
         .channel = 0,
         .sampling_rate_ms = 100,
-        .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
+        .voltage_interpolator = std::make_unique<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
     };
 
     auto sensor_2 = std::make_shared<Sensor>("#sensor_2");
@@ -336,7 +336,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
         .type = SensorType::PHYSICAL_ANALOG,
         .channel = 0,
         .sampling_rate_ms = 100,
-        .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
+        .voltage_interpolator = std::make_unique<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
     };
 
     auto sensor_3 = std::make_shared<Sensor>("3");
@@ -349,7 +349,7 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
         .type = SensorType::PHYSICAL_ANALOG,
         .channel = 0,
         .sampling_rate_ms = 100,
-        .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
+        .voltage_interpolator = std::make_unique<CubicSplineVoltageInterpolator>(calibration_data_1_ptr)
     };
 
     std::vector<std::shared_ptr<Sensor>> sensors {

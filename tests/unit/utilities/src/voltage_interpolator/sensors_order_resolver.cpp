@@ -31,8 +31,8 @@ std::vector<std::shared_ptr<Sensor>> sensors_order_resolver_GetTestSensors() {
         .type = SensorType::PHYSICAL_ANALOG,
         .channel = 0,
         .sampling_rate_ms = 1000,
-        .voltage_interpolator = make_unique_ext<LinearVoltageInterpolator>(calibration_data_1_ptr),
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_1))
+        .voltage_interpolator = std::make_unique<LinearVoltageInterpolator>(calibration_data_1_ptr),
+        .expression_evaluator = std::make_unique<ExpressionEvaluator>(std::move(expression_evaluator_1))
     };
 
     std::vector<CalibrationData> calibration_data_2 {
@@ -56,8 +56,8 @@ std::vector<std::shared_ptr<Sensor>> sensors_order_resolver_GetTestSensors() {
         .type = SensorType::PHYSICAL_ANALOG,
         .channel = 1,
         .sampling_rate_ms = 500,
-        .voltage_interpolator = make_unique_ext<LinearVoltageInterpolator>(calibration_data_2_ptr),
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_2))
+        .voltage_interpolator = std::make_unique<LinearVoltageInterpolator>(calibration_data_2_ptr),
+        .expression_evaluator = std::make_unique<ExpressionEvaluator>(std::move(expression_evaluator_2))
     };
 
     ExpressionEvaluator expression_evaluator_3("{sensor_1} + 8.34");
@@ -71,7 +71,7 @@ std::vector<std::shared_ptr<Sensor>> sensors_order_resolver_GetTestSensors() {
     sensor_3->configuration = {
         .type = SensorType::VIRTUAL_ANALOG,
         .sampling_rate_ms = 2000,
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_3))
+        .expression_evaluator = std::make_unique<ExpressionEvaluator>(std::move(expression_evaluator_3))
     };
 
     auto sensor_4 = std::make_shared<Sensor>("sensor_4");
@@ -97,7 +97,7 @@ std::vector<std::shared_ptr<Sensor>> sensors_order_resolver_GetTestSensors() {
         .type = SensorType::PHYSICAL_ANALOG,
         .channel = 4,
         .sampling_rate_ms = 2000,
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_5))
+        .expression_evaluator = std::make_unique<ExpressionEvaluator>(std::move(expression_evaluator_5))
     };
 
     ExpressionEvaluator expression_evaluator_6("{sensor_5} + 4.34");
@@ -111,7 +111,7 @@ std::vector<std::shared_ptr<Sensor>> sensors_order_resolver_GetTestSensors() {
         .type = SensorType::PHYSICAL_ANALOG,
         .channel = 4,
         .sampling_rate_ms = 2000,
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_6))
+        .expression_evaluator = std::make_unique<ExpressionEvaluator>(std::move(expression_evaluator_6))
     };
 
     std::vector<std::shared_ptr<Sensor>> sensors = {

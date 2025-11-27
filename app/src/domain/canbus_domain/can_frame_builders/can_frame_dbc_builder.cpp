@@ -31,7 +31,7 @@ CanFrame CanFrameDbcBuilder::Build(uint8_t bus_channel, uint32_t frame_id) {
         auto can_data = dbc->EncodeMessage(
             frame_id,
             [&sensor_readings_frame = sensor_readings_frame_](size_t signal_name_hash) {
-                if(!sensor_readings_frame->HasReading(signal_name_hash))
+                if(!sensor_readings_frame->HasReadingValue(signal_name_hash))
                     return 0.0f;
 
                 return sensor_readings_frame->GetReadingValue(signal_name_hash);

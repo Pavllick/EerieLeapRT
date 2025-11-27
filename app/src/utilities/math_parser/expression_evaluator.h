@@ -4,8 +4,6 @@
 #include <string>
 #include <optional>
 #include <unordered_set>
-#include <unordered_map>
-#include <zephyr/kernel.h>
 
 #include "math_parser.hpp"
 
@@ -17,23 +15,22 @@ private:
 
     std::string expression_raw_;
     std::string expression_;
-    std::unordered_map<size_t, std::string> variables_;
+    std::unordered_set<std::string> variable_names_;
 
     std::string SanitizeExpression(const std::string& expression) const;
     std::string UnwrapVariables() const;
     bool IsValidVariableName(const std::string& str) const;
-    std::unordered_map<size_t, std::string> ExtractVariables() const;
+    std::unordered_set<std::string> ExtractVariables() const;
 
 public:
-    ExpressionEvaluator(std::string expression);
+    explicit ExpressionEvaluator(std::string expression);
 
     const std::string& GetExpression() const;
     const std::string& GetRawExpression() const;
-    const std::unordered_set<size_t> GetVariableNameHashes() const;
     const std::unordered_set<std::string> GetVariableNames() const;
-    const std::string& GetVariableName(size_t hash) const;
+    void RegisterVariableValueHandler(const MathParser::VariableFactoryHandler& handler);
 
-    float Evaluate(const std::unordered_map<size_t, float*>& variables, std::optional<float> x = std::nullopt) const;
+    float Evaluate(std::optional<float> x = std::nullopt) const;
 };
 
 } // namespace eerie_leap::utilities::math_parser

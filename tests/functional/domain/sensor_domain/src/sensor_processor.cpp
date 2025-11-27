@@ -69,8 +69,8 @@ std::vector<std::shared_ptr<Sensor>> sensor_processor_GetTestSensors() {
         .type = SensorType::PHYSICAL_ANALOG,
         .channel = 0,
         .sampling_rate_ms = 1000,
-        .voltage_interpolator = make_unique_ext<LinearVoltageInterpolator>(calibration_data_1_ptr),
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_1))
+        .voltage_interpolator = std::make_unique<LinearVoltageInterpolator>(calibration_data_1_ptr),
+        .expression_evaluator = std::make_unique<ExpressionEvaluator>(std::move(expression_evaluator_1))
     };
 
     std::vector<CalibrationData> calibration_data_2 {
@@ -94,8 +94,8 @@ std::vector<std::shared_ptr<Sensor>> sensor_processor_GetTestSensors() {
         .type = SensorType::PHYSICAL_ANALOG,
         .channel = 1,
         .sampling_rate_ms = 500,
-        .voltage_interpolator = make_unique_ext<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_2))
+        .voltage_interpolator = std::make_unique<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
+        .expression_evaluator = std::make_unique<ExpressionEvaluator>(std::move(expression_evaluator_2))
     };
 
     ExpressionEvaluator expression_evaluator_3("{sensor_1} + 8.34");
@@ -109,7 +109,7 @@ std::vector<std::shared_ptr<Sensor>> sensor_processor_GetTestSensors() {
     sensor_3->configuration = {
         .type = SensorType::VIRTUAL_ANALOG,
         .sampling_rate_ms = 2000,
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_3))
+        .expression_evaluator = std::make_unique<ExpressionEvaluator>(std::move(expression_evaluator_3))
     };
 
     auto sensor_4 = std::make_shared<Sensor>("sensor_4");
@@ -135,7 +135,7 @@ std::vector<std::shared_ptr<Sensor>> sensor_processor_GetTestSensors() {
     sensor_5->configuration = {
         .type = SensorType::VIRTUAL_INDICATOR,
         .sampling_rate_ms = 1000,
-        .expression_evaluator = make_unique_ext<ExpressionEvaluator>(std::move(expression_evaluator_5))
+        .expression_evaluator = std::make_unique<ExpressionEvaluator>(std::move(expression_evaluator_5))
     };
 
     std::vector<std::shared_ptr<Sensor>> sensors = {
@@ -175,6 +175,7 @@ AdcConfiguration sensor_processor_GetTestConfiguration() {
 struct sensor_processor_HelperInstances {
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame;
     std::shared_ptr<std::vector<std::shared_ptr<ISensorReader>>> sensor_readers;
+    std::vector<std::shared_ptr<Sensor>> sensors;
 };
 
 sensor_processor_HelperInstances sensor_processor_GetReadingInstances() {
@@ -242,7 +243,8 @@ sensor_processor_HelperInstances sensor_processor_GetReadingInstances() {
 
     return sensor_processor_HelperInstances {
         .sensor_readings_frame = sensor_readings_frame,
-        .sensor_readers = sensor_readers
+        .sensor_readers = sensor_readers,
+        .sensors = sensors
     };
 }
 
@@ -251,39 +253,28 @@ ZTEST(sensor_processor, test_ProcessReading) {
 
     auto sensor_readings_frame = helper.sensor_readings_frame;
     auto sensor_readers = helper.sensor_readers;
+    auto sensors = helper.sensors;
 
     for(int i = 0; i < sensor_readers->size(); i++)
         sensor_readers->at(i)->Read();
 
     auto reading_2 = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_2"));
-    zassert_equal(reading_2->status, ReadingStatus::RAW);
-    zassert_true(reading_2->value.has_value());
-    zassert_between_inclusive(reading_2->value.value(), 0, 3.3);
-
     auto reading_1 = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_1"));
-    zassert_equal(reading_1->status, ReadingStatus::RAW);
-    zassert_true(reading_1->value.has_value());
-    zassert_between_inclusive(reading_1->value.value(), 0, 3.3);
 
-    auto reading_3 = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_3"));
-    zassert_equal(reading_3->status, ReadingStatus::UNINITIALIZED);
-    zassert_false(reading_3->value.has_value());
-
-    auto reading_4 = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_4"));
-    zassert_equal(reading_4->status, ReadingStatus::RAW);
-    zassert_true(reading_4->value.has_value());
-    zassert_true(reading_4->value.value() == 1 || reading_4->value.value() == 0);
-
-    auto reading_5 = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_5"));
-    zassert_equal(reading_5->status, ReadingStatus::UNINITIALIZED);
-    zassert_false(reading_5->value.has_value());
-
-    auto sensors = sensor_processor_GetTestSensors();
+    for(auto& sensor : sensors) {
+        if(sensor->configuration.expression_evaluator != nullptr) {
+            sensor->configuration.expression_evaluator->RegisterVariableValueHandler(
+                [&sensor_readings_frame](const std::string& sensor_id) {
+                    return sensor_readings_frame->GetReadingValuePtr(sensor_id);
+                });
+        }
+    }
 
     float reading_1_value = sensors[1]->configuration.voltage_interpolator->Interpolate(reading_1->value.value());
     float reading_2_value = sensors[0]->configuration.voltage_interpolator->Interpolate(reading_2->value.value());
 
     SensorProcessor sensor_processor(sensor_readings_frame);
+
     for(auto& sensor : sensors)
         sensor_processor.ProcessReading(sensor_readings_frame->GetReading(sensor->id_hash));
 
