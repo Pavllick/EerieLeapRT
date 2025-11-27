@@ -104,7 +104,7 @@ std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
     size_t gpio_channel_count,
     size_t adc_channel_count) {
 
-    std::vector<std::shared_ptr<Sensor>> sensors;
+    SensorsOrderResolver order_resolver;
 
     for(const auto& sensor_config : sensors_config.CborSensorConfig_m) {
         std::shared_ptr<Sensor> sensor = std::make_shared<Sensor>(CborHelpers::ToStdString(sensor_config.id));
@@ -182,10 +182,10 @@ std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
 
         SensorValidator::Validate(*sensor, gpio_channel_count, adc_channel_count);
 
-        sensors.push_back(sensor);
+        order_resolver.AddSensor(sensor);
     }
 
-    return sensors;
+    return order_resolver.GetProcessingOrder();
 }
 
 } // namespace eerie_leap::domain::sensor_domain::configuration::parsers

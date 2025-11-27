@@ -87,9 +87,9 @@ std::vector<std::shared_ptr<Sensor>> SensorsJsonParser::Deserialize(
     uint32_t gpio_channel_count,
     uint32_t adc_channel_count) {
 
-    std::vector<std::shared_ptr<Sensor>> sensors;
+    SensorsOrderResolver order_resolver;
 
-    for(auto& sensor_config : config.sensors) {
+    for(const auto& sensor_config : config.sensors) {
         auto sensor = std::make_shared<Sensor>(sensor_config.id);
 
         sensor->metadata.name = sensor_config.metadata.name;
@@ -164,10 +164,10 @@ std::vector<std::shared_ptr<Sensor>> SensorsJsonParser::Deserialize(
 
         SensorValidator::Validate(*sensor, gpio_channel_count, adc_channel_count);
 
-        sensors.push_back(sensor);
+        order_resolver.AddSensor(sensor);
     }
 
-    return sensors;
+    return order_resolver.GetProcessingOrder();
 }
 
 } // eerie_leap::domain::sensor_domain::configuration::parsers

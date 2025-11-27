@@ -11,7 +11,6 @@ namespace eerie_leap::domain::sensor_domain::utilities {
 
 using namespace eerie_leap::domain::sensor_domain::models;
 
-// NOTE: Cureently only used for dependency validation.
 class SensorsOrderResolver {
 private:
     std::unordered_map<std::string, std::unordered_set<std::string>> dependencies_;
