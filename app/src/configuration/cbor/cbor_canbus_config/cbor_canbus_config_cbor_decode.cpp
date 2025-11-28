@@ -51,12 +51,22 @@ static bool decode_CborCanChannelConfig(
         return false;
     }
 
+    if (!zcbor_bool_decode(state, &result->is_extended_id)) {
+        zcbor_list_end_decode(state);
+        return false;
+    }
+
     if (!zcbor_uint32_decode(state, &result->bus_channel)) {
         zcbor_list_end_decode(state);
         return false;
     }
 
     if (!zcbor_uint32_decode(state, &result->bitrate)) {
+        zcbor_list_end_decode(state);
+        return false;
+    }
+
+    if (!zcbor_uint32_decode(state, &result->data_bitrate)) {
         zcbor_list_end_decode(state);
         return false;
     }

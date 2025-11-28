@@ -19,8 +19,10 @@ using namespace eerie_leap::subsys::dbc;
 
 struct CanChannelConfiguration {
     CanbusType type;
+    bool is_extended_id = false;
     uint8_t bus_channel;
     uint32_t bitrate;
+    uint32_t data_bitrate;
     std::string dbc_file_path;
     std::vector<CanMessageConfiguration> message_configurations;
 

@@ -20,16 +20,20 @@ CanbusService::CanbusService(std::shared_ptr<IFsService> fs_service, std::shared
         auto canbus = make_shared_ext<Canbus>(
             DtCanbus::Get(bus_channel),
             channel_configuration.type,
-            channel_configuration.bitrate);
+            channel_configuration.bitrate,
+            channel_configuration.data_bitrate,
+            channel_configuration.is_extended_id);
 
-        if(!canbus->Initialize())
-            throw std::runtime_error("Failed to initialize CANBus.");
+        if(!canbus->Initialize()) {
+            LOG_ERR("Failed to initialize CAN channel %d.", bus_channel);
+            continue;
+        }
 
         canbus->RegisterBitrateDetectedCallback([this, bus_channel](uint32_t bitrate) {
             BitrateUpdated(bus_channel, bitrate);
         });
 
-        canbus_.insert({bus_channel, canbus});
+        canbus_.emplace(bus_channel, canbus);
 
         if(fs_service_ != nullptr && fs_service_->Exists(channel_configuration.dbc_file_path)) {
             FsServiceStreamBuf fs_stream_buf(

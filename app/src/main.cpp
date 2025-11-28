@@ -355,10 +355,11 @@ void SetupCanbusConfiguration(std::shared_ptr<CanbusConfigurationManager> canbus
     canbus_configuration->channel_configurations.clear();
 
     CanChannelConfiguration canbus_channel_configuration_0 = {
-        .bus_channel = 0,
-        .bitrate = 500000,
+        .type = CanbusType::CANFD,
+        .bus_channel = 1,
+        .bitrate = 1000000,
+        .data_bitrate = 2000000,
         .dbc_file_path = "configuration/canbus_0.dbc",
-        // .script_path = "scripts/canbus_0.lua",
 
         .message_configurations = {
             {

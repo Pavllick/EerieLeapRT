@@ -14,8 +14,10 @@ ext_unique_ptr<JsonCanbusConfig> CanbusConfigurationJsonParser::Serialize(const 
     for(const auto& [bus_channel, channel_configuration] : configuration.channel_configurations) {
         JsonCanChannelConfig channel_config {
             .type = GetCanbusTypeName(channel_configuration.type),
+            .is_extended_id = channel_configuration.is_extended_id,
             .bus_channel = bus_channel,
             .bitrate = channel_configuration.bitrate,
+            .data_bitrate = channel_configuration.data_bitrate,
             .dbc_file_path = channel_configuration.dbc_file_path
         };
 
@@ -39,8 +41,10 @@ CanbusConfiguration CanbusConfigurationJsonParser::Deserialize(const JsonCanbusC
     for(const auto& canbus_config : config.channel_configs) {
         CanChannelConfiguration channel_configuration = {
             .type = GetCanbusType(canbus_config.type),
+            .is_extended_id = canbus_config.is_extended_id,
             .bus_channel = static_cast<uint8_t>(canbus_config.bus_channel),
             .bitrate = canbus_config.bitrate,
+            .data_bitrate = canbus_config.data_bitrate,
             .dbc_file_path = canbus_config.dbc_file_path
         };
 

@@ -17,8 +17,10 @@ struct JsonCanMessageConfig {
 
 struct JsonCanChannelConfig {
     std::string type;
+    bool is_extended_id;
     uint32_t bus_channel;
     uint32_t bitrate;
+    uint32_t data_bitrate;
     std::string dbc_file_path;
     std::vector<JsonCanMessageConfig> message_configs;
 };
@@ -47,8 +49,10 @@ static JsonCanMessageConfig tag_invoke(json::value_to_tag<JsonCanMessageConfig>,
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonCanChannelConfig const& config) {
     jv = {
         {NAMEOF_MEMBER(&JsonCanChannelConfig::type), config.type},
+        {NAMEOF_MEMBER(&JsonCanChannelConfig::is_extended_id), config.is_extended_id},
         {NAMEOF_MEMBER(&JsonCanChannelConfig::bus_channel), config.bus_channel},
         {NAMEOF_MEMBER(&JsonCanChannelConfig::bitrate), config.bitrate},
+        {NAMEOF_MEMBER(&JsonCanChannelConfig::data_bitrate), config.data_bitrate},
         {NAMEOF_MEMBER(&JsonCanChannelConfig::dbc_file_path), config.dbc_file_path},
         {NAMEOF_MEMBER(&JsonCanChannelConfig::message_configs), json::value_from(config.message_configs)}
     };
@@ -58,8 +62,10 @@ static JsonCanChannelConfig tag_invoke(json::value_to_tag<JsonCanChannelConfig>,
     json::object const& obj = jv.as_object();
     return {
         .type = json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonCanChannelConfig::type).c_str())),
+        .is_extended_id = json::value_to<bool>(obj.at(NAMEOF_MEMBER(&JsonCanChannelConfig::is_extended_id).c_str())),
         .bus_channel = json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonCanChannelConfig::bus_channel).c_str())),
         .bitrate = json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonCanChannelConfig::bitrate).c_str())),
+        .data_bitrate = json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonCanChannelConfig::data_bitrate).c_str())),
         .dbc_file_path = json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonCanChannelConfig::dbc_file_path).c_str())),
         .message_configs = json::value_to<std::vector<JsonCanMessageConfig>>(obj.at(NAMEOF_MEMBER(&JsonCanChannelConfig::message_configs).c_str()))
     };

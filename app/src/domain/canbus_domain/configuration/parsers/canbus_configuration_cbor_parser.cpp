@@ -20,8 +20,10 @@ ext_unique_ptr<CborCanbusConfig> CanbusConfigurationCborParser::Serialize(const 
     for(const auto& [bus_channel, channel_configuration] : configuration.channel_configurations) {
         CborCanChannelConfig channel_config = {
             .type = std::to_underlying(channel_configuration.type),
+            .is_extended_id = channel_configuration.is_extended_id,
             .bus_channel = bus_channel,
             .bitrate = channel_configuration.bitrate,
+            .data_bitrate = channel_configuration.data_bitrate,
             .dbc_file_path = CborHelpers::ToZcborString(&channel_configuration.dbc_file_path)
         };
 
@@ -45,8 +47,10 @@ CanbusConfiguration CanbusConfigurationCborParser::Deserialize(const CborCanbusC
     for(const auto& canbus_config : config.CborCanChannelConfig_m) {
         CanChannelConfiguration channel_configuration = {
             .type = static_cast<CanbusType>(canbus_config.type),
+            .is_extended_id = canbus_config.is_extended_id,
             .bus_channel = static_cast<uint8_t>(canbus_config.bus_channel),
             .bitrate = canbus_config.bitrate,
+            .data_bitrate = canbus_config.data_bitrate,
             .dbc_file_path = CborHelpers::ToStdString(canbus_config.dbc_file_path)
         };
 

@@ -11,8 +11,22 @@ LOG_MODULE_REGISTER(canbus_logger);
 
 namespace eerie_leap::subsys::canbus {
 
-Canbus::Canbus(const device *canbus_dev, CanbusType type, uint32_t bitrate)
-    : canbus_dev_(canbus_dev), bitrate_(bitrate), auto_detect_running_(ATOMIC_INIT(0)), type_(type) {}
+Canbus::Canbus(
+    const device *canbus_dev,
+    CanbusType type,
+    uint32_t bitrate,
+    uint32_t data_bitrate,
+    bool is_extended_id)
+        : canbus_dev_(canbus_dev),
+        type_(type),
+        is_extended_id_(is_extended_id),
+        bitrate_(bitrate),
+        data_bitrate_(data_bitrate),
+        auto_detect_running_(ATOMIC_INIT(0)) {
+
+    if(type_ == CanbusType::CANFD && data_bitrate_ == 0)
+        data_bitrate_ = bitrate_;
+}
 
 Canbus::~Canbus() {
     StopActivityMonitoring();
@@ -57,7 +71,12 @@ bool Canbus::Initialize() {
         }
     } else {
         if(!SetTiming(bitrate_)) {
-            LOG_ERR("Failed to set timing.");
+            PrintCanLimits();
+            return false;
+        }
+
+        if(type_ == CanbusType::CANFD && !SetDataTiming(data_bitrate_)) {
+            PrintCanFdLimits();
             return false;
         }
 
@@ -81,8 +100,26 @@ bool Canbus::SetTiming(uint32_t bitrate) {
         return false;
 
     int ret = can_set_bitrate(canbus_dev_, bitrate);
-    if(ret != 0)
+    if(ret != 0) {
+        LOG_ERR("Failed to set bitrate [%d].", ret);
         return false;
+    }
+
+    return true;
+}
+
+bool Canbus::SetDataTiming(uint32_t bitrate) {
+    if(bitrate == 0)
+        return false;
+
+    if(type_ != CanbusType::CANFD)
+        return false;
+
+    int ret = can_set_bitrate_data(canbus_dev_, bitrate);
+    if(ret != 0) {
+        LOG_ERR("Failed to set CANFD bitrate [%d].", ret);
+        return false;
+    }
 
     return true;
 }
@@ -91,9 +128,18 @@ void Canbus::SendFrame(const CanFrame& frame) {
     if(!is_initialized_ || !bitrate_detected_)
         return;
 
+    uint8_t flags = 0;
+
+    if(type_ == CanbusType::CANFD)
+        flags |= CAN_FRAME_FDF | CAN_FRAME_BRS;
+
+    if(is_extended_id_)
+        flags |= CAN_FRAME_IDE;
+
     struct can_frame can_frame = {
         .id = frame.id,
         .dlc = static_cast<uint8_t>(frame.data.size()),
+        .flags = flags,
     };
     memcpy(can_frame.data, frame.data.data(), frame.data.size());
 
@@ -244,6 +290,9 @@ bool Canbus::AutoDetectBitrate() {
             bitrate_detected_ = true;
             bitrate_ = supported_bitrates[i];
 
+            if(type_ == CanbusType::CANFD && data_bitrate_ == 0)
+                data_bitrate_ = supported_bitrates[i];
+
             return true;
         }
 
@@ -265,11 +314,17 @@ bool Canbus::IsBitrateSupported(CanbusType type, uint32_t bitrate) {
 }
 
 bool Canbus::TestBitrate(uint32_t bitrate, uint32_t &frame_count) {
-    if (!SetTiming(bitrate))
+    if(!SetTiming(bitrate))
         return false;
 
+    if(type_ == CanbusType::CANFD) {
+        uint32_t data_bitrate = data_bitrate_ == 0 ? bitrate : data_bitrate_;
+        if(!SetDataTiming(data_bitrate))
+            return false;
+    }
+
     int ret = can_start(canbus_dev_);
-    if (ret != 0) {
+    if(ret != 0) {
         LOG_WRN("Failed to start CAN for bitrate %u [%d]", bitrate, ret);
         return false;
     }
@@ -320,6 +375,74 @@ bool Canbus::TestBitrate(uint32_t bitrate, uint32_t &frame_count) {
 
 void Canbus::RegisterBitrateDetectedCallback(const BitrateDetectedCallback& callback) {
     bitrate_detected_fn_ = callback;
+}
+
+// NOTE: Borrowed from zephyr/drivers/can/can_common.c
+uint16_t sample_point_for_bitrate(uint32_t bitrate) {
+	uint16_t sample_pnt;
+
+	if (bitrate > 800000) {
+		/* 75.0% */
+		sample_pnt = 750;
+	} else if (bitrate > 500000) {
+		/* 80.0% */
+		sample_pnt = 800;
+	} else {
+		/* 87.5% */
+		sample_pnt = 875;
+	}
+
+	return sample_pnt;
+}
+
+static void PrintCanLimitsDetails(uint32_t bitrate, int ret) {
+    if(ret >= 0 && ret <= CONFIG_CAN_SAMPLE_POINT_MARGIN) {
+        LOG_INF("  %u bps: OK (sample point error: %d).", bitrate, ret);
+    } else if(ret == -EINVAL) {
+        LOG_ERR("  %u bps: INVALID.", bitrate);
+    } else if(ret == -ENOTSUP) {
+        LOG_ERR("  %u bps: NOT SUPPORTED.", bitrate);
+    } else {
+        LOG_ERR("  %u bps: SAMPLE POINT OUT OF RANGE (error: %d).", bitrate, ret);
+    }
+}
+
+void Canbus::PrintCanLimits() {
+    LOG_INF("Hardware CAN bitrate capabilities:");
+
+    uint32_t min_bitrate = can_get_bitrate_min(canbus_dev_);
+    uint32_t max_bitrate = can_get_bitrate_max(canbus_dev_);
+    LOG_INF("CAN bitrate range: %u - %u bps.", min_bitrate, max_bitrate);
+
+    auto bitrates = classical_can_supported_bitrates_;
+    std::sort(bitrates.begin(), bitrates.end());
+
+    for(auto bitrate : bitrates) {
+        struct can_timing timing_data = {0};
+        uint16_t sample_pnt = sample_point_for_bitrate(bitrate);
+        int ret = can_calc_timing(canbus_dev_, &timing_data, bitrate, sample_pnt);
+
+        PrintCanLimitsDetails(bitrate, ret);
+    }
+}
+
+void Canbus::PrintCanFdLimits() {
+    LOG_INF("Hardware CAN FD data bitrate capabilities:");
+
+    uint32_t min_bitrate = can_get_bitrate_min(canbus_dev_);
+    uint32_t max_bitrate = can_get_bitrate_max(canbus_dev_);
+    LOG_INF("CAN FD data bitrate range: %u - %u bps.", min_bitrate, max_bitrate);
+
+    auto bitrates = canfd_supported_bitrates_;
+    std::sort(bitrates.begin(), bitrates.end());
+
+    for(auto bitrate : bitrates) {
+        struct can_timing timing_data = {0};
+        uint16_t sample_pnt = sample_point_for_bitrate(bitrate);
+        int ret = can_calc_timing_data(canbus_dev_, &timing_data, bitrate, sample_pnt);
+
+        PrintCanLimitsDetails(bitrate, ret);
+    }
 }
 
 }  // namespace eerie_leap::subsys::canbus

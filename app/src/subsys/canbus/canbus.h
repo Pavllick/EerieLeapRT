@@ -27,7 +27,9 @@ private:
 
     bool is_initialized_ = false;
     CanbusType type_;
+    bool is_extended_id_ = false;
     uint32_t bitrate_;
+    uint32_t data_bitrate_;
     bool bitrate_detected_ = false;
     atomic_t auto_detect_running_;
     std::function<void (uint32_t bitrate)> bitrate_detected_fn_;
@@ -62,13 +64,21 @@ private:
 
     static void SendFrameCallback(const device* dev, int error, void* user_data);
     bool SetTiming(uint32_t bitrate);
+    bool SetDataTiming(uint32_t bitrate);
     bool RegisterFilter(uint32_t can_id);
     static void CanFrameReceivedCallback(const device *dev, can_frame *frame, void *user_data);
+    void PrintCanLimits();
+    void PrintCanFdLimits();
 
 public:
     using BitrateDetectedCallback = std::function<void (uint32_t bitrate)>;
 
-    explicit Canbus(const device *canbus_dev, CanbusType type, uint32_t bitrate);
+    Canbus(
+        const device *canbus_dev,
+        CanbusType type,
+        uint32_t bitrate,
+        uint32_t data_bitrate = 0,
+        bool is_extended_id = false);
     ~Canbus();
 
     bool Initialize();

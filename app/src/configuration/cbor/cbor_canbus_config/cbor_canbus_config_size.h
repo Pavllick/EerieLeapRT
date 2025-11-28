@@ -15,8 +15,10 @@ static size_t cbor_get_size_CborCanbusConfig(const CborCanbusConfig& config) {
         builder.AddIndefiniteArrayStart();
 
         builder.AddUint(channel_configuration.type)
+            .AddBool(channel_configuration.is_extended_id)
             .AddUint(channel_configuration.bus_channel)
             .AddUint(channel_configuration.bitrate)
+            .AddUint(channel_configuration.data_bitrate)
             .AddTstr(channel_configuration.dbc_file_path);
 
         builder.AddIndefiniteArrayStart();
