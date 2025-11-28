@@ -5,7 +5,6 @@
 	aliases {
 		intfs0 = &intfs0;
 		sdfs0 = &sdfs0;
-		modbus0 = &modbus0;
 	};
 
 	chosen {
@@ -50,13 +49,5 @@
 			label = "intfs0_storage";
 			reg = <0x700000 DT_SIZE_M(1)>; // 1MB at offset 7MB
 		};
-	};
-};
-
-&uart1 {
-	modbus0: modbus0 {
-		compatible = "zephyr,modbus-serial";
-		status = "okay";
-		de-gpios = <&gpio1 10 GPIO_ACTIVE_HIGH>;	/* GPIO42 DIR */
 	};
 };

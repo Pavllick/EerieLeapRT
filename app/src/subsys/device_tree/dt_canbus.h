@@ -5,8 +5,12 @@
 #include <zephyr/devicetree.h>
 #include <zephyr/device.h>
 
-#if defined(CONFIG_CAN) && DT_HAS_CHOSEN(zephyr_canbus)
-#define CANBUS_NODE DT_CHOSEN(zephyr_canbus)
+#if defined(CONFIG_CAN) && DT_HAS_ALIAS(can0)
+#define CAN0_NODE DT_ALIAS(can0)
+#endif
+
+#if defined(CONFIG_CAN) && DT_HAS_ALIAS(can1)
+#define CAN1_NODE DT_ALIAS(can1)
 #endif
 
 namespace eerie_leap::subsys::device_tree {

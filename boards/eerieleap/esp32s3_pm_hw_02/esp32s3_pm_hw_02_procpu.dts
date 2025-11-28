@@ -19,7 +19,8 @@
 		gpioc = &gpioc;
 		adc0 = &adc0;
 		adc1 = &adc1;
-		uart0 = &uart0;
+		can0 = &twai;
+		can1 = &can1;
 	};
 
 	chosen {
@@ -31,7 +32,6 @@
 		zephyr,sdhc = &spi_sdhc0;
 		zephyr,bt-hci = &esp32_bt_hci;
 		zephyr,display = &ssd1306_ssd1306_128x32;
-		zephyr,canbus = &twai;
 	};
 
 	gpioc: gpioc {
@@ -130,21 +130,6 @@
 	};
 };
 
-// Needed for serial monitor
-&uart0 {
-	status = "okay";
-	current-speed = <115200>;
-	pinctrl-0 = <&uart0_default>;
-	pinctrl-names = "default";
-};
-
-&uart1 {
-	status = "okay";
-	current-speed = <115200>;
-	pinctrl-0 = <&uart1_default>;
-	pinctrl-names = "default";
-};
-
 &spi2 {
 	status = "okay";
 	#address-cells = <1>;
@@ -163,6 +148,31 @@
 			disk-name = "SD";
 			status = "okay";
 		};
+	};
+};
+
+&spi3 {
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	pinctrl-0 = <&spim3_default>;
+	pinctrl-names = "default";
+
+	can1: mcp2518fd@0 {
+		compatible = "microchip,mcp251xfd";
+		reg = <0>;
+		status = "okay";
+
+		// MCP2518FD maximum SPI frequency is 20 MHz
+		// But current temp setup is not stable at frequencies above 8 MHz
+		// TODO: Investigate
+		spi-max-frequency = <8000000>;
+		int-gpios = <&gpio0 1 GPIO_ACTIVE_LOW>;
+		osc-freq = <20000000>;
+	};
+
+	can-transceiver {
+		max-bitrate = <8000000>;
 	};
 };
 

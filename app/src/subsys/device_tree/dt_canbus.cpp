@@ -11,10 +11,16 @@ LOG_MODULE_DECLARE(dt_logger);
 std::unordered_map<uint8_t, const device*> DtCanbus::canbus_devs_;
 
 void DtCanbus::Initialize() {
-#if defined(CONFIG_CAN) && DT_HAS_CHOSEN(zephyr_canbus)
-    auto canbus_dev = DEVICE_DT_GET(CANBUS_NODE);
-    canbus_devs_.insert({0, canbus_dev});
-    LOG_INF("Canbus initialized.");
+#if defined(CAN0_NODE)
+    auto can0_dev = DEVICE_DT_GET(CAN0_NODE);
+    canbus_devs_.emplace(0, can0_dev);
+    LOG_INF("CAN0 initialized.");
+#endif
+
+#if defined(CAN1_NODE)
+    auto can1_dev = DEVICE_DT_GET(CAN1_NODE);
+    canbus_devs_.emplace(1, can1_dev);
+    LOG_INF("CAN1 initialized.");
 #endif
 }
 
