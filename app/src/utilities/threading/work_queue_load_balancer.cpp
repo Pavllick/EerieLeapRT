@@ -6,7 +6,7 @@ WorkQueueLoadBalancer::WorkQueueLoadBalancer() {
     k_mutex_init(&balancer_mutex_);
 }
 
-void WorkQueueLoadBalancer::AddThread(std::unique_ptr<WorkQueueThread> thread) {
+void WorkQueueLoadBalancer::AddThread(std::shared_ptr<WorkQueueThread> thread) {
     work_queue_threads_.emplace_back(std::move(thread));
     thread_metrics_.emplace_back(work_queue_threads_.back()->GetWorkQueue());
 }
@@ -23,7 +23,7 @@ void WorkQueueLoadBalancer::OnWorkComplete(WorkQueueThread& thread, uint32_t exe
     thread_metrics_[index].OnWorkComplete(execution_time_ms);
 }
 
-WorkQueueThread& WorkQueueLoadBalancer::GetLeastLoadedQueue() {
+std::shared_ptr<WorkQueueThread> WorkQueueLoadBalancer::GetLeastLoadedQueue() {
     k_mutex_lock(&balancer_mutex_, K_FOREVER);
 
     uint64_t now = k_uptime_get();
@@ -53,7 +53,7 @@ WorkQueueThread& WorkQueueLoadBalancer::GetLeastLoadedQueue() {
     atomic_inc(&thread_metrics_[least_loaded_index].pending_items);
     k_mutex_unlock(&balancer_mutex_);
 
-    return *work_queue_threads_[least_loaded_index];
+    return work_queue_threads_[least_loaded_index];
 }
 
 } // namespace eerie_leap::utilities::threading

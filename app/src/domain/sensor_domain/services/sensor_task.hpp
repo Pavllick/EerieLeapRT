@@ -18,8 +18,8 @@ using namespace eerie_leap::domain::sensor_domain::sensor_readers;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 
 struct SensorTask {
-    k_work_q* work_q;
     std::shared_ptr<WorkQueueLoadBalancer> work_queue_load_balancer_;
+    std::shared_ptr<WorkQueueThread> work_queue_thread_;
     k_work_delayable work;
     k_timeout_t sampling_rate_ms;
     std::shared_ptr<Sensor> sensor;

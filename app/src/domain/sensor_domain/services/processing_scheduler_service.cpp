@@ -36,7 +36,7 @@ ProcessingSchedulerService::ProcessingSchedulerService(
 
 void ProcessingSchedulerService::Initialize() {
     for(int i = 0; i < 2; i++) {
-        auto thread = std::make_unique<WorkQueueThread>(
+        auto thread = std::make_shared<WorkQueueThread>(
             "processing_scheduler_service_" + std::to_string(i),
             thread_stack_size_,
             thread_priority_ + i % 2);
@@ -48,6 +48,7 @@ void ProcessingSchedulerService::Initialize() {
 
 void ProcessingSchedulerService::ProcessSensorWorkTask(k_work* work) {
     SensorTask* task = CONTAINER_OF(work, SensorTask, work);
+    uint32_t start_time = k_uptime_get_32();
 
     try {
         task->reader->Read();
@@ -65,8 +66,9 @@ void ProcessingSchedulerService::ProcessSensorWorkTask(k_work* work) {
         LOG_DBG("Error processing sensor: %s, Error: %s", task->sensor->id.c_str(), e.what());
     }
 
-    task->work_q = task->work_queue_load_balancer_->GetLeastLoadedQueue().GetWorkQueue();
-    k_work_reschedule_for_queue(task->work_q, &task->work, task->sampling_rate_ms);
+    task->work_queue_load_balancer_->OnWorkComplete(*task->work_queue_thread_, k_uptime_get_32() - start_time);
+    task->work_queue_thread_ = task->work_queue_load_balancer_->GetLeastLoadedQueue();
+    k_work_reschedule_for_queue(task->work_queue_thread_->GetWorkQueue(), &task->work, task->sampling_rate_ms);
 }
 
 std::shared_ptr<SensorTask> ProcessingSchedulerService::CreateSensorTask(std::shared_ptr<Sensor> sensor) {
@@ -81,7 +83,7 @@ std::shared_ptr<SensorTask> ProcessingSchedulerService::CreateSensorTask(std::sh
 
     auto task = make_shared_ext<SensorTask>();
     task->work_queue_load_balancer_ = work_queue_load_balancer_;
-    task->work_q = work_queue_load_balancer_->GetLeastLoadedQueue().GetWorkQueue();
+    task->work_queue_thread_ = work_queue_load_balancer_->GetLeastLoadedQueue();
     task->sampling_rate_ms = K_MSEC(sensor->configuration.sampling_rate_ms);
     task->sensor = sensor;
     task->readings_frame = sensor_readings_frame_;
@@ -103,7 +105,7 @@ void ProcessingSchedulerService::StartTasks() {
         k_work_delayable* work = &task->work;
         k_work_init_delayable(work, ProcessSensorWorkTask);
 
-        k_work_schedule_for_queue(task->work_q, work, K_NO_WAIT);
+        k_work_schedule_for_queue(task->work_queue_thread_->GetWorkQueue(), work, K_NO_WAIT);
     }
 
     k_sleep(K_MSEC(1));
