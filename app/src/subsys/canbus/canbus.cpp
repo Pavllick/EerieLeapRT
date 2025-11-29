@@ -30,7 +30,8 @@ Canbus::Canbus(
 
 Canbus::~Canbus() {
     StopActivityMonitoring();
-    can_stop(canbus_dev_);
+    if(canbus_dev_ != nullptr && is_initialized_)
+        can_stop(canbus_dev_);
 
     if(stack_area_)
         k_thread_stack_free(stack_area_);
