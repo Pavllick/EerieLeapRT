@@ -26,33 +26,24 @@ CalibrationService::CalibrationService(
     : time_service_(std::move(time_service)),
     guid_generator_(std::move(guid_generator)),
     adc_configuration_manager_(std::move(adc_configuration_manager)),
-    processing_scheduler_service_(std::move(processing_scheduler_service)) {
-
-    k_sem_init(&processing_semaphore_, 1, 1);
-};
+    processing_scheduler_service_(std::move(processing_scheduler_service)) {};
 
 void CalibrationService::ProcessCalibrationWorkTask(k_work* work) {
     SensorTask* task = CONTAINER_OF(work, SensorTask, work);
 
-    if(k_sem_take(task->processing_semaphore, PROCESSING_TIMEOUT) == 0) {
-        try {
-            task->reader->Read();
-            auto reading = task->readings_frame->GetReading(task->sensor->id_hash);
+    try {
+        task->reader->Read();
+        auto reading = task->readings_frame->GetReading(task->sensor->id_hash);
 
-            LOG_INF("ADC Calibration Reading: Value: %.3f, Time: %s\n",
-                reading->value.value_or(0.0f),
-                TimeHelpers::GetFormattedString(*reading->timestamp).c_str());
-        } catch (const std::exception& e) {
-            LOG_ERR("Error processing calibrator on channel %d, Error: %s",
-                task->sensor->configuration.channel.value_or(-1),
-                e.what());
-        }
-    } else {
-        LOG_ERR("Lock take timed out for calibrator on channel %d",
-            task->sensor->configuration.channel.value_or(-1));
+        LOG_INF("ADC Calibration Reading: Value: %.3f, Time: %s\n",
+            reading->value.value_or(0.0f),
+            TimeHelpers::GetFormattedString(*reading->timestamp).c_str());
+    } catch (const std::exception& e) {
+        LOG_ERR("Error processing calibrator on channel %d, Error: %s",
+            task->sensor->configuration.channel.value_or(-1),
+            e.what());
     }
 
-    k_sem_give(task->processing_semaphore);
     k_work_reschedule(&task->work, task->sampling_rate_ms);
 }
 
@@ -65,7 +56,6 @@ std::shared_ptr<SensorTask> CalibrationService::CreateCalibrationTask(int channe
     auto sensor_readings_frame = make_shared_ext<SensorReadingsFrame>();
 
     auto task = make_shared_ext<SensorTask>();
-    task->processing_semaphore = &processing_semaphore_;
     task->sampling_rate_ms = K_MSEC(sensor->configuration.sampling_rate_ms);
     task->sensor = sensor;
     task->readings_frame = sensor_readings_frame;

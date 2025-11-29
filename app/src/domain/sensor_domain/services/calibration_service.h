@@ -22,9 +22,6 @@ using namespace eerie_leap::domain::sensor_domain::services;
 
 class CalibrationService {
 private:
-    k_sem processing_semaphore_;
-    static constexpr k_timeout_t PROCESSING_TIMEOUT = K_MSEC(200);
-
     std::shared_ptr<ITimeService> time_service_;
     std::shared_ptr<GuidGenerator> guid_generator_;
     std::shared_ptr<AdcConfigurationManager> adc_configuration_manager_;

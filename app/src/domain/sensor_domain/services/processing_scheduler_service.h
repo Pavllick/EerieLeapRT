@@ -5,6 +5,7 @@
 
 #include <zephyr/kernel.h>
 
+#include "utilities/threading/work_queue_load_balancer.h"
 #include "domain/sensor_domain/configuration/sensors_configuration_manager.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 #include "domain/sensor_domain/sensor_readers/sensor_reader_factory.h"
@@ -14,20 +15,17 @@
 
 namespace eerie_leap::domain::sensor_domain::services {
 
+using namespace eerie_leap::utilities::threading;
 using namespace eerie_leap::domain::sensor_domain::configuration;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 using namespace eerie_leap::domain::sensor_domain::processors;
 
 class ProcessingSchedulerService {
 private:
-    k_sem processing_semaphore_;
-    static constexpr k_timeout_t PROCESSING_TIMEOUT = K_MSEC(5);
+    static constexpr int thread_stack_size_ = 8192;
+    static constexpr int thread_priority_ = 6;
 
-    static constexpr int k_stack_size_ = 8192;
-    static constexpr int k_priority_ = K_PRIO_PREEMPT(6);
-
-    k_thread_stack_t* stack_area_;
-    k_work_q work_q_;
+    std::shared_ptr<WorkQueueLoadBalancer> work_queue_load_balancer_;
 
     std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager_;
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame_;
@@ -47,7 +45,7 @@ public:
         std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager,
         std::shared_ptr<SensorReadingsFrame> sensor_readings_frame,
         std::shared_ptr<SensorReaderFactory> sensor_reader_factory);
-    ~ProcessingSchedulerService();
+    ~ProcessingSchedulerService() = default;
 
     void Initialize();
 

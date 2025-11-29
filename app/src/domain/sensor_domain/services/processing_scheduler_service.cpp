@@ -23,7 +23,8 @@ ProcessingSchedulerService::ProcessingSchedulerService(
     std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager,
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame,
     std::shared_ptr<SensorReaderFactory> sensor_reader_factory)
-        : sensors_configuration_manager_(std::move(sensors_configuration_manager)),
+        : work_queue_load_balancer_(std::make_shared<WorkQueueLoadBalancer>()),
+        sensors_configuration_manager_(std::move(sensors_configuration_manager)),
         sensor_readings_frame_(std::move(sensor_readings_frame)),
         sensor_reader_factory_(std::move(sensor_reader_factory)),
         reading_processors_(std::make_shared<std::vector<std::shared_ptr<IReadingProcessor>>>()) {
@@ -31,33 +32,22 @@ ProcessingSchedulerService::ProcessingSchedulerService(
     reading_processors_->push_back(make_shared_ext<ScriptProcessor>("pre_process_sensor_value"));
     reading_processors_->push_back(make_shared_ext<SensorProcessor>(sensor_readings_frame_));
     reading_processors_->push_back(make_shared_ext<ScriptProcessor>("post_process_sensor_value"));
-
-    k_sem_init(&processing_semaphore_, 1, 1);
 };
 
-ProcessingSchedulerService::~ProcessingSchedulerService() {
-    if(stack_area_ == nullptr)
-        return;
-
-    k_work_queue_stop(&work_q_, K_FOREVER);
-    k_thread_stack_free(stack_area_);
-}
-
 void ProcessingSchedulerService::Initialize() {
-    stack_area_ = k_thread_stack_alloc(k_stack_size_, 0);
-    k_work_queue_init(&work_q_);
-    k_work_queue_start(&work_q_, stack_area_, k_stack_size_, k_priority_, nullptr);
+    for(int i = 0; i < 2; i++) {
+        auto thread = std::make_unique<WorkQueueThread>(
+            "processing_scheduler_service_" + std::to_string(i),
+            thread_stack_size_,
+            thread_priority_ + i % 2);
+        thread->Initialize();
 
-    k_thread_name_set(&work_q_.thread, "processing_scheduler_service");
+        work_queue_load_balancer_->AddThread(std::move(thread));
+    }
 }
 
 void ProcessingSchedulerService::ProcessSensorWorkTask(k_work* work) {
     SensorTask* task = CONTAINER_OF(work, SensorTask, work);
-
-    if(k_sem_take(task->processing_semaphore, PROCESSING_TIMEOUT) != 0) {
-        LOG_ERR("Lock take timed out for sensor: %s", task->sensor->id.c_str());
-        return;
-    }
 
     try {
         task->reader->Read();
@@ -75,7 +65,7 @@ void ProcessingSchedulerService::ProcessSensorWorkTask(k_work* work) {
         LOG_DBG("Error processing sensor: %s, Error: %s", task->sensor->id.c_str(), e.what());
     }
 
-    k_sem_give(task->processing_semaphore);
+    task->work_q = task->work_queue_load_balancer_->GetLeastLoadedQueue().GetWorkQueue();
     k_work_reschedule_for_queue(task->work_q, &task->work, task->sampling_rate_ms);
 }
 
@@ -90,8 +80,8 @@ std::shared_ptr<SensorTask> ProcessingSchedulerService::CreateSensorTask(std::sh
         return nullptr;
 
     auto task = make_shared_ext<SensorTask>();
-    task->work_q = &work_q_;
-    task->processing_semaphore = &processing_semaphore_;
+    task->work_queue_load_balancer_ = work_queue_load_balancer_;
+    task->work_q = work_queue_load_balancer_->GetLeastLoadedQueue().GetWorkQueue();
     task->sampling_rate_ms = K_MSEC(sensor->configuration.sampling_rate_ms);
     task->sensor = sensor;
     task->readings_frame = sensor_readings_frame_;
@@ -113,7 +103,7 @@ void ProcessingSchedulerService::StartTasks() {
         k_work_delayable* work = &task->work;
         k_work_init_delayable(work, ProcessSensorWorkTask);
 
-        k_work_schedule_for_queue(&work_q_, work, K_NO_WAIT);
+        k_work_schedule_for_queue(task->work_q, work, K_NO_WAIT);
     }
 
     k_sleep(K_MSEC(1));
