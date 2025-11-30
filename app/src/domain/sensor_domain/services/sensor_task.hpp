@@ -3,7 +3,7 @@
 #include <memory>
 #include <zephyr/kernel.h>
 
-#include "utilities/threading/work_queue_load_balancer.h"
+#include "utilities/threading/work_queue_thread.h"
 #include "domain/sensor_domain/models/sensor.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 #include "domain/sensor_domain/sensor_readers/i_sensor_reader.h"
@@ -18,9 +18,6 @@ using namespace eerie_leap::domain::sensor_domain::sensor_readers;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 
 struct SensorTask {
-    std::shared_ptr<WorkQueueLoadBalancer> work_queue_load_balancer_;
-    std::shared_ptr<WorkQueueThread> work_queue_thread_;
-    k_work_delayable work;
     k_timeout_t sampling_rate_ms;
     std::shared_ptr<Sensor> sensor;
 

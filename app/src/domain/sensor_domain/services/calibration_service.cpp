@@ -1,3 +1,4 @@
+#include <memory>
 #include <vector>
 #include <zephyr/sys/util.h>
 #include <zephyr/kernel.h>
@@ -23,14 +24,21 @@ CalibrationService::CalibrationService(
     std::shared_ptr<GuidGenerator> guid_generator,
     std::shared_ptr<AdcConfigurationManager> adc_configuration_manager,
     std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service)
-    : time_service_(std::move(time_service)),
+    : work_queue_thread_(nullptr),
+    time_service_(std::move(time_service)),
     guid_generator_(std::move(guid_generator)),
     adc_configuration_manager_(std::move(adc_configuration_manager)),
     processing_scheduler_service_(std::move(processing_scheduler_service)) {};
 
-void CalibrationService::ProcessCalibrationWorkTask(k_work* work) {
-    SensorTask* task = CONTAINER_OF(work, SensorTask, work);
+void CalibrationService::Initialize() {
+    work_queue_thread_ = std::make_unique<WorkQueueThread>(
+        "calibration_service_",
+        thread_stack_size_,
+        thread_priority_);
+    work_queue_thread_->Initialize();
+}
 
+WorkQueueTaskResult CalibrationService::ProcessCalibrationWorkTask(SensorTask* task) {
     try {
         task->reader->Read();
         auto reading = task->readings_frame->GetReading(task->sensor->id_hash);
@@ -44,18 +52,21 @@ void CalibrationService::ProcessCalibrationWorkTask(k_work* work) {
             e.what());
     }
 
-    k_work_reschedule(&task->work, task->sampling_rate_ms);
+    return WorkQueueTaskResult {
+        .reschedule = true,
+        .delay = task->sampling_rate_ms
+    };
 }
 
-std::shared_ptr<SensorTask> CalibrationService::CreateCalibrationTask(int channel) {
-    auto sensor = make_shared_ext<Sensor>("CalibrationSensor");
+std::unique_ptr<SensorTask> CalibrationService::CreateCalibrationTask(int channel) {
+    auto sensor = std::make_shared<Sensor>("CalibrationSensor");
     sensor->configuration.type = SensorType::PHYSICAL_ANALOG;
     sensor->configuration.channel = channel;
     sensor->configuration.sampling_rate_ms = CONFIG_EERIE_LEAP_ADC_CALIBRATION_SAMPLING_RATE_MS;
 
-    auto sensor_readings_frame = make_shared_ext<SensorReadingsFrame>();
+    auto sensor_readings_frame = std::make_shared<SensorReadingsFrame>();
 
-    auto task = make_shared_ext<SensorTask>();
+    auto task = std::make_unique<SensorTask>();
     task->sampling_rate_ms = K_MSEC(sensor->configuration.sampling_rate_ms);
     task->sensor = sensor;
     task->readings_frame = sensor_readings_frame;
@@ -76,12 +87,13 @@ void CalibrationService::Start(int channel) {
     auto adc_manager = adc_configuration_manager_->Get();
     adc_manager->UpdateSamplesCount(CONFIG_EERIE_LEAP_ADC_CALIBRATION_SAMPLES_COUNT);
 
-    calibration_task_ = CreateCalibrationTask(channel);
+    auto calibration_task = CreateCalibrationTask(channel);
 
-    k_work_delayable* work = &calibration_task_->work;
-    k_work_init_delayable(work, ProcessCalibrationWorkTask);
+    if(calibration_task == nullptr)
+        return;
 
-    k_work_schedule(work, K_NO_WAIT);
+    calibration_task_ = work_queue_thread_->CreateTask(ProcessCalibrationWorkTask, std::move(calibration_task));
+    work_queue_thread_->ScheduleTask(calibration_task_);
 
     k_sleep(K_MSEC(1));
 
@@ -89,15 +101,8 @@ void CalibrationService::Start(int channel) {
 }
 
 void CalibrationService::Stop() {
-    k_work_sync sync;
-
-    while(calibration_task_ != nullptr) {
-        bool res = k_work_cancel_delayable_sync(&calibration_task_->work, &sync);
-        if(!res) {
-            calibration_task_.reset();
-            break;
-        }
-    }
+    while(!work_queue_thread_->CancelTask(calibration_task_))
+        k_sleep(K_MSEC(1));
 
     LOG_INF("Calibration Service stopped");
 

@@ -22,4 +22,16 @@ void WorkQueueThread::Initialize() {
     return &work_q_;
 }
 
+void WorkQueueThread::TaskHandler(k_work* work) {
+    WorkQueueTaskBase* task = CONTAINER_OF(work, WorkQueueTaskBase, work);
+    auto result = task->Execute();
+
+    if(result.reschedule)
+        k_work_reschedule_for_queue(task->work_q, &task->work, result.delay);
+}
+
+bool WorkQueueThread::CancelTask(WorkQueueTaskBase& task) {
+    return k_work_cancel_delayable_sync(&task.work, &sync_);
+}
+
 } // namespace eerie_leap::utilities::threading

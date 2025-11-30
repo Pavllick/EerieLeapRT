@@ -5,7 +5,7 @@
 
 #include <zephyr/kernel.h>
 
-#include "utilities/threading/work_queue_load_balancer.h"
+#include "utilities/threading/work_queue_thread.h"
 #include "domain/sensor_domain/configuration/sensors_configuration_manager.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 #include "domain/sensor_domain/sensor_readers/sensor_reader_factory.h"
@@ -24,19 +24,18 @@ class ProcessingSchedulerService {
 private:
     static constexpr int thread_stack_size_ = 8192;
     static constexpr int thread_priority_ = 6;
-
-    std::shared_ptr<WorkQueueLoadBalancer> work_queue_load_balancer_;
+    std::unique_ptr<WorkQueueThread> work_queue_thread_;
 
     std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager_;
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame_;
     std::shared_ptr<SensorReaderFactory> sensor_reader_factory_;
 
-    std::vector<std::shared_ptr<SensorTask>> sensor_tasks_;
+    std::vector<WorkQueueTask<SensorTask>> sensor_tasks_;
     std::shared_ptr<std::vector<std::shared_ptr<IReadingProcessor>>> reading_processors_;
 
     void StartTasks();
-    std::shared_ptr<SensorTask> CreateSensorTask(std::shared_ptr<Sensor> sensor);
-    static void ProcessSensorWorkTask(k_work* work);
+    std::unique_ptr<SensorTask> CreateSensorTask(std::shared_ptr<Sensor> sensor);
+    static WorkQueueTaskResult ProcessSensorWorkTask(SensorTask* task);
 
     void InitializeScript(std::shared_ptr<Sensor> sensor);
 

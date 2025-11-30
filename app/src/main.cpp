@@ -309,6 +309,7 @@ int main(void) {
         guid_generator,
         adc_configuration_manager,
         processing_scheduler_service);
+    calibration_service->Initialize();
 
     auto canbus_scheduler_service = make_shared_ext<CanbusSchedulerService>(
         canbus_configuration_manager,
