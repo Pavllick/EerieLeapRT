@@ -11,7 +11,6 @@
 
 namespace eerie_leap::domain::sensor_domain::configuration::parsers {
 
-using namespace eerie_leap::utilities::math_parser;
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::domain::sensor_domain::models;

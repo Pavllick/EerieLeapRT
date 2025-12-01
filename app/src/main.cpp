@@ -44,7 +44,7 @@
 #include "controllers/display_controller.h"
 
 // Test sensors includes
-#include "utilities/math_parser/expression_evaluator.h"
+#include "subsys/math_parser/expression_evaluator.h"
 #include "domain/sensor_domain/models/sensor.h"
 
 #include "utilities/voltage_interpolator/calibration_data.h"
@@ -67,8 +67,8 @@ using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::dev_tools;
 using namespace eerie_leap::utilities::guid;
-using namespace eerie_leap::utilities::math_parser;
 
+using namespace eerie_leap::subsys::math_parser;
 using namespace eerie_leap::subsys::device_tree;
 using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::subsys::gpio;

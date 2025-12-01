@@ -4,10 +4,10 @@
 #include <zephyr/ztest.h>
 
 #include "utilities/string/string_helpers.h"
-#include "utilities/math_parser/expression_evaluator.h"
+#include "subsys/math_parser/expression_evaluator.h"
 
 using namespace eerie_leap::utilities::string;
-using namespace eerie_leap::utilities::math_parser;
+using namespace eerie_leap::subsys::math_parser;
 
 ZTEST_SUITE(expression_evaluator, NULL, NULL, NULL, NULL, NULL);
 

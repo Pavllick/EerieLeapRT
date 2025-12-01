@@ -3,8 +3,8 @@
 #include <memory>
 #include <optional>
 
-#include "utilities/math_parser/expression_evaluator.h"
 #include "utilities/voltage_interpolator/i_voltage_interpolator.h"
+#include "subsys/math_parser/expression_evaluator.h"
 #include "subsys/lua_script/lua_script.h"
 #include "domain/sensor_domain/models/sources/canbus_source.h"
 
@@ -12,8 +12,8 @@
 
 namespace eerie_leap::domain::sensor_domain::models {
 
-using namespace eerie_leap::utilities::math_parser;
 using namespace eerie_leap::utilities::voltage_interpolator;
+using namespace eerie_leap::subsys::math_parser;
 using namespace eerie_leap::subsys::lua_script;
 using namespace eerie_leap::domain::sensor_domain::models::sources;
 

@@ -7,7 +7,7 @@
 
 #include <zephyr/kernel.h>
 
-namespace eerie_leap::utilities::math_parser {
+namespace eerie_leap::subsys::math_parser {
 
 using namespace mu;
 
@@ -46,4 +46,4 @@ public:
     }
 };
 
-} // namespace eerie_leap::utilities::math_parser
+} // namespace eerie_leap::subsys::math_parser

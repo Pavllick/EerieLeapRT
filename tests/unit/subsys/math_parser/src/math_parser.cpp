@@ -1,8 +1,8 @@
 #include <zephyr/ztest.h>
 
-#include "utilities/math_parser/math_parser.h"
+#include "subsys/math_parser/expression_evaluator.h"
 
-using namespace eerie_leap::utilities::math_parser;
+using namespace eerie_leap::subsys::math_parser;
 
 ZTEST_SUITE(math_parser, NULL, NULL, NULL, NULL, NULL);
 

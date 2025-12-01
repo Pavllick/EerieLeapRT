@@ -56,6 +56,7 @@ file(GLOB_RECURSE APP_SRC_SUBSYS
   ${APP_SRC_SUBSYS_DIR}/time/*.cpp
   ${APP_SRC_SUBSYS_DIR}/dbc/*.cpp
   ${APP_SRC_SUBSYS_DIR}/lua_script/*.cpp
+  ${APP_SRC_SUBSYS_DIR}/math_parser/*.cpp
 )
 
 set(APP_SRC_DOMAIN_DIR ${APP_SRC_DIR}/domain)

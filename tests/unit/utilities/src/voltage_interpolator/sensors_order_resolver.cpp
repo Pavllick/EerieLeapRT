@@ -1,14 +1,14 @@
 #include <zephyr/ztest.h>
 
-#include "domain/sensor_domain/models/sensor.h"
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
-#include "utilities/math_parser/expression_evaluator.h"
+#include "subsys/math_parser/expression_evaluator.h"
+#include "domain/sensor_domain/models/sensor.h"
 #include "domain/sensor_domain/utilities/sensors_order_resolver.h"
 
-using namespace eerie_leap::utilities::math_parser;
+using namespace eerie_leap::utilities::voltage_interpolator;
+using namespace eerie_leap::subsys::math_parser;
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::domain::sensor_domain::utilities;
-using namespace eerie_leap::utilities::voltage_interpolator;
 
 ZTEST_SUITE(sensors_order_resolver, NULL, NULL, NULL, NULL, NULL);
 

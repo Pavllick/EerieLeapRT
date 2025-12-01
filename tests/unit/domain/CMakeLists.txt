@@ -49,6 +49,7 @@ file(GLOB_RECURSE APP_SRC_SUBSYS
   ${APP_SRC_SUBSYS_DIR}/adc/utilities/*.cpp
   ${APP_SRC_SUBSYS_DIR}/adc/models/*.cpp
   ${APP_SRC_SUBSYS_DIR}/canbus/*.cpp
+  ${APP_SRC_SUBSYS_DIR}/math_parser/*.cpp
   ${APP_SRC_SUBSYS_DIR}/lua_script/*.cpp
   ${APP_SRC_SUBSYS_DIR}/dbc/*.cpp
 )

@@ -4,7 +4,6 @@
 #include <zephyr/ztest.h>
 
 #include "utilities/cbor/cbor_helpers.hpp"
-#include "utilities/math_parser/expression_evaluator.h"
 #include "configuration/cbor/cbor_system_config/cbor_system_config.h"
 #include "configuration/cbor/cbor_sensors_config/cbor_sensors_config.h"
 #include "configuration/services/cbor_configuration_service.h"
@@ -14,18 +13,19 @@
 #include "subsys/device_tree/dt_fs.h"
 #include "subsys/fs/services/i_fs_service.h"
 #include "subsys/fs/services/fs_service.h"
+#include "subsys/math_parser/expression_evaluator.h"
 
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
 
 using namespace eerie_leap::utilities::cbor;
-using namespace eerie_leap::utilities::math_parser;
+using namespace eerie_leap::utilities::voltage_interpolator;
 using namespace eerie_leap::configuration::services;
-using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::domain::sensor_domain::configuration;
 using namespace eerie_leap::domain::sensor_domain::models;
-using namespace eerie_leap::utilities::voltage_interpolator;
 using namespace eerie_leap::subsys::device_tree;
+using namespace eerie_leap::subsys::fs::services;
+using namespace eerie_leap::subsys::math_parser;
 
 ZTEST_SUITE(sensors_configuration_manager, NULL, NULL, NULL, NULL, NULL);
 

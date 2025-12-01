@@ -1,11 +1,8 @@
 #include <string>
-#include <zephyr/logging/log.h>
 
 #include "expression_evaluator.h"
 
-namespace eerie_leap::utilities::math_parser {
-
-LOG_MODULE_REGISTER(expression_evaluator_logger);
+namespace eerie_leap::subsys::math_parser {
 
 using namespace mu;
 
@@ -37,4 +34,4 @@ const std::unordered_set<std::string> ExpressionEvaluator::GetVariableNames() co
     return math_parser_->GetVariableNames();
 }
 
-} // namespace eerie_leap::utilities::math_parser
+} // namespace eerie_leap::subsys::math_parser

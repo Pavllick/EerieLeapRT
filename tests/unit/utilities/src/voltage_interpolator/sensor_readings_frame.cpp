@@ -1,20 +1,20 @@
 #include <zephyr/ztest.h>
 
 #include "utilities/guid/guid_generator.h"
-#include "utilities/math_parser/expression_evaluator.h"
+#include "utilities/string/string_helpers.h"
+#include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
+#include "subsys/math_parser/expression_evaluator.h"
 #include "domain/sensor_domain/models/sensor.h"
 #include "domain/sensor_domain/models/sensor_reading.h"
 #include "domain/sensor_domain/models/reading_status.h"
-#include "utilities/string/string_helpers.h"
-#include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::utilities::string;
-using namespace eerie_leap::utilities::math_parser;
+using namespace eerie_leap::utilities::voltage_interpolator;
+using namespace eerie_leap::subsys::math_parser;
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::domain::sensor_domain::utilities;
-using namespace eerie_leap::utilities::voltage_interpolator;
 
 ZTEST_SUITE(sensor_readings_frame, NULL, NULL, NULL, NULL, NULL);
 

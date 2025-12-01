@@ -7,7 +7,7 @@
 
 #include "math_parser.h"
 
-namespace eerie_leap::utilities::math_parser {
+namespace eerie_leap::subsys::math_parser {
 
 class ExpressionEvaluator {
 private:
@@ -29,4 +29,4 @@ public:
     float Evaluate(std::optional<float> x = std::nullopt);
 };
 
-} // namespace eerie_leap::utilities::math_parser
+} // namespace eerie_leap::subsys::math_parser

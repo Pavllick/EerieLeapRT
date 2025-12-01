@@ -2,7 +2,7 @@
 
 #include "utilities/guid/guid_generator.h"
 #include "utilities/string/string_helpers.h"
-#include "utilities/math_parser/expression_evaluator.h"
+#include "subsys/math_parser/expression_evaluator.h"
 #include "subsys/time/rtc_provider.h"
 #include "subsys/time/boot_elapsed_time_provider.h"
 #include "subsys/time/time_service.h"
@@ -31,13 +31,13 @@
 
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::utilities::string;
-using namespace eerie_leap::utilities::math_parser;
 
 using namespace eerie_leap::subsys::device_tree;
 using namespace eerie_leap::subsys::adc;
 using namespace eerie_leap::subsys::adc::models;
 using namespace eerie_leap::subsys::gpio;
 using namespace eerie_leap::subsys::time;
+using namespace eerie_leap::subsys::math_parser;
 
 using namespace eerie_leap::domain::sensor_domain::processors;
 using namespace eerie_leap::domain::sensor_domain::sensor_readers;
