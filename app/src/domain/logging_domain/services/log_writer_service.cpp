@@ -22,40 +22,31 @@ LogWriterService::LogWriterService(
     std::shared_ptr<LoggingConfigurationManager> logging_configuration_manager,
     std::shared_ptr<ITimeService> time_service,
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame)
-        : fs_service_(std::move(fs_service)),
+        : work_queue_thread_(nullptr),
+        work_queue_task_(nullptr),
+        fs_service_(std::move(fs_service)),
         logging_configuration_manager_(std::move(logging_configuration_manager)),
         time_service_(std::move(time_service)),
         sensor_readings_frame_(std::move(sensor_readings_frame)),
-        logger_running_(ATOMIC_INIT(0)) {
-
-    k_sem_init(&processing_semaphore_, 1, 1);
-}
-
-LogWriterService::~LogWriterService() {
-    if(stack_area_ == nullptr)
-        return;
-
-    k_work_queue_stop(&work_q_, K_FOREVER);
-    k_thread_stack_free(stack_area_);
-}
+        logger_running_(ATOMIC_INIT(0)) {}
 
 void LogWriterService::SetLogger(std::shared_ptr<ILogger<SensorReading>> logger) {
     logger_ = std::move(logger);
 }
 
 void LogWriterService::Initialize() {
-    stack_area_ = k_thread_stack_alloc(k_stack_size_, 0);
-    k_work_queue_init(&work_q_);
-    k_work_queue_start(&work_q_, stack_area_, k_stack_size_, k_priority_, nullptr);
+    work_queue_thread_ = std::make_unique<WorkQueueThread>(
+        "log_writer_service",
+        thread_stack_size_,
+        thread_priority_);
+    work_queue_thread_->Initialize();
 
-    k_thread_name_set(&work_q_.thread, "log_writer_service");
+    auto task = std::make_unique<LogWriterTask>();
+    task->time_service = time_service_;
+    task->sensor_readings_frame = sensor_readings_frame_;
 
-    task_ = std::make_shared<LogWriterTask>();
-    task_->work_q = &work_q_;
-    task_->processing_semaphore = &processing_semaphore_;
-    task_->time_service = time_service_;
-    task_->sensor_readings_frame = sensor_readings_frame_;
-    k_work_init_delayable(&task_->work, LogReadingWorkTask);
+    work_queue_task_ = std::make_unique<WorkQueueTask<LogWriterTask>>(
+        work_queue_thread_->CreateTask(ProcessWorkTask, std::move(task)));
 
     LOG_INF("Log writer service initialized.");
 }
@@ -119,12 +110,13 @@ int LogWriterService::LogWriterStart() {
 
     LOG_INF("Logging started. Log file created: %s", file_name.c_str());
 
-    task_->logging_interval_ms = logging_configuration_manager_->Get()->logging_interval_ms;
-    task_->start_time = start_time;
-    task_->logger = logger_;
+    work_queue_task_->user_data->logging_interval_ms =
+        K_MSEC(logging_configuration_manager_->Get()->logging_interval_ms);
+    work_queue_task_->user_data->start_time = start_time;
+    work_queue_task_->user_data->logger = logger_;
 
     atomic_set(&logger_running_, 1);
-    k_work_schedule_for_queue(&work_q_, &task_->work, K_NO_WAIT);
+    work_queue_thread_->ScheduleTask(*work_queue_task_);
 
     return 0;
 }
@@ -133,8 +125,7 @@ int LogWriterService::LogWriterStop() {
     if(!atomic_get(&logger_running_))
         return -1;
 
-    k_work_sync sync;
-    k_work_cancel_delayable_sync(&task_->work, &sync);
+    work_queue_thread_->CancelTask(*work_queue_task_);
     atomic_set(&logger_running_, 0);
 
     logger_->StopLogging();
@@ -145,14 +136,7 @@ int LogWriterService::LogWriterStop() {
     return 0;
 }
 
-void LogWriterService::LogReadingWorkTask(k_work* work) {
-    LogWriterTask* task = CONTAINER_OF(work, LogWriterTask, work);
-
-    if(k_sem_take(task->processing_semaphore, SEMAPHORE_TIMEOUT) != 0) {
-        LOG_ERR("Log writer lock timed out.");
-        return;
-    }
-
+WorkQueueTaskResult LogWriterService::ProcessWorkTask(LogWriterTask* task) {
     auto time_now = task->time_service->GetCurrentTime();
     for(const auto& [sensor_id, reading] : task->sensor_readings_frame->GetReadings()) {
         if(reading->status != ReadingStatus::PROCESSED && reading->sensor->configuration.type != SensorType::CANBUS_RAW)
@@ -161,8 +145,10 @@ void LogWriterService::LogReadingWorkTask(k_work* work) {
         task->logger->LogReading(time_now, *reading);
     }
 
-    k_sem_give(task->processing_semaphore);
-    k_work_reschedule_for_queue(task->work_q, &task->work, K_MSEC(task->logging_interval_ms));
+    return {
+        .reschedule = true,
+        .delay = task->logging_interval_ms
+    };
 }
 
 } // namespace eerie_leap::domain::logging_domain::services

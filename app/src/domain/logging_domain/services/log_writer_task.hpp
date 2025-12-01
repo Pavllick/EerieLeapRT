@@ -19,10 +19,7 @@ using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::domain::logging_domain::loggers;
 
 struct LogWriterTask {
-    k_work_q* work_q;
-    k_work_delayable work;
-    k_sem* processing_semaphore;
-    int logging_interval_ms;
+    k_timeout_t logging_interval_ms;
     std::shared_ptr<ITimeService> time_service;
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame;
     std::shared_ptr<ILogger<SensorReading>> logger;
