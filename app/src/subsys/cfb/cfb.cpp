@@ -1,3 +1,4 @@
+#include <memory>
 #include <zephyr/kernel.h>
 #include <zephyr/devicetree.h>
 #include <zephyr/drivers/display.h>
@@ -15,17 +16,7 @@ namespace eerie_leap::subsys::cfb {
 
 using namespace eerie_leap::subsys::device_tree;
 
-Cfb::Cfb() {
-    k_sem_init(&processing_semaphore_, 1, 1);
-}
-
-Cfb::~Cfb() {
-    if(stack_area_ == nullptr)
-        return;
-
-    k_work_queue_stop(&work_q_, K_FOREVER);
-    k_thread_stack_free(stack_area_);
-}
+Cfb::Cfb() : work_queue_thread_(nullptr), work_queue_task_(nullptr) {}
 
 bool Cfb::Initialize() {
     if(initialized_) {
@@ -74,31 +65,22 @@ bool Cfb::Initialize() {
 }
 
 void Cfb::InitializeThread() {
-    stack_area_ = k_thread_stack_alloc(k_stack_size_, 0);
-    k_work_queue_init(&work_q_);
-    k_work_queue_start(&work_q_, stack_area_, k_stack_size_, k_priority_, nullptr);
+    work_queue_thread_ = std::make_unique<WorkQueueThread>(
+        "display_service",
+        thread_stack_size_,
+        thread_priority_);
+    work_queue_thread_->Initialize();
 
-    k_thread_name_set(&work_q_.thread, "display_service");
+    auto task = std::make_unique<CfbTask>();
 
-    k_work_init(&task_.work, CfbTaskWorkTask);
-    task_.work_q = &work_q_;
-    task_.processing_semaphore = &processing_semaphore_;
-    atomic_set(&task_.is_animation_running_, 0);
+    work_queue_task_ = std::make_unique<WorkQueueTask<CfbTask>>(
+        work_queue_thread_->CreateTask(ProcessWorkTask, std::move(task)));
+    work_queue_thread_->ScheduleTask(*work_queue_task_);
 
     LOG_INF("Display service initialized.");
-
-    k_work_submit_to_queue(&work_q_, &task_.work);
 }
 
-void Cfb::CfbTaskWorkTask(k_work* work) {
-    CfbTask* task = CONTAINER_OF(work, CfbTask, work);
-
-    if(k_sem_take(task->processing_semaphore, PROCESSING_TIMEOUT) != 0) {
-        LOG_ERR("Display service lock timed out");
-
-        return;
-    }
-
+WorkQueueTaskResult Cfb::ProcessWorkTask(CfbTask* task) {
     bool is_animation_running = atomic_get(&task->is_animation_running_)
         && task->frame_rate > 0
         && task->animation_handler;
@@ -108,20 +90,16 @@ void Cfb::CfbTaskWorkTask(k_work* work) {
 
     cfb_framebuffer_finalize(DtDisplay::Get());
 
-    if(is_animation_running) {
-        k_sleep(K_MSEC(1000 / task->frame_rate));
-        k_work_submit_to_queue(task->work_q, &task->work);
-    }
 
-    k_sem_give(task->processing_semaphore);
+    return {
+        .reschedule = is_animation_running,
+        .delay = K_MSEC(1000 / task->frame_rate)
+    };
 }
 
 bool Cfb::Flush() {
-    if(k_sem_count_get(&processing_semaphore_) == 0)
-        return false;
-
-    k_work_submit_to_queue(&work_q_, &task_.work);
-    k_work_flush(&task_.work, &work_sync_);
+    work_queue_thread_->ScheduleTask(*work_queue_task_);
+    work_queue_thread_->FlushTask(*work_queue_task_);
 
     return true;
 }
@@ -240,18 +218,18 @@ bool Cfb::Clear(bool clear_display) {
 }
 
 void Cfb::SetAnimationHandler(std::function<void()> handler, uint32_t frame_rate) {
-    task_.animation_handler = handler;
-    task_.frame_rate = frame_rate;
+    work_queue_task_->user_data->animation_handler = handler;
+    work_queue_task_->user_data->frame_rate = frame_rate;
 }
 
 void Cfb::StartAnimation() {
-    atomic_set(&task_.is_animation_running_, 1);
-    k_work_submit_to_queue(&work_q_, &task_.work);
+    atomic_set(&work_queue_task_->user_data->is_animation_running_, 1);
+    work_queue_thread_->ScheduleTask(*work_queue_task_);
 }
 
 void Cfb::StopAnimation() {
-    k_work_cancel_sync(&task_.work, &work_sync_);
-    atomic_set(&task_.is_animation_running_, 0);
+    work_queue_thread_->CancelTask(*work_queue_task_);
+    atomic_set(&work_queue_task_->user_data->is_animation_running_, 0);
 }
 
 void Cfb::PrintScreenInfo() {

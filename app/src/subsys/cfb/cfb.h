@@ -1,41 +1,39 @@
 #pragma once
 
+#include <memory>
 #include <cstdint>
 
 #include "utilities/gui/coordinate.h"
+#include "subsys/threading/work_queue_thread.h"
 
 #include "cbf_task.h"
 
 namespace eerie_leap::subsys::cfb {
 
 using namespace eerie_leap::utilities::gui;
+using namespace eerie_leap::subsys::threading;
 
 class Cfb {
 private:
+    static constexpr int thread_stack_size_ = 2048;
+    static constexpr int thread_priority_ = 6;
+    std::unique_ptr<WorkQueueThread> work_queue_thread_;
+
+    std::unique_ptr<WorkQueueTask<CfbTask>> work_queue_task_;
+
     uint16_t x_res_;
     uint16_t y_res_;
     uint8_t font_height_;
     uint8_t font_width_;
     bool initialized_ = false;
 
-    static constexpr int k_stack_size_ = 1024;
-    static constexpr int k_priority_ = K_PRIO_PREEMPT(6);
-
-    k_thread_stack_t* stack_area_;
-    k_work_q work_q_;
-    k_work_sync work_sync_;
-    CfbTask task_;
-
-    k_sem processing_semaphore_;
-    static constexpr k_timeout_t PROCESSING_TIMEOUT = K_MSEC(200);
-
     void PrintScreenInfo();
     void InitializeThread();
-    static void CfbTaskWorkTask(k_work* work);
+    static WorkQueueTaskResult ProcessWorkTask(CfbTask* task);
 
 public:
     Cfb();
-    ~Cfb();
+    ~Cfb() = default;
 
     bool Initialize();
     bool SetFont(uint8_t font_idx);

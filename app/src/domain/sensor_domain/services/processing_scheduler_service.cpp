@@ -57,7 +57,7 @@ WorkQueueTaskResult ProcessingSchedulerService::ProcessSensorWorkTask(SensorTask
         LOG_DBG("Error processing sensor: %s, Error: %s", task->sensor->id.c_str(), e.what());
     }
 
-    return WorkQueueTaskResult {
+    return {
         .reschedule = true,
         .delay = task->sampling_rate_ms
     };
@@ -91,8 +91,8 @@ std::unique_ptr<SensorTask> ProcessingSchedulerService::CreateSensorTask(std::sh
 }
 
 void ProcessingSchedulerService::StartTasks() {
-    for(auto& task : tasks_)
-        work_queue_thread_->ScheduleTask(task);
+    for(auto& work_queue_task : work_queue_tasks_)
+        work_queue_thread_->ScheduleTask(work_queue_task);
 
     k_sleep(K_MSEC(1));
 }
@@ -109,7 +109,7 @@ void ProcessingSchedulerService::Start() {
         if(task == nullptr)
             continue;
 
-        tasks_.push_back(
+        work_queue_tasks_.push_back(
             work_queue_thread_->CreateTask(ProcessSensorWorkTask, std::move(task)));
         LOG_INF("Created task for sensor: %s", sensor->id.c_str());
     }
@@ -121,16 +121,16 @@ void ProcessingSchedulerService::Start() {
 
 void ProcessingSchedulerService::Restart() {
     Pause();
-    tasks_.clear();
+    work_queue_tasks_.clear();
     sensor_readings_frame_->ClearReadings();
     Start();
 }
 
 void ProcessingSchedulerService::Pause() {
-    for(auto& task : tasks_) {
-        LOG_INF("Canceling task for sensor: %s", task.user_data->sensor->id.c_str());
+    for(auto& work_queue_task : work_queue_tasks_) {
+        LOG_INF("Canceling task for sensor: %s", work_queue_task.user_data->sensor->id.c_str());
 
-        while(work_queue_thread_->CancelTask(task))
+        while(work_queue_thread_->CancelTask(work_queue_task))
             k_sleep(K_MSEC(1));
     }
 
@@ -138,8 +138,8 @@ void ProcessingSchedulerService::Pause() {
 }
 
 void ProcessingSchedulerService::Resume() {
-    for(auto& task : tasks_)
-        work_queue_thread_->ScheduleTask(task);
+    for(auto& work_queue_task : work_queue_tasks_)
+        work_queue_thread_->ScheduleTask(work_queue_task);
 
     LOG_INF("Processing Scheduler Service resumed.");
 }

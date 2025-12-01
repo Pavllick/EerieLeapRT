@@ -133,7 +133,8 @@ int main(void) {
 
     auto display_controller = std::make_shared<DisplayController>(cfb);
     // NOTE: Affects performance, in particular occasionally adds around 5ms delay
-    // to the sensor processing time.
+    // to the sensor processing time. As it's running on a thread with same priority
+    // as the CAN and sensor processing threads.
     display_controller->Initialize();
 
     std::shared_ptr<SdmmcService> sd_fs_service = nullptr;

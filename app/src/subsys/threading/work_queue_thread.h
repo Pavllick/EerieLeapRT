@@ -39,6 +39,7 @@ public:
     }
 
     bool CancelTask(WorkQueueTaskBase& task);
+    bool FlushTask(WorkQueueTaskBase& task);
 };
 
 } // namespace eerie_leap::subsys::threading

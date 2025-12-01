@@ -35,7 +35,7 @@ private:
     std::shared_ptr<CanbusService> canbus_service_;
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame_;
 
-    std::vector<WorkQueueTask<CanbusTask>> tasks_;
+    std::vector<WorkQueueTask<CanbusTask>> work_queue_tasks_;
     std::shared_ptr<CanFrameDbcBuilder> can_frame_dbc_builder_;
     std::shared_ptr<std::vector<std::shared_ptr<ICanFrameProcessor>>> can_frame_processors_;
 

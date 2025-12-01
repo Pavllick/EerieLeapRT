@@ -30,7 +30,7 @@ private:
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame_;
     std::shared_ptr<SensorReaderFactory> sensor_reader_factory_;
 
-    std::vector<WorkQueueTask<SensorTask>> tasks_;
+    std::vector<WorkQueueTask<SensorTask>> work_queue_tasks_;
     std::shared_ptr<std::vector<std::shared_ptr<IReadingProcessor>>> reading_processors_;
 
     void StartTasks();

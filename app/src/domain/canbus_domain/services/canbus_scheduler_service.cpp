@@ -45,7 +45,7 @@ WorkQueueTaskResult CanbusSchedulerService::ProcessCanbusWorkTask(CanbusTask* ta
         LOG_DBG("Error processing Frame ID: %d, Error: %s", task->message_configuration.frame_id, e.what());
     }
 
-    return WorkQueueTaskResult {
+    return {
         .reschedule = true,
         .delay = task->send_interval_ms
     };
@@ -83,8 +83,8 @@ std::unique_ptr<CanbusTask> CanbusSchedulerService::CreateTask(uint8_t bus_chann
 }
 
 void CanbusSchedulerService::StartTasks() {
-    for(auto& task : tasks_)
-        work_queue_thread_->ScheduleTask(task);
+    for(auto& work_queue_task : work_queue_tasks_)
+        work_queue_thread_->ScheduleTask(work_queue_task);
 
     k_sleep(K_MSEC(1));
 }
@@ -98,7 +98,7 @@ void CanbusSchedulerService::Start() {
             if(task == nullptr)
                 continue;
 
-            tasks_.push_back(
+            work_queue_tasks_.push_back(
                 work_queue_thread_->CreateTask(ProcessCanbusWorkTask, std::move(task)));
             LOG_INF("Created task for Frame ID: %d", message_configuration.frame_id);
         }
@@ -111,16 +111,16 @@ void CanbusSchedulerService::Start() {
 
 void CanbusSchedulerService::Restart() {
     Pause();
-    tasks_.clear();
+    work_queue_tasks_.clear();
     sensor_readings_frame_->ClearReadings();
     Start();
 }
 
 void CanbusSchedulerService::Pause() {
-    for(auto& task : tasks_) {
-        LOG_INF("Canceling task for Frame ID: %d", task.user_data->message_configuration.frame_id);
+    for(auto& work_queue_task : work_queue_tasks_) {
+        LOG_INF("Canceling task for Frame ID: %d", work_queue_task.user_data->message_configuration.frame_id);
 
-        while(work_queue_thread_->CancelTask(task))
+        while(work_queue_thread_->CancelTask(work_queue_task))
             k_sleep(K_MSEC(1));
     }
 
@@ -128,8 +128,8 @@ void CanbusSchedulerService::Pause() {
 }
 
 void CanbusSchedulerService::Resume() {
-    for(auto& task : tasks_)
-        work_queue_thread_->ScheduleTask(task);
+    for(auto& work_queue_task : work_queue_tasks_)
+        work_queue_thread_->ScheduleTask(work_queue_task);
 
     LOG_INF("CANBus Scheduler Service resumed.");
 }

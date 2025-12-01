@@ -34,4 +34,7 @@ bool WorkQueueThread::CancelTask(WorkQueueTaskBase& task) {
     return k_work_cancel_delayable_sync(&task.work, &sync_);
 }
 
+bool WorkQueueThread::FlushTask(WorkQueueTaskBase& task) {
+    return k_work_flush_delayable(&task.work, &sync_);
+}
 } // namespace eerie_leap::subsys::threading
