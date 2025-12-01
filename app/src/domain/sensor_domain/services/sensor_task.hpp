@@ -3,7 +3,7 @@
 #include <memory>
 #include <zephyr/kernel.h>
 
-#include "utilities/threading/work_queue_thread.h"
+#include "subsys/threading/work_queue_thread.h"
 #include "domain/sensor_domain/models/sensor.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 #include "domain/sensor_domain/sensor_readers/i_sensor_reader.h"
@@ -11,7 +11,7 @@
 
 namespace eerie_leap::domain::sensor_domain::services {
 
-using namespace eerie_leap::utilities::threading;
+using namespace eerie_leap::subsys::threading;
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::domain::sensor_domain::processors;
 using namespace eerie_leap::domain::sensor_domain::sensor_readers;

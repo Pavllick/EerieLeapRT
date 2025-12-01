@@ -2,7 +2,7 @@
 
 #include <zephyr/kernel.h>
 
-namespace eerie_leap::utilities::threading {
+namespace eerie_leap::subsys::threading {
 
 class ThreadBase {
 protected:
@@ -18,4 +18,4 @@ public:
     [[nodiscard]] const k_thread_stack_t* GetStack() const;
 };
 
-} // namespace eerie_leap::utilities::threading
+} // namespace eerie_leap::subsys::threading

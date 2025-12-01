@@ -5,7 +5,7 @@
 
 #include <zephyr/kernel.h>
 
-#include "utilities/threading/work_queue_thread.h"
+#include "subsys/threading/work_queue_thread.h"
 #include "domain/sensor_domain/configuration/sensors_configuration_manager.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 #include "domain/sensor_domain/sensor_readers/sensor_reader_factory.h"
@@ -15,7 +15,7 @@
 
 namespace eerie_leap::domain::sensor_domain::services {
 
-using namespace eerie_leap::utilities::threading;
+using namespace eerie_leap::subsys::threading;
 using namespace eerie_leap::domain::sensor_domain::configuration;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 using namespace eerie_leap::domain::sensor_domain::processors;
@@ -30,7 +30,7 @@ private:
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame_;
     std::shared_ptr<SensorReaderFactory> sensor_reader_factory_;
 
-    std::vector<WorkQueueTask<SensorTask>> sensor_tasks_;
+    std::vector<WorkQueueTask<SensorTask>> tasks_;
     std::shared_ptr<std::vector<std::shared_ptr<IReadingProcessor>>> reading_processors_;
 
     void StartTasks();

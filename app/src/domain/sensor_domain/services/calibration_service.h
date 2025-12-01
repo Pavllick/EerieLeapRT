@@ -4,7 +4,7 @@
 #include <zephyr/kernel.h>
 
 #include "utilities/guid/guid_generator.h"
-#include "utilities/threading/work_queue_thread.h"
+#include "subsys/threading/work_queue_thread.h"
 #include "subsys/time/i_time_service.h"
 #include "domain/sensor_domain/configuration/adc_configuration_manager.h"
 #include "domain/sensor_domain/services/processing_scheduler_service.h"
@@ -14,7 +14,7 @@
 namespace eerie_leap::domain::sensor_domain::services {
 
 using namespace eerie_leap::utilities::guid;
-using namespace eerie_leap::utilities::threading;
+using namespace eerie_leap::subsys::threading;
 using namespace eerie_leap::subsys::time;
 using namespace eerie_leap::subsys::adc;
 using namespace eerie_leap::domain::sensor_domain::configuration;

@@ -1,6 +1,6 @@
 #include "thread_base.h"
 
-namespace eerie_leap::utilities::threading {
+namespace eerie_leap::subsys::threading {
 
 ThreadBase::ThreadBase(int stack_size, int priority, bool is_cooperative) : k_stack_size_(stack_size) {
     k_priority_ = is_cooperative ? K_PRIO_COOP(priority) : K_PRIO_PREEMPT(priority);
@@ -21,4 +21,4 @@ void ThreadBase::InitializeStack() {
     return stack_area_;
 }
 
-} // namespace eerie_leap::utilities::threading
+} // namespace eerie_leap::subsys::threading

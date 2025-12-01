@@ -1,6 +1,6 @@
 #include "work_queue_load_balancer.h"
 
-namespace eerie_leap::utilities::threading {
+namespace eerie_leap::subsys::threading {
 
 WorkQueueLoadBalancer::WorkQueueLoadBalancer() {
     k_mutex_init(&balancer_mutex_);
@@ -56,4 +56,4 @@ std::shared_ptr<WorkQueueThread> WorkQueueLoadBalancer::GetLeastLoadedQueue() {
     return work_queue_threads_[least_loaded_index];
 }
 
-} // namespace eerie_leap::utilities::threading
+} // namespace eerie_leap::subsys::threading

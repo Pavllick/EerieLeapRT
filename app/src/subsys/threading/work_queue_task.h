@@ -8,7 +8,7 @@
 
 #include "work_queue_task_result.h"
 
-namespace eerie_leap::utilities::threading {
+namespace eerie_leap::subsys::threading {
 
 // Type-erased base class
 class WorkQueueTaskBase {
@@ -34,4 +34,4 @@ public:
     }
 };
 
-} // namespace eerie_leap::utilities::threading
+} // namespace eerie_leap::subsys::threading

@@ -2,7 +2,7 @@
 
 #include <zephyr/kernel.h>
 
-namespace eerie_leap::utilities::threading {
+namespace eerie_leap::subsys::threading {
 
 struct WorkQueueLoadMetrics {
     k_work_q* work_queue;
@@ -22,4 +22,4 @@ struct WorkQueueLoadMetrics {
     }
 };
 
-} // namespace eerie_leap::utilities::threading
+} // namespace eerie_leap::subsys::threading

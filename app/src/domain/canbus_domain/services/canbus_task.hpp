@@ -16,9 +16,6 @@ using namespace eerie_leap::domain::canbus_domain::can_frame_builders;
 using namespace eerie_leap::domain::canbus_domain::processors;
 
 struct CanbusTask {
-    k_work_q* work_q;
-    k_work_delayable work;
-    k_sem* processing_semaphore;
     k_timeout_t send_interval_ms;
     uint8_t bus_channel;
     CanMessageConfiguration message_configuration;

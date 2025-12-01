@@ -1,6 +1,6 @@
 #include "work_queue_thread.h"
 
-namespace eerie_leap::utilities::threading {
+namespace eerie_leap::subsys::threading {
 
 WorkQueueThread::WorkQueueThread(std::string name, int stack_size, int priority, bool is_cooperative)
     : ThreadBase(stack_size, priority, is_cooperative), name_(std::move(name)) {}
@@ -34,4 +34,4 @@ bool WorkQueueThread::CancelTask(WorkQueueTaskBase& task) {
     return k_work_cancel_delayable_sync(&task.work, &sync_);
 }
 
-} // namespace eerie_leap::utilities::threading
+} // namespace eerie_leap::subsys::threading

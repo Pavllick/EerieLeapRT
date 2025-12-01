@@ -6,7 +6,7 @@
 #include "thread_base.h"
 #include "work_queue_task.h"
 
-namespace eerie_leap::utilities::threading {
+namespace eerie_leap::subsys::threading {
 
 class WorkQueueThread : public ThreadBase {
 private:
@@ -41,4 +41,4 @@ public:
     bool CancelTask(WorkQueueTaskBase& task);
 };
 
-} // namespace eerie_leap::utilities::threading
+} // namespace eerie_leap::subsys::threading

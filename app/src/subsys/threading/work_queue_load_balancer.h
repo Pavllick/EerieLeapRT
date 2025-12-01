@@ -9,7 +9,7 @@
 #include "work_queue_thread.h"
 #include "work_queue_load_metrics.h"
 
-namespace eerie_leap::utilities::threading {
+namespace eerie_leap::subsys::threading {
 
 // NOTE: Usage example:
 //
@@ -45,4 +45,4 @@ public:
     void OnWorkComplete(WorkQueueThread& thread, uint32_t execution_time_ms);
 };
 
-} // namespace eerie_leap::utilities::threading
+} // namespace eerie_leap::subsys::threading

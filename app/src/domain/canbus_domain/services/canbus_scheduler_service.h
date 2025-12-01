@@ -5,6 +5,7 @@
 
 #include <zephyr/kernel.h>
 
+#include "subsys/threading/work_queue_thread.h"
 #include "domain/canbus_domain/can_frame_builders/can_frame_dbc_builder.h"
 #include "domain/canbus_domain/models/can_channel_configuration.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
@@ -18,6 +19,7 @@
 
 namespace eerie_leap::domain::canbus_domain::services {
 
+using namespace eerie_leap::subsys::threading;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 using namespace eerie_leap::domain::canbus_domain::configuration;
 using namespace eerie_leap::domain::canbus_domain::can_frame_builders;
@@ -25,26 +27,21 @@ using namespace eerie_leap::domain::canbus_domain::processors;
 
 class CanbusSchedulerService {
 private:
-    k_sem processing_semaphore_;
-    static constexpr k_timeout_t PROCESSING_TIMEOUT = K_MSEC(200);
-
-    static constexpr int k_stack_size_ = 8192;
-    static constexpr int k_priority_ = K_PRIO_PREEMPT(6);
-
-    k_thread_stack_t* stack_area_;
-    k_work_q work_q_;
+    static constexpr int thread_stack_size_ = 8192;
+    static constexpr int thread_priority_ = 6;
+    std::unique_ptr<WorkQueueThread> work_queue_thread_;
 
     std::shared_ptr<CanbusConfigurationManager> canbus_configuration_manager_;
     std::shared_ptr<CanbusService> canbus_service_;
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame_;
 
-    std::vector<std::shared_ptr<CanbusTask>> tasks_;
+    std::vector<WorkQueueTask<CanbusTask>> tasks_;
     std::shared_ptr<CanFrameDbcBuilder> can_frame_dbc_builder_;
     std::shared_ptr<std::vector<std::shared_ptr<ICanFrameProcessor>>> can_frame_processors_;
 
     void StartTasks();
-    std::shared_ptr<CanbusTask> CreateTask(uint8_t bus_channel, const CanMessageConfiguration& message_configuration);
-    static void ProcessCanbusWorkTask(k_work* work);
+    std::unique_ptr<CanbusTask> CreateTask(uint8_t bus_channel, const CanMessageConfiguration& message_configuration);
+    static WorkQueueTaskResult ProcessCanbusWorkTask(CanbusTask* task);
 
     void InitializeScript(const CanMessageConfiguration& message_configuration);
 
@@ -53,7 +50,7 @@ public:
         std::shared_ptr<CanbusConfigurationManager> canbus_configuration_manager,
         std::shared_ptr<CanbusService> canbus_service,
         std::shared_ptr<SensorReadingsFrame> sensor_readings_frame);
-    ~CanbusSchedulerService();
+    ~CanbusSchedulerService() = default;
 
     void Initialize();
 
