@@ -4,7 +4,6 @@
 #include <zephyr/kernel.h>
 
 #include "subsys/time/time_helpers.hpp"
-#include "utilities/memory/heap_allocator.h"
 #include "subsys/adc/utilities/adc_calibrator.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 #include "domain/sensor_domain/sensor_readers/sensor_reader_physical_analog_calibrator.h"
@@ -12,7 +11,6 @@
 
 namespace eerie_leap::domain::sensor_domain::services {
 
-using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::subsys::adc::utilities;
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::domain::sensor_domain::sensor_readers;

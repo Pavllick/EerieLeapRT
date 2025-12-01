@@ -23,12 +23,12 @@ using namespace eerie_leap::domain::canbus_domain::models;
 
 class CanbusConfigurationManager {
 private:
-    ext_unique_ptr<CborConfigurationService<CborCanbusConfig>> cbor_configuration_service_;
-    ext_unique_ptr<JsonConfigurationService<JsonCanbusConfig>> json_configuration_service_;
+    std::unique_ptr<CborConfigurationService<CborCanbusConfig>> cbor_configuration_service_;
+    std::unique_ptr<JsonConfigurationService<JsonCanbusConfig>> json_configuration_service_;
     std::shared_ptr<IFsService> sd_fs_service_;
 
-    std::unique_ptr<CanbusConfigurationCborParser> cbor_parser_;
-    std::unique_ptr<CanbusConfigurationJsonParser> json_parser_;
+    ext_unique_ptr<CanbusConfigurationCborParser> cbor_parser_;
+    ext_unique_ptr<CanbusConfigurationJsonParser> json_parser_;
 
     std::shared_ptr<CanbusConfiguration> configuration_;
 
@@ -39,8 +39,8 @@ private:
 
 public:
     explicit CanbusConfigurationManager(
-        ext_unique_ptr<CborConfigurationService<CborCanbusConfig>> cbor_configuration_service,
-        ext_unique_ptr<JsonConfigurationService<JsonCanbusConfig>> json_configuration_service,
+        std::unique_ptr<CborConfigurationService<CborCanbusConfig>> cbor_configuration_service,
+        std::unique_ptr<JsonConfigurationService<JsonCanbusConfig>> json_configuration_service,
         std::shared_ptr<IFsService> sd_fs_service);
 
     bool Update(const CanbusConfiguration& configuration);

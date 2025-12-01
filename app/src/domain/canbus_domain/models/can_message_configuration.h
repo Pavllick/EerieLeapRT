@@ -3,12 +3,10 @@
 #include <cstdint>
 #include <string>
 
-#include "utilities/memory/heap_allocator.h"
 #include "subsys/lua_script/lua_script.h"
 
 namespace eerie_leap::domain::canbus_domain::models {
 
-using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::subsys::lua_script;
 
 struct CanMessageConfiguration {

@@ -36,7 +36,7 @@ private:
 
     std::string configuration_name_;
     std::shared_ptr<IFsService> fs_service_;
-    std::shared_ptr<JsonSerializer<T>> serializer_;
+    ext_unique_ptr<JsonSerializer<T>> serializer_;
 
     const std::string configuration_file_path_ = configuration_dir_ + "/" + configuration_name_ + ".json";
 
@@ -138,7 +138,7 @@ public:
         task_load_.instance = this;
         k_work_init(&task_load_.work, WorkTaskLoad);
 
-        serializer_ = make_shared_ext<JsonSerializer<T>>(
+        serializer_ = make_unique_ext<JsonSerializer<T>>(
             JsonTrait<T>::Encode,
             JsonTrait<T>::Decode);
 

@@ -1,7 +1,6 @@
 #include <memory>
 #include <stdexcept>
 
-#include "utilities/memory/heap_allocator.h"
 #include "domain/sensor_domain/models/reading_status.h"
 #include "domain/sensor_domain/models/reading_metadata.h"
 
@@ -9,8 +8,6 @@
 
 namespace eerie_leap::domain::canbus_domain::can_frame_builders {
 
-using namespace eerie_leap::utilities;
-using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 using namespace eerie_leap::utilities::voltage_interpolator;

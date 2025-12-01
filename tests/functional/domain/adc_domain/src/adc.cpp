@@ -22,20 +22,20 @@ std::shared_ptr<AdcConfiguration> adc_GetTestConfiguration() {
         {3.3, 3.3}
     };
 
-    auto adc_calibration_data_samples_ptr = make_shared_ext<std::vector<CalibrationData>>(adc_calibration_data_samples);
-    auto adc_calibrator = make_shared_ext<AdcCalibrator>(InterpolationMethod::LINEAR, adc_calibration_data_samples_ptr);
+    auto adc_calibration_data_samples_ptr = std::make_shared<std::vector<CalibrationData>>(adc_calibration_data_samples);
+    auto adc_calibrator = std::make_shared<AdcCalibrator>(InterpolationMethod::LINEAR, adc_calibration_data_samples_ptr);
 
     std::vector<std::shared_ptr<AdcChannelConfiguration>> channel_configurations = {
-        make_shared_ext<AdcChannelConfiguration>(adc_calibrator),
-        make_shared_ext<AdcChannelConfiguration>(adc_calibrator),
-        make_shared_ext<AdcChannelConfiguration>(adc_calibrator),
-        make_shared_ext<AdcChannelConfiguration>(adc_calibrator)
+        std::make_shared<AdcChannelConfiguration>(adc_calibrator),
+        std::make_shared<AdcChannelConfiguration>(adc_calibrator),
+        std::make_shared<AdcChannelConfiguration>(adc_calibrator),
+        std::make_shared<AdcChannelConfiguration>(adc_calibrator)
     };
 
-    auto adc_configuration = make_shared_ext<AdcConfiguration>();
+    auto adc_configuration = std::make_shared<AdcConfiguration>();
     adc_configuration->samples = 40;
     adc_configuration->channel_configurations =
-        make_shared_ext<std::vector<std::shared_ptr<AdcChannelConfiguration>>>(channel_configurations);
+        std::make_shared<std::vector<std::shared_ptr<AdcChannelConfiguration>>>(channel_configurations);
 
     return adc_configuration;
 }

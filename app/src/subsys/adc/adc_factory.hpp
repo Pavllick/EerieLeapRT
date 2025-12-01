@@ -2,7 +2,6 @@
 
 #include <memory>
 
-#include "utilities/memory/heap_allocator.h"
 #include "subsys/device_tree/dt_adc.h"
 
 #include "i_adc_manager.h"
@@ -12,7 +11,6 @@
 
 namespace eerie_leap::subsys::adc {
 
-using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::subsys::device_tree;
 
 class AdcFactory {
@@ -20,15 +18,15 @@ public:
     static std::shared_ptr<IAdcManager> Create() {
 #ifdef CONFIG_ADC_EMUL
         if(DtAdc::Get().has_value())
-            return make_shared_ext<AdcEmulatorManager>(DtAdc::Get().value());
+            return std::make_shared<AdcEmulatorManager>(DtAdc::Get().value());
 #endif
 
 #ifdef CONFIG_ADC
         if(DtAdc::Get().has_value())
-            return make_shared_ext<AdcManager>(DtAdc::Get().value());
+            return std::make_shared<AdcManager>(DtAdc::Get().value());
 #endif
 
-        return make_shared_ext<AdcSimulatorManager>();
+        return std::make_shared<AdcSimulatorManager>();
     }
 };
 

@@ -111,8 +111,8 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
 
     fs_service->Format();
 
-    auto cbor_sensors_configuration_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
-    auto json_sensors_configuration_service = make_unique_ext<JsonConfigurationService<JsonSensorsConfig>>("sensors_config", fs_service);
+    auto cbor_sensors_configuration_service = std::make_unique<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
+    auto json_sensors_configuration_service = std::make_unique<JsonConfigurationService<JsonSensorsConfig>>("sensors_config", fs_service);
 
     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
         nullptr,
@@ -162,8 +162,8 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
 
     fs_service->Format();
 
-    auto cbor_sensors_configuration_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
-    auto json_sensors_configuration_service = make_unique_ext<JsonConfigurationService<JsonSensorsConfig>>("sensors_config", fs_service);
+    auto cbor_sensors_configuration_service = std::make_unique<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
+    auto json_sensors_configuration_service = std::make_unique<JsonConfigurationService<JsonSensorsConfig>>("sensors_config", fs_service);
 
     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
         nullptr,
@@ -175,8 +175,8 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
     auto sensors = sensors_configuration_manager_SetupTestSensors();
     sensors_configuration_manager->Update(sensors);
 
-    cbor_sensors_configuration_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
-    json_sensors_configuration_service = make_unique_ext<JsonConfigurationService<JsonSensorsConfig>>("sensors_config", fs_service);
+    cbor_sensors_configuration_service = std::make_unique<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
+    json_sensors_configuration_service = std::make_unique<JsonConfigurationService<JsonSensorsConfig>>("sensors_config", fs_service);
     sensors_configuration_manager = nullptr;
     sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
         nullptr,
@@ -223,8 +223,8 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
 
     fs_service->Format();
 
-    auto cbor_sensors_configuration_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
-    auto json_sensors_configuration_service = make_unique_ext<JsonConfigurationService<JsonSensorsConfig>>("sensors_config", fs_service);
+    auto cbor_sensors_configuration_service = std::make_unique<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
+    auto json_sensors_configuration_service = std::make_unique<JsonConfigurationService<JsonSensorsConfig>>("sensors_config", fs_service);
 
     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
         nullptr,
@@ -291,8 +291,8 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
 
     fs_service->Format();
 
-    auto cbor_sensors_configuration_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
-    auto json_sensors_configuration_service = make_unique_ext<JsonConfigurationService<JsonSensorsConfig>>("sensors_config", fs_service);
+    auto cbor_sensors_configuration_service = std::make_unique<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
+    auto json_sensors_configuration_service = std::make_unique<JsonConfigurationService<JsonSensorsConfig>>("sensors_config", fs_service);
 
     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
         nullptr,

@@ -93,7 +93,7 @@ int SensorsApiController::sensors_config_post_handler(http_client_ctx *client, e
 	memcpy(sensors_config_post_buffer_->data() + cursor, request_ctx->data, request_ctx->data_len);
 	cursor += request_ctx->data_len;
 
-    static std::shared_ptr<std::string> error_msg;
+    static std::string error_msg;
 
 	if (status == HTTP_SERVER_DATA_FINAL) {
         LOG_DBG("JSON payload received successfully, len=%zu", cursor);
@@ -104,11 +104,11 @@ int SensorsApiController::sensors_config_post_handler(http_client_ctx *client, e
         } catch (const std::exception &e) {
             LOG_ERR("Failed to parse JSON: %s", e.what());
 
-            error_msg = make_shared_ext<std::string>("Failed to parse JSON: " + std::string(e.what()));
+            error_msg = "Failed to parse JSON: " + std::string(e.what());
 
             response_ctx->status = HTTP_500_INTERNAL_SERVER_ERROR;
-            response_ctx->body = (uint8_t*)error_msg->c_str();
-            response_ctx->body_len = error_msg->size();
+            response_ctx->body = (uint8_t*)error_msg.c_str();
+            response_ctx->body_len = error_msg.size();
             response_ctx->final_chunk = true;
         }
 

@@ -1,6 +1,5 @@
 #include <zephyr/logging/log.h>
 
-#include "utilities/memory/heap_allocator.h"
 #include "subsys/fs/services/fs_service_stream_buf.h"
 #include "subsys/device_tree/dt_canbus.h"
 
@@ -8,7 +7,6 @@
 
 namespace eerie_leap::domain::canbus_domain::services {
 
-using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::subsys::device_tree;
 
 LOG_MODULE_REGISTER(canbus_service_logger);
@@ -17,7 +15,7 @@ CanbusService::CanbusService(std::shared_ptr<IFsService> fs_service, std::shared
     : fs_service_(std::move(fs_service)), canbus_configuration_manager_(std::move(canbus_configuration_manager)) {
 
     for(const auto& [bus_channel, channel_configuration] : canbus_configuration_manager_->Get()->channel_configurations) {
-        auto canbus = make_shared_ext<Canbus>(
+        auto canbus = std::make_shared<Canbus>(
             DtCanbus::Get(bus_channel),
             channel_configuration.type,
             channel_configuration.bitrate,

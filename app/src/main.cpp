@@ -123,7 +123,7 @@ int main(void) {
     std::shared_ptr<Cfb> cfb = nullptr;
 
     if(DtDisplay::Get() != nullptr) {
-        cfb = make_shared_ext<Cfb>();
+        cfb = std::make_shared<Cfb>();
 
         if(!cfb->Initialize()) {
             LOG_ERR("Failed to initialize CFB.");
@@ -131,13 +131,15 @@ int main(void) {
         }
     }
 
-    auto display_controller = make_shared_ext<DisplayController>(cfb);
+    auto display_controller = std::make_shared<DisplayController>(cfb);
+    // NOTE: Affects performance, in particular occasionally adds around 5ms delay
+    // to the sensor processing time.
     display_controller->Initialize();
 
     std::shared_ptr<SdmmcService> sd_fs_service = nullptr;
     auto sd_fs_mp = DtFs::GetSdFsMp();
     if(sd_fs_mp.has_value()) {
-        sd_fs_service = make_shared_ext<SdmmcService>(sd_fs_mp.value(), DtFs::GetSdDiskName());
+        sd_fs_service = std::make_shared<SdmmcService>(sd_fs_mp.value(), DtFs::GetSdDiskName());
         if(!sd_fs_service->Initialize()) {
             LOG_ERR("Failed to initialize SD File System.");
         }
@@ -166,38 +168,38 @@ int main(void) {
     http_server.Start();
 #endif // CONFIG_NETWORKING
 
-    auto fs_service = make_shared_ext<FsService>(DtFs::GetInternalFsMp().value());
+    auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
     if(!fs_service->Initialize()) {
         LOG_ERR("Failed to initialize File System.");
         return -1;
     }
 
-    auto rtc_provider = make_shared_ext<RtcProvider>();
-    auto boot_elapsed_time_provider = make_shared_ext<BootElapsedTimeProvider>();
-    auto time_service = make_shared_ext<TimeService>(rtc_provider, boot_elapsed_time_provider);
+    auto rtc_provider = std::make_shared<RtcProvider>();
+    auto boot_elapsed_time_provider = std::make_shared<BootElapsedTimeProvider>();
+    auto time_service = std::make_shared<TimeService>(rtc_provider, boot_elapsed_time_provider);
     time_service->Initialize();
 
-    auto guid_generator = make_shared_ext<GuidGenerator>();
+    auto guid_generator = std::make_shared<GuidGenerator>();
 
-    auto cbor_system_config_service = make_unique_ext<CborConfigurationService<CborSystemConfig>>(
+    auto cbor_system_config_service = std::make_unique<CborConfigurationService<CborSystemConfig>>(
         "system_config", fs_service);
-    auto cbor_adc_config_service = make_unique_ext<CborConfigurationService<CborAdcConfig>>(
+    auto cbor_adc_config_service = std::make_unique<CborConfigurationService<CborAdcConfig>>(
         "adc_config", fs_service);
-    auto cbor_sensors_config_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>(
+    auto cbor_sensors_config_service = std::make_unique<CborConfigurationService<CborSensorsConfig>>(
         "sensors_config", fs_service);
-    auto cbor_canbus_config_service = make_unique_ext<CborConfigurationService<CborCanbusConfig>>(
+    auto cbor_canbus_config_service = std::make_unique<CborConfigurationService<CborCanbusConfig>>(
         "canbus_config", fs_service);
 
-    auto json_system_config_service = make_unique_ext<JsonConfigurationService<JsonSystemConfig>>(
+    auto json_system_config_service = std::make_unique<JsonConfigurationService<JsonSystemConfig>>(
         "system_config", sd_fs_service);
-    auto json_adc_config_service = make_unique_ext<JsonConfigurationService<JsonAdcConfig>>(
+    auto json_adc_config_service = std::make_unique<JsonConfigurationService<JsonAdcConfig>>(
         "adc_config", sd_fs_service);
-    auto json_sensors_config_service = make_unique_ext<JsonConfigurationService<JsonSensorsConfig>>(
+    auto json_sensors_config_service = std::make_unique<JsonConfigurationService<JsonSensorsConfig>>(
         "sensors_config", sd_fs_service);
-    auto json_canbus_config_service = make_unique_ext<JsonConfigurationService<JsonCanbusConfig>>(
+    auto json_canbus_config_service = std::make_unique<JsonConfigurationService<JsonCanbusConfig>>(
         "canbus_config", sd_fs_service);
 
-    auto adc_configuration_manager = make_shared_ext<AdcConfigurationManager>(
+    auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(
         std::move(cbor_adc_config_service), std::move(json_adc_config_service));
 
     // TODO: For test purposes only
@@ -206,53 +208,53 @@ int main(void) {
     auto gpio = GpioFactory::Create();
     gpio->Initialize();
 
-    auto system_configuration_manager = make_shared_ext<SystemConfigurationManager>(
+    auto system_configuration_manager = std::make_shared<SystemConfigurationManager>(
         std::move(cbor_system_config_service), std::move(json_system_config_service));
 
     // TODO: For test purposes only
     // SetupSystemConfiguration(system_configuration_manager);
 
-    auto canbus_configuration_manager = make_shared_ext<CanbusConfigurationManager>(
+    auto canbus_configuration_manager = std::make_shared<CanbusConfigurationManager>(
         std::move(cbor_canbus_config_service), std::move(json_canbus_config_service), sd_fs_service);
 
     // TODO: For test purposes only
     // SetupCanbusConfiguration(canbus_configuration_manager);
 
-    auto sensors_configuration_manager = make_shared_ext<SensorsConfigurationManager>(
+    auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
         sd_fs_service,
         std::move(cbor_sensors_config_service),
         std::move(json_sensors_config_service),
         gpio->GetChannelCount(),
         adc_configuration_manager->Get()->GetChannelCount());
 
-    auto canbus_service = make_shared_ext<CanbusService>(sd_fs_service, canbus_configuration_manager);
+    auto canbus_service = std::make_shared<CanbusService>(sd_fs_service, canbus_configuration_manager);
 
     // TODO: For test purposes only
-    // SetupTestSensors(sensors_configuration_manager);
+    SetupTestSensors(sensors_configuration_manager);
 
-    auto sensor_readings_frame = make_shared_ext<SensorReadingsFrame>();
+    auto sensor_readings_frame = std::make_shared<SensorReadingsFrame>();
 
     std::shared_ptr<LoggingController> logging_controller = nullptr;
     if(sd_fs_service != nullptr) {
-        auto cbor_logging_config_service = make_unique_ext<CborConfigurationService<CborLoggingConfig>>(
+        auto cbor_logging_config_service = std::make_unique<CborConfigurationService<CborLoggingConfig>>(
             "logging_config", fs_service);
-        auto json_logging_config_service = make_unique_ext<JsonConfigurationService<JsonLoggingConfig>>(
+        auto json_logging_config_service = std::make_unique<JsonConfigurationService<JsonLoggingConfig>>(
             "logging_config", sd_fs_service);
 
-        auto logging_configuration_manager = make_shared_ext<LoggingConfigurationManager>(
+        auto logging_configuration_manager = std::make_shared<LoggingConfigurationManager>(
             std::move(cbor_logging_config_service), std::move(json_logging_config_service));
 
         // TODO: For test purposes only
         // SetupLoggingConfiguration(sensors_configuration_manager, logging_configuration_manager);
 
-        auto log_writer_service = make_shared_ext<LogWriterService>(
+        auto log_writer_service = std::make_shared<LogWriterService>(
             sd_fs_service,
             logging_configuration_manager,
             time_service,
             sensor_readings_frame);
         log_writer_service->Initialize();
 
-        logging_controller = make_shared_ext<LoggingController>(
+        logging_controller = std::make_shared<LoggingController>(
             log_writer_service,
             sensors_configuration_manager,
             logging_configuration_manager,
@@ -263,8 +265,8 @@ int main(void) {
     std::shared_ptr<ComReadingInterfaceService> com_reading_interface_service = nullptr;
     std::shared_ptr<ComPollingController> com_polling_controller = nullptr;
     if(DtModbus::Get() != nullptr) {
-        auto modbus = make_shared_ext<Modbus>(DtModbus::Get());
-        auto user_com_interface = make_shared_ext<UserCom>(modbus, system_configuration_manager);
+        auto modbus = std::make_shared<Modbus>(DtModbus::Get());
+        auto user_com_interface = std::make_shared<UserCom>(modbus, system_configuration_manager);
         user_com_interface->Initialize();
 
         if(user_com_interface->GetUsers()->size() == 0)
@@ -275,22 +277,22 @@ int main(void) {
         for(auto com_user_configuration : *com_user_configurations)
             LOG_INF("Com User Device ID: %llu, Server ID: %hu", com_user_configuration.device_id, com_user_configuration.server_id);
 
-        com_polling_interface_service = make_shared_ext<ComPollingInterfaceService>(user_com_interface);
+        com_polling_interface_service = std::make_shared<ComPollingInterfaceService>(user_com_interface);
         com_polling_interface_service->Initialize();
 
-        com_reading_interface_service = make_shared_ext<ComReadingInterfaceService>(
+        com_reading_interface_service = std::make_shared<ComReadingInterfaceService>(
             user_com_interface,
             sensor_readings_frame,
             system_configuration_manager->Get()->com_user_refresh_rate_ms);
         com_reading_interface_service->Initialize();
 
         if(logging_controller != nullptr) {
-            com_polling_controller = make_shared_ext<ComPollingController>(user_com_interface, com_polling_interface_service, logging_controller);
+            com_polling_controller = std::make_shared<ComPollingController>(user_com_interface, com_polling_interface_service, logging_controller);
             com_polling_controller->Initialize();
         }
     }
 
-    auto sensor_reader_factory = make_shared_ext<SensorReaderFactory>(
+    auto sensor_reader_factory = std::make_shared<SensorReaderFactory>(
         time_service,
         guid_generator,
         gpio,
@@ -298,20 +300,20 @@ int main(void) {
         sensor_readings_frame,
         canbus_service);
 
-    auto processing_scheduler_service = make_shared_ext<ProcessingSchedulerService>(
+    auto processing_scheduler_service = std::make_shared<ProcessingSchedulerService>(
         sensors_configuration_manager,
         sensor_readings_frame,
         sensor_reader_factory);
     processing_scheduler_service->Initialize();
 
-    auto calibration_service = make_shared_ext<CalibrationService>(
+    auto calibration_service = std::make_shared<CalibrationService>(
         time_service,
         guid_generator,
         adc_configuration_manager,
         processing_scheduler_service);
     calibration_service->Initialize();
 
-    auto canbus_scheduler_service = make_shared_ext<CanbusSchedulerService>(
+    auto canbus_scheduler_service = std::make_shared<CanbusSchedulerService>(
         canbus_configuration_manager,
         canbus_service,
         sensor_readings_frame);
@@ -357,6 +359,7 @@ void SetupCanbusConfiguration(std::shared_ptr<CanbusConfigurationManager> canbus
 
     CanChannelConfiguration canbus_channel_configuration_0 = {
         .type = CanbusType::CANFD,
+        .is_extended_id = false,
         .bus_channel = 1,
         .bitrate = 1000000,
         .data_bitrate = 2000000,
@@ -395,18 +398,18 @@ void SetupAdcConfiguration(std::shared_ptr<AdcConfigurationManager> adc_configur
         {5.0, 5.0}
     };
 
-    auto adc_calibration_data_samples_ptr = make_shared_ext<std::vector<CalibrationData>>(adc_calibration_data_samples);
-    auto adc_calibrator = make_shared_ext<AdcCalibrator>(InterpolationMethod::LINEAR, adc_calibration_data_samples_ptr);
+    auto adc_calibration_data_samples_ptr = std::make_shared<std::vector<CalibrationData>>(adc_calibration_data_samples);
+    auto adc_calibrator = std::make_shared<AdcCalibrator>(InterpolationMethod::LINEAR, adc_calibration_data_samples_ptr);
 
     std::vector<std::shared_ptr<AdcChannelConfiguration>> channel_configurations = {
-        make_shared_ext<AdcChannelConfiguration>(adc_calibrator),
-        make_shared_ext<AdcChannelConfiguration>(adc_calibrator),
-        make_shared_ext<AdcChannelConfiguration>(adc_calibrator),
-        make_shared_ext<AdcChannelConfiguration>(adc_calibrator),
-        // make_shared_ext<AdcChannelConfiguration>(adc_calibrator),
-        // make_shared_ext<AdcChannelConfiguration>(adc_calibrator),
-        // make_shared_ext<AdcChannelConfiguration>(adc_calibrator),
-        // make_shared_ext<AdcChannelConfiguration>(adc_calibrator),
+        std::make_shared<AdcChannelConfiguration>(adc_calibrator),
+        std::make_shared<AdcChannelConfiguration>(adc_calibrator),
+        std::make_shared<AdcChannelConfiguration>(adc_calibrator),
+        std::make_shared<AdcChannelConfiguration>(adc_calibrator),
+        // std::make_shared<AdcChannelConfiguration>(adc_calibrator),
+        // std::make_shared<AdcChannelConfiguration>(adc_calibrator),
+        // std::make_shared<AdcChannelConfiguration>(adc_calibrator),
+        // std::make_shared<AdcChannelConfiguration>(adc_calibrator),
     };
 
     auto adc_configuration = std::make_shared<AdcConfiguration>();
@@ -421,8 +424,8 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
     // Test Sensors
 
     std::vector<CalibrationData> calibration_data_1 {
-        {0.0, 0.0},
-        {5.0, 100.0}
+        {0.0, 2000.0},
+        {5.0, 2100.0}
     };
     auto calibration_data_1_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_1);
 
@@ -436,17 +439,14 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
         .type = SensorType::PHYSICAL_ANALOG,
         .channel = 0,
         .script_path = "scripts/sensor_1.lua",
-        .sampling_rate_ms = 10,
+        .sampling_rate_ms = 1000,
         .voltage_interpolator = std::make_unique<LinearVoltageInterpolator>(calibration_data_1_ptr),
         // .expression_evaluator = std::make_unique<ExpressionEvaluator>("x * 2 + sensor_2 + 1")
     };
 
     std::vector<CalibrationData> calibration_data_2 {
-        {0.0, 0.0},
-        {1.0, 29.0},
-        {2.0, 111.0},
-        {2.5, 162.0},
-        {3.3, 200.0}
+        {0.0, 90.0},
+        {5.0, 100.0},
     };
     auto calibration_data_2_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_2);
 
@@ -473,7 +473,7 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
     sensor_3->configuration = {
         .type = SensorType::VIRTUAL_ANALOG,
         .sampling_rate_ms = 2000,
-        .expression_evaluator = std::make_unique<ExpressionEvaluator>("sensor_1 + 8.34")
+        .expression_evaluator = std::make_unique<ExpressionEvaluator>("2 + 8.34")
     };
 
     auto sensor_4 = std::make_shared<Sensor>("sensor_4");
@@ -549,7 +549,6 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
     };
 
     sensors_configuration_manager->Update(sensors);
-    sensors_configuration_manager->Get(true);
 }
 
 void SetupLoggingConfiguration(std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager,

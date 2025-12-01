@@ -1,13 +1,10 @@
 #include <stdexcept>
 
-#include "utilities/memory/heap_allocator.h"
 #include "domain/sensor_domain/models/sensor_reading.h"
 #include "domain/sensor_domain/models/reading_status.h"
 #include "sensor_reader_virtual_indicator.h"
 
 namespace eerie_leap::domain::sensor_domain::sensor_readers {
-
-using namespace eerie_leap::utilities::memory;
 
 SensorReaderVirtualIndicator::SensorReaderVirtualIndicator(
     std::shared_ptr<ITimeService> time_service,
@@ -25,7 +22,7 @@ SensorReaderVirtualIndicator::SensorReaderVirtualIndicator(
 }
 
 void SensorReaderVirtualIndicator::Read() {
-    auto reading = make_shared_ext<SensorReading>(guid_generator_->Generate(), sensor_);
+    auto reading = std::make_shared<SensorReading>(guid_generator_->Generate(), sensor_);
     reading->timestamp = time_service_->GetCurrentTime();
 
     reading->status = ReadingStatus::UNINITIALIZED;

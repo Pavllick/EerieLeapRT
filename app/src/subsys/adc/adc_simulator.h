@@ -7,14 +7,12 @@
 #include <zephyr/drivers/adc/adc_emul.h>
 #include <zephyr/random/random.h>
 
-#include "utilities/memory/heap_allocator.h"
 #include "i_adc.h"
 #include "i_adc_manager.h"
 #include "models/adc_configuration.h"
 
 namespace eerie_leap::subsys::adc {
 
-using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::subsys::adc::models;
 
 class AdcSimulator : public IAdc {
@@ -46,7 +44,7 @@ class AdcSimulatorManager : public IAdcManager {
 
     public:
         AdcSimulatorManager() {
-            adc_ = make_shared_ext<AdcSimulator>();
+            adc_ = std::make_shared<AdcSimulator>();
             adc_configuration_ = nullptr;
         }
 

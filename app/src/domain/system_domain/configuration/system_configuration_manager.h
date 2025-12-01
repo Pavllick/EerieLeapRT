@@ -21,11 +21,11 @@ using namespace eerie_leap::domain::system_domain::models;
 
 class SystemConfigurationManager {
 private:
-    ext_unique_ptr<CborConfigurationService<CborSystemConfig>> cbor_configuration_service_;
-    ext_unique_ptr<JsonConfigurationService<JsonSystemConfig>> json_configuration_service_;
+    std::unique_ptr<CborConfigurationService<CborSystemConfig>> cbor_configuration_service_;
+    std::unique_ptr<JsonConfigurationService<JsonSystemConfig>> json_configuration_service_;
 
-    std::unique_ptr<SystemConfigurationCborParser> cbor_parser_;
-    std::unique_ptr<SystemConfigurationJsonParser> json_parser_;
+    ext_unique_ptr<SystemConfigurationCborParser> cbor_parser_;
+    ext_unique_ptr<SystemConfigurationJsonParser> json_parser_;
 
     std::shared_ptr<SystemConfiguration> configuration_;
 
@@ -38,8 +38,8 @@ private:
 
 public:
     explicit SystemConfigurationManager(
-        ext_unique_ptr<CborConfigurationService<CborSystemConfig>> cbor_configuration_service,
-        ext_unique_ptr<JsonConfigurationService<JsonSystemConfig>> json_configuration_service);
+        std::unique_ptr<CborConfigurationService<CborSystemConfig>> cbor_configuration_service,
+        std::unique_ptr<JsonConfigurationService<JsonSystemConfig>> json_configuration_service);
 
     bool UpdateBuildNumber(uint32_t build_number);
     bool UpdateComUsers(const std::vector<ComUserConfiguration>& com_user_configurations);

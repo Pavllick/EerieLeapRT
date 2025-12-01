@@ -4,20 +4,18 @@
 #include <set>
 #include <string>
 
-#include "utilities/memory/heap_allocator.h"
 #include "subsys/cfb/cfb.h"
 #include "views/animations/i_animation.h"
 
 namespace eerie_leap::controllers {
 
-using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::subsys::cfb;
 using namespace eerie_leap::views::animations;
 
 class DisplayController {
 private:
     std::shared_ptr<Cfb> cfb_;
-    ext_unique_ptr<IAnimation> animation_;
+    std::unique_ptr<IAnimation> animation_;
     int current_animation_index_ = 0;
     bool is_animation_in_progress_ = false;
     std::set<std::string> statuses_;

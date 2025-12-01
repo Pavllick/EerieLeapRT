@@ -22,11 +22,11 @@ using namespace eerie_leap::domain::sensor_domain::configuration::parsers;
 
 class AdcConfigurationManager {
 private:
-    ext_unique_ptr<CborConfigurationService<CborAdcConfig>> cbor_configuration_service_;
-    ext_unique_ptr<JsonConfigurationService<JsonAdcConfig>> json_configuration_service_;
+    std::unique_ptr<CborConfigurationService<CborAdcConfig>> cbor_configuration_service_;
+    std::unique_ptr<JsonConfigurationService<JsonAdcConfig>> json_configuration_service_;
 
-    std::unique_ptr<AdcConfigurationCborParser> cbor_parser_;
-    std::unique_ptr<AdcConfigurationJsonParser> json_parser_;
+    ext_unique_ptr<AdcConfigurationCborParser> cbor_parser_;
+    ext_unique_ptr<AdcConfigurationJsonParser> json_parser_;
 
     std::shared_ptr<IAdcManager> adc_manager_;
     std::shared_ptr<AdcConfiguration> configuration_;
@@ -38,8 +38,8 @@ private:
 
 public:
     AdcConfigurationManager(
-        ext_unique_ptr<CborConfigurationService<CborAdcConfig>> cbor_configuration_service,
-        ext_unique_ptr<JsonConfigurationService<JsonAdcConfig>> json_configuration_service);
+        std::unique_ptr<CborConfigurationService<CborAdcConfig>> cbor_configuration_service,
+        std::unique_ptr<JsonConfigurationService<JsonAdcConfig>> json_configuration_service);
 
     bool Update(const AdcConfiguration& configuration, bool internal_only = false);
     std::shared_ptr<IAdcManager> Get(bool force_load = false);

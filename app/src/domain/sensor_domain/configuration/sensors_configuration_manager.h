@@ -27,11 +27,11 @@ class SensorsConfigurationManager {
 private:
     std::shared_ptr<IFsService> sd_fs_service_;
 
-    ext_unique_ptr<CborConfigurationService<CborSensorsConfig>> cbor_configuration_service_;
-    ext_unique_ptr<JsonConfigurationService<JsonSensorsConfig>> json_configuration_service_;
+    std::unique_ptr<CborConfigurationService<CborSensorsConfig>> cbor_configuration_service_;
+    std::unique_ptr<JsonConfigurationService<JsonSensorsConfig>> json_configuration_service_;
 
-    std::unique_ptr<SensorsCborParser> cbor_parser_;
-    std::unique_ptr<SensorsJsonParser> json_parser_;
+    ext_unique_ptr<SensorsCborParser> cbor_parser_;
+    ext_unique_ptr<SensorsJsonParser> json_parser_;
 
     std::vector<std::shared_ptr<Sensor>> sensors_;
     int gpio_channel_count_;
@@ -45,8 +45,8 @@ private:
 public:
     SensorsConfigurationManager(
         std::shared_ptr<IFsService> sd_fs_service,
-        ext_unique_ptr<CborConfigurationService<CborSensorsConfig>> cbor_configuration_service,
-        ext_unique_ptr<JsonConfigurationService<JsonSensorsConfig>> json_configuration_service,
+        std::unique_ptr<CborConfigurationService<CborSensorsConfig>> cbor_configuration_service,
+        std::unique_ptr<JsonConfigurationService<JsonSensorsConfig>> json_configuration_service,
         int gpio_channel_count,
         int adc_channel_count);
 

@@ -23,8 +23,8 @@ ZTEST(system_configuration_manager, test_SystemConfigurationManager_Save_config_
 
     fs_service->Format();
 
-    auto cbor_system_configuration_service = make_unique_ext<CborConfigurationService<CborSystemConfig>>("system_config", fs_service);
-    auto json_system_configuration_service = make_unique_ext<JsonConfigurationService<JsonSystemConfig>>("system_config", fs_service);
+    auto cbor_system_configuration_service = std::make_unique<CborConfigurationService<CborSystemConfig>>("system_config", fs_service);
+    auto json_system_configuration_service = std::make_unique<JsonConfigurationService<JsonSystemConfig>>("system_config", fs_service);
     auto system_configuration_manager = std::make_shared<SystemConfigurationManager>(
         std::move(cbor_system_configuration_service), std::move(json_system_configuration_service));
 
@@ -48,8 +48,8 @@ ZTEST(system_configuration_manager, test_SystemConfigurationManager_Save_config_
 
     fs_service->Format();
 
-    auto cbor_system_configuration_service = make_unique_ext<CborConfigurationService<CborSystemConfig>>("system_config", fs_service);
-    auto json_system_configuration_service = make_unique_ext<JsonConfigurationService<JsonSystemConfig>>("system_config", fs_service);
+    auto cbor_system_configuration_service = std::make_unique<CborConfigurationService<CborSystemConfig>>("system_config", fs_service);
+    auto json_system_configuration_service = std::make_unique<JsonConfigurationService<JsonSystemConfig>>("system_config", fs_service);
     auto system_configuration_manager = std::make_shared<SystemConfigurationManager>(
         std::move(cbor_system_configuration_service), std::move(json_system_configuration_service));
 
@@ -60,8 +60,8 @@ ZTEST(system_configuration_manager, test_SystemConfigurationManager_Save_config_
     bool result = system_configuration_manager->Update(system_configuration);
     zassert_true(result);
 
-    cbor_system_configuration_service = make_unique_ext<CborConfigurationService<CborSystemConfig>>("system_config", fs_service);
-    json_system_configuration_service = make_unique_ext<JsonConfigurationService<JsonSystemConfig>>("system_config", fs_service);
+    cbor_system_configuration_service = std::make_unique<CborConfigurationService<CborSystemConfig>>("system_config", fs_service);
+    json_system_configuration_service = std::make_unique<JsonConfigurationService<JsonSystemConfig>>("system_config", fs_service);
     system_configuration_manager = nullptr;
     system_configuration_manager = std::make_shared<SystemConfigurationManager>(
         std::move(cbor_system_configuration_service), std::move(json_system_configuration_service));

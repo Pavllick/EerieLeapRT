@@ -36,7 +36,7 @@ private:
 
     std::string configuration_name_;
     std::shared_ptr<IFsService> fs_service_;
-    std::shared_ptr<CborSerializer<T>> cbor_serializer_;
+    ext_unique_ptr<CborSerializer<T>> serializer_;
 
     const std::string configuration_file_path_ = configuration_dir_ + "/" + configuration_name_ + ".cbor";
 
@@ -63,7 +63,7 @@ private:
     bool SaveProcessor(T* configuration) {
         LOG_MODULE_DECLARE(configuration_service_logger);
 
-        auto config_bytes = cbor_serializer_->Serialize(*configuration);
+        auto config_bytes = serializer_->Serialize(*configuration);
 
         if (!config_bytes) {
             LOG_ERR("Failed to serialize configuration %s.", configuration_file_path_.c_str());
@@ -91,7 +91,7 @@ private:
         }
 
         auto config_bytes = std::span<const uint8_t>(buffer->data(), out_len);
-        auto configuration = cbor_serializer_->Deserialize(config_bytes);
+        auto configuration = serializer_->Deserialize(config_bytes);
 
         if (configuration == nullptr) {
             LOG_ERR("Failed to deserialize configuration %s.", configuration_file_path_.c_str());
@@ -133,7 +133,7 @@ public:
         task_load_.instance = this;
         k_work_init(&task_load_.work, WorkTaskLoad);
 
-        cbor_serializer_ = make_shared_ext<CborSerializer<T>>(
+        serializer_ = make_unique_ext<CborSerializer<T>>(
             CborTrait<T>::Encode, CborTrait<T>::Decode, CborTrait<T>::GetSerializingSize);
 
         if (!fs_service_->Exists(configuration_dir_))

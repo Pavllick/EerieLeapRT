@@ -10,8 +10,8 @@ LOG_MODULE_REGISTER(sensors_config_ctrl_logger);
 
 SensorsConfigurationManager::SensorsConfigurationManager(
     std::shared_ptr<IFsService> sd_fs_service,
-    ext_unique_ptr<CborConfigurationService<CborSensorsConfig>> cbor_configuration_service,
-    ext_unique_ptr<JsonConfigurationService<JsonSensorsConfig>> json_configuration_service,
+    std::unique_ptr<CborConfigurationService<CborSensorsConfig>> cbor_configuration_service,
+    std::unique_ptr<JsonConfigurationService<JsonSensorsConfig>> json_configuration_service,
     int gpio_channel_count,
     int adc_channel_count)
         : sd_fs_service_(std::move(sd_fs_service)),
@@ -20,8 +20,8 @@ SensorsConfigurationManager::SensorsConfigurationManager(
         gpio_channel_count_(gpio_channel_count),
         adc_channel_count_(adc_channel_count) {
 
-    cbor_parser_ = std::make_unique<SensorsCborParser>(sd_fs_service_);
-    json_parser_ = std::make_unique<SensorsJsonParser>(sd_fs_service_);
+    cbor_parser_ = make_unique_ext<SensorsCborParser>(sd_fs_service_);
+    json_parser_ = make_unique_ext<SensorsJsonParser>(sd_fs_service_);
 
     const std::vector<std::shared_ptr<Sensor>>* sensors = nullptr;
 

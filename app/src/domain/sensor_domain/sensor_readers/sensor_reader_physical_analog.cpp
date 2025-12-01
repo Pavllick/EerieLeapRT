@@ -1,6 +1,5 @@
 #include <stdexcept>
 
-#include "utilities/memory/heap_allocator.h"
 #include "domain/sensor_domain/models/sensor_reading.h"
 #include "domain/sensor_domain/models/reading_status.h"
 #include "domain/sensor_domain/models/reading_metadata.h"
@@ -8,7 +7,6 @@
 
 namespace eerie_leap::domain::sensor_domain::sensor_readers {
 
-using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::subsys::adc::utilities;
 
 SensorReaderPhysicalAnalog::SensorReaderPhysicalAnalog(
@@ -33,7 +31,7 @@ SensorReaderPhysicalAnalog::SensorReaderPhysicalAnalog(
 }
 
 void SensorReaderPhysicalAnalog::Read() {
-    auto reading = make_shared_ext<SensorReading>(guid_generator_->Generate(), sensor_);
+    auto reading = std::make_shared<SensorReading>(guid_generator_->Generate(), sensor_);
     reading->timestamp = time_service_->GetCurrentTime();
 
     float voltage = AdcChannelReader();

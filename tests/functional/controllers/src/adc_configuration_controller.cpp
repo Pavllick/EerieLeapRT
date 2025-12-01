@@ -23,10 +23,10 @@ AdcConfiguration adc_configuration_manager_GetTestConfiguration() {
         {5.0, 5.0}
     };
 
-    auto adc_calibration_data_samples_ptr = make_shared_ext<std::vector<CalibrationData>>(adc_calibration_data_samples);
-    auto adc_calibrator = make_shared_ext<AdcCalibrator>(InterpolationMethod::LINEAR, adc_calibration_data_samples_ptr);
+    auto adc_calibration_data_samples_ptr = std::make_shared<std::vector<CalibrationData>>(adc_calibration_data_samples);
+    auto adc_calibrator = std::make_shared<AdcCalibrator>(InterpolationMethod::LINEAR, adc_calibration_data_samples_ptr);
 
-    auto adc_channel_configuration = make_shared_ext<AdcChannelConfiguration>(adc_calibrator);
+    auto adc_channel_configuration = std::make_shared<AdcChannelConfiguration>(adc_calibrator);
 
     std::vector<std::shared_ptr<AdcChannelConfiguration>> channel_configurations;
     channel_configurations.reserve(8);
@@ -36,7 +36,7 @@ AdcConfiguration adc_configuration_manager_GetTestConfiguration() {
     AdcConfiguration adc_configuration;
     adc_configuration.samples = 40;
     adc_configuration.channel_configurations =
-        make_shared_ext<std::vector<std::shared_ptr<AdcChannelConfiguration>>>(channel_configurations);
+        std::make_shared<std::vector<std::shared_ptr<AdcChannelConfiguration>>>(channel_configurations);
 
     return adc_configuration;
 }
@@ -47,8 +47,8 @@ ZTEST(adc_configuration_manager, test_AdcConfigurationManager_Save_config_succes
 
     fs_service->Format();
 
-    auto adc_configuration_service = make_unique_ext<CborConfigurationService<CborAdcConfig>>("adc_config", fs_service);
-    auto json_configuration_service = make_unique_ext<JsonConfigurationService<JsonAdcConfig>>("adc_config", fs_service);
+    auto adc_configuration_service = std::make_unique<CborConfigurationService<CborAdcConfig>>("adc_config", fs_service);
+    auto json_configuration_service = std::make_unique<JsonConfigurationService<JsonAdcConfig>>("adc_config", fs_service);
     auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(
         std::move(adc_configuration_service), std::move(json_configuration_service));
 
@@ -80,8 +80,8 @@ ZTEST(adc_configuration_manager, test_AdcConfigurationManager_Save_config_and_Lo
 
     fs_service->Format();
 
-    auto adc_configuration_service = make_unique_ext<CborConfigurationService<CborAdcConfig>>("adc_config", fs_service);
-    auto json_configuration_service = make_unique_ext<JsonConfigurationService<JsonAdcConfig>>("adc_config", fs_service);
+    auto adc_configuration_service = std::make_unique<CborConfigurationService<CborAdcConfig>>("adc_config", fs_service);
+    auto json_configuration_service = std::make_unique<JsonConfigurationService<JsonAdcConfig>>("adc_config", fs_service);
     auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(
         std::move(adc_configuration_service), std::move(json_configuration_service));
 
@@ -90,8 +90,8 @@ ZTEST(adc_configuration_manager, test_AdcConfigurationManager_Save_config_and_Lo
     bool result = adc_configuration_manager->Update(adc_configuration);
     zassert_true(result);
 
-    adc_configuration_service = make_unique_ext<CborConfigurationService<CborAdcConfig>>("adc_config", fs_service);
-    json_configuration_service = make_unique_ext<JsonConfigurationService<JsonAdcConfig>>("adc_config", fs_service);
+    adc_configuration_service = std::make_unique<CborConfigurationService<CborAdcConfig>>("adc_config", fs_service);
+    json_configuration_service = std::make_unique<JsonConfigurationService<JsonAdcConfig>>("adc_config", fs_service);
     adc_configuration_manager = nullptr;
     adc_configuration_manager = std::make_shared<AdcConfigurationManager>(
         std::move(adc_configuration_service), std::move(json_configuration_service));

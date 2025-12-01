@@ -19,11 +19,11 @@ using namespace eerie_leap::domain::logging_domain::models;
 
 class LoggingConfigurationManager {
 private:
-    ext_unique_ptr<CborConfigurationService<CborLoggingConfig>> cbor_configuration_service_;
-    ext_unique_ptr<JsonConfigurationService<JsonLoggingConfig>> json_configuration_service_;
+    std::unique_ptr<CborConfigurationService<CborLoggingConfig>> cbor_configuration_service_;
+    std::unique_ptr<JsonConfigurationService<JsonLoggingConfig>> json_configuration_service_;
 
-    std::unique_ptr<LoggingConfigurationCborParser> cbor_parser_;
-    std::unique_ptr<LoggingConfigurationJsonParser> json_parser_;
+    ext_unique_ptr<LoggingConfigurationCborParser> cbor_parser_;
+    ext_unique_ptr<LoggingConfigurationJsonParser> json_parser_;
 
     std::shared_ptr<LoggingConfiguration> configuration_;
 
@@ -34,8 +34,8 @@ private:
 
 public:
     LoggingConfigurationManager(
-        ext_unique_ptr<CborConfigurationService<CborLoggingConfig>> cbor_configuration_service,
-        ext_unique_ptr<JsonConfigurationService<JsonLoggingConfig>> json_configuration_service);
+        std::unique_ptr<CborConfigurationService<CborLoggingConfig>> cbor_configuration_service,
+        std::unique_ptr<JsonConfigurationService<JsonLoggingConfig>> json_configuration_service);
 
     bool Update(const LoggingConfiguration& configuration, bool internal_only = false);
     std::shared_ptr<LoggingConfiguration> Get(bool force_load = false);

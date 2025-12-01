@@ -1,4 +1,3 @@
-#include "utilities/memory/heap_allocator.h"
 #include "domain/canbus_domain/processors/script_processor.h"
 #include "domain/script_domain/utilities/global_fuctions_registry.h"
 
@@ -6,7 +5,6 @@
 
 namespace eerie_leap::domain::canbus_domain::services {
 
-using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::domain::script_domain::utilities;
 
@@ -21,8 +19,8 @@ CanbusSchedulerService::CanbusSchedulerService(
         sensor_readings_frame_(std::move(sensor_readings_frame)),
         can_frame_processors_(std::make_shared<std::vector<std::shared_ptr<ICanFrameProcessor>>>()) {
 
-    can_frame_dbc_builder_ = make_shared_ext<CanFrameDbcBuilder>(canbus_service_, sensor_readings_frame_);
-    can_frame_processors_->push_back(make_shared_ext<ScriptProcessor>(sensor_readings_frame_, "process_can_frame"));
+    can_frame_dbc_builder_ = std::make_shared<CanFrameDbcBuilder>(canbus_service_, sensor_readings_frame_);
+    can_frame_processors_->push_back(std::make_shared<ScriptProcessor>(sensor_readings_frame_, "process_can_frame"));
 
     k_sem_init(&processing_semaphore_, 1, 1);
 };
@@ -85,7 +83,7 @@ std::shared_ptr<CanbusTask> CanbusSchedulerService::CreateTask(uint8_t bus_chann
 
     InitializeScript(message_configuration);
 
-    auto task = make_shared_ext<CanbusTask>();
+    auto task = std::make_shared<CanbusTask>();
     task->work_q = &work_q_;
     task->processing_semaphore = &processing_semaphore_;
     task->send_interval_ms = K_MSEC(message_configuration.send_interval_ms);

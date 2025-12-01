@@ -1,6 +1,5 @@
 #include <span>
 
-#include "utilities/memory/heap_allocator.h"
 #include "subsys/time/time_helpers.hpp"
 #include "subsys/lua_script/lua_script.h"
 #include "domain/sensor_domain/processors/sensor_processor.h"
@@ -11,7 +10,6 @@
 
 namespace eerie_leap::domain::sensor_domain::services {
 
-using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::subsys::time;
 using namespace eerie_leap::subsys::lua_script;
 using namespace eerie_leap::domain::sensor_domain::models;
@@ -29,9 +27,9 @@ ProcessingSchedulerService::ProcessingSchedulerService(
         sensor_reader_factory_(std::move(sensor_reader_factory)),
         reading_processors_(std::make_shared<std::vector<std::shared_ptr<IReadingProcessor>>>()) {
 
-    reading_processors_->push_back(make_shared_ext<ScriptProcessor>("pre_process_sensor_value"));
-    reading_processors_->push_back(make_shared_ext<SensorProcessor>(sensor_readings_frame_));
-    reading_processors_->push_back(make_shared_ext<ScriptProcessor>("post_process_sensor_value"));
+    reading_processors_->push_back(std::make_shared<ScriptProcessor>("pre_process_sensor_value"));
+    reading_processors_->push_back(std::make_shared<SensorProcessor>(sensor_readings_frame_));
+    reading_processors_->push_back(std::make_shared<ScriptProcessor>("post_process_sensor_value"));
 };
 
 void ProcessingSchedulerService::Initialize() {

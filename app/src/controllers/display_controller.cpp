@@ -29,16 +29,16 @@ void DisplayController::StartAnimation(int animation_index) {
 
     switch(animation_index) {
         case 0:
-            animation_ = make_unique_ext<WaveLinesAnimation>(cfb_);
+            animation_ = std::make_unique<WaveLinesAnimation>(cfb_);
             break;
         case 1:
-            animation_ = make_unique_ext<DotPathAnimation>(cfb_);
+            animation_ = std::make_unique<DotPathAnimation>(cfb_);
             break;
         case 2:
-            animation_ = make_unique_ext<ParticlesAnimation>(cfb_);
+            animation_ = std::make_unique<ParticlesAnimation>(cfb_);
             break;
         case 3:
-            animation_ = make_unique_ext<TaperedWaveAnimation>(cfb_);
+            animation_ = std::make_unique<TaperedWaveAnimation>(cfb_);
             break;
         default:
             return;

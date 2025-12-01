@@ -6,10 +6,6 @@
 #include "cbor_canbus_config_cbor_decode.h"
 #include "zcbor_print.h"
 
-#include "utilities/memory/heap_allocator.h"
-
-using namespace eerie_leap::utilities::memory;
-
 #define log_result(state, result, func) do { \
 	if (!result) { \
 		zcbor_trace_file(state); \

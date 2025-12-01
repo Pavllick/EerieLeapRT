@@ -7,14 +7,14 @@ namespace eerie_leap::domain::logging_domain::configuration {
 LOG_MODULE_REGISTER(logging_config_ctrl_logger);
 
 LoggingConfigurationManager::LoggingConfigurationManager(
-    ext_unique_ptr<CborConfigurationService<CborLoggingConfig>> cbor_configuration_service,
-    ext_unique_ptr<JsonConfigurationService<JsonLoggingConfig>> json_configuration_service)
+    std::unique_ptr<CborConfigurationService<CborLoggingConfig>> cbor_configuration_service,
+    std::unique_ptr<JsonConfigurationService<JsonLoggingConfig>> json_configuration_service)
         : cbor_configuration_service_(std::move(cbor_configuration_service)),
         json_configuration_service_(std::move(json_configuration_service)),
         configuration_(nullptr) {
 
-    cbor_parser_ = std::make_unique<LoggingConfigurationCborParser>();
-    json_parser_ = std::make_unique<LoggingConfigurationJsonParser>();
+    cbor_parser_ = make_unique_ext<LoggingConfigurationCborParser>();
+    json_parser_ = make_unique_ext<LoggingConfigurationJsonParser>();
     std::shared_ptr<LoggingConfiguration> configuration = nullptr;
 
     try {

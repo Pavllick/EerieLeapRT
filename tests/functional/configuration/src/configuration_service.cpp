@@ -29,7 +29,7 @@ ZTEST(configuration_service, test_CborSystemConfig_Save_config_successfully_save
     auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
 
     fs_service->Format();
-    auto system_config_service = make_unique_ext<CborConfigurationService<CborSystemConfig>>("system_config", fs_service);
+    auto system_config_service = std::make_unique<CborConfigurationService<CborSystemConfig>>("system_config", fs_service);
 
     auto save_res = system_config_service->Save(&system_config);
     zassert_true(save_res);
@@ -47,7 +47,7 @@ ZTEST(configuration_service, test_CborSystemConfig_Load_config_successfully_save
     auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
 
     fs_service->Format();
-    auto system_config_service = make_unique_ext<CborConfigurationService<CborSystemConfig>>("system_config", fs_service);
+    auto system_config_service = std::make_unique<CborConfigurationService<CborSystemConfig>>("system_config", fs_service);
 
     auto save_res = system_config_service->Save(&system_config);
     zassert_true(save_res);
@@ -135,7 +135,7 @@ ZTEST(configuration_service, test_CborSensorsConfig_Save_config_successfully_sav
     auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
 
     fs_service->Format();
-    auto sensors_config_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
+    auto sensors_config_service = std::make_unique<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
 
     auto save_res = sensors_config_service->Save(&sensors_config);
     zassert_true(save_res);
@@ -220,7 +220,7 @@ ZTEST(configuration_service, test_CborSensorsConfig_Load_config_successfully_sav
     auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
 
     fs_service->Format();
-    auto sensors_config_service = make_unique_ext<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
+    auto sensors_config_service = std::make_unique<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
 
     // Save config
     auto save_res = sensors_config_service->Save(&sensors_config);

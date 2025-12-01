@@ -2,14 +2,11 @@
 
 #include <zephyr/logging/log.h>
 
-#include "utilities/memory/heap_allocator.h"
 #include "adc.h"
 
 #include "adc_manager.h"
 
 namespace eerie_leap::subsys::adc {
-
-using namespace eerie_leap::utilities::memory;
 
 LOG_MODULE_REGISTER(adc_manager);
 
@@ -17,7 +14,7 @@ AdcManager::AdcManager(std::vector<AdcDTInfo> adc_infos) {
     adc_infos_ = adc_infos;
 
     for(auto& adc_info : adc_infos_) {
-        adcs_.push_back(make_shared_ext<Adc>(adc_info));
+        adcs_.push_back(std::make_shared<Adc>(adc_info));
     }
 }
 

@@ -35,7 +35,7 @@ ext_unique_ptr<CborSensorsConfig> SensorsCborParser::Serialize(
         sensor->configuration.UpdateConnectionString();
         SensorValidator::Validate(*sensor, gpio_channel_count, adc_channel_count);
 
-        auto sensor_config = make_shared_ext<CborSensorConfig>();
+        auto sensor_config = make_unique_ext<CborSensorConfig>();
 
         sensor_config->id = CborHelpers::ToZcborString(&sensor->id);
         sensor_config->configuration.type = std::to_underlying(sensor->configuration.type);

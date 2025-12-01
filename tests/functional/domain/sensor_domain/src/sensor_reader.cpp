@@ -1,6 +1,5 @@
 #include <zephyr/ztest.h>
 
-#include "utilities/memory/heap_allocator.h"
 #include "utilities/guid/guid_generator.h"
 #include "utilities/string/string_helpers.h"
 #include "utilities/math_parser/expression_evaluator.h"
@@ -32,7 +31,6 @@
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
 
-using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::utilities::string;
 using namespace eerie_leap::utilities::math_parser;
@@ -180,8 +178,8 @@ sensors_reader_HelperInstances sensors_reader_GetReadingInstances() {
 
     const auto adc_configuration = sensors_reader_GetTestConfiguration();
 
-    auto adc_configuration_service = make_unique_ext<CborConfigurationService<CborAdcConfig>>("adc_config", fs_service);
-    auto json_configuration_service = make_unique_ext<JsonConfigurationService<JsonAdcConfig>>("adc_config", fs_service);
+    auto adc_configuration_service = std::make_unique<CborConfigurationService<CborAdcConfig>>("adc_config", fs_service);
+    auto json_configuration_service = std::make_unique<JsonConfigurationService<JsonAdcConfig>>("adc_config", fs_service);
     auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(
         std::move(adc_configuration_service), std::move(json_configuration_service));
 
@@ -196,27 +194,27 @@ sensors_reader_HelperInstances sensors_reader_GetReadingInstances() {
         std::shared_ptr<ISensorReader> sensor_reader;
 
         if(sensors[i]->configuration.type == SensorType::PHYSICAL_ANALOG) {
-            sensor_reader = make_shared_ext<SensorReaderPhysicalAnalog>(
+            sensor_reader = std::make_shared<SensorReaderPhysicalAnalog>(
                 time_service,
                 guid_generator,
                 sensor_readings_frame,
                 sensors[i],
                 adc_configuration_manager);
         } else if(sensors[i]->configuration.type == SensorType::VIRTUAL_ANALOG) {
-            sensor_reader = make_shared_ext<SensorReaderVirtualAnalog>(
+            sensor_reader = std::make_shared<SensorReaderVirtualAnalog>(
                 time_service,
                 guid_generator,
                 sensor_readings_frame,
                 sensors[i]);
         } else if(sensors[i]->configuration.type == SensorType::PHYSICAL_INDICATOR) {
-            sensor_reader = make_shared_ext<SensorReaderPhysicalIndicator>(
+            sensor_reader = std::make_shared<SensorReaderPhysicalIndicator>(
                 time_service,
                 guid_generator,
                 sensor_readings_frame,
                 sensors[i],
                 gpio);
         } else if(sensors[i]->configuration.type == SensorType::VIRTUAL_INDICATOR) {
-            sensor_reader = make_shared_ext<SensorReaderVirtualIndicator>(
+            sensor_reader = std::make_shared<SensorReaderVirtualIndicator>(
                 time_service,
                 guid_generator,
                 sensor_readings_frame,

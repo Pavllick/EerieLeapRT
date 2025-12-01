@@ -1,7 +1,6 @@
 #include <memory>
 #include <vector>
 
-#include "utilities/memory/heap_allocator.h"
 #include "utilities/voltage_interpolator/calibration_data.h"
 #include "utilities/voltage_interpolator/interpolation_method.h"
 #include "subsys/adc/adc_factory.hpp"
@@ -10,23 +9,22 @@
 
 namespace eerie_leap::domain::sensor_domain::configuration {
 
-using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::voltage_interpolator;
 using namespace eerie_leap::subsys::adc;
 
 LOG_MODULE_REGISTER(adc_config_ctrl_logger);
 
 AdcConfigurationManager::AdcConfigurationManager(
-    ext_unique_ptr<CborConfigurationService<CborAdcConfig>> cbor_configuration_service,
-    ext_unique_ptr<JsonConfigurationService<JsonAdcConfig>> json_configuration_service)
+    std::unique_ptr<CborConfigurationService<CborAdcConfig>> cbor_configuration_service,
+    std::unique_ptr<JsonConfigurationService<JsonAdcConfig>> json_configuration_service)
         : cbor_configuration_service_(std::move(cbor_configuration_service)),
         json_configuration_service_(std::move(json_configuration_service)),
         adc_manager_(AdcFactory::Create()),
         configuration_(nullptr),
         json_config_checksum_(0) {
 
-    cbor_parser_ = std::make_unique<AdcConfigurationCborParser>();
-    json_parser_ = std::make_unique<AdcConfigurationJsonParser>();
+    cbor_parser_ = make_unique_ext<AdcConfigurationCborParser>();
+    json_parser_ = make_unique_ext<AdcConfigurationJsonParser>();
     adc_manager_->Initialize();
 
     std::shared_ptr<IAdcManager> adc_manager = nullptr;

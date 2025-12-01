@@ -34,7 +34,7 @@ void HttpServer::Initialize(
         sensors_configuration_manager_ = sensors_configuration_manager;
         processing_scheduler_service_ = processing_scheduler_service;
 
-        sensors_http_controller_ = make_shared_ext<SensorsApiController>(sensors_configuration_manager, processing_scheduler_service);
+        sensors_http_controller_ = std::make_shared<SensorsApiController>(sensors_configuration_manager, processing_scheduler_service);
     }
 
 void HttpServer::Start() {

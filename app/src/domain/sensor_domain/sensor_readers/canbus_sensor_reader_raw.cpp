@@ -1,12 +1,9 @@
 #include <stdexcept>
 
-#include "utilities/memory/heap_allocator.h"
-
 #include "canbus_sensor_reader_raw.h"
 
 namespace eerie_leap::domain::sensor_domain::sensor_readers {
 
-using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::subsys::canbus;
 
 CanbusSensorReaderRaw::CanbusSensorReaderRaw(
@@ -36,7 +33,7 @@ std::shared_ptr<SensorReading> CanbusSensorReaderRaw::CreateRawReading() {
     if(can_frame_.data.empty())
         return nullptr;
 
-    auto reading = make_shared_ext<SensorReading>(guid_generator_->Generate(), sensor_);
+    auto reading = std::make_shared<SensorReading>(guid_generator_->Generate(), sensor_);
 
     reading->value = std::nullopt;
     reading->status = ReadingStatus::RAW;
