@@ -157,7 +157,7 @@ namespace mu
 		varmap_type m_UsedVar;
 		value_type m_fZero;      ///< Dummy value of zero, referenced by undefined variables
 
-		std::stack<int> m_bracketStack;
+		std::stack<int, std::vector<int>> m_bracketStack;
 
 		token_type m_lastTok;
 		char_type m_cArgSep;     ///< The character used for separating function arguments

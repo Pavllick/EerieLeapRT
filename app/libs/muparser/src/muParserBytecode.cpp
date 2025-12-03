@@ -54,9 +54,7 @@ namespace mu
 		, m_iMaxStackSize(0)
 		, m_vRPN()
 		, m_bEnableOptimizer(true)
-	{
-		m_vRPN.reserve(50);
-	}
+	{}
 
 
 	/** \brief Copy constructor.
@@ -496,7 +494,7 @@ namespace mu
 		rpn_type(m_vRPN).swap(m_vRPN);     // shrink bytecode vector to fit
 
 		// Determine the if-then-else jump offsets
-		std::stack<int> stIf, stElse;
+		std::stack<int, std::vector<int>> stIf, stElse;
 		int idx;
 		for (int i = 0; i < (int)m_vRPN.size(); ++i)
 		{

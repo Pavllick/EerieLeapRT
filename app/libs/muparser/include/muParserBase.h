@@ -253,10 +253,10 @@ namespace mu
 		void ReInit() const;
 
 		void AddCallback(const string_type& a_strName, const ParserCallback& a_Callback, funmap_type& a_Storage, const char_type* a_szCharSet);
-		void ApplyRemainingOprt(std::stack<token_type>& a_stOpt, std::stack<token_type>& a_stVal) const;
-		void ApplyBinOprt(std::stack<token_type>& a_stOpt, std::stack<token_type>& a_stVal) const;
-		void ApplyIfElse(std::stack<token_type>& a_stOpt, std::stack<token_type>& a_stVal) const;
-		void ApplyFunc(std::stack<token_type>& a_stOpt, std::stack<token_type>& a_stVal, int iArgCount) const;
+		void ApplyRemainingOprt(std::stack<token_type, std::vector<token_type>>& a_stOpt, std::stack<token_type, std::vector<token_type>>& a_stVal) const;
+		void ApplyBinOprt(std::stack<token_type, std::vector<token_type>>& a_stOpt, std::stack<token_type, std::vector<token_type>>& a_stVal) const;
+		void ApplyIfElse(std::stack<token_type, std::vector<token_type>>& a_stOpt, std::stack<token_type, std::vector<token_type>>& a_stVal) const;
+		void ApplyFunc(std::stack<token_type, std::vector<token_type>>& a_stOpt, std::stack<token_type, std::vector<token_type>>& a_stVal, int iArgCount) const;
 
 		token_type ApplyStrFunc(const token_type& a_FunTok, const std::vector<token_type>& a_vArg) const;
 
@@ -273,7 +273,7 @@ namespace mu
 		void  CheckName(const string_type& a_strName, const string_type& a_CharSet) const;
 		void  CheckOprt(const string_type& a_sName, const ParserCallback& a_Callback, const string_type& a_szCharSet) const;
 
-		void StackDump(const std::stack<token_type >& a_stVal, const std::stack<token_type >& a_stOprt) const;
+		void StackDump(const std::stack<token_type, std::vector<token_type>>& a_stVal, const std::stack<token_type, std::vector<token_type>>& a_stOprt) const;
 
 		/** \brief Pointer to the parser function.
 
@@ -291,8 +291,8 @@ namespace mu
 		static funmap_type  m_InfixOprtDef;   ///< unary infix operator.
 		static funmap_type  m_OprtDef;        ///< Binary operator callbacks
 
-		valmap_type  m_ConstDef;       ///< user constants.
-		strmap_type  m_StrVarDef;      ///< user defined string constants
+		static valmap_type  m_ConstDef;       ///< user constants.
+		static strmap_type  m_StrVarDef;      ///< user defined string constants
 		varmap_type  m_VarDef;         ///< user defind variables.
 
 		bool m_bBuiltInOp;             ///< Flag that can be used for switching built in operators on and off

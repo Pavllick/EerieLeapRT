@@ -65,6 +65,8 @@ namespace mu
 	funmap_type  ParserBase::m_PostOprtDef;
 	funmap_type  ParserBase::m_InfixOprtDef;
 	funmap_type  ParserBase::m_OprtDef;
+	valmap_type  ParserBase::m_ConstDef;
+	strmap_type  ParserBase::m_StrVarDef;
 
 	const string_type ParserBase::m_sNameChars = "0123456789_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	const string_type ParserBase::m_sOprtChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+-*^/?<>=#!$%&|~'_{}";
@@ -89,7 +91,7 @@ namespace mu
 	  _T(")"),   _T("?"),  _T(":"), 0
 	};
 
-	const int ParserBase::s_MaxNumOpenMPThreads = 16;
+	const int ParserBase::s_MaxNumOpenMPThreads = 1;
 
 	//------------------------------------------------------------------------------
 	/** \brief Constructor.
@@ -101,8 +103,6 @@ namespace mu
 		, m_vRPN()
 		, m_vStringBuf()
 		, m_pTokenReader()
-		, m_ConstDef()
-		, m_StrVarDef()
 		, m_VarDef()
 		, m_bBuiltInOp(true)
 		, m_vStackBuffer()
@@ -122,8 +122,6 @@ namespace mu
 		, m_vRPN()
 		, m_vStringBuf()
 		, m_pTokenReader()
-		, m_ConstDef()
-		, m_StrVarDef()
 		, m_VarDef()
 		, m_bBuiltInOp(true)	{
 		m_pTokenReader.reset(new token_reader_type(this));
@@ -166,13 +164,11 @@ namespace mu
 		// by resetting the parse function.
 		ReInit();
 
-		m_ConstDef = a_Parser.m_ConstDef;         // Copy user define constants
 		m_VarDef = a_Parser.m_VarDef;           // Copy user defined variables
 		m_bBuiltInOp = a_Parser.m_bBuiltInOp;
 		m_vStringBuf = a_Parser.m_vStringBuf;
 		m_vStackBuffer = a_Parser.m_vStackBuffer;
 		m_nFinalResultIdx = a_Parser.m_nFinalResultIdx;
-		m_StrVarDef = a_Parser.m_StrVarDef;
 		m_vStringVarBuf = a_Parser.m_vStringVarBuf;
 		m_pTokenReader.reset(a_Parser.m_pTokenReader->Clone(this));
 	}
@@ -777,7 +773,7 @@ namespace mu
 		\post The function token is removed from the stack
 		\throw exception_type if Argument count does not match function requirements.
 	*/
-	void ParserBase::ApplyFunc(std::stack<token_type>& a_stOpt, std::stack<token_type>& a_stVal, int a_iArgCount) const
+	void ParserBase::ApplyFunc(std::stack<token_type, std::vector<token_type>>& a_stOpt, std::stack<token_type, std::vector<token_type>>& a_stVal, int a_iArgCount) const
 	{
 		MUP_ASSERT(m_pTokenReader.get());
 
@@ -867,7 +863,7 @@ namespace mu
 	}
 
 	//---------------------------------------------------------------------------
-	void ParserBase::ApplyIfElse(std::stack<token_type>& a_stOpt, std::stack<token_type>& a_stVal) const
+	void ParserBase::ApplyIfElse(std::stack<token_type, std::vector<token_type>>& a_stOpt, std::stack<token_type, std::vector<token_type>>& a_stVal) const
 	{
 		// Check if there is an if Else clause to be calculated
 		while (a_stOpt.size() && a_stOpt.top().GetCode() == cmELSE)
@@ -915,7 +911,7 @@ namespace mu
 	/** \brief Performs the necessary steps to write code for
 			   the execution of binary operators into the bytecode.
 	*/
-	void ParserBase::ApplyBinOprt(std::stack<token_type>& a_stOpt, std::stack<token_type>& a_stVal) const
+	void ParserBase::ApplyBinOprt(std::stack<token_type, std::vector<token_type>>& a_stOpt, std::stack<token_type, std::vector<token_type>>& a_stVal) const
 	{
 		// is it a user defined binary operator?
 		if (a_stOpt.top().GetCode() == cmOPRT_BIN)
@@ -962,7 +958,7 @@ namespace mu
 		\param a_stOpt The operator stack
 		\param a_stVal The value stack
 	*/
-	void ParserBase::ApplyRemainingOprt(std::stack<token_type>& stOpt, std::stack<token_type>& stVal) const
+	void ParserBase::ApplyRemainingOprt(std::stack<token_type, std::vector<token_type>>& stOpt, std::stack<token_type, std::vector<token_type>>& stVal) const
 	{
 		while (stOpt.size() &&
 			stOpt.top().GetCode() != cmBO &&
@@ -1242,8 +1238,8 @@ namespace mu
 		if (!m_pTokenReader->GetExpr().length())
 			Error(ecUNEXPECTED_EOF, 0);
 
-		std::stack<token_type> stOpt, stVal;
-		std::stack<int> stArgCount;
+		std::stack<token_type, std::vector<token_type>> stOpt, stVal;
+		std::stack<int, std::vector<int>> stArgCount;
 		token_type opta, opt;  // for storing operators
 		token_type val, tval;  // for storing value
 		int ifElseCounter = 0;
@@ -1705,10 +1701,10 @@ namespace mu
 
 		This function is used for debugging only.
 	*/
-	void ParserBase::StackDump(const std::stack<token_type>& a_stVal, const std::stack<token_type>& a_stOprt) const
+	void ParserBase::StackDump(const std::stack<token_type, std::vector<token_type>>& a_stVal, const std::stack<token_type, std::vector<token_type>>& a_stOprt) const
 	{
-		std::stack<token_type> stOprt(a_stOprt);
-		std::stack<token_type> stVal(a_stVal);
+		std::stack<token_type, std::vector<token_type>> stOprt(a_stOprt);
+		std::stack<token_type, std::vector<token_type>> stVal(a_stVal);
 
 		mu::console() << _T("\nValue stack:\n");
 		while (!stVal.empty())

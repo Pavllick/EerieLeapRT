@@ -253,7 +253,7 @@ namespace mu
 	{
 		m_iPos = 0;
 		m_iSynFlags = sfSTART_OF_LINE;
-		m_bracketStack = std::stack<int>();
+		m_bracketStack = std::stack<int, std::vector<int>>();
 		m_UsedVar.clear();
 		m_lastTok = token_type();
 	}
