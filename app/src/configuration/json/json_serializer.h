@@ -3,13 +3,14 @@
 #include <cstddef>
 #include <cstdint>
 #include <span>
+#include <boost/json.hpp>
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/logging/log_instance.h>
 #include <zephyr/data/json.h>
 
-#include "utilities/memory/heap_allocator.h"
+#include "utilities/memory/boost_memory_resource.h"
 
 namespace eerie_leap::configuration::json {
 
@@ -17,17 +18,37 @@ using namespace eerie_leap::utilities::memory;
 
 template <typename T>
 class JsonSerializer {
-public:
-    using EncodeFn = std::unique_ptr<ExtString> (*)(const T&);
-    using DecodeFn = T (*)(std::string_view);
+private:
+    static std::unique_ptr<ExtString> Encode(const T& config) {
+        boost::json::value jv = boost::json::value_from(config, &ext_boost_mem_resource);
+        ExtString result;
 
-    JsonSerializer(EncodeFn encoder, DecodeFn decoder)
-        : encodeFn_(encoder), decodeFn_(decoder) {}
+        boost::json::serializer sr;
+        sr.reset(&jv);
+
+        char buffer[1024];
+
+        while(!sr.done()) {
+            boost::json::string_view sv = sr.read(buffer, sizeof(buffer));
+            result.append(sv.data(), sv.size());
+        }
+
+        return std::make_unique<ExtString>(std::move(result));
+    }
+
+    static T Decode(std::string_view json_str) {
+        boost::json::value jv = boost::json::parse(json_str, &ext_boost_mem_resource);
+
+        return boost::json::value_to<T>(jv);
+    }
+
+public:
+    JsonSerializer() = default;
 
     std::unique_ptr<ExtString> Serialize(const T& obj, size_t *payload_len_out = nullptr) {
         LOG_MODULE_DECLARE(json_serializer_logger);
 
-        auto json_str = encodeFn_(obj);
+        auto json_str = Encode(obj);
         if(json_str->empty()) {
             LOG_ERR("Failed to serialize object.");
             return nullptr;
@@ -40,16 +61,12 @@ public:
         LOG_MODULE_DECLARE(json_serializer_logger);
 
         try {
-            return make_unique_ext<T>(decodeFn_(json_str));
+            return make_unique_ext<T>(Decode(json_str));
         } catch(...) {
             LOG_ERR("Failed to deserialize object.");
             return nullptr;
         }
     }
-
-private:
-    EncodeFn encodeFn_;
-    DecodeFn decodeFn_;
 };
 
 } // namespace eerie_leap::configuration::json

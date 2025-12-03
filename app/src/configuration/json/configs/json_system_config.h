@@ -23,48 +23,51 @@ struct JsonSystemConfig {
 };
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonComUserConfig const& config) {
-    jv = {
-        {NAMEOF_MEMBER(&JsonComUserConfig::device_id), config.device_id},
-        {NAMEOF_MEMBER(&JsonComUserConfig::server_id), config.server_id}
-    };
+    jv.~value();
+    new(&jv) json::value(json::object(&ext_boost_mem_resource));
+    json::object& obj = jv.as_object();
+
+    obj[NAMEOF_MEMBER(&JsonComUserConfig::device_id).c_str()] = config.device_id;
+    obj[NAMEOF_MEMBER(&JsonComUserConfig::server_id).c_str()] = config.server_id;
+
+    jv = std::move(obj);
 }
 
 static JsonComUserConfig tag_invoke(json::value_to_tag<JsonComUserConfig>, json::value const& jv) {
     json::object const& obj = jv.as_object();
-    return JsonComUserConfig{
-        .device_id = json::value_to<uint64_t>(obj.at(NAMEOF_MEMBER(&JsonComUserConfig::device_id).c_str())),
-        .server_id = json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonComUserConfig::server_id).c_str()))
+    return {
+        .device_id = static_cast<uint64_t>(obj.at(NAMEOF_MEMBER(&JsonComUserConfig::device_id).c_str()).as_uint64()),
+        .server_id = static_cast<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonComUserConfig::server_id).c_str()).as_int64())
     };
 }
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonSystemConfig const& config) {
-    jv = {
-        {NAMEOF_MEMBER(&JsonSystemConfig::com_user_refresh_rate_ms), config.com_user_refresh_rate_ms},
-        {NAMEOF_MEMBER(&JsonSystemConfig::com_user_configs), json::value_from(config.com_user_configs)}
-    };
+    jv.~value();
+    new(&jv) json::value(json::object(&ext_boost_mem_resource));
+    json::object& obj = jv.as_object();
+
+    obj[NAMEOF_MEMBER(&JsonSystemConfig::com_user_refresh_rate_ms).c_str()] = config.com_user_refresh_rate_ms;
+
+    json::array com_user_configs_array(&ext_boost_mem_resource);
+    for(const auto& com_user_config : config.com_user_configs)
+        com_user_configs_array.push_back(json::value_from(com_user_config, &ext_boost_mem_resource));
+    obj[NAMEOF_MEMBER(&JsonSystemConfig::com_user_configs).c_str()] = std::move(com_user_configs_array);
+
+    jv = std::move(obj);
 }
 
 static JsonSystemConfig tag_invoke(json::value_to_tag<JsonSystemConfig>, json::value const& jv) {
     json::object const& obj = jv.as_object();
-    return JsonSystemConfig{
-        .com_user_refresh_rate_ms = json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonSystemConfig::com_user_refresh_rate_ms).c_str())),
-        .com_user_configs = json::value_to<std::vector<JsonComUserConfig>>(obj.at(NAMEOF_MEMBER(&JsonSystemConfig::com_user_configs).c_str()))
-    };
-}
+    JsonSystemConfig result;
 
-static std::unique_ptr<ExtString> json_encode_JsonSystemConfig(const JsonSystemConfig& config) {
-    json::value jv = json::value_from(config, &ext_boost_mem_resource);
+    result.com_user_refresh_rate_ms = static_cast<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonSystemConfig::com_user_refresh_rate_ms).c_str()).as_int64());
 
-    ExtString result;
-    result = json::serialize(jv);
+    const json::array& com_user_configs_array = obj.at(NAMEOF_MEMBER(&JsonSystemConfig::com_user_configs).c_str()).as_array();
+    result.com_user_configs.reserve(com_user_configs_array.size());
+    for(const auto& elem : com_user_configs_array)
+        result.com_user_configs.push_back(json::value_to<JsonComUserConfig>(elem));
 
-    return std::make_unique<ExtString>(result);
-}
-
-static JsonSystemConfig json_decode_JsonSystemConfig(std::string_view json_str) {
-    json::value jv = json::parse(json_str, &ext_boost_mem_resource);
-
-    return json::value_to<JsonSystemConfig>(jv);
+    return result;
 }
 
 } // namespace eerie_leap::configuration::json::configs

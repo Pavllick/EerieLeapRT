@@ -5,6 +5,10 @@
 #include <cstddef>
 #include <vector>
 
+#include "utilities/memory/heap_allocator.h"
+
+using namespace eerie_leap::utilities::memory;
+
 struct CborAdcCalibrationDataMap_float32float {
 	float float32float_key;
 	float float32float;
@@ -22,6 +26,6 @@ struct CborAdcChannelConfig {
 
 struct CborAdcConfig {
 	uint32_t samples;
-	std::vector<CborAdcChannelConfig> CborAdcChannelConfig_m;
+	std::vector<CborAdcChannelConfig, HeapAllocator<CborAdcChannelConfig>> CborAdcChannelConfig_m;
 	uint32_t json_config_checksum;
 };

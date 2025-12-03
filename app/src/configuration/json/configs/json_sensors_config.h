@@ -187,27 +187,4 @@ static JsonSensorsConfig tag_invoke(json::value_to_tag<JsonSensorsConfig>, json:
     return result;
 }
 
-static std::unique_ptr<ExtString> json_encode_JsonSensorsConfig(const JsonSensorsConfig& config) {
-    json::value jv = json::value_from(config, &ext_boost_mem_resource);
-    ExtString result;
-
-    json::serializer sr;
-    sr.reset(&jv);
-
-    char buffer[1024];
-
-    while(!sr.done()) {
-        boost::json::string_view sv = sr.read(buffer, sizeof(buffer));
-        result.append(sv.data(), sv.size());
-    }
-
-    return std::make_unique<ExtString>(std::move(result));
-}
-
-static JsonSensorsConfig json_decode_JsonSensorsConfig(std::string_view json_str) {
-    json::value jv = json::parse(json_str, &ext_boost_mem_resource);
-
-    return json::value_to<JsonSensorsConfig>(jv);
-}
-
 } // namespace eerie_leap::configuration::json::configs

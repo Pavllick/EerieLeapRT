@@ -25,7 +25,7 @@ ext_unique_ptr<JsonAdcConfig> AdcConfigurationJsonParser::Serialize(const AdcCon
         if(interpolation_method == InterpolationMethod::NONE)
             throw std::runtime_error("ADC channel configuration is invalid. Calibration table is missing.");
 
-        channel_configuration.interpolation_method = GetInterpolationMethodName(interpolation_method);
+        channel_configuration.interpolation_method = json::string(GetInterpolationMethodName(interpolation_method));
 
         auto& calibration_table = *configuration.channel_configurations->at(i)->calibrator->GetCalibrationTable();
 
@@ -44,7 +44,7 @@ ext_unique_ptr<JsonAdcConfig> AdcConfigurationJsonParser::Serialize(const AdcCon
                 .value = calibration_data.value});
         }
 
-        config->channel_configurations.push_back(channel_configuration);
+        config->channel_configs.push_back(channel_configuration);
     }
 
     return config;
@@ -56,10 +56,10 @@ AdcConfiguration AdcConfigurationJsonParser::Deserialize(const JsonAdcConfig& co
     configuration.samples = static_cast<uint16_t>(config.samples);
     configuration.channel_configurations = std::make_shared<std::vector<std::shared_ptr<AdcChannelConfiguration>>>();
 
-    for(auto& adc_channel_config : config.channel_configurations) {
+    for(auto& adc_channel_config : config.channel_configs) {
         auto adc_channel_configuration = std::make_shared<AdcChannelConfiguration>();
 
-        auto interpolation_method = GetInterpolationMethod(adc_channel_config.interpolation_method);
+        auto interpolation_method = GetInterpolationMethod(std::string(adc_channel_config.interpolation_method));
 
         if(interpolation_method == InterpolationMethod::NONE)
             throw std::runtime_error("ADC channel configuration is invalid. Calibration table is missing.");

@@ -12,24 +12,24 @@ ext_unique_ptr<JsonCanbusConfig> CanbusConfigurationJsonParser::Serialize(const 
     auto config = make_unique_ext<JsonCanbusConfig>();
 
     for(const auto& [bus_channel, channel_configuration] : configuration.channel_configurations) {
-        JsonCanChannelConfig channel_config {
-            .type = GetCanbusTypeName(channel_configuration.type),
-            .is_extended_id = channel_configuration.is_extended_id,
-            .bus_channel = bus_channel,
-            .bitrate = channel_configuration.bitrate,
-            .data_bitrate = channel_configuration.data_bitrate,
-            .dbc_file_path = channel_configuration.dbc_file_path
-        };
+        JsonCanChannelConfig channel_config;
+        channel_config.type = json::string(GetCanbusTypeName(channel_configuration.type));
+        channel_config.is_extended_id = channel_configuration.is_extended_id;
+        channel_config.bus_channel = bus_channel;
+        channel_config.bitrate = channel_configuration.bitrate;
+        channel_config.data_bitrate = channel_configuration.data_bitrate;
+        channel_config.dbc_file_path = json::string(channel_configuration.dbc_file_path);
 
         for(const auto& message_configuration : channel_configuration.message_configurations) {
-            channel_config.message_configs.push_back({
-                .frame_id = message_configuration.frame_id,
-                .send_interval_ms = message_configuration.send_interval_ms,
-                .script_path = message_configuration.script_path
-            });
+            JsonCanMessageConfig message_config;
+            message_config.frame_id = message_configuration.frame_id;
+            message_config.send_interval_ms = message_configuration.send_interval_ms;
+            message_config.script_path = json::string(message_configuration.script_path);
+
+            channel_config.message_configs.push_back(std::move(message_config));
         }
 
-        config->channel_configs.push_back(channel_config);
+        config->channel_configs.push_back(std::move(channel_config));
     }
 
     return config;
@@ -40,19 +40,19 @@ CanbusConfiguration CanbusConfigurationJsonParser::Deserialize(const JsonCanbusC
 
     for(const auto& canbus_config : config.channel_configs) {
         CanChannelConfiguration channel_configuration = {
-            .type = GetCanbusType(canbus_config.type),
+            .type = GetCanbusType(std::string(canbus_config.type)),
             .is_extended_id = canbus_config.is_extended_id,
             .bus_channel = static_cast<uint8_t>(canbus_config.bus_channel),
             .bitrate = canbus_config.bitrate,
             .data_bitrate = canbus_config.data_bitrate,
-            .dbc_file_path = canbus_config.dbc_file_path
+            .dbc_file_path = std::string(canbus_config.dbc_file_path)
         };
 
         for(const auto& message_config : canbus_config.message_configs) {
             CanMessageConfiguration message_configuration = {
                 .frame_id = message_config.frame_id,
                 .send_interval_ms = message_config.send_interval_ms,
-                .script_path = message_config.script_path
+                .script_path = std::string(message_config.script_path)
             };
 
             if(fs_service_ != nullptr

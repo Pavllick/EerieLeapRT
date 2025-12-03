@@ -3,7 +3,6 @@
 
 #include "utilities/voltage_interpolator/interpolation_method.h"
 #include "utilities/memory/heap_allocator.h"
-#include "configuration/json/traits/sensors_config_trait.h"
 
 #include "sensors_api_controller.h"
 
@@ -11,7 +10,6 @@ namespace eerie_leap::domain::http_domain::controllers::api {
 
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::voltage_interpolator;
-using namespace eerie_leap::configuration::json::traits;
 
 LOG_MODULE_REGISTER(sensors_api_controller_logger);
 
@@ -42,9 +40,7 @@ SensorsApiController::SensorsApiController(
         processing_scheduler_service_ = std::move(processing_scheduler_service);
 
     if(!json_serializer_)
-        json_serializer_ = std::make_unique<JsonSerializer<JsonSensorsConfig>>(
-            JsonTrait<JsonSensorsConfig>::Encode,
-            JsonTrait<JsonSensorsConfig>::Decode);
+        json_serializer_ = std::make_unique<JsonSerializer<JsonSensorsConfig>>();
 }
 
 int SensorsApiController::sensors_config_get_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data) {

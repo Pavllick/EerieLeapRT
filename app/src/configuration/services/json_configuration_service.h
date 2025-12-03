@@ -14,11 +14,6 @@
 #include "subsys/fs/services/i_fs_service.h"
 
 #include "configuration/json/json_serializer.h"
-#include "configuration/json/traits/system_config_trait.h"
-#include "configuration/json/traits/adc_config_trait.h"
-#include "configuration/json/traits/sensors_config_trait.h"
-#include "configuration/json/traits/logging_config_trait.h"
-#include "configuration/json/traits/canbus_config_trait.h"
 
 #include "loaded_config.hpp"
 
@@ -26,7 +21,6 @@ namespace eerie_leap::configuration::services {
 
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::configuration::json;
-using namespace eerie_leap::configuration::json::traits;
 using namespace eerie_leap::subsys::fs::services;
 
 template <typename T>
@@ -138,9 +132,7 @@ public:
         task_load_.instance = this;
         k_work_init(&task_load_.work, WorkTaskLoad);
 
-        serializer_ = make_unique_ext<JsonSerializer<T>>(
-            JsonTrait<T>::Encode,
-            JsonTrait<T>::Decode);
+        serializer_ = make_unique_ext<JsonSerializer<T>>();
 
         if(!fs_service_)
             return;

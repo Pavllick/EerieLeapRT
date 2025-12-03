@@ -18,73 +18,93 @@ struct JsonAdcCalibrationDataConfig {
 };
 
 struct JsonAdcChannelConfig {
-    std::string interpolation_method;
-    std::vector<JsonAdcCalibrationDataConfig> calibration_table;
+    json::string interpolation_method;
+    std::vector<JsonAdcCalibrationDataConfig, HeapAllocator<JsonAdcCalibrationDataConfig>> calibration_table;
+
+    JsonAdcChannelConfig(json::storage_ptr sp = &ext_boost_mem_resource)
+        : interpolation_method(sp) {}
 };
 
 struct JsonAdcConfig {
     uint32_t samples;
-    std::vector<JsonAdcChannelConfig> channel_configurations;
+    std::vector<JsonAdcChannelConfig, HeapAllocator<JsonAdcChannelConfig>> channel_configs;
 };
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonAdcCalibrationDataConfig const& config) {
-    jv = {
-        {NAMEOF_MEMBER(&JsonAdcCalibrationDataConfig::voltage), config.voltage},
-        {NAMEOF_MEMBER(&JsonAdcCalibrationDataConfig::value), config.value}
-    };
+    jv.~value();
+    new(&jv) json::value(json::object(&ext_boost_mem_resource));
+    json::object& obj = jv.as_object();
+
+    obj[NAMEOF_MEMBER(&JsonAdcCalibrationDataConfig::voltage).c_str()] = config.voltage;
+    obj[NAMEOF_MEMBER(&JsonAdcCalibrationDataConfig::value).c_str()] = config.value;
+
+    jv = std::move(obj);
 }
 
 static JsonAdcCalibrationDataConfig tag_invoke(json::value_to_tag<JsonAdcCalibrationDataConfig>, json::value const& jv) {
     json::object const& obj = jv.as_object();
-    return JsonAdcCalibrationDataConfig{
-        .voltage = json::value_to<float>(obj.at(NAMEOF_MEMBER(&JsonAdcCalibrationDataConfig::voltage).c_str())),
-        .value = json::value_to<float>(obj.at(NAMEOF_MEMBER(&JsonAdcCalibrationDataConfig::value).c_str()))
+    return {
+        .voltage = static_cast<float>(obj.at(NAMEOF_MEMBER(&JsonAdcCalibrationDataConfig::voltage).c_str()).to_number<double>()),
+        .value = static_cast<float>(obj.at(NAMEOF_MEMBER(&JsonAdcCalibrationDataConfig::value).c_str()).to_number<double>())
     };
 }
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonAdcChannelConfig const& config) {
-    jv = {
-        {NAMEOF_MEMBER(&JsonAdcChannelConfig::interpolation_method), config.interpolation_method},
-        {NAMEOF_MEMBER(&JsonAdcChannelConfig::calibration_table), json::value_from(config.calibration_table)}
-    };
+    jv.~value();
+    new(&jv) json::value(json::object(&ext_boost_mem_resource));
+    json::object& obj = jv.as_object();
+
+    obj[NAMEOF_MEMBER(&JsonAdcChannelConfig::interpolation_method).c_str()] = config.interpolation_method;
+
+    json::array calibration_table_array(&ext_boost_mem_resource);
+    for(const auto& elem : config.calibration_table)
+        calibration_table_array.push_back(json::value_from(elem, &ext_boost_mem_resource));
+    obj[NAMEOF_MEMBER(&JsonAdcChannelConfig::calibration_table).c_str()] = std::move(calibration_table_array);
+
+    jv = std::move(obj);
 }
 
 static JsonAdcChannelConfig tag_invoke(json::value_to_tag<JsonAdcChannelConfig>, json::value const& jv) {
     json::object const& obj = jv.as_object();
-    return JsonAdcChannelConfig{
-        .interpolation_method = json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonAdcChannelConfig::interpolation_method).c_str())),
-        .calibration_table = json::value_to<std::vector<JsonAdcCalibrationDataConfig>>(obj.at(NAMEOF_MEMBER(&JsonAdcChannelConfig::calibration_table).c_str()))
-    };
+    JsonAdcChannelConfig result;
+
+    result.interpolation_method = obj.at(NAMEOF_MEMBER(&JsonAdcChannelConfig::interpolation_method).c_str()).as_string();
+
+    const json::array& calibration_table_array = obj.at(NAMEOF_MEMBER(&JsonAdcChannelConfig::calibration_table).c_str()).as_array();
+    result.calibration_table.reserve(calibration_table_array.size());
+    for(const auto& elem : calibration_table_array)
+        result.calibration_table.push_back(json::value_to<JsonAdcCalibrationDataConfig>(elem));
+
+    return result;
 }
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonAdcConfig const& config) {
-    jv = {
-        {NAMEOF_MEMBER(&JsonAdcConfig::samples), config.samples},
-        {NAMEOF_MEMBER(&JsonAdcConfig::channel_configurations), json::value_from(config.channel_configurations)}
-    };
+    jv.~value();
+    new(&jv) json::value(json::object(&ext_boost_mem_resource));
+    json::object& obj = jv.as_object();
+
+    obj[NAMEOF_MEMBER(&JsonAdcConfig::samples).c_str()] = config.samples;
+
+    json::array channel_configs_array(&ext_boost_mem_resource);
+    for(const auto& channel_config : config.channel_configs)
+        channel_configs_array.push_back(json::value_from(channel_config, &ext_boost_mem_resource));
+    obj[NAMEOF_MEMBER(&JsonAdcConfig::channel_configs).c_str()] = std::move(channel_configs_array);
+
+    jv = std::move(obj);
 }
 
 static JsonAdcConfig tag_invoke(json::value_to_tag<JsonAdcConfig>, json::value const& jv) {
     json::object const& obj = jv.as_object();
-    return JsonAdcConfig{
-        .samples = json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonAdcConfig::samples).c_str())),
-        .channel_configurations = json::value_to<std::vector<JsonAdcChannelConfig>>(obj.at(NAMEOF_MEMBER(&JsonAdcConfig::channel_configurations).c_str()))
-    };
-}
+    JsonAdcConfig result;
 
-static std::unique_ptr<ExtString> json_encode_JsonAdcConfig(const JsonAdcConfig& config) {
-    json::value jv = json::value_from(config, &ext_boost_mem_resource);
+    result.samples = static_cast<int32_t>(obj.at(NAMEOF_MEMBER(&JsonAdcConfig::samples).c_str()).as_int64());
 
-    ExtString result;
-    result = json::serialize(jv);
+    const json::array& channel_configs_array = obj.at(NAMEOF_MEMBER(&JsonAdcConfig::channel_configs).c_str()).as_array();
+    result.channel_configs.reserve(channel_configs_array.size());
+    for(const auto& elem : channel_configs_array)
+        result.channel_configs.push_back(json::value_to<JsonAdcChannelConfig>(elem));
 
-    return std::make_unique<ExtString>(result);
-}
-
-static JsonAdcConfig json_decode_JsonAdcConfig(std::string_view json_str) {
-    json::value jv = json::parse(json_str, &ext_boost_mem_resource);
-
-    return json::value_to<JsonAdcConfig>(jv);
+    return result;
 }
 
 } // namespace eerie_leap::configuration::json::configs

@@ -3,12 +3,10 @@
 #include <zephyr/ztest.h>
 
 #include "configuration/json/json_serializer.h"
-#include "configuration/json/traits/system_config_trait.h"
 #include "domain/system_domain/configuration/parsers/system_configuration_cbor_parser.h"
 #include "domain/system_domain/configuration/parsers/system_configuration_json_parser.h"
 
 using namespace eerie_leap::configuration::json;
-using namespace eerie_leap::configuration::json::traits;
 using namespace eerie_leap::domain::system_domain::configuration::parsers;
 
 ZTEST_SUITE(system_configuration_parser, NULL, NULL, NULL, NULL, NULL);

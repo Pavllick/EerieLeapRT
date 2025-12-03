@@ -22,62 +22,61 @@ struct JsonSensorLoggingConfig {
 struct JsonLoggingConfig {
     uint32_t logging_interval_ms;
     uint32_t max_log_size_mb;
-    std::vector<JsonSensorLoggingConfig> sensor_configurations;
+    std::vector<JsonSensorLoggingConfig, HeapAllocator<JsonSensorLoggingConfig>> sensor_configs;
 };
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonSensorLoggingConfig const& config) {
-    jv = {
-        {NAMEOF_MEMBER(&JsonSensorLoggingConfig::sensor_id_hash), config.sensor_id_hash},
-        {NAMEOF_MEMBER(&JsonSensorLoggingConfig::is_enabled), config.is_enabled},
-        {NAMEOF_MEMBER(&JsonSensorLoggingConfig::log_raw_value), config.log_raw_value},
-        {NAMEOF_MEMBER(&JsonSensorLoggingConfig::log_only_new_data), config.log_only_new_data}
-    };
+    jv.~value();
+    new(&jv) json::value(json::object(&ext_boost_mem_resource));
+    json::object& obj = jv.as_object();
+
+    obj[NAMEOF_MEMBER(&JsonSensorLoggingConfig::sensor_id_hash).c_str()] = config.sensor_id_hash;
+    obj[NAMEOF_MEMBER(&JsonSensorLoggingConfig::is_enabled).c_str()] = config.is_enabled;
+    obj[NAMEOF_MEMBER(&JsonSensorLoggingConfig::log_raw_value).c_str()] = config.log_raw_value;
+    obj[NAMEOF_MEMBER(&JsonSensorLoggingConfig::log_only_new_data).c_str()] = config.log_only_new_data;
+
+    jv = std::move(obj);
 }
 
 static JsonSensorLoggingConfig tag_invoke(json::value_to_tag<JsonSensorLoggingConfig>, json::value const& jv) {
     json::object const& obj = jv.as_object();
-    return JsonSensorLoggingConfig{
-        .sensor_id_hash = json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonSensorLoggingConfig::sensor_id_hash).c_str())),
-        .is_enabled = json::value_to<bool>(obj.at(NAMEOF_MEMBER(&JsonSensorLoggingConfig::is_enabled).c_str())),
-        .log_raw_value = json::value_to<bool>(obj.at(NAMEOF_MEMBER(&JsonSensorLoggingConfig::log_raw_value).c_str())),
-        .log_only_new_data = json::value_to<bool>(obj.at(NAMEOF_MEMBER(&JsonSensorLoggingConfig::log_only_new_data).c_str()))
+    return {
+        .sensor_id_hash = static_cast<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonSensorLoggingConfig::sensor_id_hash).c_str()).as_int64()),
+        .is_enabled = obj.at(NAMEOF_MEMBER(&JsonSensorLoggingConfig::is_enabled).c_str()).as_bool(),
+        .log_raw_value = obj.at(NAMEOF_MEMBER(&JsonSensorLoggingConfig::log_raw_value).c_str()).as_bool(),
+        .log_only_new_data = obj.at(NAMEOF_MEMBER(&JsonSensorLoggingConfig::log_only_new_data).c_str()).as_bool()
     };
 }
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonLoggingConfig const& config) {
-    jv = {
-        {NAMEOF_MEMBER(&JsonLoggingConfig::logging_interval_ms), config.logging_interval_ms},
-        {NAMEOF_MEMBER(&JsonLoggingConfig::max_log_size_mb), config.max_log_size_mb},
-        {NAMEOF_MEMBER(&JsonLoggingConfig::sensor_configurations), json::value_from(config.sensor_configurations)}
-    };
+    jv.~value();
+    new(&jv) json::value(json::object(&ext_boost_mem_resource));
+    json::object& obj = jv.as_object();
+
+    obj[NAMEOF_MEMBER(&JsonLoggingConfig::logging_interval_ms).c_str()] = config.logging_interval_ms;
+    obj[NAMEOF_MEMBER(&JsonLoggingConfig::max_log_size_mb).c_str()] = config.max_log_size_mb;
+
+    json::array sensor_configs_array(&ext_boost_mem_resource);
+    for(const auto& sensor_config : config.sensor_configs)
+        sensor_configs_array.push_back(json::value_from(sensor_config, &ext_boost_mem_resource));
+    obj[NAMEOF_MEMBER(&JsonLoggingConfig::sensor_configs).c_str()] = std::move(sensor_configs_array);
+
+    jv = std::move(obj);
 }
 
 static JsonLoggingConfig tag_invoke(json::value_to_tag<JsonLoggingConfig>, json::value const& jv) {
     json::object const& obj = jv.as_object();
-    return JsonLoggingConfig{
-        .logging_interval_ms = json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonLoggingConfig::logging_interval_ms).c_str())),
-        .max_log_size_mb = json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonLoggingConfig::max_log_size_mb).c_str())),
-        .sensor_configurations = json::value_to<std::vector<JsonSensorLoggingConfig>>(obj.at(NAMEOF_MEMBER(&JsonLoggingConfig::sensor_configurations).c_str()))
-    };
-}
+    JsonLoggingConfig result;
 
-static std::unique_ptr<ExtString> json_encode_JsonLoggingConfig(const JsonLoggingConfig& config) {
-    static BoostMemoryResource heap_mem_resource;
-    json::storage_ptr sp = &heap_mem_resource;
+    result.logging_interval_ms = static_cast<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonLoggingConfig::logging_interval_ms).c_str()).as_int64());
+    result.max_log_size_mb = static_cast<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonLoggingConfig::max_log_size_mb).c_str()).as_int64());
 
-    json::value jv = json::value_from(config, sp);
+    const json::array& sensor_configs_array = obj.at(NAMEOF_MEMBER(&JsonLoggingConfig::sensor_configs).c_str()).as_array();
+    result.sensor_configs.reserve(sensor_configs_array.size());
+    for(const auto& elem : sensor_configs_array)
+        result.sensor_configs.push_back(json::value_to<JsonSensorLoggingConfig>(elem));
 
-    ExtString result;
-    result = json::serialize(jv);
-
-    return std::make_unique<ExtString>(result);
-}
-
-static JsonLoggingConfig json_decode_JsonLoggingConfig(std::string_view json_str) {
-    static BoostMemoryResource mem_resource;
-    json::value jv = json::parse(json_str, &mem_resource);
-
-    return json::value_to<JsonLoggingConfig>(jv);
+    return result;
 }
 
 } // namespace eerie_leap::configuration::json::configs

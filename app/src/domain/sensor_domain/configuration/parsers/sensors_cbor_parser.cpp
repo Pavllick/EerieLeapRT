@@ -88,7 +88,7 @@ ext_unique_ptr<CborSensorsConfig> SensorsCborParser::Serialize(
 
         sensor_config->metadata.description = CborHelpers::ToZcborString(&sensor->metadata.description);
 
-        sensors_config->CborSensorConfig_m.push_back(*sensor_config);
+        sensors_config->CborSensorConfig_m.push_back(std::move(*sensor_config));
 
         order_resolver.AddSensor(sensor);
     }
@@ -107,7 +107,7 @@ std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
     SensorsOrderResolver order_resolver;
 
     for(const auto& sensor_config : sensors_config.CborSensorConfig_m) {
-        std::shared_ptr<Sensor> sensor = std::make_shared<Sensor>(CborHelpers::ToStdString(sensor_config.id));
+        auto sensor = std::make_shared<Sensor>(CborHelpers::ToStdString(sensor_config.id));
 
         sensor->configuration.type = static_cast<SensorType>(sensor_config.configuration.type);
 
@@ -182,7 +182,7 @@ std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
 
         SensorValidator::Validate(*sensor, gpio_channel_count, adc_channel_count);
 
-        order_resolver.AddSensor(sensor);
+        order_resolver.AddSensor(std::move(sensor));
     }
 
     return order_resolver.GetProcessingOrder();

@@ -16,7 +16,7 @@ ext_unique_ptr<JsonLoggingConfig> LoggingConfigurationJsonParser::Serialize(cons
             .log_only_new_data = sensor_configuration.log_only_new_data
         };
 
-        config->sensor_configurations.push_back(sensor_logging_config);
+        config->sensor_configs.push_back(sensor_logging_config);
     }
 
     return config;
@@ -28,7 +28,7 @@ LoggingConfiguration LoggingConfigurationJsonParser::Deserialize(const JsonLoggi
         .max_log_size_mb = config.max_log_size_mb
     };
 
-    for(auto& sensor_logging_config : config.sensor_configurations) {
+    for(auto& sensor_logging_config : config.sensor_configs) {
         SensorLoggingConfiguration sensor_logging_configuration {
             .is_enabled = sensor_logging_config.is_enabled,
             .log_raw_value = sensor_logging_config.log_raw_value,
