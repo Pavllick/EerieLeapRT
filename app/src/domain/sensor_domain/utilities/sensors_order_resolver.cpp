@@ -5,8 +5,6 @@ namespace eerie_leap::domain::sensor_domain::utilities {
 using namespace eerie_leap::domain::sensor_domain::models;
 
 void SensorsOrderResolver::AddSensor(std::shared_ptr<Sensor> sensor) {
-    sensors_.emplace(sensor->id, sensor);
-
     if(sensor->configuration.expression_evaluator != nullptr) {
         auto sensor_ids = sensor->configuration.expression_evaluator->GetVariableNames();
         sensor_ids.erase("x");
@@ -15,6 +13,8 @@ void SensorsOrderResolver::AddSensor(std::shared_ptr<Sensor> sensor) {
     } else {
         dependencies_.emplace(sensor->id, std::unordered_set<std::string>());
     }
+
+    sensors_.emplace(sensor->id, std::move(sensor));
 }
 
 bool SensorsOrderResolver::HasCyclicDependency(
@@ -60,7 +60,7 @@ void SensorsOrderResolver::ResolveDependencies(
     for(const auto& dep : dependencies_.at(sensor_id))
         ResolveDependencies(dep, visited, ordered_sensors);
 
-    ordered_sensors.push_back(sensors_.at(sensor_id));
+    ordered_sensors.push_back(std::move(sensors_.at(sensor_id)));
 }
 
 std::vector<std::shared_ptr<Sensor>> SensorsOrderResolver::GetProcessingOrder() {

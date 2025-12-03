@@ -5,9 +5,12 @@
 #include <boost/json.hpp>
 #include <nameof.hpp>
 
+#include "utilities/memory/boost_memory_resource.h"
+
 namespace eerie_leap::configuration::json::configs {
 
 namespace json = boost::json;
+using namespace eerie_leap::utilities::memory;
 
 struct JsonSensorLoggingConfig {
     uint32_t sensor_id_hash;
@@ -58,12 +61,21 @@ static JsonLoggingConfig tag_invoke(json::value_to_tag<JsonLoggingConfig>, json:
     };
 }
 
-static std::string json_encode_JsonLoggingConfig(const JsonLoggingConfig& config) {
-    return json::serialize(json::value_from(config));
+static std::unique_ptr<ExtString> json_encode_JsonLoggingConfig(const JsonLoggingConfig& config) {
+    static BoostMemoryResource heap_mem_resource;
+    json::storage_ptr sp = &heap_mem_resource;
+
+    json::value jv = json::value_from(config, sp);
+
+    ExtString result;
+    result = json::serialize(jv);
+
+    return std::make_unique<ExtString>(result);
 }
 
 static JsonLoggingConfig json_decode_JsonLoggingConfig(std::string_view json_str) {
-    json::value jv = json::parse(json_str);
+    static BoostMemoryResource mem_resource;
+    json::value jv = json::parse(json_str, &mem_resource);
 
     return json::value_to<JsonLoggingConfig>(jv);
 }

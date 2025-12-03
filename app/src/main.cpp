@@ -549,6 +549,32 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
         sensor_8
     };
 
+    // std::vector<std::shared_ptr<Sensor>> sensors;
+
+    // for(int i = 0; i < 50; i++) {
+    //     std::vector<CalibrationData> calibration_data_1 {
+    //         {0.0, 0.0},
+    //         {5.0, 100.0}
+    //     };
+    //     auto calibration_data_1_ptr = make_shared_ext<std::vector<CalibrationData>>(calibration_data_1);
+
+    //     auto sensor = make_shared_ext<Sensor>("sensor_" + std::to_string(i));
+    //     sensor->metadata = {
+    //         .name = "Sensor " + std::to_string(i),
+    //         .unit = "km/h",
+    //         .description = "Test Sensor " + std::to_string(i)
+    //     };
+    //     sensor->configuration = {
+    //         .type = SensorType::PHYSICAL_ANALOG,
+    //         .channel = 0,
+    //         .script_path = "scripts/sensor_1.lua",
+    //         .sampling_rate_ms = 50,
+    //         .voltage_interpolator = std::make_unique<LinearVoltageInterpolator>(calibration_data_1_ptr),
+    //         .expression_evaluator = std::make_unique<ExpressionEvaluator>("x * 2 + 1")
+    //     };
+    //     sensors.push_back(sensor);
+    // }
+
     sensors_configuration_manager->Update(sensors);
 }
 

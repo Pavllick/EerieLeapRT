@@ -5,9 +5,12 @@
 #include <boost/json.hpp>
 #include <nameof.hpp>
 
+#include "utilities/memory/boost_memory_resource.h"
+
 namespace eerie_leap::configuration::json::configs {
 
 namespace json = boost::json;
+using namespace eerie_leap::utilities::memory;
 
 struct JsonAdcCalibrationDataConfig {
     float voltage;
@@ -69,12 +72,17 @@ static JsonAdcConfig tag_invoke(json::value_to_tag<JsonAdcConfig>, json::value c
     };
 }
 
-static std::string json_encode_JsonAdcConfig(const JsonAdcConfig& config) {
-    return json::serialize(json::value_from(config));
+static std::unique_ptr<ExtString> json_encode_JsonAdcConfig(const JsonAdcConfig& config) {
+    json::value jv = json::value_from(config, &ext_boost_mem_resource);
+
+    ExtString result;
+    result = json::serialize(jv);
+
+    return std::make_unique<ExtString>(result);
 }
 
 static JsonAdcConfig json_decode_JsonAdcConfig(std::string_view json_str) {
-    json::value jv = json::parse(json_str);
+    json::value jv = json::parse(json_str, &ext_boost_mem_resource);
 
     return json::value_to<JsonAdcConfig>(jv);
 }

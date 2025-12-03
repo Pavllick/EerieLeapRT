@@ -7,6 +7,10 @@
 
 #include <zcbor_common.h>
 
+#include "utilities/memory/heap_allocator.h"
+
+using namespace eerie_leap::utilities::memory;
+
 struct CborSensorMetadataConfig {
 	struct zcbor_string name;
 	struct zcbor_string unit;
@@ -19,7 +23,7 @@ struct CborSensorCalibrationDataMap_float32float {
 };
 
 struct CborSensorCalibrationDataMap {
-	std::vector<CborSensorCalibrationDataMap_float32float> float32float;
+	std::vector<CborSensorCalibrationDataMap_float32float, HeapAllocator<CborSensorCalibrationDataMap_float32float>> float32float;
 };
 
 struct CborSensorConfigurationConfig {
@@ -43,6 +47,6 @@ struct CborSensorConfig {
 };
 
 struct CborSensorsConfig {
-	std::vector<CborSensorConfig> CborSensorConfig_m;
+	std::vector<CborSensorConfig, HeapAllocator<CborSensorConfig>> CborSensorConfig_m;
 	uint32_t json_config_checksum;
 };

@@ -5,9 +5,12 @@
 #include <boost/json.hpp>
 #include <nameof.hpp>
 
+#include "utilities/memory/boost_memory_resource.h"
+
 namespace eerie_leap::configuration::json::configs {
 
 namespace json = boost::json;
+using namespace eerie_leap::utilities::memory;
 
 struct JsonComUserConfig {
     uint64_t device_id;
@@ -49,12 +52,17 @@ static JsonSystemConfig tag_invoke(json::value_to_tag<JsonSystemConfig>, json::v
     };
 }
 
-static std::string json_encode_JsonSystemConfig(const JsonSystemConfig& config) {
-    return json::serialize(json::value_from(config));
+static std::unique_ptr<ExtString> json_encode_JsonSystemConfig(const JsonSystemConfig& config) {
+    json::value jv = json::value_from(config, &ext_boost_mem_resource);
+
+    ExtString result;
+    result = json::serialize(jv);
+
+    return std::make_unique<ExtString>(result);
 }
 
 static JsonSystemConfig json_decode_JsonSystemConfig(std::string_view json_str) {
-    json::value jv = json::parse(json_str);
+    json::value jv = json::parse(json_str, &ext_boost_mem_resource);
 
     return json::value_to<JsonSystemConfig>(jv);
 }

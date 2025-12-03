@@ -127,8 +127,9 @@ const std::vector<std::shared_ptr<Sensor>>* SensorsConfigurationManager::Get(boo
 
     auto cbor_config = std::move(cbor_config_data.value().config);
 
+    sensors_.clear();
     sensors_ = cbor_parser_->Deserialize(
-        *cbor_config.get(), gpio_channel_count_, adc_channel_count_);
+        *cbor_config, gpio_channel_count_, adc_channel_count_);
 
     json_config_checksum_ = cbor_config->json_config_checksum;
 

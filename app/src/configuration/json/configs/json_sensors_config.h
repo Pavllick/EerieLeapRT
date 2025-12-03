@@ -5,14 +5,20 @@
 #include <boost/json.hpp>
 #include <nameof.hpp>
 
+#include "utilities/memory/boost_memory_resource.h"
+
 namespace eerie_leap::configuration::json::configs {
 
 namespace json = boost::json;
+using namespace eerie_leap::utilities::memory;
 
 struct JsonSensorMetadataConfig {
-    std::string name;
-    std::string unit;
-    std::string description;
+    json::string name;
+    json::string unit;
+    json::string description;
+
+    JsonSensorMetadataConfig(json::storage_ptr sp = &ext_boost_mem_resource)
+        : name(sp), unit(sp), description(sp) {}
 };
 
 struct JsonSensorCalibrationDataConfig {
@@ -21,121 +27,185 @@ struct JsonSensorCalibrationDataConfig {
 };
 
 struct JsonSensorConfigurationConfig {
-    std::string type;
+    json::string type;
     int32_t channel;
-    std::string connection_string;
-    std::string script_path;
+    json::string connection_string;
+    json::string script_path;
     uint32_t sampling_rate_ms;
-    std::string interpolation_method;
-    std::vector<JsonSensorCalibrationDataConfig> calibration_table;
-    std::string expression;
+    json::string interpolation_method;
+    std::vector<JsonSensorCalibrationDataConfig, HeapAllocator<JsonSensorCalibrationDataConfig>> calibration_table;
+    json::string expression;
+
+    JsonSensorConfigurationConfig(json::storage_ptr sp = &ext_boost_mem_resource)
+        : type(sp), connection_string(sp), script_path(sp), interpolation_method(sp), expression(sp) {}
 };
 
 struct JsonSensorConfig {
-    std::string id;
+    json::string id;
     JsonSensorMetadataConfig metadata;
     JsonSensorConfigurationConfig configuration;
+
+    JsonSensorConfig(json::storage_ptr sp = &ext_boost_mem_resource)
+        : id(sp), metadata(sp), configuration(sp) {}
 };
 
 struct JsonSensorsConfig {
-    std::vector<JsonSensorConfig> sensors;
+    std::vector<JsonSensorConfig, HeapAllocator<JsonSensorConfig>> sensors;
 };
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonSensorMetadataConfig const& config) {
-    jv = {
-        {NAMEOF_MEMBER(&JsonSensorMetadataConfig::name), config.name},
-        {NAMEOF_MEMBER(&JsonSensorMetadataConfig::unit), config.unit},
-        {NAMEOF_MEMBER(&JsonSensorMetadataConfig::description), config.description}
-    };
+    jv.~value();
+    new(&jv) json::value(json::object(&ext_boost_mem_resource));
+    json::object& obj = jv.as_object();
+
+    obj[NAMEOF_MEMBER(&JsonSensorMetadataConfig::name).c_str()] = config.name;
+    obj[NAMEOF_MEMBER(&JsonSensorMetadataConfig::unit).c_str()] = config.unit;
+    obj[NAMEOF_MEMBER(&JsonSensorMetadataConfig::description).c_str()] = config.description;
+
+    jv = std::move(obj);
 }
 
 static JsonSensorMetadataConfig tag_invoke(json::value_to_tag<JsonSensorMetadataConfig>, json::value const& jv) {
     json::object const& obj = jv.as_object();
-    return JsonSensorMetadataConfig{
-        .name = json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonSensorMetadataConfig::name).c_str())),
-        .unit = json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonSensorMetadataConfig::unit).c_str())),
-        .description = json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonSensorMetadataConfig::description).c_str()))
-    };
+
+    JsonSensorMetadataConfig result;
+    result.name = obj.at(NAMEOF_MEMBER(&JsonSensorMetadataConfig::name).c_str()).as_string();
+    result.unit = obj.at(NAMEOF_MEMBER(&JsonSensorMetadataConfig::unit).c_str()).as_string();
+    result.description = obj.at(NAMEOF_MEMBER(&JsonSensorMetadataConfig::description).c_str()).as_string();
+
+    return result;
 }
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonSensorCalibrationDataConfig const& config) {
-    jv = {
-        {NAMEOF_MEMBER(&JsonSensorCalibrationDataConfig::voltage), config.voltage},
-        {NAMEOF_MEMBER(&JsonSensorCalibrationDataConfig::value), config.value}
-    };
+    jv.~value();
+    new(&jv) json::value(json::object(&ext_boost_mem_resource));
+    json::object& obj = jv.as_object();
+
+    obj[NAMEOF_MEMBER(&JsonSensorCalibrationDataConfig::voltage).c_str()] = config.voltage;
+    obj[NAMEOF_MEMBER(&JsonSensorCalibrationDataConfig::value).c_str()] = config.value;
+
+    jv = std::move(obj);
 }
 
 static JsonSensorCalibrationDataConfig tag_invoke(json::value_to_tag<JsonSensorCalibrationDataConfig>, json::value const& jv) {
     json::object const& obj = jv.as_object();
-    return JsonSensorCalibrationDataConfig{
-        .voltage = json::value_to<float>(obj.at(NAMEOF_MEMBER(&JsonSensorCalibrationDataConfig::voltage).c_str())),
-        .value = json::value_to<float>(obj.at(NAMEOF_MEMBER(&JsonSensorCalibrationDataConfig::value).c_str()))
+    return {
+        .voltage = static_cast<float>(obj.at(NAMEOF_MEMBER(&JsonSensorCalibrationDataConfig::voltage).c_str()).to_number<double>()),
+        .value = static_cast<float>(obj.at(NAMEOF_MEMBER(&JsonSensorCalibrationDataConfig::value).c_str()).to_number<double>())
     };
 }
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonSensorConfigurationConfig const& config) {
-    jv = {
-        {NAMEOF_MEMBER(&JsonSensorConfigurationConfig::type), config.type},
-        {NAMEOF_MEMBER(&JsonSensorConfigurationConfig::channel), config.channel},
-        {NAMEOF_MEMBER(&JsonSensorConfigurationConfig::connection_string), config.connection_string},
-        {NAMEOF_MEMBER(&JsonSensorConfigurationConfig::script_path), config.script_path},
-        {NAMEOF_MEMBER(&JsonSensorConfigurationConfig::sampling_rate_ms), config.sampling_rate_ms},
-        {NAMEOF_MEMBER(&JsonSensorConfigurationConfig::interpolation_method), config.interpolation_method},
-        {NAMEOF_MEMBER(&JsonSensorConfigurationConfig::calibration_table), json::value_from(config.calibration_table)},
-        {NAMEOF_MEMBER(&JsonSensorConfigurationConfig::expression), config.expression}
-    };
+    jv.~value();
+    new(&jv) json::value(json::object(&ext_boost_mem_resource));
+    json::object& obj = jv.as_object();
+
+    obj[NAMEOF_MEMBER(&JsonSensorConfigurationConfig::type).c_str()] = config.type;
+    obj[NAMEOF_MEMBER(&JsonSensorConfigurationConfig::channel).c_str()] = config.channel;
+    obj[NAMEOF_MEMBER(&JsonSensorConfigurationConfig::connection_string).c_str()] = config.connection_string;
+    obj[NAMEOF_MEMBER(&JsonSensorConfigurationConfig::script_path).c_str()] = config.script_path;
+    obj[NAMEOF_MEMBER(&JsonSensorConfigurationConfig::sampling_rate_ms).c_str()] = config.sampling_rate_ms;
+    obj[NAMEOF_MEMBER(&JsonSensorConfigurationConfig::interpolation_method).c_str()] = config.interpolation_method;
+
+    json::array calib_array(&ext_boost_mem_resource);
+    for(const auto& calib : config.calibration_table)
+        calib_array.push_back(json::value_from(calib, &ext_boost_mem_resource));
+    obj[NAMEOF_MEMBER(&JsonSensorConfigurationConfig::calibration_table).c_str()] = std::move(calib_array);
+
+    obj[NAMEOF_MEMBER(&JsonSensorConfigurationConfig::expression).c_str()] = config.expression;
+
+    jv = std::move(obj);
 }
 
 static JsonSensorConfigurationConfig tag_invoke(json::value_to_tag<JsonSensorConfigurationConfig>, json::value const& jv) {
     json::object const& obj = jv.as_object();
-    return JsonSensorConfigurationConfig{
-        .type = json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonSensorConfigurationConfig::type).c_str())),
-        .channel = json::value_to<int32_t>(obj.at(NAMEOF_MEMBER(&JsonSensorConfigurationConfig::channel).c_str())),
-        .connection_string = json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonSensorConfigurationConfig::connection_string).c_str())),
-        .script_path = json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonSensorConfigurationConfig::script_path).c_str())),
-        .sampling_rate_ms = json::value_to<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonSensorConfigurationConfig::sampling_rate_ms).c_str())),
-        .interpolation_method = json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonSensorConfigurationConfig::interpolation_method).c_str())),
-        .calibration_table = json::value_to<std::vector<JsonSensorCalibrationDataConfig>>(obj.at(NAMEOF_MEMBER(&JsonSensorConfigurationConfig::calibration_table).c_str())),
-        .expression = json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonSensorConfigurationConfig::expression).c_str()))
-    };
+    JsonSensorConfigurationConfig result;
+
+    result.type = obj.at(NAMEOF_MEMBER(&JsonSensorConfigurationConfig::type).c_str()).as_string();
+    result.channel = static_cast<int32_t>(obj.at(NAMEOF_MEMBER(&JsonSensorConfigurationConfig::channel).c_str()).as_int64());
+    result.connection_string = obj.at(NAMEOF_MEMBER(&JsonSensorConfigurationConfig::connection_string).c_str()).as_string();
+    result.script_path = obj.at(NAMEOF_MEMBER(&JsonSensorConfigurationConfig::script_path).c_str()).as_string();
+    result.sampling_rate_ms = static_cast<uint32_t>(obj.at(NAMEOF_MEMBER(&JsonSensorConfigurationConfig::sampling_rate_ms).c_str()).as_int64());
+    result.interpolation_method = obj.at(NAMEOF_MEMBER(&JsonSensorConfigurationConfig::interpolation_method).c_str()).as_string();
+
+    const json::array& calib_array = obj.at(NAMEOF_MEMBER(&JsonSensorConfigurationConfig::calibration_table).c_str()).as_array();
+    result.calibration_table.reserve(calib_array.size());
+    for(const auto& elem : calib_array)
+        result.calibration_table.push_back(json::value_to<JsonSensorCalibrationDataConfig>(elem));
+
+    result.expression = obj.at(NAMEOF_MEMBER(&JsonSensorConfigurationConfig::expression).c_str()).as_string();
+
+    return result;
 }
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonSensorConfig const& config) {
-    jv = {
-        {NAMEOF_MEMBER(&JsonSensorConfig::id), config.id},
-        {NAMEOF_MEMBER(&JsonSensorConfig::metadata), json::value_from(config.metadata)},
-        {NAMEOF_MEMBER(&JsonSensorConfig::configuration), json::value_from(config.configuration)}
-    };
+    jv.~value();
+    new(&jv) json::value(json::object(&ext_boost_mem_resource));
+    json::object& obj = jv.as_object();
+
+    obj[NAMEOF_MEMBER(&JsonSensorConfig::id).c_str()] = config.id;
+    obj[NAMEOF_MEMBER(&JsonSensorConfig::metadata).c_str()] = json::value_from(config.metadata, &ext_boost_mem_resource);
+    obj[NAMEOF_MEMBER(&JsonSensorConfig::configuration).c_str()] = json::value_from(config.configuration, &ext_boost_mem_resource);
+
+    jv = std::move(obj);
 }
 
 static JsonSensorConfig tag_invoke(json::value_to_tag<JsonSensorConfig>, json::value const& jv) {
     json::object const& obj = jv.as_object();
-    return JsonSensorConfig{
-        .id = json::value_to<std::string>(obj.at(NAMEOF_MEMBER(&JsonSensorConfig::id).c_str())),
-        .metadata = json::value_to<JsonSensorMetadataConfig>(obj.at(NAMEOF_MEMBER(&JsonSensorConfig::metadata).c_str())),
-        .configuration = json::value_to<JsonSensorConfigurationConfig>(obj.at(NAMEOF_MEMBER(&JsonSensorConfig::configuration).c_str()))
-    };
+    JsonSensorConfig result;
+
+    result.id = obj.at(NAMEOF_MEMBER(&JsonSensorConfig::id).c_str()).as_string();
+    result.metadata = json::value_to<JsonSensorMetadataConfig>(obj.at(NAMEOF_MEMBER(&JsonSensorConfig::metadata).c_str()));
+    result.configuration = json::value_to<JsonSensorConfigurationConfig>(obj.at(NAMEOF_MEMBER(&JsonSensorConfig::configuration).c_str()));
+
+    return result;
 }
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonSensorsConfig const& config) {
-    jv = {
-        {NAMEOF_MEMBER(&JsonSensorsConfig::sensors), json::value_from(config.sensors)}
-    };
+    jv.~value();
+    new(&jv) json::value(json::object(&ext_boost_mem_resource));
+    json::object& obj = jv.as_object();
+
+    json::array sensors_array(&ext_boost_mem_resource);
+    for(const auto& sensor : config.sensors)
+        sensors_array.push_back(json::value_from(sensor, &ext_boost_mem_resource));
+
+    obj[NAMEOF_MEMBER(&JsonSensorsConfig::sensors).c_str()] = std::move(sensors_array);
+
+    jv = std::move(obj);
 }
 
 static JsonSensorsConfig tag_invoke(json::value_to_tag<JsonSensorsConfig>, json::value const& jv) {
     json::object const& obj = jv.as_object();
-    return JsonSensorsConfig{
-       .sensors = json::value_to<std::vector<JsonSensorConfig>>(obj.at(NAMEOF_MEMBER(&JsonSensorsConfig::sensors).c_str()))
-    };
+    JsonSensorsConfig result;
+
+    const json::array& sensors_array = obj.at(NAMEOF_MEMBER(&JsonSensorsConfig::sensors).c_str()).as_array();
+    result.sensors.reserve(sensors_array.size());
+    for(const auto& elem : sensors_array)
+        result.sensors.push_back(json::value_to<JsonSensorConfig>(elem));
+
+    return result;
 }
 
-static std::string json_encode_JsonSensorsConfig(const JsonSensorsConfig& config) {
-    return json::serialize(json::value_from(config));
+static std::unique_ptr<ExtString> json_encode_JsonSensorsConfig(const JsonSensorsConfig& config) {
+    json::value jv = json::value_from(config, &ext_boost_mem_resource);
+    ExtString result;
+
+    json::serializer sr;
+    sr.reset(&jv);
+
+    char buffer[1024];
+
+    while(!sr.done()) {
+        boost::json::string_view sv = sr.read(buffer, sizeof(buffer));
+        result.append(sv.data(), sv.size());
+    }
+
+    return std::make_unique<ExtString>(std::move(result));
 }
 
 static JsonSensorsConfig json_decode_JsonSensorsConfig(std::string_view json_str) {
-    json::value jv = json::parse(json_str);
+    json::value jv = json::parse(json_str, &ext_boost_mem_resource);
 
     return json::value_to<JsonSensorsConfig>(jv);
 }

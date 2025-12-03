@@ -5,9 +5,12 @@
 #include <boost/json.hpp>
 #include <nameof.hpp>
 
+#include "utilities/memory/boost_memory_resource.h"
+
 namespace eerie_leap::configuration::json::configs {
 
 namespace json = boost::json;
+using namespace eerie_leap::utilities::memory;
 
 struct JsonCanMessageConfig {
     uint32_t frame_id;
@@ -84,12 +87,17 @@ static JsonCanbusConfig tag_invoke(json::value_to_tag<JsonCanbusConfig>, json::v
     };
 }
 
-static std::string json_encode_JsonCanbusConfig(const JsonCanbusConfig& config) {
-    return json::serialize(json::value_from(config));
+static std::unique_ptr<ExtString> json_encode_JsonCanbusConfig(const JsonCanbusConfig& config) {
+    json::value jv = json::value_from(config, &ext_boost_mem_resource);
+
+    ExtString result;
+    result = json::serialize(jv);
+
+    return std::make_unique<ExtString>(result);
 }
 
 static JsonCanbusConfig json_decode_JsonCanbusConfig(std::string_view json_str) {
-    json::value jv = json::parse(json_str);
+    json::value jv = json::parse(json_str, &ext_boost_mem_resource);
 
     return json::value_to<JsonCanbusConfig>(jv);
 }

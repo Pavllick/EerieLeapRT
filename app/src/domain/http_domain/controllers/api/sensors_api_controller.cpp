@@ -18,7 +18,7 @@ LOG_MODULE_REGISTER(sensors_api_controller_logger);
 const size_t SensorsApiController::sensors_config_post_buffer_size_;
 
 ext_unique_ptr<ExtVector> SensorsApiController::sensors_config_post_buffer_;
-ext_unique_ptr<std::string> SensorsApiController::sensors_config_get_buffer_;
+std::unique_ptr<ExtString> SensorsApiController::sensors_config_get_buffer_;
 
 std::unique_ptr<SensorsJsonParser> SensorsApiController::sensors_json_parser_ = nullptr;
 std::shared_ptr<SensorsConfigurationManager> SensorsApiController::sensors_configuration_manager_ = nullptr;

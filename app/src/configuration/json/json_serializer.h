@@ -18,22 +18,22 @@ using namespace eerie_leap::utilities::memory;
 template <typename T>
 class JsonSerializer {
 public:
-    using EncodeFn = std::string (*)(const T&);
+    using EncodeFn = std::unique_ptr<ExtString> (*)(const T&);
     using DecodeFn = T (*)(std::string_view);
 
     JsonSerializer(EncodeFn encoder, DecodeFn decoder)
         : encodeFn_(encoder), decodeFn_(decoder) {}
 
-    ext_unique_ptr<std::string> Serialize(const T& obj, size_t *payload_len_out = nullptr) {
+    std::unique_ptr<ExtString> Serialize(const T& obj, size_t *payload_len_out = nullptr) {
         LOG_MODULE_DECLARE(json_serializer_logger);
 
         auto json_str = encodeFn_(obj);
-        if(json_str.empty()) {
+        if(json_str->empty()) {
             LOG_ERR("Failed to serialize object.");
             return nullptr;
         }
 
-        return make_unique_ext<std::string>(json_str);
+        return json_str;
     }
 
     ext_unique_ptr<T> Deserialize(std::string_view json_str) {

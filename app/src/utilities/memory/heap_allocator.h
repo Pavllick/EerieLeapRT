@@ -141,5 +141,6 @@ ext_unique_ptr<T> make_unique_ext(Args&&... args) {
 }
 
 using ExtVector = std::vector<uint8_t, HeapAllocator<uint8_t>>;
+using ExtString = std::basic_string<char, std::char_traits<char>, HeapAllocator<char>>;
 
 } // namespace eerie_leap::utilities::memory

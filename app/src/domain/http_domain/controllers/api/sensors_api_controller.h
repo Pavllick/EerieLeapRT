@@ -28,7 +28,7 @@ private:
     static const size_t sensors_config_post_buffer_size_ = 24576;
 
     static ext_unique_ptr<ExtVector> sensors_config_post_buffer_;
-    static ext_unique_ptr<std::string> sensors_config_get_buffer_;
+    static std::unique_ptr<ExtString> sensors_config_get_buffer_;
 
     static std::unique_ptr<SensorsJsonParser> sensors_json_parser_;
     static std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager_;
