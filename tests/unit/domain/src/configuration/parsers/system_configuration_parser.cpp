@@ -77,9 +77,7 @@ ZTEST(system_configuration_parser, test_JsonSerializeDeserialize) {
     std::ofstream file("../../../../../../../system_configuration.json", std::ios::out);
     zassert_true(file.is_open());
 
-    auto json_serializer_ = std::make_unique<JsonSerializer<JsonSystemConfig>>(
-        JsonTrait<JsonSystemConfig>::Encode,
-        JsonTrait<JsonSystemConfig>::Decode);
+    auto json_serializer_ = std::make_unique<JsonSerializer<JsonSystemConfig>>();
 
     auto system_config_buffer = json_serializer_->Serialize(*json_system_config);
 

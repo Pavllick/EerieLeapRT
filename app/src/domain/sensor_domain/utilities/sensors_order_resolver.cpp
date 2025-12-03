@@ -60,7 +60,7 @@ void SensorsOrderResolver::ResolveDependencies(
     for(const auto& dep : dependencies_.at(sensor_id))
         ResolveDependencies(dep, visited, ordered_sensors);
 
-    ordered_sensors.push_back(std::move(sensors_.at(sensor_id)));
+    ordered_sensors.push_back(sensors_.at(sensor_id));
 }
 
 std::vector<std::shared_ptr<Sensor>> SensorsOrderResolver::GetProcessingOrder() {
