@@ -22,12 +22,12 @@ int GlobalFunctionsRegistry::LuaGetSensorValue(lua_State* state) {
 
     const char* sensor_id = luaL_checkstring(state, 1);
 
-    if(!sensor_readings_frame->HasReadingValue(sensor_id)) {
+    if(!sensor_readings_frame->HasReading(sensor_id) || !sensor_readings_frame->GetReading(sensor_id)->value.has_value()) {
         lua_pushnil(state);
         return 1;
     }
 
-    float result = sensor_readings_frame->GetReadingValue(sensor_id);
+    float result = sensor_readings_frame->GetReading(sensor_id)->value.value();
     lua_pushnumber(state, result);
 
     return 1;
