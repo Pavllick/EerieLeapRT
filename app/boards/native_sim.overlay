@@ -4,6 +4,7 @@
 		sdhc0 = &sdhc_disk;
 		gpioc = &gpioc;
 		adc0 = &adc_emul;
+		can0 = &can_loopback0;
 	};
 
 	fstab {

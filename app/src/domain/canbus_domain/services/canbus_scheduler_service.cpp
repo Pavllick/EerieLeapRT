@@ -77,8 +77,6 @@ std::unique_ptr<CanbusTask> CanbusSchedulerService::CreateTask(uint8_t bus_chann
     task->can_frame_dbc_builder = can_frame_dbc_builder_;
     task->can_frame_processors = can_frame_processors_;
 
-    dbc->RegisterAllSignalsForFrame(task->message_configuration.frame_id);
-
     return task;
 }
 

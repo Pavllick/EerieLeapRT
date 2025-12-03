@@ -25,8 +25,7 @@ void CanbusSensorReader::Read() {
     if(reading == nullptr)
         return;
 
-    reading->value = dbc_->GetSignalValue(
-        sensor_->configuration.canbus_source->frame_id,
+    reading->value = dbc_->GetOrRegisterMessage(sensor_->configuration.canbus_source->frame_id)->GetSignalValue(
         sensor_->configuration.canbus_source->signal_name_hash,
         reading->metadata.GetTag<CanFrame>(ReadingMetadataTag::CANBUS_DATA).value().data.data());
     reading->status = ReadingStatus::RAW;
