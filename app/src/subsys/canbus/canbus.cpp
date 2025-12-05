@@ -139,7 +139,7 @@ void Canbus::SendFrame(const CanFrame& frame) {
 
     struct can_frame can_frame = {
         .id = frame.id,
-        .dlc = static_cast<uint8_t>(frame.data.size()),
+        .dlc = can_bytes_to_dlc(frame.data.size()),
         .flags = flags,
     };
     memcpy(can_frame.data, frame.data.data(), frame.data.size());
@@ -159,7 +159,7 @@ void Canbus::SendFrame(const CanFrame& frame) {
 
 void Canbus::SendFrameCallback(const device* dev, int error, void* user_data) {
     if(error != 0)
-        LOG_INF("SendFrameCallback error: %d", error);
+        LOG_ERR("SendFrameCallback error: %d", error);
 }
 
 void Canbus::CanFrameReceivedCallback(const device *dev, can_frame *frame, void *user_data) {
