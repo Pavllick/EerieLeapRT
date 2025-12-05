@@ -33,34 +33,9 @@ CanbusService::CanbusService(std::shared_ptr<IFsService> fs_service, std::shared
 
         canbus_.emplace(bus_channel, canbus);
 
-        if(fs_service_ != nullptr && fs_service_->Exists(channel_configuration.dbc_file_path)) {
-            FsServiceStreamBuf fs_stream_buf(
-                fs_service_.get(),
-                channel_configuration.dbc_file_path,
-                FsServiceStreamBuf::OpenMode::Read);
-
-            bool res = LoadDbcFile(*channel_configuration.dbc, fs_stream_buf);
-
-            fs_stream_buf.close();
-
-            if(res)
-                LOG_INF("DBC file loaded successfully. %s", channel_configuration.dbc_file_path.c_str());
-            else
-                LOG_ERR("Failed to load DBC file. %s", channel_configuration.dbc_file_path.c_str());
-        } else if(fs_service_ != nullptr && !channel_configuration.dbc_file_path.empty()) {
-            LOG_ERR("DBC file not found. %s", channel_configuration.dbc_file_path.c_str());
-        }
+        LoadDbcConfiguration(channel_configuration);
+        ConfigureUserSignals(channel_configuration);
     }
-}
-
-void CanbusService::BitrateUpdated(uint8_t bus_channel, uint32_t bitrate) {
-    auto canbus_configuration = canbus_configuration_manager_->Get();
-    bool is_bus_channel_valid = canbus_configuration->channel_configurations.contains(bus_channel);
-
-    if(is_bus_channel_valid && canbus_configuration_manager_->Update(*canbus_configuration))
-        LOG_INF("Bitrate for bus channel %d updated to %d bps.", bus_channel, bitrate);
-    else
-        LOG_ERR("Failed to update bitrate for bus channel %d.", bus_channel);
 }
 
 bool CanbusService::LoadDbcFile(Dbc& dbc, std::streambuf& dbc_content) {
@@ -81,6 +56,60 @@ const CanChannelConfiguration* CanbusService::GetChannelConfiguration(uint8_t bu
         return nullptr;
 
     return &canbus_configuration->channel_configurations.at(bus_channel);
+}
+
+void CanbusService::BitrateUpdated(uint8_t bus_channel, uint32_t bitrate) {
+    auto canbus_configuration = canbus_configuration_manager_->Get();
+    bool is_bus_channel_valid = canbus_configuration->channel_configurations.contains(bus_channel);
+
+    if(is_bus_channel_valid && canbus_configuration_manager_->Update(*canbus_configuration))
+        LOG_INF("Bitrate for bus channel %d updated to %d bps.", bus_channel, bitrate);
+    else
+        LOG_ERR("Failed to update bitrate for bus channel %d.", bus_channel);
+}
+
+void CanbusService::LoadDbcConfiguration(const CanChannelConfiguration& channel_configuration) {
+    if(fs_service_ != nullptr && fs_service_->Exists(channel_configuration.dbc_file_path)) {
+        FsServiceStreamBuf fs_stream_buf(
+            fs_service_.get(),
+            channel_configuration.dbc_file_path,
+            FsServiceStreamBuf::OpenMode::Read);
+
+        bool res = LoadDbcFile(*channel_configuration.dbc, fs_stream_buf);
+
+        fs_stream_buf.close();
+
+        if(res)
+            LOG_INF("DBC file loaded successfully. %s", channel_configuration.dbc_file_path.c_str());
+        else
+            LOG_ERR("Failed to load DBC file. %s", channel_configuration.dbc_file_path.c_str());
+    } else if(fs_service_ != nullptr && !channel_configuration.dbc_file_path.empty()) {
+        LOG_ERR("DBC file not found. %s", channel_configuration.dbc_file_path.c_str());
+    }
+}
+
+void CanbusService::ConfigureUserSignals(const CanChannelConfiguration& channel_configuration) {
+    for(const auto& message_configuration : channel_configuration.message_configurations) {
+        DbcMessage* message = nullptr;
+
+        if(channel_configuration.dbc->HasMessage(message_configuration.frame_id))
+            message = channel_configuration.dbc->GetOrRegisterMessage(message_configuration.frame_id);
+        else
+            message = channel_configuration.dbc->AddMessage(
+                message_configuration.frame_id,
+                message_configuration.name,
+                message_configuration.message_size);
+
+        for(const auto& signal_configuration : message_configuration.signal_configurations) {
+            message->AddSignal(
+                signal_configuration.name,
+                signal_configuration.start_bit,
+                signal_configuration.size_bits,
+                signal_configuration.factor,
+                signal_configuration.offset,
+                signal_configuration.unit);
+        }
+    }
 }
 
 } // namespace eerie_leap::domain::canbus_domain::services

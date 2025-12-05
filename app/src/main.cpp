@@ -379,9 +379,41 @@ void SetupCanbusConfiguration(std::shared_ptr<CanbusConfigurationManager> canbus
                 .frame_id = 1087,
                 .send_interval_ms = 10,
                 .script_path = "scripts/e46_smg_gear.lua",
-            }
+            },
+            {
+                .frame_id = 100,
+                .send_interval_ms = 10,
+                .name = "EL_FRAME_0",
+                .message_size = 8,
+                .signal_configurations = {
+                    {
+                        .start_bit = 16,
+                        .size_bits = 16,
+                        .name = "sensor_1",
+                        .unit = "km/h",
+                    },
+                },
+            },
         }
     };
+
+    // for(int i = 0; i < 100; i++) {
+    //     canbus_channel_configuration_0.message_configurations.push_back({
+    //         .frame_id = 100 + i,
+    //         .send_interval_ms = 10,
+    //         .name = "EL_FRAME_0",
+    //         .message_size = 8,
+    //         .signal_configurations = {
+    //             {
+    //                 .start_bit = 16,
+    //                 .size_bits = 16,
+    //                 .name = "sensor_1",
+    //                 .unit = "km/h",
+    //             },
+    //         },
+    //     });
+    // }
+
     canbus_configuration->channel_configurations.emplace(
         canbus_channel_configuration_0.bus_channel,
         canbus_channel_configuration_0);

@@ -11,10 +11,23 @@
 
 using namespace eerie_leap::utilities::memory;
 
+struct CborCanSignalConfig {
+	uint32_t start_bit;
+	uint32_t size_bits;
+	float factor;
+	float offset;
+	struct zcbor_string name;
+	struct zcbor_string unit;
+};
+
 struct CborCanMessageConfig {
 	uint32_t frame_id;
 	uint32_t send_interval_ms;
 	struct zcbor_string script_path;
+
+	struct zcbor_string name;
+	uint32_t message_size;
+	std::vector<CborCanSignalConfig, HeapAllocator<CborCanSignalConfig>> CborCanSignalConfig_m;
 };
 
 struct CborCanChannelConfig {

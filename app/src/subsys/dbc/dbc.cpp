@@ -33,6 +33,16 @@ DbcMessage* Dbc::GetOrRegisterMessage(uint32_t frame_id) {
    if(messages_.contains(frame_id))
       return &messages_.at(frame_id);
 
+   const dbcppp::IMessage* message = GetDbcMessage(frame_id);
+   if(message == nullptr)
+      throw std::runtime_error("Invalid DBC Frame ID.");
+
+   messages_.emplace(frame_id, DbcMessage(message));
+
+   return &messages_.at(frame_id);
+}
+
+const dbcppp::IMessage* Dbc::GetDbcMessage(uint32_t frame_id) const {
    const dbcppp::IMessage* message = nullptr;
    for(const dbcppp::IMessage& msg : net_->Messages()) {
       if(msg.Id() == frame_id) {
@@ -41,12 +51,14 @@ DbcMessage* Dbc::GetOrRegisterMessage(uint32_t frame_id) {
       }
    }
 
-   if(message == nullptr)
-      throw std::runtime_error("Invalid DBC Frame ID.");
+   return message;
+}
 
-   messages_.emplace(frame_id, DbcMessage(message));
+bool Dbc::HasMessage(uint32_t frame_id) const {
+   if(messages_.contains(frame_id))
+      return true;
 
-   return &messages_.at(frame_id);
+   return GetDbcMessage(frame_id) != nullptr;
 }
 
 } // namespace eerie_leap::subsys::dbc

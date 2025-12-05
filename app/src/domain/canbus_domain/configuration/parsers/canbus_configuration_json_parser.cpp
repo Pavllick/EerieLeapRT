@@ -25,6 +25,20 @@ ext_unique_ptr<JsonCanbusConfig> CanbusConfigurationJsonParser::Serialize(const 
             message_config.frame_id = message_configuration.frame_id;
             message_config.send_interval_ms = message_configuration.send_interval_ms;
             message_config.script_path = json::string(message_configuration.script_path);
+            message_config.name = json::string(message_configuration.name);
+            message_config.message_size = message_configuration.message_size;
+
+            for(const auto& signal_configuration : message_configuration.signal_configurations) {
+                JsonCanSignalConfig signal_config;
+                signal_config.start_bit = signal_configuration.start_bit;
+                signal_config.size_bits = signal_configuration.size_bits;
+                signal_config.factor = signal_configuration.factor;
+                signal_config.offset = signal_configuration.offset;
+                signal_config.name = json::string(signal_configuration.name);
+                signal_config.unit = json::string(signal_configuration.unit);
+
+                message_config.signal_configs.push_back(std::move(signal_config));
+            }
 
             channel_config.message_configs.push_back(std::move(message_config));
         }
@@ -52,8 +66,21 @@ CanbusConfiguration CanbusConfigurationJsonParser::Deserialize(const JsonCanbusC
             CanMessageConfiguration message_configuration = {
                 .frame_id = message_config.frame_id,
                 .send_interval_ms = message_config.send_interval_ms,
-                .script_path = std::string(message_config.script_path)
+                .script_path = std::string(message_config.script_path),
+                .name = std::string(message_config.name),
+                .message_size = message_config.message_size
             };
+
+            for(const auto& signal_config : message_config.signal_configs) {
+                message_configuration.signal_configurations.push_back({
+                    .start_bit = signal_config.start_bit,
+                    .size_bits = signal_config.size_bits,
+                    .factor = signal_config.factor,
+                    .offset = signal_config.offset,
+                    .name = std::string(signal_config.name),
+                    .unit = std::string(signal_config.unit)
+                });
+            }
 
             if(fs_service_ != nullptr
                 && fs_service_->IsAvailable()

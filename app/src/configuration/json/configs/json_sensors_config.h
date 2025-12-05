@@ -169,7 +169,6 @@ static void tag_invoke(json::value_from_tag, json::value& jv, JsonSensorsConfig 
     json::array sensors_array(&ext_boost_mem_resource);
     for(const auto& sensor : config.sensors)
         sensors_array.push_back(json::value_from(sensor, &ext_boost_mem_resource));
-
     obj[NAMEOF_MEMBER(&JsonSensorsConfig::sensors).c_str()] = std::move(sensors_array);
 
     jv = std::move(obj);

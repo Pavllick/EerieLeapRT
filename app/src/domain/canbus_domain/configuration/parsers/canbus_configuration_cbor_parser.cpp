@@ -31,8 +31,21 @@ ext_unique_ptr<CborCanbusConfig> CanbusConfigurationCborParser::Serialize(const 
             channel_config.CborCanMessageConfig_m.push_back({
                 .frame_id = message_configuration.frame_id,
                 .send_interval_ms = message_configuration.send_interval_ms,
-                .script_path = CborHelpers::ToZcborString(&message_configuration.script_path)
+                .script_path = CborHelpers::ToZcborString(&message_configuration.script_path),
+                .name = CborHelpers::ToZcborString(&message_configuration.name),
+                .message_size = message_configuration.message_size
             });
+
+            for(const auto& signal_configuration : message_configuration.signal_configurations) {
+                channel_config.CborCanMessageConfig_m.back().CborCanSignalConfig_m.push_back({
+                    .start_bit = signal_configuration.start_bit,
+                    .size_bits = signal_configuration.size_bits,
+                    .factor = signal_configuration.factor,
+                    .offset = signal_configuration.offset,
+                    .name = CborHelpers::ToZcborString(&signal_configuration.name),
+                    .unit = CborHelpers::ToZcborString(&signal_configuration.unit)
+                });
+            }
         }
 
         config->CborCanChannelConfig_m.push_back(channel_config);
@@ -58,8 +71,21 @@ CanbusConfiguration CanbusConfigurationCborParser::Deserialize(const CborCanbusC
             CanMessageConfiguration message_configuration = {
                 .frame_id = message_config.frame_id,
                 .send_interval_ms = message_config.send_interval_ms,
-                .script_path = CborHelpers::ToStdString(message_config.script_path)
+                .script_path = CborHelpers::ToStdString(message_config.script_path),
+                .name = CborHelpers::ToStdString(message_config.name),
+                .message_size = message_config.message_size
             };
+
+            for(const auto& signal_config : message_config.CborCanSignalConfig_m) {
+                message_configuration.signal_configurations.push_back({
+                    .start_bit = signal_config.start_bit,
+                    .size_bits = signal_config.size_bits,
+                    .factor = signal_config.factor,
+                    .offset = signal_config.offset,
+                    .name = CborHelpers::ToStdString(signal_config.name),
+                    .unit = CborHelpers::ToStdString(signal_config.unit)
+                });
+            }
 
             if(fs_service_ != nullptr
                 && fs_service_->IsAvailable()

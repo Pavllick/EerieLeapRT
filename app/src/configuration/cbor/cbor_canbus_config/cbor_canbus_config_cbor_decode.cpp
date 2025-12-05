@@ -15,22 +15,89 @@
 	} \
 } while(0)
 
+static bool decode_CborCanSignalConfig(zcbor_state_t *state, struct CborCanSignalConfig *result);
 static bool decode_CborCanMessageConfig(zcbor_state_t *state, struct CborCanMessageConfig *result);
 static bool decode_CborCanChannelConfig(zcbor_state_t *state, struct CborCanChannelConfig *result);
 static bool decode_CborCanbusConfig(zcbor_state_t *state, struct CborCanbusConfig *result);
 
+
+static bool decode_CborCanSignalConfig(
+		zcbor_state_t *state, struct CborCanSignalConfig *result)
+{
+	zcbor_log("%s\r\n", __func__);
+
+	bool res = (((zcbor_list_start_decode(state) && ((((zcbor_uint32_decode(state, (&(*result).start_bit))))
+	&& ((zcbor_uint32_decode(state, (&(*result).size_bits))))
+	&& ((zcbor_float32_decode(state, (&(*result).factor))))
+	&& ((zcbor_float32_decode(state, (&(*result).offset))))
+	&& ((zcbor_tstr_decode(state, (&(*result).name))))
+	&& ((zcbor_tstr_decode(state, (&(*result).unit))))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
+
+	log_result(state, res, __func__);
+	return res;
+}
 
 static bool decode_CborCanMessageConfig(
 		zcbor_state_t *state, struct CborCanMessageConfig *result)
 {
 	zcbor_log("%s\r\n", __func__);
 
-	bool res = (((zcbor_list_start_decode(state) && ((((zcbor_uint32_decode(state, (&(*result).frame_id))))
-	&& ((zcbor_uint32_decode(state, (&(*result).send_interval_ms))))
-	&& ((zcbor_tstr_decode(state, (&(*result).script_path))))) || (zcbor_list_map_end_force_decode(state), false)) && zcbor_list_end_decode(state))));
+    if (!zcbor_list_start_decode(state)) {
+        return false;
+    }
 
-	log_result(state, res, __func__);
-	return res;
+    if (!zcbor_uint32_decode(state, &result->frame_id)) {
+        zcbor_list_end_decode(state);
+        return false;
+    }
+
+    if (!zcbor_uint32_decode(state, &result->send_interval_ms)) {
+        zcbor_list_end_decode(state);
+        return false;
+    }
+
+    if (!zcbor_tstr_decode(state, &result->script_path)) {
+        zcbor_list_end_decode(state);
+        return false;
+    }
+
+    if (!zcbor_tstr_decode(state, &result->name)) {
+        zcbor_list_end_decode(state);
+        return false;
+    }
+
+    if (!zcbor_uint32_decode(state, &result->message_size)) {
+        zcbor_list_end_decode(state);
+        return false;
+    }
+
+    if (!zcbor_list_start_decode(state)) {
+        zcbor_list_end_decode(state);
+        return false;
+    }
+
+    while (!zcbor_array_at_end(state)) {
+        result->CborCanSignalConfig_m.emplace_back();
+        if (!decode_CborCanSignalConfig(state, &result->CborCanSignalConfig_m.back())) {
+            result->CborCanSignalConfig_m.pop_back();
+            zcbor_list_map_end_force_decode(state);
+            zcbor_list_end_decode(state);
+            zcbor_list_end_decode(state);
+            return false;
+        }
+    }
+
+    if (!zcbor_list_end_decode(state)) {
+        zcbor_list_end_decode(state);
+        return false;
+    }
+
+    if (!zcbor_list_end_decode(state)) {
+        return false;
+    }
+
+	log_result(state, true, __func__);
+	return true;
 }
 
 static bool decode_CborCanChannelConfig(

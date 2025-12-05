@@ -17,7 +17,7 @@ DbcMessage::DbcMessage(const dbcppp::IMessage* message) : message_(message) {
         RegisterSignal(&signal);
 }
 
-DbcMessage::DbcMessage(uint32_t id, std::string name, uint8_t message_size) {
+DbcMessage::DbcMessage(uint32_t id, std::string name, uint32_t message_size) {
     message_container_ = dbcppp::IMessage::Create(
         id,
         std::move(name),
@@ -40,11 +40,11 @@ std::string_view DbcMessage::Name() const {
     return message_->Name();
 }
 
-uint8_t DbcMessage::MessageSize() const {
+uint32_t DbcMessage::MessageSize() const {
     return message_->MessageSize();
 }
 
-void DbcMessage::AddSignal(std::string name, uint64_t start_bit, uint64_t size_bits, std::string unit) {
+void DbcMessage::AddSignal(std::string name, uint32_t start_bit, uint32_t size_bits, float factor, float offset, std::string unit) {
     auto signal = dbcppp::ISignal::Create(
         message_->MessageSize(),
         std::move(name),
@@ -54,8 +54,8 @@ void DbcMessage::AddSignal(std::string name, uint64_t start_bit, uint64_t size_b
         size_bits,
         dbcppp::ISignal::EByteOrder::LittleEndian,
         dbcppp::ISignal::EValueType::Signed,
-        1.0,
-        0.0,
+        static_cast<double>(factor),
+        static_cast<double>(offset),
         0.0,
         0.0,
         std::move(unit),
@@ -63,7 +63,7 @@ void DbcMessage::AddSignal(std::string name, uint64_t start_bit, uint64_t size_b
         {},
         {},
         "",
-        dbcppp::ISignal::EExtendedValueType::Double,
+        dbcppp::ISignal::EExtendedValueType::Integer,
         {});
 
     signals_container_.push_back(std::move(signal));

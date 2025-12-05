@@ -27,7 +27,22 @@ static size_t cbor_get_size_CborCanbusConfig(const CborCanbusConfig& config) {
 
             builder.AddUint(message_configuration.frame_id)
                 .AddUint(message_configuration.send_interval_ms)
-                .AddTstr(message_configuration.script_path);
+                .AddTstr(message_configuration.script_path)
+                .AddTstr(message_configuration.name)
+                .AddUint(message_configuration.message_size);
+
+            builder.AddIndefiniteArrayStart();
+            for(const auto& signal_configuration : message_configuration.CborCanSignalConfig_m) {
+                builder.AddIndefiniteArrayStart();
+
+                builder.AddUint(signal_configuration.start_bit)
+                    .AddUint(signal_configuration.size_bits)
+                    .AddFloat(signal_configuration.factor)
+                    .AddFloat(signal_configuration.offset)
+                    .AddTstr(signal_configuration.name)
+                    .AddTstr(signal_configuration.unit);
+            }
+
         }
     }
 

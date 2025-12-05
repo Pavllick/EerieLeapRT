@@ -24,13 +24,13 @@ public:
    using SignalReader = std::function<float (size_t)>;
 
    explicit DbcMessage(const dbcppp::IMessage* message);
-   DbcMessage(uint32_t id, std::string name, uint8_t message_size);
+   DbcMessage(uint32_t id, std::string name, uint32_t message_size);
 
    uint32_t Id() const;
    std::string_view Name() const;
-   uint8_t MessageSize() const;
+   uint32_t MessageSize() const;
 
-   void AddSignal(std::string name, uint64_t start_bit, uint64_t size_bits, std::string unit);
+   void AddSignal(std::string name, uint32_t start_bit, uint32_t size_bits, float factor, float offset, std::string unit);
    bool HasSignal(size_t signal_name_hash) const;
    bool HasSignal(const std::string& signal_name) const;
 

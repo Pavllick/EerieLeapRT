@@ -25,6 +25,8 @@ private:
     std::unordered_map<uint8_t, std::shared_ptr<Canbus>> canbus_;
 
     void BitrateUpdated(uint8_t bus_channel, uint32_t bitrate);
+    void LoadDbcConfiguration(const CanChannelConfiguration& channel_configuration);
+    void ConfigureUserSignals(const CanChannelConfiguration& channel_configuration);
 
 public:
     CanbusService(std::shared_ptr<IFsService> fs_service, std::shared_ptr<CanbusConfigurationManager> canbus_configuration_manager);
