@@ -8,6 +8,8 @@ using namespace std::chrono;
 
 class ITimeProvider {
 public:
+    virtual ~ITimeProvider() = default;
+
     system_clock::time_point virtual GetTime() = 0;
 };
 

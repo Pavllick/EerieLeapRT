@@ -8,6 +8,8 @@ using namespace std::chrono;
 
 class ITimeService {
 public:
+    virtual ~ITimeService() = default;
+
     system_clock::time_point virtual GetCurrentTime() = 0;
     system_clock::time_point virtual GetTimeSinceBoot() = 0;
 };

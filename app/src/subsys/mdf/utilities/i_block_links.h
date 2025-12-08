@@ -11,6 +11,7 @@ namespace eerie_leap::subsys::mdf::utilities {
 class IBlockLinks {
 public:
     IBlockLinks() = default;
+    virtual ~IBlockLinks() = default;
 
     virtual int Count() const = 0;
     virtual uint64_t GetLinksSizeBytes() const = 0;

@@ -10,6 +10,8 @@ namespace eerie_leap::subsys::fs::services {
 
 class IFsService {
 public:
+    virtual ~IFsService() = default;
+
     virtual bool Initialize() = 0;
     virtual bool IsAvailable() const = 0;
     virtual bool WriteFile(std::string_view relative_path, const void* data_p, size_t data_size, bool append = false) = 0;
