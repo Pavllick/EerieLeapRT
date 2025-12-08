@@ -28,16 +28,16 @@ ext_unique_ptr<CborCanbusConfig> CanbusConfigurationCborParser::Serialize(const 
         };
 
         for(const auto& message_configuration : channel_configuration.message_configurations) {
-            channel_config.CborCanMessageConfig_m.push_back({
+            CborCanMessageConfig message_config = {
                 .frame_id = message_configuration.frame_id,
                 .send_interval_ms = message_configuration.send_interval_ms,
                 .script_path = CborHelpers::ToZcborString(&message_configuration.script_path),
                 .name = CborHelpers::ToZcborString(&message_configuration.name),
                 .message_size = message_configuration.message_size
-            });
+            };
 
             for(const auto& signal_configuration : message_configuration.signal_configurations) {
-                channel_config.CborCanMessageConfig_m.back().CborCanSignalConfig_m.push_back({
+                message_config.CborCanSignalConfig_m.push_back({
                     .start_bit = signal_configuration.start_bit,
                     .size_bits = signal_configuration.size_bits,
                     .factor = signal_configuration.factor,
@@ -46,6 +46,8 @@ ext_unique_ptr<CborCanbusConfig> CanbusConfigurationCborParser::Serialize(const 
                     .unit = CborHelpers::ToZcborString(&signal_configuration.unit)
                 });
             }
+
+            channel_config.CborCanMessageConfig_m.push_back(message_config);
         }
 
         config->CborCanChannelConfig_m.push_back(channel_config);

@@ -216,7 +216,7 @@ int cbor_decode_CborCanbusConfig(
 		struct CborCanbusConfig *result,
 		size_t *payload_len_out)
 {
-	zcbor_state_t states[7];
+	zcbor_state_t states[9];
 
 	return zcbor_entry_function(payload, payload_len, (void *)result, payload_len_out, states,
 		(zcbor_decoder_t *)decode_CborCanbusConfig, sizeof(states) / sizeof(zcbor_state_t), 1);

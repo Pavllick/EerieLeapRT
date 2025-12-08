@@ -92,6 +92,8 @@ void CanbusService::ConfigureUserSignals(const CanChannelConfiguration& channel_
     for(const auto& message_configuration : channel_configuration.message_configurations) {
         DbcMessage* message = nullptr;
 
+        channel_configuration.dbc->HasMessage(message_configuration.frame_id);
+
         if(channel_configuration.dbc->HasMessage(message_configuration.frame_id))
             message = channel_configuration.dbc->GetOrRegisterMessage(message_configuration.frame_id);
         else

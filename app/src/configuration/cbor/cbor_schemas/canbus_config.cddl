@@ -19,8 +19,10 @@ CborCanMessageConfig = [
 
 CborCanChannelConfig = [
   type: uint,
+  is_extended_id: bool,
   bus_channel: uint,
   bitrate: uint,
+  data_bitrate: uint,
   dbc_file_path: tstr,
   message_configs: [*CborCanMessageConfig]
 ]

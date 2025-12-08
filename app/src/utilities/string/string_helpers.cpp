@@ -2,7 +2,7 @@
 
 namespace eerie_leap::utilities::string {
 
-std::hash<std::string> StringHelpers::string_hasher;
+std::hash<std::string_view> StringHelpers::string_hasher;
 
 std::unique_ptr<char[]> StringHelpers::ToPaddedCharArray(const std::string& str, size_t size, char padding_char) {
     std::unique_ptr<char[]> char_array = std::make_unique<char[]>(size);
@@ -12,7 +12,7 @@ std::unique_ptr<char[]> StringHelpers::ToPaddedCharArray(const std::string& str,
     return char_array;
 }
 
-size_t StringHelpers::GetHash(const std::string& str) {
+size_t StringHelpers::GetHash(const std::string_view str) {
     return string_hasher(str);
 }
 

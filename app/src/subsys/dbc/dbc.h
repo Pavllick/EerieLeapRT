@@ -6,10 +6,10 @@
 #include <memory>
 #include <streambuf>
 
-#include <dbcppp/Network.h>
+#include "subsys/dbc/dbcppp/include/Network.h"
+#include "subsys/dbc/dbcppp/include/Message.h"
 
 #include "dbc_message.h"
-#include "dbcppp/Message.h"
 
 namespace eerie_leap::subsys::dbc {
 

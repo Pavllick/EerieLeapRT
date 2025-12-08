@@ -59,7 +59,7 @@ std::unique_ptr<CanbusTask> CanbusSchedulerService::CreateTask(uint8_t bus_chann
     }
 
     auto dbc = canbus_service_->GetChannelConfiguration(bus_channel)->dbc;
-    if(dbc == nullptr || !dbc->IsLoaded()) {
+    if(dbc == nullptr || !dbc->HasMessage(message_configuration.frame_id)) {
         LOG_ERR("Failed to create task for Frame ID: %d", message_configuration.frame_id);
         return nullptr;
     }

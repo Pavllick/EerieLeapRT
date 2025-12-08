@@ -1,3 +1,6 @@
+#include "subsys/dbc/dbcppp/src/SignalImpl.h"
+#include "subsys/dbc/dbcppp/src/MessageImpl.h"
+
 #include "utilities/string/string_helpers.h"
 
 #include "dbc_message.h"
@@ -6,10 +9,11 @@ namespace eerie_leap::subsys::dbc {
 
 using namespace eerie_leap::utilities::string;
 
-bool DbcMessage::RegisterSignal(const dbcppp::ISignal* signal) {
+void DbcMessage::RegisterSignal(const dbcppp::ISignal* signal) {
     size_t signal_name_hash = StringHelpers::GetHash(signal->Name());
 
-    return signals_.emplace(signal_name_hash, signal).second;
+    if(!signals_.emplace(signal_name_hash, signal).second)
+        throw std::runtime_error("Failed to register signal. Signal with name '" + std::string(signal->Name()) + "' already exists.");
 }
 
 DbcMessage::DbcMessage(const dbcppp::IMessage* message) : message_(message) {
@@ -66,15 +70,15 @@ void DbcMessage::AddSignal(std::string name, uint32_t start_bit, uint32_t size_b
         dbcppp::ISignal::EExtendedValueType::Integer,
         {});
 
+    RegisterSignal(signal.get());
     signals_container_.push_back(std::move(signal));
-    RegisterSignal(signals_container_.back().get());
 }
 
 bool DbcMessage::HasSignal(size_t signal_name_hash) const {
     return signals_.contains(signal_name_hash);
 }
 
-bool DbcMessage::HasSignal(const std::string& signal_name) const {
+bool DbcMessage::HasSignal(const std::string_view signal_name) const {
     return HasSignal(StringHelpers::GetHash(signal_name));
 }
 

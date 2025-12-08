@@ -19,7 +19,7 @@ bool Dbc::LoadDbcFile(std::streambuf& dbc_content) {
 
 DbcMessage* Dbc::AddMessage(uint32_t id, std::string name, uint8_t message_size) {
    if(messages_.contains(id))
-      throw std::runtime_error("Invalid DBC Frame ID.");
+      throw std::runtime_error("Duplicate Frame ID.");
 
    messages_.emplace(id, DbcMessage(id, std::move(name), message_size));
 
@@ -27,15 +27,12 @@ DbcMessage* Dbc::AddMessage(uint32_t id, std::string name, uint8_t message_size)
 }
 
 DbcMessage* Dbc::GetOrRegisterMessage(uint32_t frame_id) {
-   if(!is_loaded_)
-      throw std::runtime_error("DBC not loaded.");
-
    if(messages_.contains(frame_id))
       return &messages_.at(frame_id);
 
    const dbcppp::IMessage* message = GetDbcMessage(frame_id);
    if(message == nullptr)
-      throw std::runtime_error("Invalid DBC Frame ID.");
+      throw std::runtime_error("Invalid Frame ID.");
 
    messages_.emplace(frame_id, DbcMessage(message));
 
@@ -43,6 +40,9 @@ DbcMessage* Dbc::GetOrRegisterMessage(uint32_t frame_id) {
 }
 
 const dbcppp::IMessage* Dbc::GetDbcMessage(uint32_t frame_id) const {
+   if(!is_loaded_)
+      return nullptr;
+
    const dbcppp::IMessage* message = nullptr;
    for(const dbcppp::IMessage& msg : net_->Messages()) {
       if(msg.Id() == frame_id) {
