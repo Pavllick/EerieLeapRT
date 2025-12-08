@@ -337,8 +337,8 @@ int main(void) {
     // calibration_service->Stop();
 
     while(true) {
-        // SystemInfo::print_heap_info();
-        // SystemInfo::print_stack_info();
+        SystemInfo::PrintHeapInfo();
+        SystemInfo::PrintStackInfo();
         k_msleep(SLEEP_TIME_MS);
     }
 
