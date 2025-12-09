@@ -27,7 +27,7 @@ struct JsonLoggingConfig {
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonSensorLoggingConfig const& config) {
     jv.~value();
-    new(&jv) json::value(json::object(&ext_boost_mem_resource));
+    new(&jv) json::value(json::object(ext_boost_json_storage_ptr));
     json::object& obj = jv.as_object();
 
     obj[NAMEOF_MEMBER(&JsonSensorLoggingConfig::sensor_id_hash).c_str()] = config.sensor_id_hash;
@@ -50,15 +50,15 @@ static JsonSensorLoggingConfig tag_invoke(json::value_to_tag<JsonSensorLoggingCo
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonLoggingConfig const& config) {
     jv.~value();
-    new(&jv) json::value(json::object(&ext_boost_mem_resource));
+    new(&jv) json::value(json::object(ext_boost_json_storage_ptr));
     json::object& obj = jv.as_object();
 
     obj[NAMEOF_MEMBER(&JsonLoggingConfig::logging_interval_ms).c_str()] = config.logging_interval_ms;
     obj[NAMEOF_MEMBER(&JsonLoggingConfig::max_log_size_mb).c_str()] = config.max_log_size_mb;
 
-    json::array sensor_configs_array(&ext_boost_mem_resource);
+    json::array sensor_configs_array(ext_boost_json_storage_ptr);
     for(const auto& sensor_config : config.sensor_configs)
-        sensor_configs_array.push_back(json::value_from(sensor_config, &ext_boost_mem_resource));
+        sensor_configs_array.push_back(json::value_from(sensor_config, ext_boost_json_storage_ptr));
     obj[NAMEOF_MEMBER(&JsonLoggingConfig::sensor_configs).c_str()] = std::move(sensor_configs_array);
 
     jv = std::move(obj);

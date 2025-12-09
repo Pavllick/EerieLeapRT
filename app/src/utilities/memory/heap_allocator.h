@@ -36,11 +36,11 @@ public:
     template <typename U>
     constexpr HeapAllocator(const HeapAllocator<U>& obj) noexcept {}
 
-    T* allocate(size_t n) {
+    T* allocate(size_t n, size_t align = kAlignment) {
         void* pointer = nullptr;
 
     #ifdef CONFIG_SHARED_MULTI_HEAP
-        pointer = shared_multi_heap_aligned_alloc(SMH_REG_ATTR_EXTERNAL, kAlignment, n * sizeof(T));
+        pointer = shared_multi_heap_aligned_alloc(SMH_REG_ATTR_EXTERNAL, align, n * sizeof(T));
     #else
         pointer = k_malloc(n * sizeof(T));
     #endif
@@ -54,7 +54,7 @@ public:
         return static_cast<T*>(pointer);
     }
 
-    void deallocate(T* p, size_t) noexcept {
+    void deallocate(void* p, size_t n, size_t align = 0) noexcept {
     #ifdef CONFIG_SHARED_MULTI_HEAP
         shared_multi_heap_free(p);
     #else

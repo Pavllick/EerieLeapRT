@@ -21,7 +21,7 @@ struct JsonAdcChannelConfig {
     json::string interpolation_method;
     std::vector<JsonAdcCalibrationDataConfig, HeapAllocator<JsonAdcCalibrationDataConfig>> calibration_table;
 
-    JsonAdcChannelConfig(json::storage_ptr sp = &ext_boost_mem_resource)
+    JsonAdcChannelConfig(json::storage_ptr sp = ext_boost_json_storage_ptr)
         : interpolation_method(sp) {}
 };
 
@@ -32,7 +32,7 @@ struct JsonAdcConfig {
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonAdcCalibrationDataConfig const& config) {
     jv.~value();
-    new(&jv) json::value(json::object(&ext_boost_mem_resource));
+    new(&jv) json::value(json::object(ext_boost_json_storage_ptr));
     json::object& obj = jv.as_object();
 
     obj[NAMEOF_MEMBER(&JsonAdcCalibrationDataConfig::voltage).c_str()] = config.voltage;
@@ -51,14 +51,14 @@ static JsonAdcCalibrationDataConfig tag_invoke(json::value_to_tag<JsonAdcCalibra
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonAdcChannelConfig const& config) {
     jv.~value();
-    new(&jv) json::value(json::object(&ext_boost_mem_resource));
+    new(&jv) json::value(json::object(ext_boost_json_storage_ptr));
     json::object& obj = jv.as_object();
 
     obj[NAMEOF_MEMBER(&JsonAdcChannelConfig::interpolation_method).c_str()] = config.interpolation_method;
 
-    json::array calibration_table_array(&ext_boost_mem_resource);
+    json::array calibration_table_array(ext_boost_json_storage_ptr);
     for(const auto& elem : config.calibration_table)
-        calibration_table_array.push_back(json::value_from(elem, &ext_boost_mem_resource));
+        calibration_table_array.push_back(json::value_from(elem, ext_boost_json_storage_ptr));
     obj[NAMEOF_MEMBER(&JsonAdcChannelConfig::calibration_table).c_str()] = std::move(calibration_table_array);
 
     jv = std::move(obj);
@@ -80,14 +80,14 @@ static JsonAdcChannelConfig tag_invoke(json::value_to_tag<JsonAdcChannelConfig>,
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonAdcConfig const& config) {
     jv.~value();
-    new(&jv) json::value(json::object(&ext_boost_mem_resource));
+    new(&jv) json::value(json::object(ext_boost_json_storage_ptr));
     json::object& obj = jv.as_object();
 
     obj[NAMEOF_MEMBER(&JsonAdcConfig::samples).c_str()] = config.samples;
 
-    json::array channel_configs_array(&ext_boost_mem_resource);
+    json::array channel_configs_array(ext_boost_json_storage_ptr);
     for(const auto& channel_config : config.channel_configs)
-        channel_configs_array.push_back(json::value_from(channel_config, &ext_boost_mem_resource));
+        channel_configs_array.push_back(json::value_from(channel_config, ext_boost_json_storage_ptr));
     obj[NAMEOF_MEMBER(&JsonAdcConfig::channel_configs).c_str()] = std::move(channel_configs_array);
 
     jv = std::move(obj);

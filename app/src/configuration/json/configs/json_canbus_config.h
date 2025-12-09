@@ -20,7 +20,7 @@ struct JsonCanSignalConfig {
     json::string name;
     json::string unit;
 
-    JsonCanSignalConfig(json::storage_ptr sp = &ext_boost_mem_resource)
+    JsonCanSignalConfig(json::storage_ptr sp = ext_boost_json_storage_ptr)
         : name(sp), unit(sp) {}
 };
 
@@ -33,7 +33,7 @@ struct JsonCanMessageConfig {
 	uint32_t message_size;
     std::vector<JsonCanSignalConfig, HeapAllocator<JsonCanSignalConfig>> signal_configs;
 
-    JsonCanMessageConfig(json::storage_ptr sp = &ext_boost_mem_resource)
+    JsonCanMessageConfig(json::storage_ptr sp = ext_boost_json_storage_ptr)
         : script_path(sp), name(sp) {}
 };
 
@@ -46,7 +46,7 @@ struct JsonCanChannelConfig {
     json::string dbc_file_path;
     std::vector<JsonCanMessageConfig, HeapAllocator<JsonCanMessageConfig>> message_configs;
 
-    JsonCanChannelConfig(json::storage_ptr sp = &ext_boost_mem_resource)
+    JsonCanChannelConfig(json::storage_ptr sp = ext_boost_json_storage_ptr)
         : type(sp), dbc_file_path(sp) {}
 };
 
@@ -56,7 +56,7 @@ struct JsonCanbusConfig {
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonCanSignalConfig const& config) {
     jv.~value();
-    new(&jv) json::value(json::object(&ext_boost_mem_resource));
+    new(&jv) json::value(json::object(ext_boost_json_storage_ptr));
     json::object& obj = jv.as_object();
 
     obj[NAMEOF_MEMBER(&JsonCanSignalConfig::start_bit).c_str()] = config.start_bit;
@@ -85,7 +85,7 @@ static JsonCanSignalConfig tag_invoke(json::value_to_tag<JsonCanSignalConfig>, j
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonCanMessageConfig const& config) {
     jv.~value();
-    new(&jv) json::value(json::object(&ext_boost_mem_resource));
+    new(&jv) json::value(json::object(ext_boost_json_storage_ptr));
     json::object& obj = jv.as_object();
 
     obj[NAMEOF_MEMBER(&JsonCanMessageConfig::frame_id).c_str()] = config.frame_id;
@@ -94,9 +94,9 @@ static void tag_invoke(json::value_from_tag, json::value& jv, JsonCanMessageConf
     obj[NAMEOF_MEMBER(&JsonCanMessageConfig::name).c_str()] = config.name;
     obj[NAMEOF_MEMBER(&JsonCanMessageConfig::message_size).c_str()] = config.message_size;
 
-    json::array signal_configs_array(&ext_boost_mem_resource);
+    json::array signal_configs_array(ext_boost_json_storage_ptr);
     for(const auto& signal_config : config.signal_configs)
-        signal_configs_array.push_back(json::value_from(signal_config, &ext_boost_mem_resource));
+        signal_configs_array.push_back(json::value_from(signal_config, ext_boost_json_storage_ptr));
     obj[NAMEOF_MEMBER(&JsonCanMessageConfig::signal_configs).c_str()] = std::move(signal_configs_array);
 
     jv = std::move(obj);
@@ -122,7 +122,7 @@ static JsonCanMessageConfig tag_invoke(json::value_to_tag<JsonCanMessageConfig>,
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonCanChannelConfig const& config) {
     jv.~value();
-    new(&jv) json::value(json::object(&ext_boost_mem_resource));
+    new(&jv) json::value(json::object(ext_boost_json_storage_ptr));
     json::object& obj = jv.as_object();
 
     obj[NAMEOF_MEMBER(&JsonCanChannelConfig::type).c_str()] = config.type;
@@ -132,9 +132,9 @@ static void tag_invoke(json::value_from_tag, json::value& jv, JsonCanChannelConf
     obj[NAMEOF_MEMBER(&JsonCanChannelConfig::data_bitrate).c_str()] = config.data_bitrate;
     obj[NAMEOF_MEMBER(&JsonCanChannelConfig::dbc_file_path).c_str()] = config.dbc_file_path;
 
-    json::array message_configs_array(&ext_boost_mem_resource);
+    json::array message_configs_array(ext_boost_json_storage_ptr);
     for(const auto& message_config : config.message_configs)
-        message_configs_array.push_back(json::value_from(message_config, &ext_boost_mem_resource));
+        message_configs_array.push_back(json::value_from(message_config, ext_boost_json_storage_ptr));
     obj[NAMEOF_MEMBER(&JsonCanChannelConfig::message_configs).c_str()] = std::move(message_configs_array);
 
     jv = std::move(obj);
@@ -161,12 +161,12 @@ static JsonCanChannelConfig tag_invoke(json::value_to_tag<JsonCanChannelConfig>,
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonCanbusConfig const& config) {
     jv.~value();
-    new(&jv) json::value(json::object(&ext_boost_mem_resource));
+    new(&jv) json::value(json::object(ext_boost_json_storage_ptr));
     json::object& obj = jv.as_object();
 
-    json::array channel_configs_array(&ext_boost_mem_resource);
+    json::array channel_configs_array(ext_boost_json_storage_ptr);
     for(const auto& channel_config : config.channel_configs)
-        channel_configs_array.push_back(json::value_from(channel_config, &ext_boost_mem_resource));
+        channel_configs_array.push_back(json::value_from(channel_config, ext_boost_json_storage_ptr));
     obj[NAMEOF_MEMBER(&JsonCanbusConfig::channel_configs).c_str()] = std::move(channel_configs_array);
 
     jv = std::move(obj);

@@ -20,7 +20,7 @@ template <typename T>
 class JsonSerializer {
 private:
     static std::unique_ptr<ExtString> Encode(const T& config) {
-        boost::json::value jv = boost::json::value_from(config, &ext_boost_mem_resource);
+        boost::json::value jv = boost::json::value_from(config, ext_boost_json_storage_ptr);
         ExtString result;
 
         boost::json::serializer sr;
@@ -37,7 +37,7 @@ private:
     }
 
     static T Decode(std::string_view json_str) {
-        boost::json::value jv = boost::json::parse(json_str, &ext_boost_mem_resource);
+        boost::json::value jv = boost::json::parse(json_str, ext_boost_json_storage_ptr);
 
         return boost::json::value_to<T>(jv);
     }
