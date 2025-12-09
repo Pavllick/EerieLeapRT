@@ -42,7 +42,7 @@ public:
 
         size_t sensor_id_hash = reading->sensor->id_hash;
 
-        readings_[sensor_id_hash] = reading;
+        readings_[sensor_id_hash] = std::move(reading);
         if(readings_[sensor_id_hash]->status == ReadingStatus::PROCESSED && readings_[sensor_id_hash]->value.has_value())
             reading_values_[sensor_id_hash] = readings_[sensor_id_hash]->value.value();
 

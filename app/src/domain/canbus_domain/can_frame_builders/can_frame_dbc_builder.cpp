@@ -36,7 +36,7 @@ CanFrame CanFrameDbcBuilder::Build(uint8_t bus_channel, uint32_t frame_id) {
         CanFrame can_frame_new = {
             .id = frame_id,
             .is_transmit = true,
-            .data = can_data
+            .data = std::move(can_data)
         };
 
         return can_frame_new;
