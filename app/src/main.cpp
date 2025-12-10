@@ -472,8 +472,8 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
     sensor_1->configuration.channel = 0;
     sensor_1->configuration.script_path = "scripts/sensor_1.lua";
     sensor_1->configuration.sampling_rate_ms = 1000;
-    sensor_1->configuration.voltage_interpolator = std::make_unique<LinearVoltageInterpolator>(calibration_data_1_ptr);
-    // sensor_1->configuration.expression_evaluator = std::make_unique<ExpressionEvaluator>("x * 2 + sensor_2 + 1");
+    sensor_1->configuration.voltage_interpolator = make_unique_pmr<LinearVoltageInterpolator>(Mrm::GetExtPmr(), calibration_data_1_ptr);
+    // sensor_1->configuration.expression_evaluator = make_unique_pmr<ExpressionEvaluator>(Mrm::GetExtPmr(), "x * 2 + sensor_2 + 1");
 
     std::pmr::vector<CalibrationData> calibration_data_2 {
         {0.0, 90.0},
@@ -490,8 +490,8 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
     sensor_2->configuration.type = SensorType::PHYSICAL_ANALOG;
     sensor_2->configuration.channel = 1;
     sensor_2->configuration.sampling_rate_ms = 1000;
-    sensor_2->configuration.voltage_interpolator = std::make_unique<CubicSplineVoltageInterpolator>(calibration_data_2_ptr);
-    sensor_2->configuration.expression_evaluator = std::make_unique<ExpressionEvaluator>("x * 4 + 1.6");
+    sensor_2->configuration.voltage_interpolator = make_unique_pmr<CubicSplineVoltageInterpolator>(Mrm::GetExtPmr(), calibration_data_2_ptr);
+    sensor_2->configuration.expression_evaluator = make_unique_pmr<ExpressionEvaluator>(Mrm::GetExtPmr(), "x * 4 + 1.6");
 
     auto sensor_3 = make_shared_pmr<Sensor>(Mrm::GetExtPmr(), "sensor_3");
 
@@ -501,7 +501,7 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
 
     sensor_3->configuration.type = SensorType::VIRTUAL_ANALOG;
     sensor_3->configuration.sampling_rate_ms = 2000;
-    sensor_3->configuration.expression_evaluator = std::make_unique<ExpressionEvaluator>("2 + 8.34");
+    sensor_3->configuration.expression_evaluator = make_unique_pmr<ExpressionEvaluator>(Mrm::GetExtPmr(), "2 + 8.34");
 
     auto sensor_4 = make_shared_pmr<Sensor>(Mrm::GetExtPmr(), "sensor_4");
 
@@ -521,7 +521,7 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
 
     sensor_5->configuration.type = SensorType::VIRTUAL_INDICATOR;
     sensor_5->configuration.sampling_rate_ms = 1000;
-    sensor_5->configuration.expression_evaluator = std::make_unique<ExpressionEvaluator>("sensor_1 < 400");
+    sensor_5->configuration.expression_evaluator = make_unique_pmr<ExpressionEvaluator>(Mrm::GetExtPmr(), "sensor_1 < 400");
 
     auto sensor_6 = make_shared_pmr<Sensor>(Mrm::GetExtPmr(), "sensor_6");
 
@@ -552,7 +552,7 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
     sensor_8->configuration.type = SensorType::USER_ANALOG;
     sensor_8->configuration.script_path = "scripts/sensor_8.lua";
     sensor_8->configuration.sampling_rate_ms = 500;
-    sensor_8->configuration.expression_evaluator = std::make_unique<ExpressionEvaluator>("x * 2");
+    sensor_8->configuration.expression_evaluator = make_unique_pmr<ExpressionEvaluator>(Mrm::GetExtPmr(), "x * 2");
 
     std::vector<std::shared_ptr<Sensor>> sensors = {
         sensor_1,
@@ -585,7 +585,7 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
     //     sensor->configuration.script_path = "scripts/sensor_1.lua";
     //     sensor->configuration.sampling_rate_ms = 50;
     //     sensor->configuration.voltage_interpolator = make_unique_pmr<LinearVoltageInterpolator>(Mrm::GetExtPmr(), calibration_data_1_ptr);
-    //     sensor->configuration.expression_evaluator = std::make_unique<ExpressionEvaluator>("x * 2 + 1");
+    //     sensor->configuration.expression_evaluator = make_unique_pmr<ExpressionEvaluator>(Mrm::GetExtPmr(), "x * 2 + 1");
 
     //     sensors.push_back(sensor);
     // }
