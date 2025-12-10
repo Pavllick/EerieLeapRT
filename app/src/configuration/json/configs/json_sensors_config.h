@@ -5,7 +5,7 @@
 #include <boost/json.hpp>
 #include <nameof.hpp>
 
-#include "utilities/memory/boost_memory_resource.h"
+#include "utilities/memory/memory_resource_manager.h"
 
 namespace eerie_leap::configuration::json::configs {
 
@@ -17,7 +17,7 @@ struct JsonSensorMetadataConfig {
     json::string unit;
     json::string description;
 
-    JsonSensorMetadataConfig(json::storage_ptr sp = ext_boost_json_storage_ptr)
+    JsonSensorMetadataConfig(json::storage_ptr sp = Mrm::GetBoostExtPmr())
         : name(sp), unit(sp), description(sp) {}
 };
 
@@ -36,7 +36,7 @@ struct JsonSensorConfigurationConfig {
     std::vector<JsonSensorCalibrationDataConfig, HeapAllocator<JsonSensorCalibrationDataConfig>> calibration_table;
     json::string expression;
 
-    JsonSensorConfigurationConfig(json::storage_ptr sp = ext_boost_json_storage_ptr)
+    JsonSensorConfigurationConfig(json::storage_ptr sp = Mrm::GetBoostExtPmr())
         : type(sp), connection_string(sp), script_path(sp), interpolation_method(sp), expression(sp) {}
 };
 
@@ -45,7 +45,7 @@ struct JsonSensorConfig {
     JsonSensorMetadataConfig metadata;
     JsonSensorConfigurationConfig configuration;
 
-    JsonSensorConfig(json::storage_ptr sp = ext_boost_json_storage_ptr)
+    JsonSensorConfig(json::storage_ptr sp = Mrm::GetBoostExtPmr())
         : id(sp), metadata(sp), configuration(sp) {}
 };
 
@@ -55,7 +55,7 @@ struct JsonSensorsConfig {
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonSensorMetadataConfig const& config) {
     jv.~value();
-    new(&jv) json::value(json::object(ext_boost_json_storage_ptr));
+    new(&jv) json::value(json::object(Mrm::GetBoostExtPmr()));
     json::object& obj = jv.as_object();
 
     obj[NAMEOF_MEMBER(&JsonSensorMetadataConfig::name).c_str()] = config.name;
@@ -78,7 +78,7 @@ static JsonSensorMetadataConfig tag_invoke(json::value_to_tag<JsonSensorMetadata
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonSensorCalibrationDataConfig const& config) {
     jv.~value();
-    new(&jv) json::value(json::object(ext_boost_json_storage_ptr));
+    new(&jv) json::value(json::object(Mrm::GetBoostExtPmr()));
     json::object& obj = jv.as_object();
 
     obj[NAMEOF_MEMBER(&JsonSensorCalibrationDataConfig::voltage).c_str()] = config.voltage;
@@ -97,7 +97,7 @@ static JsonSensorCalibrationDataConfig tag_invoke(json::value_to_tag<JsonSensorC
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonSensorConfigurationConfig const& config) {
     jv.~value();
-    new(&jv) json::value(json::object(ext_boost_json_storage_ptr));
+    new(&jv) json::value(json::object(Mrm::GetBoostExtPmr()));
     json::object& obj = jv.as_object();
 
     obj[NAMEOF_MEMBER(&JsonSensorConfigurationConfig::type).c_str()] = config.type;
@@ -107,9 +107,9 @@ static void tag_invoke(json::value_from_tag, json::value& jv, JsonSensorConfigur
     obj[NAMEOF_MEMBER(&JsonSensorConfigurationConfig::sampling_rate_ms).c_str()] = config.sampling_rate_ms;
     obj[NAMEOF_MEMBER(&JsonSensorConfigurationConfig::interpolation_method).c_str()] = config.interpolation_method;
 
-    json::array calib_array(ext_boost_json_storage_ptr);
+    json::array calib_array(Mrm::GetBoostExtPmr());
     for(const auto& calib : config.calibration_table)
-        calib_array.push_back(json::value_from(calib, ext_boost_json_storage_ptr));
+        calib_array.push_back(json::value_from(calib, Mrm::GetBoostExtPmr()));
     obj[NAMEOF_MEMBER(&JsonSensorConfigurationConfig::calibration_table).c_str()] = std::move(calib_array);
 
     obj[NAMEOF_MEMBER(&JsonSensorConfigurationConfig::expression).c_str()] = config.expression;
@@ -140,12 +140,12 @@ static JsonSensorConfigurationConfig tag_invoke(json::value_to_tag<JsonSensorCon
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonSensorConfig const& config) {
     jv.~value();
-    new(&jv) json::value(json::object(ext_boost_json_storage_ptr));
+    new(&jv) json::value(json::object(Mrm::GetBoostExtPmr()));
     json::object& obj = jv.as_object();
 
     obj[NAMEOF_MEMBER(&JsonSensorConfig::id).c_str()] = config.id;
-    obj[NAMEOF_MEMBER(&JsonSensorConfig::metadata).c_str()] = json::value_from(config.metadata, ext_boost_json_storage_ptr);
-    obj[NAMEOF_MEMBER(&JsonSensorConfig::configuration).c_str()] = json::value_from(config.configuration, ext_boost_json_storage_ptr);
+    obj[NAMEOF_MEMBER(&JsonSensorConfig::metadata).c_str()] = json::value_from(config.metadata, Mrm::GetBoostExtPmr());
+    obj[NAMEOF_MEMBER(&JsonSensorConfig::configuration).c_str()] = json::value_from(config.configuration, Mrm::GetBoostExtPmr());
 
     jv = std::move(obj);
 }
@@ -163,12 +163,12 @@ static JsonSensorConfig tag_invoke(json::value_to_tag<JsonSensorConfig>, json::v
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonSensorsConfig const& config) {
     jv.~value();
-    new(&jv) json::value(json::object(ext_boost_json_storage_ptr));
+    new(&jv) json::value(json::object(Mrm::GetBoostExtPmr()));
     json::object& obj = jv.as_object();
 
-    json::array sensors_array(ext_boost_json_storage_ptr);
+    json::array sensors_array(Mrm::GetBoostExtPmr());
     for(const auto& sensor : config.sensors)
-        sensors_array.push_back(json::value_from(sensor, ext_boost_json_storage_ptr));
+        sensors_array.push_back(json::value_from(sensor, Mrm::GetBoostExtPmr()));
     obj[NAMEOF_MEMBER(&JsonSensorsConfig::sensors).c_str()] = std::move(sensors_array);
 
     jv = std::move(obj);

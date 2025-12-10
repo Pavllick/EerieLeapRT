@@ -5,7 +5,7 @@
 #include <boost/json.hpp>
 #include <nameof.hpp>
 
-#include "utilities/memory/boost_memory_resource.h"
+#include "utilities/memory/memory_resource_manager.h"
 
 namespace eerie_leap::configuration::json::configs {
 
@@ -24,7 +24,7 @@ struct JsonSystemConfig {
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonComUserConfig const& config) {
     jv.~value();
-    new(&jv) json::value(json::object(ext_boost_json_storage_ptr));
+    new(&jv) json::value(json::object(Mrm::GetBoostExtPmr()));
     json::object& obj = jv.as_object();
 
     obj[NAMEOF_MEMBER(&JsonComUserConfig::device_id).c_str()] = config.device_id;
@@ -43,14 +43,14 @@ static JsonComUserConfig tag_invoke(json::value_to_tag<JsonComUserConfig>, json:
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonSystemConfig const& config) {
     jv.~value();
-    new(&jv) json::value(json::object(ext_boost_json_storage_ptr));
+    new(&jv) json::value(json::object(Mrm::GetBoostExtPmr()));
     json::object& obj = jv.as_object();
 
     obj[NAMEOF_MEMBER(&JsonSystemConfig::com_user_refresh_rate_ms).c_str()] = config.com_user_refresh_rate_ms;
 
-    json::array com_user_configs_array(ext_boost_json_storage_ptr);
+    json::array com_user_configs_array(Mrm::GetBoostExtPmr());
     for(const auto& com_user_config : config.com_user_configs)
-        com_user_configs_array.push_back(json::value_from(com_user_config, ext_boost_json_storage_ptr));
+        com_user_configs_array.push_back(json::value_from(com_user_config, Mrm::GetBoostExtPmr()));
     obj[NAMEOF_MEMBER(&JsonSystemConfig::com_user_configs).c_str()] = std::move(com_user_configs_array);
 
     jv = std::move(obj);
