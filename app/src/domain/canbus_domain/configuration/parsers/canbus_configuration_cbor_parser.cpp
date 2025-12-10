@@ -18,23 +18,23 @@ pmr_unique_ptr<CborCanbusConfig> CanbusConfigurationCborParser::Serialize(const 
     auto config = make_unique_pmr<CborCanbusConfig>(Mrm::GetExtPmr());
 
     for(const auto& [bus_channel, channel_configuration] : configuration.channel_configurations) {
-        CborCanChannelConfig channel_config = {
-            .type = std::to_underlying(channel_configuration.type),
-            .is_extended_id = channel_configuration.is_extended_id,
-            .bus_channel = bus_channel,
-            .bitrate = channel_configuration.bitrate,
-            .data_bitrate = channel_configuration.data_bitrate,
-            .dbc_file_path = CborHelpers::ToZcborString(channel_configuration.dbc_file_path)
-        };
+        CborCanChannelConfig channel_config(std::allocator_arg, Mrm::GetExtPmr());
+
+        channel_config.type = std::to_underlying(channel_configuration.type);
+        channel_config.is_extended_id = channel_configuration.is_extended_id;
+        channel_config.bus_channel = bus_channel;
+        channel_config.bitrate = channel_configuration.bitrate;
+        channel_config.data_bitrate = channel_configuration.data_bitrate;
+        channel_config.dbc_file_path = CborHelpers::ToZcborString(channel_configuration.dbc_file_path);
 
         for(const auto& message_configuration : channel_configuration.message_configurations) {
-            CborCanMessageConfig message_config = {
-                .frame_id = message_configuration->frame_id,
-                .send_interval_ms = message_configuration->send_interval_ms,
-                .script_path = CborHelpers::ToZcborString(message_configuration->script_path),
-                .name = CborHelpers::ToZcborString(message_configuration->name),
-                .message_size = message_configuration->message_size
-            };
+            CborCanMessageConfig message_config(std::allocator_arg, Mrm::GetExtPmr());
+
+            message_config.frame_id = message_configuration->frame_id;
+            message_config.send_interval_ms = message_configuration->send_interval_ms;
+            message_config.script_path = CborHelpers::ToZcborString(message_configuration->script_path);
+            message_config.name = CborHelpers::ToZcborString(message_configuration->name);
+            message_config.message_size = message_configuration->message_size;
 
             for(const auto& signal_configuration : message_configuration->signal_configurations) {
                 message_config.CborCanSignalConfig_m.push_back({

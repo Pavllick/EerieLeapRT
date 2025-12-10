@@ -10,7 +10,7 @@ pmr_unique_ptr<CborAdcConfig> AdcConfigurationCborParser::Serialize(const AdcCon
     adc_config->samples = adc_configuration.samples;
 
     for(const auto& channel_configuration : *adc_configuration.channel_configurations) {
-        CborAdcChannelConfig adc_channel_config;
+        CborAdcChannelConfig adc_channel_config(std::allocator_arg, Mrm::GetExtPmr());
 
         auto interpolation_method = channel_configuration->calibrator != nullptr
             ? channel_configuration->calibrator->GetInterpolationMethod()

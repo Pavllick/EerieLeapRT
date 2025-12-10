@@ -1,15 +1,12 @@
 #pragma once
 
+#include <memory_resource>
 #include <cstdint>
 #include <cstdbool>
 #include <cstddef>
 #include <vector>
 
 #include <zcbor_common.h>
-
-#include "utilities/memory/heap_allocator.h"
-
-using namespace eerie_leap::utilities::memory;
 
 struct CborSensorMetadataConfig {
 	struct zcbor_string name;
@@ -23,10 +20,23 @@ struct CborSensorCalibrationDataMap_float32float {
 };
 
 struct CborSensorCalibrationDataMap {
-	std::vector<CborSensorCalibrationDataMap_float32float, HeapAllocator<CborSensorCalibrationDataMap_float32float>> float32float;
+	using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+
+	std::pmr::vector<CborSensorCalibrationDataMap_float32float> float32float;
+
+	CborSensorCalibrationDataMap(std::allocator_arg_t, const allocator_type& alloc)
+        : float32float(alloc) {}
+
+    CborSensorCalibrationDataMap(const CborSensorCalibrationDataMap&) = delete;
+    CborSensorCalibrationDataMap& operator=(const CborSensorCalibrationDataMap&) = delete;
+
+	CborSensorCalibrationDataMap(CborSensorCalibrationDataMap&& other, allocator_type alloc)
+        : float32float(std::move(other.float32float), alloc) {}
 };
 
 struct CborSensorConfigurationConfig {
+	using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+
 	uint32_t type;
 	uint32_t sampling_rate_ms;
 	uint32_t interpolation_method;
@@ -38,15 +48,59 @@ struct CborSensorConfigurationConfig {
 	bool calibration_table_present;
 	struct zcbor_string expression;
 	bool expression_present;
+
+	CborSensorConfigurationConfig(std::allocator_arg_t, const allocator_type& alloc)
+        : calibration_table(std::allocator_arg, alloc) {}
+
+    CborSensorConfigurationConfig(const CborSensorConfigurationConfig&) = delete;
+    CborSensorConfigurationConfig& operator=(const CborSensorConfigurationConfig&) = delete;
+
+	CborSensorConfigurationConfig(CborSensorConfigurationConfig&& other, allocator_type alloc)
+        : type(other.type),
+		sampling_rate_ms(other.sampling_rate_ms),
+		interpolation_method(other.interpolation_method),
+		channel(other.channel),
+		channel_present(other.channel_present),
+		connection_string(other.connection_string),
+		script_path(other.script_path),
+		calibration_table(std::move(other.calibration_table), alloc),
+		calibration_table_present(other.calibration_table_present),
+		expression(other.expression),
+		expression_present(other.expression_present) {}
 };
 
 struct CborSensorConfig {
+	using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+
 	struct zcbor_string id;
 	struct CborSensorMetadataConfig metadata;
 	struct CborSensorConfigurationConfig configuration;
+
+	CborSensorConfig(std::allocator_arg_t, const allocator_type& alloc)
+        : configuration(std::allocator_arg, alloc) {}
+
+    CborSensorConfig(const CborSensorConfig&) = delete;
+    CborSensorConfig& operator=(const CborSensorConfig&) = delete;
+
+	CborSensorConfig(CborSensorConfig&& other, allocator_type alloc)
+        : id(other.id),
+		metadata(other.metadata),
+		configuration(std::move(other.configuration), alloc) {}
 };
 
 struct CborSensorsConfig {
-	std::vector<CborSensorConfig, HeapAllocator<CborSensorConfig>> CborSensorConfig_m;
+	using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+
+	std::pmr::vector<CborSensorConfig> CborSensorConfig_m;
 	uint32_t json_config_checksum;
+
+	CborSensorsConfig(std::allocator_arg_t, const allocator_type& alloc)
+        : CborSensorConfig_m(alloc) {}
+
+    CborSensorsConfig(const CborSensorsConfig&) = delete;
+    CborSensorsConfig& operator=(const CborSensorsConfig&) = delete;
+
+	CborSensorsConfig(CborSensorsConfig&& other, allocator_type alloc)
+        : CborSensorConfig_m(std::move(other.CborSensorConfig_m), alloc),
+		json_config_checksum(other.json_config_checksum) {}
 };

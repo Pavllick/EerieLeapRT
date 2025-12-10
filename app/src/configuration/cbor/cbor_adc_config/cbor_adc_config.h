@@ -1,13 +1,10 @@
 #pragma once
 
+#include <memory_resource>
 #include <cstdint>
 #include <cstdbool>
 #include <cstddef>
 #include <vector>
-
-#include "utilities/memory/heap_allocator.h"
-
-using namespace eerie_leap::utilities::memory;
 
 struct CborAdcCalibrationDataMap_float32float {
 	float float32float_key;
@@ -15,17 +12,54 @@ struct CborAdcCalibrationDataMap_float32float {
 };
 
 struct CborAdcCalibrationDataMap {
-	std::vector<CborAdcCalibrationDataMap_float32float> float32float;
+	using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+
+	std::pmr::vector<CborAdcCalibrationDataMap_float32float> float32float;
+
+	CborAdcCalibrationDataMap(std::allocator_arg_t, const allocator_type& alloc)
+        : float32float(alloc) {}
+
+    CborAdcCalibrationDataMap(const CborAdcCalibrationDataMap&) = delete;
+    CborAdcCalibrationDataMap& operator=(const CborAdcCalibrationDataMap&) = delete;
+
+	CborAdcCalibrationDataMap(CborAdcCalibrationDataMap&& other, allocator_type alloc)
+        : float32float(std::move(other.float32float), alloc) {}
 };
 
 struct CborAdcChannelConfig {
+	using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+
 	uint32_t interpolation_method;
 	struct CborAdcCalibrationDataMap calibration_table;
 	bool calibration_table_present;
+
+	CborAdcChannelConfig(std::allocator_arg_t, const allocator_type& alloc)
+        : calibration_table(std::allocator_arg, alloc) {}
+
+    CborAdcChannelConfig(const CborAdcChannelConfig&) = delete;
+    CborAdcChannelConfig& operator=(const CborAdcChannelConfig&) = delete;
+
+	CborAdcChannelConfig(CborAdcChannelConfig&& other, allocator_type alloc)
+        : interpolation_method(other.interpolation_method),
+		calibration_table(std::move(other.calibration_table), alloc),
+		calibration_table_present(other.calibration_table_present) {}
 };
 
 struct CborAdcConfig {
+	using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+
 	uint32_t samples;
-	std::vector<CborAdcChannelConfig, HeapAllocator<CborAdcChannelConfig>> CborAdcChannelConfig_m;
+	std::pmr::vector<CborAdcChannelConfig> CborAdcChannelConfig_m;
 	uint32_t json_config_checksum;
+
+	CborAdcConfig(std::allocator_arg_t, const allocator_type& alloc)
+        : CborAdcChannelConfig_m(alloc) {}
+
+    CborAdcConfig(const CborAdcConfig&) = delete;
+    CborAdcConfig& operator=(const CborAdcConfig&) = delete;
+
+	CborAdcConfig(CborAdcConfig&& other, allocator_type alloc)
+        : samples(samples),
+		CborAdcChannelConfig_m(std::move(other.CborAdcChannelConfig_m), alloc),
+		json_config_checksum(other.json_config_checksum) {}
 };
