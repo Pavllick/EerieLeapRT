@@ -72,7 +72,7 @@ void CanbusService::LoadDbcConfiguration(const CanChannelConfiguration& channel_
     if(fs_service_ != nullptr && fs_service_->Exists(channel_configuration.dbc_file_path)) {
         FsServiceStreamBuf fs_stream_buf(
             fs_service_.get(),
-            channel_configuration.dbc_file_path,
+            std::string(channel_configuration.dbc_file_path),
             FsServiceStreamBuf::OpenMode::Read);
 
         bool res = LoadDbcFile(*channel_configuration.dbc, fs_stream_buf);
@@ -92,24 +92,24 @@ void CanbusService::ConfigureUserSignals(const CanChannelConfiguration& channel_
     for(const auto& message_configuration : channel_configuration.message_configurations) {
         DbcMessage* message = nullptr;
 
-        channel_configuration.dbc->HasMessage(message_configuration.frame_id);
+        channel_configuration.dbc->HasMessage(message_configuration->frame_id);
 
-        if(channel_configuration.dbc->HasMessage(message_configuration.frame_id))
-            message = channel_configuration.dbc->GetOrRegisterMessage(message_configuration.frame_id);
+        if(channel_configuration.dbc->HasMessage(message_configuration->frame_id))
+            message = channel_configuration.dbc->GetOrRegisterMessage(message_configuration->frame_id);
         else
             message = channel_configuration.dbc->AddMessage(
-                message_configuration.frame_id,
-                message_configuration.name,
-                message_configuration.message_size);
+                message_configuration->frame_id,
+                std::string(message_configuration->name),
+                message_configuration->message_size);
 
-        for(const auto& signal_configuration : message_configuration.signal_configurations) {
+        for(const auto& signal_configuration : message_configuration->signal_configurations) {
             message->AddSignal(
-                signal_configuration.name,
+                std::string(signal_configuration.name),
                 signal_configuration.start_bit,
                 signal_configuration.size_bits,
                 signal_configuration.factor,
                 signal_configuration.offset,
-                signal_configuration.unit);
+                std::string(signal_configuration.unit));
         }
     }
 }

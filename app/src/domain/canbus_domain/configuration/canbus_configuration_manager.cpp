@@ -16,8 +16,8 @@ CanbusConfigurationManager::CanbusConfigurationManager(
         configuration_(nullptr),
         json_config_checksum_(0) {
 
-    cbor_parser_ = make_unique_ext<CanbusConfigurationCborParser>(sd_fs_service_);
-    json_parser_ = make_unique_ext<CanbusConfigurationJsonParser>(sd_fs_service_);
+    cbor_parser_ = std::make_unique<CanbusConfigurationCborParser>(sd_fs_service_);
+    json_parser_ = std::make_unique<CanbusConfigurationJsonParser>(sd_fs_service_);
     std::shared_ptr<CanbusConfiguration> configuration = nullptr;
 
     try {
@@ -48,9 +48,9 @@ bool CanbusConfigurationManager::ApplyJsonConfiguration() {
             return true;
 
         try {
-            auto configuration = json_parser_->Deserialize(*json_config_loaded->config);
+            auto configuration = json_parser_->Deserialize(Mrm::GetExtPmr(), *json_config_loaded->config);
 
-            if(!Update(configuration))
+            if(!Update(*configuration))
                 return false;
         } catch(const std::exception& e) {
             LOG_ERR("Failed to deserialize JSON configuration. %s", e.what());
@@ -107,8 +107,8 @@ std::shared_ptr<CanbusConfiguration> CanbusConfigurationManager::Get(bool force_
 
     auto cbor_config = std::move(cbor_config_data.value().config);
 
-    auto configuration = cbor_parser_->Deserialize(*cbor_config);
-    configuration_ = std::make_shared<CanbusConfiguration>(configuration);
+    auto configuration = cbor_parser_->Deserialize(Mrm::GetExtPmr(), *cbor_config);
+    configuration_ = make_shared_pmr<CanbusConfiguration>(Mrm::GetExtPmr(), std::move(*configuration));
 
     json_config_checksum_ = cbor_config->json_config_checksum;
 
@@ -116,7 +116,7 @@ std::shared_ptr<CanbusConfiguration> CanbusConfigurationManager::Get(bool force_
 }
 
 bool CanbusConfigurationManager::CreateDefaultConfiguration() {
-    auto configuration = make_unique_ext<CanbusConfiguration>();
+    auto configuration = make_unique_pmr<CanbusConfiguration>(Mrm::GetExtPmr());
 
     return Update(*configuration);
 }

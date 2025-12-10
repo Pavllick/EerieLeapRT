@@ -47,7 +47,7 @@ bool LoggingConfigurationManager::ApplyJsonConfiguration() {
             return true;
 
         try {
-            auto configuration = json_parser_->Deserialize(*json_config_loaded->config);
+            auto configuration = json_parser_->Deserialize(Mrm::GetExtPmr(), *json_config_loaded->config);
 
             json_config_checksum_ = json_config_loaded->checksum;
 
@@ -109,7 +109,7 @@ std::shared_ptr<LoggingConfiguration> LoggingConfigurationManager::Get(bool forc
 
     auto cbor_config = std::move(cbor_config_data.value().config);
 
-    auto configuration = cbor_parser_->Deserialize(*cbor_config);
+    auto configuration = cbor_parser_->Deserialize(Mrm::GetExtPmr(), *cbor_config);
     configuration_ = make_shared_pmr<LoggingConfiguration>(Mrm::GetExtPmr(), std::move(*configuration));
 
     json_config_checksum_ = cbor_config->json_config_checksum;

@@ -34,15 +34,15 @@ void CanbusSchedulerService::Initialize() {
 
 WorkQueueTaskResult CanbusSchedulerService::ProcessCanbusWorkTask(CanbusTask* task) {
     try {
-        auto can_frame = task->can_frame_dbc_builder->Build(task->bus_channel, task->message_configuration.frame_id);
+        auto can_frame = task->can_frame_dbc_builder->Build(task->bus_channel, task->message_configuration->frame_id);
 
         for(const auto& processor : *task->can_frame_processors)
-            can_frame = processor->Process(task->message_configuration, can_frame);
+            can_frame = processor->Process(*task->message_configuration, can_frame);
 
         if(can_frame.data.size() > 0)
             task->canbus->SendFrame(can_frame);
     } catch (const std::exception& e) {
-        LOG_DBG("Error processing Frame ID: %d, Error: %s", task->message_configuration.frame_id, e.what());
+        LOG_DBG("Error processing Frame ID: %d, Error: %s", task->message_configuration->frame_id, e.what());
     }
 
     return {
@@ -51,28 +51,28 @@ WorkQueueTaskResult CanbusSchedulerService::ProcessCanbusWorkTask(CanbusTask* ta
     };
 }
 
-std::unique_ptr<CanbusTask> CanbusSchedulerService::CreateTask(uint8_t bus_channel, const CanMessageConfiguration& message_configuration) {
+std::unique_ptr<CanbusTask> CanbusSchedulerService::CreateTask(uint8_t bus_channel, std::shared_ptr<CanMessageConfiguration> message_configuration) {
     auto canbus = canbus_service_->GetCanbus(bus_channel);
     if(canbus == nullptr) {
-        LOG_ERR("Failed to create task for Frame ID: %d", message_configuration.frame_id);
+        LOG_ERR("Failed to create task for Frame ID: %d", message_configuration->frame_id);
         return nullptr;
     }
 
     auto dbc = canbus_service_->GetChannelConfiguration(bus_channel)->dbc;
-    if(dbc == nullptr || !dbc->HasMessage(message_configuration.frame_id)) {
-        LOG_ERR("Failed to create task for Frame ID: %d", message_configuration.frame_id);
+    if(dbc == nullptr || !dbc->HasMessage(message_configuration->frame_id)) {
+        LOG_ERR("Failed to create task for Frame ID: %d", message_configuration->frame_id);
         return nullptr;
     }
 
-    if(message_configuration.send_interval_ms == 0)
+    if(message_configuration->send_interval_ms == 0)
         return nullptr;
 
-    InitializeScript(message_configuration);
+    InitializeScript(*message_configuration);
 
     auto task = std::make_unique<CanbusTask>();
-    task->send_interval_ms = K_MSEC(message_configuration.send_interval_ms);
+    task->send_interval_ms = K_MSEC(message_configuration->send_interval_ms);
     task->bus_channel = bus_channel;
-    task->message_configuration = message_configuration;
+    task->message_configuration = std::move(message_configuration);
     task->canbus = canbus;
     task->can_frame_dbc_builder = can_frame_dbc_builder_;
     task->can_frame_processors = can_frame_processors_;
@@ -98,7 +98,7 @@ void CanbusSchedulerService::Start() {
 
             work_queue_tasks_.push_back(
                 work_queue_thread_->CreateTask(ProcessCanbusWorkTask, std::move(task)));
-            LOG_INF("Created task for Frame ID: %d", message_configuration.frame_id);
+            LOG_INF("Created task for Frame ID: %d", message_configuration->frame_id);
         }
     }
 
@@ -116,7 +116,7 @@ void CanbusSchedulerService::Restart() {
 
 void CanbusSchedulerService::Pause() {
     for(auto& work_queue_task : work_queue_tasks_) {
-        LOG_INF("Canceling task for Frame ID: %d", work_queue_task.user_data->message_configuration.frame_id);
+        LOG_INF("Canceling task for Frame ID: %d", work_queue_task.user_data->message_configuration->frame_id);
 
         while(work_queue_thread_->CancelTask(work_queue_task))
             k_sleep(K_MSEC(1));

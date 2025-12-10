@@ -22,8 +22,8 @@ ext_unique_ptr<JsonLoggingConfig> LoggingConfigurationJsonParser::Serialize(cons
     return config;
 }
 
-pmr_unique_ptr<LoggingConfiguration> LoggingConfigurationJsonParser::Deserialize(const JsonLoggingConfig& config) {
-    auto configuration = make_unique_pmr<LoggingConfiguration>(Mrm::GetExtPmr());
+pmr_unique_ptr<LoggingConfiguration> LoggingConfigurationJsonParser::Deserialize(std::pmr::memory_resource* mr, const JsonLoggingConfig& config) {
+    auto configuration = make_unique_pmr<LoggingConfiguration>(mr);
     configuration->logging_interval_ms = config.logging_interval_ms;
     configuration->max_log_size_mb = config.max_log_size_mb;
 

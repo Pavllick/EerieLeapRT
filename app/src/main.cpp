@@ -358,65 +358,66 @@ void SetupCanbusConfiguration(std::shared_ptr<CanbusConfigurationManager> canbus
 
     canbus_configuration->channel_configurations.clear();
 
-    CanChannelConfiguration canbus_channel_configuration_0 = {
-        .type = CanbusType::CANFD,
-        .is_extended_id = false,
-        .bus_channel = 1,
-        .bitrate = 1000000,
-        .data_bitrate = 2000000,
-        .dbc_file_path = "configuration/canbus_0.dbc",
+    CanChannelConfiguration canbus_channel_configuration_0(std::allocator_arg, Mrm::GetExtPmr());
+    canbus_channel_configuration_0.type = CanbusType::CANFD;
+    canbus_channel_configuration_0.is_extended_id = false;
+    canbus_channel_configuration_0.bus_channel = 1;
+    canbus_channel_configuration_0.bitrate = 1000000;
+    canbus_channel_configuration_0.data_bitrate = 2000000;
+    canbus_channel_configuration_0.dbc_file_path = "configuration/canbus_0.dbc";
 
-        .message_configurations = {
-            {
-                .frame_id = 790,
-                .send_interval_ms = 10,
-            },
-            {
-                .frame_id = 809,
-                .send_interval_ms = 10,
-            },
-            {
-                .frame_id = 1087,
-                .send_interval_ms = 10,
-                .script_path = "scripts/e46_smg_gear.lua",
-            },
-            {
-                .frame_id = 100,
-                .send_interval_ms = 10,
-                .name = "EL_FRAME_0",
-                .message_size = 8,
-                .signal_configurations = {
-                    {
-                        .start_bit = 16,
-                        .size_bits = 16,
-                        .name = "sensor_1",
-                        .unit = "km/h",
-                    },
-                },
-            },
-        }
-    };
+    auto message_configuration_0 = make_shared_pmr<CanMessageConfiguration>(Mrm::GetExtPmr());
+    message_configuration_0->frame_id = 790;
+    message_configuration_0->send_interval_ms = 10;
+    canbus_channel_configuration_0.message_configurations.emplace_back(std::move(message_configuration_0));
 
-    // for(int i = 0; i < 100; i++) {
-    //     canbus_channel_configuration_0.message_configurations.push_back({
-    //         .frame_id = 100 + i,
-    //         .send_interval_ms = 10,
-    //         .name = "EL_FRAME_0",
-    //         .message_size = 8,
-    //         .signal_configurations = {
-    //             {
-    //                 .start_bit = 16,
-    //                 .size_bits = 16,
-    //                 .name = "sensor_1",
-    //                 .unit = "km/h",
-    //             },
-    //         },
-    //     });
+    auto message_configuration_1 = make_shared_pmr<CanMessageConfiguration>(Mrm::GetExtPmr());
+    message_configuration_1->frame_id = 809;
+    message_configuration_1->send_interval_ms = 10;
+    canbus_channel_configuration_0.message_configurations.emplace_back(std::move(message_configuration_1));
+
+    auto message_configuration_2 = make_shared_pmr<CanMessageConfiguration>(Mrm::GetExtPmr());
+    message_configuration_2->frame_id = 1087;
+    message_configuration_2->send_interval_ms = 10;
+    message_configuration_2->script_path = "scripts/e46_smg_gear.lua";
+    canbus_channel_configuration_0.message_configurations.emplace_back(std::move(message_configuration_2));
+
+    auto message_configuration_3 = make_shared_pmr<CanMessageConfiguration>(Mrm::GetExtPmr());
+    message_configuration_3->frame_id = 100;
+    message_configuration_3->send_interval_ms = 10;
+    message_configuration_3->name = "EL_FRAME_0";
+    message_configuration_3->message_size = 8;
+
+    CanSignalConfiguration signal_configuration_0(std::allocator_arg, Mrm::GetExtPmr());
+    signal_configuration_0.start_bit = 16;
+    signal_configuration_0.size_bits = 16;
+    signal_configuration_0.name = "sensor_1";
+    signal_configuration_0.unit = "km/h";
+    message_configuration_3->signal_configurations.emplace_back(std::move(signal_configuration_0));
+    canbus_channel_configuration_0.message_configurations.emplace_back(std::move(message_configuration_3));
+
+    // for(int i = 0; i < 20; i++) {
+    //     auto message_configuration = make_shared_pmr<CanMessageConfiguration>(Mrm::GetExtPmr());
+    //     message_configuration->frame_id = 100 + i;
+    //     message_configuration->send_interval_ms = 10;
+    //     message_configuration->name = "EL_FRAME_0";
+    //     message_configuration->message_size = 8 * 8;
+
+    //     for(int j = 0; j < 4 * 8; j++) {
+    //         CanSignalConfiguration signal_configuration(std::allocator_arg, Mrm::GetExtPmr());
+    //         signal_configuration.start_bit = j * 16;
+    //         signal_configuration.size_bits = 16;
+    //         signal_configuration.name = "sensor_" + std::to_string(j);
+    //         signal_configuration.unit = "km/h";
+    //         message_configuration->signal_configurations.emplace_back(std::move(signal_configuration));
+    //     }
+
+    //     canbus_channel_configuration_0.message_configurations.emplace_back(std::move(message_configuration));
     // }
 
     canbus_configuration->channel_configurations.emplace(
         canbus_channel_configuration_0.bus_channel,
-        canbus_channel_configuration_0);
+        std::move(canbus_channel_configuration_0));
 
     canbus_configuration_manager->Update(*canbus_configuration);
 }

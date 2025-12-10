@@ -22,7 +22,7 @@ public:
     explicit CanbusConfigurationJsonParser(std::shared_ptr<IFsService> fs_service);
 
     ext_unique_ptr<JsonCanbusConfig> Serialize(const CanbusConfiguration& configuration);
-    CanbusConfiguration Deserialize(const JsonCanbusConfig& config);
+    pmr_unique_ptr<CanbusConfiguration> Deserialize(std::pmr::memory_resource* mr, const JsonCanbusConfig& config);
 };
 
 } // namespace eerie_leap::domain::canbus_domain::configuration::parsers

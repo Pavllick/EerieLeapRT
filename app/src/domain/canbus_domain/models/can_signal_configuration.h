@@ -1,18 +1,43 @@
 #pragma once
 
+#include <memory_resource>
 #include <cstdint>
 #include <string>
 
 namespace eerie_leap::domain::canbus_domain::models {
 
 struct CanSignalConfiguration {
+    using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+
     uint32_t start_bit;
     uint32_t size_bits;
     float factor = 1.0f;
     float offset = 0.0f;
 
-    std::string name;
-    std::string unit;
+    std::pmr::string name;
+    std::pmr::string unit;
+
+    CanSignalConfiguration(std::allocator_arg_t, const allocator_type& alloc)
+        : name(alloc), unit(alloc) {}
+
+    CanSignalConfiguration(const CanSignalConfiguration&) = delete;
+    CanSignalConfiguration& operator=(const CanSignalConfiguration&) = delete;
+
+    CanSignalConfiguration(CanSignalConfiguration&& other) noexcept
+        : start_bit(other.start_bit),
+        size_bits(other.size_bits),
+        factor(other.factor),
+        offset(other.offset),
+        name(std::move(other.name)),
+        unit(std::move(other.unit)) {}
+
+    CanSignalConfiguration(CanSignalConfiguration&& other, const allocator_type& alloc)
+        : start_bit(other.start_bit),
+        size_bits(other.size_bits),
+        factor(other.factor),
+        offset(other.offset),
+        name(std::move(other.name), alloc),
+        unit(std::move(other.unit), alloc) {}
 };
 
 } // namespace eerie_leap::domain::canbus_domain::models

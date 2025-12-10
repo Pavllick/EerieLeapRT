@@ -24,8 +24,8 @@ ext_unique_ptr<CborLoggingConfig> LoggingConfigurationCborParser::Serialize(cons
     return logging_config;
 }
 
-pmr_unique_ptr<LoggingConfiguration> LoggingConfigurationCborParser::Deserialize(const CborLoggingConfig& logging_config) {
-    auto configuration = make_unique_pmr<LoggingConfiguration>(Mrm::GetExtPmr());
+pmr_unique_ptr<LoggingConfiguration> LoggingConfigurationCborParser::Deserialize(std::pmr::memory_resource* mr, const CborLoggingConfig& logging_config) {
+    auto configuration = make_unique_pmr<LoggingConfiguration>(mr);
     configuration->logging_interval_ms = logging_config.logging_interval_ms;
     configuration->max_log_size_mb = logging_config.max_log_size_mb;
 

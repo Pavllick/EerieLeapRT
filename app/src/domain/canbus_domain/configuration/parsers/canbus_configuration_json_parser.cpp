@@ -1,4 +1,5 @@
 #include "canbus_configuration_validator.h"
+#include "domain/canbus_domain/models/can_signal_configuration.h"
 #include "canbus_configuration_json_parser.h"
 
 namespace eerie_leap::domain::canbus_domain::configuration::parsers {
@@ -22,13 +23,13 @@ ext_unique_ptr<JsonCanbusConfig> CanbusConfigurationJsonParser::Serialize(const 
 
         for(const auto& message_configuration : channel_configuration.message_configurations) {
             JsonCanMessageConfig message_config;
-            message_config.frame_id = message_configuration.frame_id;
-            message_config.send_interval_ms = message_configuration.send_interval_ms;
-            message_config.script_path = json::string(message_configuration.script_path);
-            message_config.name = json::string(message_configuration.name);
-            message_config.message_size = message_configuration.message_size;
+            message_config.frame_id = message_configuration->frame_id;
+            message_config.send_interval_ms = message_configuration->send_interval_ms;
+            message_config.script_path = json::string(message_configuration->script_path);
+            message_config.name = json::string(message_configuration->name);
+            message_config.message_size = message_configuration->message_size;
 
-            for(const auto& signal_configuration : message_configuration.signal_configurations) {
+            for(const auto& signal_configuration : message_configuration->signal_configurations) {
                 JsonCanSignalConfig signal_config;
                 signal_config.start_bit = signal_configuration.start_bit;
                 signal_config.size_bits = signal_configuration.size_bits;
@@ -49,64 +50,68 @@ ext_unique_ptr<JsonCanbusConfig> CanbusConfigurationJsonParser::Serialize(const 
     return config;
 }
 
-CanbusConfiguration CanbusConfigurationJsonParser::Deserialize(const JsonCanbusConfig& config) {
-    CanbusConfiguration configuration;
+pmr_unique_ptr<CanbusConfiguration> CanbusConfigurationJsonParser::Deserialize(std::pmr::memory_resource* mr, const JsonCanbusConfig& config) {
+    auto configuration = make_unique_pmr<CanbusConfiguration>(mr);
 
     for(const auto& canbus_config : config.channel_configs) {
-        CanChannelConfiguration channel_configuration = {
-            .type = GetCanbusType(std::string(canbus_config.type)),
-            .is_extended_id = canbus_config.is_extended_id,
-            .bus_channel = static_cast<uint8_t>(canbus_config.bus_channel),
-            .bitrate = canbus_config.bitrate,
-            .data_bitrate = canbus_config.data_bitrate,
-            .dbc_file_path = std::string(canbus_config.dbc_file_path)
-        };
+        CanChannelConfiguration channel_configuration(std::allocator_arg, mr);
+
+        channel_configuration.type = GetCanbusType(std::string(canbus_config.type));
+        channel_configuration.is_extended_id = canbus_config.is_extended_id;
+        channel_configuration.bus_channel = static_cast<uint8_t>(canbus_config.bus_channel);
+        channel_configuration.bitrate = canbus_config.bitrate;
+        channel_configuration.data_bitrate = canbus_config.data_bitrate;
+        channel_configuration.dbc_file_path = std::string(canbus_config.dbc_file_path);
 
         for(const auto& message_config : canbus_config.message_configs) {
-            CanMessageConfiguration message_configuration = {
-                .frame_id = message_config.frame_id,
-                .send_interval_ms = message_config.send_interval_ms,
-                .script_path = std::string(message_config.script_path),
-                .name = std::string(message_config.name),
-                .message_size = message_config.message_size
-            };
+            auto message_configuration = make_shared_pmr<CanMessageConfiguration>(mr);
+
+            message_configuration->frame_id = message_config.frame_id;
+            message_configuration->send_interval_ms = message_config.send_interval_ms;
+            message_configuration->script_path = std::string(message_config.script_path);
+            message_configuration->name = std::string(message_config.name);
+            message_configuration->message_size = message_config.message_size;
 
             for(const auto& signal_config : message_config.signal_configs) {
-                message_configuration.signal_configurations.push_back({
-                    .start_bit = signal_config.start_bit,
-                    .size_bits = signal_config.size_bits,
-                    .factor = signal_config.factor,
-                    .offset = signal_config.offset,
-                    .name = std::string(signal_config.name),
-                    .unit = std::string(signal_config.unit)
-                });
+                CanSignalConfiguration signal_configuration(std::allocator_arg, mr);
+
+                signal_configuration.start_bit = signal_config.start_bit;
+                signal_configuration.size_bits = signal_config.size_bits;
+                signal_configuration.factor = signal_config.factor;
+                signal_configuration.offset = signal_config.offset;
+                signal_configuration.name = signal_config.name;
+                signal_configuration.unit = signal_config.unit;
+
+                message_configuration->signal_configurations.emplace_back(std::move(signal_configuration));
             }
 
             if(fs_service_ != nullptr
                 && fs_service_->IsAvailable()
-                && !message_configuration.script_path.empty()
-                && fs_service_->Exists(message_configuration.script_path)) {
+                && !message_configuration->script_path.empty()
+                && fs_service_->Exists(message_configuration->script_path)) {
 
-                size_t script_size = fs_service_->GetFileSize(message_configuration.script_path);
+                size_t script_size = fs_service_->GetFileSize(message_configuration->script_path);
 
                 if(script_size != 0) {
                     ext_unique_ptr<ExtVector> buffer = make_unique_ext<ExtVector>(script_size);
 
                     size_t out_len = 0;
-                    fs_service_->ReadFile(message_configuration.script_path, buffer->data(), script_size, out_len);
+                    fs_service_->ReadFile(message_configuration->script_path, buffer->data(), script_size, out_len);
 
-                    message_configuration.lua_script = std::make_shared<LuaScript>(LuaScript::CreateExt());
-                    message_configuration.lua_script->Load(std::span<const uint8_t>(buffer->data(), buffer->size()));
+                    message_configuration->lua_script = std::make_shared<LuaScript>(LuaScript::CreateExt());
+                    message_configuration->lua_script->Load(std::span<const uint8_t>(buffer->data(), buffer->size()));
                 }
             }
 
-            channel_configuration.message_configurations.push_back(message_configuration);
+            channel_configuration.message_configurations.emplace_back(std::move(message_configuration));
         }
 
-        configuration.channel_configurations.emplace(canbus_config.bus_channel, channel_configuration);
+        configuration->channel_configurations.emplace(
+            canbus_config.bus_channel,
+            std::move(channel_configuration));
     }
 
-    CanbusConfigurationValidator::Validate(configuration);
+    CanbusConfigurationValidator::Validate(*configuration);
 
     return configuration;
 }

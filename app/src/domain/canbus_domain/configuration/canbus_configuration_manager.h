@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "utilities/memory/heap_allocator.h"
+#include "utilities/memory/memory_resource_manager.h"
 #include "configuration/cbor/cbor_canbus_config/cbor_canbus_config.h"
 #include "configuration/json/configs/json_canbus_config.h"
 #include "configuration/services/cbor_configuration_service.h"
@@ -27,8 +27,8 @@ private:
     std::unique_ptr<JsonConfigurationService<JsonCanbusConfig>> json_configuration_service_;
     std::shared_ptr<IFsService> sd_fs_service_;
 
-    ext_unique_ptr<CanbusConfigurationCborParser> cbor_parser_;
-    ext_unique_ptr<CanbusConfigurationJsonParser> json_parser_;
+    std::unique_ptr<CanbusConfigurationCborParser> cbor_parser_;
+    std::unique_ptr<CanbusConfigurationJsonParser> json_parser_;
 
     std::shared_ptr<CanbusConfiguration> configuration_;
 

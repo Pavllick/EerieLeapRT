@@ -17,7 +17,7 @@ public:
     LoggingConfigurationJsonParser() = default;
 
     ext_unique_ptr<JsonLoggingConfig> Serialize(const LoggingConfiguration& configuration);
-    pmr_unique_ptr<LoggingConfiguration> Deserialize(const JsonLoggingConfig& config);
+    pmr_unique_ptr<LoggingConfiguration> Deserialize(std::pmr::memory_resource* mr, const JsonLoggingConfig& config);
 };
 
 } // namespace eerie_leap::domain::logging_domain::configuration::parsers

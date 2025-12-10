@@ -40,7 +40,7 @@ private:
     std::shared_ptr<std::vector<std::shared_ptr<ICanFrameProcessor>>> can_frame_processors_;
 
     void StartTasks();
-    std::unique_ptr<CanbusTask> CreateTask(uint8_t bus_channel, const CanMessageConfiguration& message_configuration);
+    std::unique_ptr<CanbusTask> CreateTask(uint8_t bus_channel, std::shared_ptr<CanMessageConfiguration> message_configuration);
     static WorkQueueTaskResult ProcessCanbusWorkTask(CanbusTask* task);
 
     void InitializeScript(const CanMessageConfiguration& message_configuration);

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory_resource>
 #include <cstdint>
 #include <string>
 
@@ -11,15 +12,44 @@ namespace eerie_leap::domain::canbus_domain::models {
 using namespace eerie_leap::subsys::lua_script;
 
 struct CanMessageConfiguration {
+    using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+
     uint32_t frame_id;
     uint32_t send_interval_ms;
-    std::string script_path;
+    std::pmr::string script_path;
 
-    std::string name;
+    std::pmr::string name;
     uint32_t message_size;
-    std::vector<CanSignalConfiguration> signal_configurations;
+    std::pmr::vector<CanSignalConfiguration> signal_configurations;
 
-    std::shared_ptr<LuaScript> lua_script = nullptr;
+    std::shared_ptr<LuaScript> lua_script;
+
+    CanMessageConfiguration(std::allocator_arg_t, const allocator_type& alloc)
+        : script_path(alloc),
+        name(alloc),
+        signal_configurations(alloc),
+        lua_script(nullptr) {}
+
+    CanMessageConfiguration(const CanMessageConfiguration&) = delete;
+    CanMessageConfiguration& operator=(const CanMessageConfiguration&) = delete;
+
+    CanMessageConfiguration(CanMessageConfiguration&& other) noexcept
+        : frame_id(other.frame_id),
+        send_interval_ms(other.send_interval_ms),
+        script_path(std::move(other.script_path)),
+        name(std::move(other.name)),
+        message_size(other.message_size),
+        signal_configurations(std::move(other.signal_configurations)),
+        lua_script(std::move(lua_script)) {}
+
+    CanMessageConfiguration(CanMessageConfiguration&& other, const allocator_type& alloc)
+        : frame_id(other.frame_id),
+        send_interval_ms(other.send_interval_ms),
+        script_path(std::move(other.script_path), alloc),
+        name(std::move(other.name), alloc),
+        message_size(other.message_size),
+        signal_configurations(std::move(other.signal_configurations), alloc),
+        lua_script(std::move(lua_script)) {}
 };
 
 } // namespace eerie_leap::domain::canbus_domain::models
