@@ -61,11 +61,11 @@ bool AdcConfigurationManager::ApplyJsonConfiguration() {
             return true;
 
         try {
-            auto configuration = json_parser_->Deserialize(*json_config_loaded->config);
+            auto configuration = json_parser_->Deserialize(Mrm::GetDefaultPmr(), *json_config_loaded->config);
 
             json_config_checksum_ = json_config_loaded->checksum;
 
-            if(!Update(configuration, true))
+            if(!Update(*configuration, true))
                 return false;
         } catch(const std::exception& e) {
             LOG_ERR("Failed to deserialize JSON configuration. %s", e.what());
@@ -123,8 +123,8 @@ std::shared_ptr<IAdcManager> AdcConfigurationManager::Get(bool force_load) {
 
     auto cbor_config = std::move(cbor_config_data.value().config);
 
-    auto configuration = cbor_parser_->Deserialize(*cbor_config);
-    configuration_ = std::make_shared<AdcConfiguration>(configuration);
+    auto configuration = cbor_parser_->Deserialize(Mrm::GetDefaultPmr(), *cbor_config);
+    configuration_ = make_shared_pmr<AdcConfiguration>(Mrm::GetDefaultPmr(), std::move(*configuration));
     adc_manager_->UpdateConfiguration(configuration_);
 
     json_config_checksum_ = cbor_config->json_config_checksum;
@@ -134,7 +134,7 @@ std::shared_ptr<IAdcManager> AdcConfigurationManager::Get(bool force_load) {
 
 // TODO: Refine default configuration
 bool AdcConfigurationManager::CreateDefaultConfiguration() {
-    std::vector<CalibrationData> adc_calibration_data_samples {
+    std::pmr::vector<CalibrationData> adc_calibration_data_samples {
         {0.501, 0.469},
         {1.0, 0.968},
         {2.0, 1.970},
@@ -143,7 +143,7 @@ bool AdcConfigurationManager::CreateDefaultConfiguration() {
         {5.0, 5.0}
     };
 
-    auto adc_calibration_data_samples_ptr = std::make_shared<std::vector<CalibrationData>>(adc_calibration_data_samples);
+    auto adc_calibration_data_samples_ptr = std::make_shared<std::pmr::vector<CalibrationData>>(adc_calibration_data_samples);
     auto adc_calibrator = std::make_shared<AdcCalibrator>(InterpolationMethod::LINEAR, adc_calibration_data_samples_ptr);
 
     std::vector<std::shared_ptr<AdcChannelConfiguration>> channel_configurations;

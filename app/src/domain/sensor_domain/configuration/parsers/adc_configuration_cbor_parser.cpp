@@ -46,34 +46,34 @@ ext_unique_ptr<CborAdcConfig> AdcConfigurationCborParser::Serialize(const AdcCon
     return adc_config;
 }
 
-AdcConfiguration AdcConfigurationCborParser::Deserialize(const CborAdcConfig& adc_config) {
-    AdcConfiguration adc_configuration;
+pmr_unique_ptr<AdcConfiguration> AdcConfigurationCborParser::Deserialize(std::pmr::memory_resource* mr, const CborAdcConfig& adc_config) {
+    auto configuration = make_unique_pmr<AdcConfiguration>(mr);
 
-    adc_configuration.samples = static_cast<uint16_t>(adc_config.samples);
-    adc_configuration.channel_configurations = std::make_shared<std::vector<std::shared_ptr<AdcChannelConfiguration>>>();
+    configuration->samples = static_cast<uint16_t>(adc_config.samples);
+    configuration->channel_configurations = make_shared_pmr<std::vector<std::shared_ptr<AdcChannelConfiguration>>>(mr);
 
     for(const auto& adc_channel_config : adc_config.CborAdcChannelConfig_m) {
-        auto adc_channel_configuration = std::make_shared<AdcChannelConfiguration>();
+        auto adc_channel_configuration = make_shared_pmr<AdcChannelConfiguration>(mr);
 
         auto interpolation_method = static_cast<InterpolationMethod>(adc_channel_config.interpolation_method);
         if(interpolation_method != InterpolationMethod::NONE && adc_channel_config.calibration_table_present) {
-            std::vector<CalibrationData> calibration_table;
+            std::pmr::vector<CalibrationData> calibration_table(mr);
             for(const auto& calibration_data : adc_channel_config.calibration_table.float32float) {
                 calibration_table.push_back({
                     .voltage = calibration_data.float32float_key,
                     .value = calibration_data.float32float});
             }
 
-            auto calibration_table_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_table);
-            adc_channel_configuration->calibrator = std::make_shared<AdcCalibrator>(interpolation_method, calibration_table_ptr);
+            auto calibration_table_ptr = make_shared_pmr<std::pmr::vector<CalibrationData>>(mr, calibration_table);
+            adc_channel_configuration->calibrator = make_shared_pmr<AdcCalibrator>(mr, interpolation_method, calibration_table_ptr);
         } else {
             throw std::runtime_error("ADC channel configuration is invalid. Calibration table is missing.");
         }
 
-        adc_configuration.channel_configurations->push_back(adc_channel_configuration);
+        configuration->channel_configurations->push_back(adc_channel_configuration);
     }
 
-    return adc_configuration;
+    return configuration;
 }
 
 } // namespace eerie_leap::domain::sensor_domain::configuration::parsers

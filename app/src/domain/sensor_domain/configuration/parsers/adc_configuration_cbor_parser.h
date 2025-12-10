@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "utilities/memory/heap_allocator.h"
+#include "utilities/memory/memory_resource_manager.h"
 #include "configuration/cbor/cbor_adc_config/cbor_adc_config.h"
 #include "subsys/adc/models/adc_configuration.h"
 
@@ -16,7 +16,7 @@ public:
     AdcConfigurationCborParser() = default;
 
     ext_unique_ptr<CborAdcConfig> Serialize(const AdcConfiguration& adc_configuration);
-    AdcConfiguration Deserialize(const CborAdcConfig& adc_config);
+    pmr_unique_ptr<AdcConfiguration> Deserialize(std::pmr::memory_resource* mr, const CborAdcConfig& adc_config);
 };
 
 } // namespace eerie_leap::domain::sensor_domain::configuration::parsers

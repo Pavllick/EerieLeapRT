@@ -27,6 +27,7 @@ public:
         uint32_t gpio_channel_count,
         uint32_t adc_channel_count);
     std::vector<std::shared_ptr<Sensor>> Deserialize(
+        std::pmr::memory_resource* mr,
         const CborSensorsConfig& sensors_config,
         uint32_t gpio_channel_count,
         uint32_t adc_channel_count);

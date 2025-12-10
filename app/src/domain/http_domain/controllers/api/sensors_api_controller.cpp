@@ -65,7 +65,7 @@ void SensorsApiController::UpdateSensorsConfig(const std::span<const uint8_t>& b
     // TODO: Get GPIO and ADC channel count
     std::string_view json_str(reinterpret_cast<const char*>(buffer.data()), buffer.size());
     auto json_sensors_config = json_serializer_->Deserialize(json_str);
-    auto sensors = sensors_json_parser_->Deserialize(*json_sensors_config, 16, 16);
+    auto sensors = sensors_json_parser_->Deserialize(Mrm::GetExtPmr(), *json_sensors_config, 16, 16);
 
     if(!sensors_configuration_manager_->Update(sensors))
         throw std::runtime_error("Failed to update sensors configuration.");

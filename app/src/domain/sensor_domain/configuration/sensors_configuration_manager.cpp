@@ -58,6 +58,7 @@ bool SensorsConfigurationManager::ApplyJsonConfiguration() {
 
         try {
             auto sensors = json_parser_->Deserialize(
+                Mrm::GetExtPmr(),
                 *json_config_loaded->config,
                 gpio_channel_count_,
                 adc_channel_count_);
@@ -129,7 +130,7 @@ const std::vector<std::shared_ptr<Sensor>>* SensorsConfigurationManager::Get(boo
 
     sensors_.clear();
     sensors_ = cbor_parser_->Deserialize(
-        *cbor_config, gpio_channel_count_, adc_channel_count_);
+        Mrm::GetExtPmr(), *cbor_config, gpio_channel_count_, adc_channel_count_);
 
     json_config_checksum_ = cbor_config->json_config_checksum;
 

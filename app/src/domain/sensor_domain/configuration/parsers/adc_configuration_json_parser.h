@@ -1,6 +1,6 @@
 #pragma once
 
-#include "utilities/memory/heap_allocator.h"
+#include "utilities/memory/memory_resource_manager.h"
 #include "configuration/json/configs/json_adc_config.h"
 #include "subsys/adc/models/adc_configuration.h"
 
@@ -15,7 +15,7 @@ public:
     AdcConfigurationJsonParser() = default;
 
     ext_unique_ptr<JsonAdcConfig> Serialize(const AdcConfiguration& adc_configuration);
-    AdcConfiguration Deserialize(const JsonAdcConfig& json);
+    pmr_unique_ptr<AdcConfiguration> Deserialize(std::pmr::memory_resource* mr, const JsonAdcConfig& json);
 };
 
 } // namespace eerie_leap::domain::sensor_domain::configuration::parsers

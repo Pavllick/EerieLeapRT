@@ -422,7 +422,7 @@ void SetupCanbusConfiguration(std::shared_ptr<CanbusConfigurationManager> canbus
 }
 
 void SetupAdcConfiguration(std::shared_ptr<AdcConfigurationManager> adc_configuration_manager) {
-    std::vector<CalibrationData> adc_calibration_data_samples {
+    std::pmr::vector<CalibrationData> adc_calibration_data_samples {
         {0.501, 0.469},
         {1.0, 0.968},
         {2.0, 1.970},
@@ -431,7 +431,7 @@ void SetupAdcConfiguration(std::shared_ptr<AdcConfigurationManager> adc_configur
         {5.0, 5.0}
     };
 
-    auto adc_calibration_data_samples_ptr = std::make_shared<std::vector<CalibrationData>>(adc_calibration_data_samples);
+    auto adc_calibration_data_samples_ptr = std::make_shared<std::pmr::vector<CalibrationData>>(adc_calibration_data_samples);
     auto adc_calibrator = std::make_shared<AdcCalibrator>(InterpolationMethod::LINEAR, adc_calibration_data_samples_ptr);
 
     std::vector<std::shared_ptr<AdcChannelConfiguration>> channel_configurations = {

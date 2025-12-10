@@ -100,6 +100,7 @@ ext_unique_ptr<CborSensorsConfig> SensorsCborParser::Serialize(
 }
 
 std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
+    std::pmr::memory_resource* mr,
     const CborSensorsConfig& sensors_config,
     size_t gpio_channel_count,
     size_t adc_channel_count) {
@@ -107,7 +108,7 @@ std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
     SensorsOrderResolver order_resolver;
 
     for(const auto& sensor_config : sensors_config.CborSensorConfig_m) {
-        auto sensor = make_shared_pmr<Sensor>(Mrm::GetExtPmr(), CborHelpers::ToStdString(sensor_config.id));
+        auto sensor = make_shared_pmr<Sensor>(mr, CborHelpers::ToStdString(sensor_config.id));
 
         sensor->configuration.type = static_cast<SensorType>(sensor_config.configuration.type);
 
@@ -128,12 +129,12 @@ std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
             size_t script_size = fs_service_->GetFileSize(sensor->configuration.script_path);
 
             if(script_size != 0) {
-                auto buffer = make_unique_pmr<ExtVector>(Mrm::GetExtPmr(), script_size);
+                auto buffer = make_unique_pmr<ExtVector>(mr, script_size);
 
                 size_t out_len = 0;
                 fs_service_->ReadFile(sensor->configuration.script_path, buffer->data(), script_size, out_len);
 
-                sensor->configuration.lua_script = make_shared_pmr<LuaScript>(Mrm::GetExtPmr(), LuaScript::CreateExt());
+                sensor->configuration.lua_script = make_shared_pmr<LuaScript>(mr, LuaScript::CreateExt());
                 sensor->configuration.lua_script->Load(std::span<const uint8_t>(buffer->data(), buffer->size()));
             }
         }
@@ -150,7 +151,7 @@ std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
                     .value = calibration_data.float32float});
             }
 
-            auto calibration_table_ptr = make_shared_pmr<std::vector<CalibrationData>>(Mrm::GetExtPmr(), calibration_table);
+            auto calibration_table_ptr = make_shared_pmr<std::vector<CalibrationData>>(mr, calibration_table);
 
             switch(interpolation_method) {
             case InterpolationMethod::LINEAR:

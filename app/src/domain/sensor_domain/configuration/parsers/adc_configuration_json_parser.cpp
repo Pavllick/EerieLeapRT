@@ -50,14 +50,14 @@ ext_unique_ptr<JsonAdcConfig> AdcConfigurationJsonParser::Serialize(const AdcCon
     return config;
 }
 
-AdcConfiguration AdcConfigurationJsonParser::Deserialize(const JsonAdcConfig& config) {
-    AdcConfiguration configuration;
+pmr_unique_ptr<AdcConfiguration> AdcConfigurationJsonParser::Deserialize(std::pmr::memory_resource* mr, const JsonAdcConfig& config) {
+    auto configuration = make_unique_pmr<AdcConfiguration>(mr);
 
-    configuration.samples = static_cast<uint16_t>(config.samples);
-    configuration.channel_configurations = std::make_shared<std::vector<std::shared_ptr<AdcChannelConfiguration>>>();
+    configuration->samples = static_cast<uint16_t>(config.samples);
+    configuration->channel_configurations = make_shared_pmr<std::vector<std::shared_ptr<AdcChannelConfiguration>>>(mr);
 
     for(auto& adc_channel_config : config.channel_configs) {
-        auto adc_channel_configuration = std::make_shared<AdcChannelConfiguration>();
+        auto adc_channel_configuration = make_shared_pmr<AdcChannelConfiguration>(mr);
 
         auto interpolation_method = GetInterpolationMethod(std::string(adc_channel_config.interpolation_method));
 
@@ -67,17 +67,17 @@ AdcConfiguration AdcConfigurationJsonParser::Deserialize(const JsonAdcConfig& co
         if(adc_channel_config.calibration_table.size() < 2)
             throw std::runtime_error("Calibration table must have at least 2 points.");
 
-        std::vector<CalibrationData> calibration_table;
+        std::pmr::vector<CalibrationData> calibration_table(mr);
         for(auto& calibration_data : adc_channel_config.calibration_table) {
             calibration_table.push_back({
                 .voltage = calibration_data.voltage,
                 .value = calibration_data.value});
         }
 
-        auto calibration_table_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_table);
-        adc_channel_configuration->calibrator = std::make_shared<AdcCalibrator>(interpolation_method, calibration_table_ptr);
+        auto calibration_table_ptr = make_shared_pmr<std::pmr::vector<CalibrationData>>(mr, calibration_table);
+        adc_channel_configuration->calibrator = make_shared_pmr<AdcCalibrator>(mr, interpolation_method, calibration_table_ptr);
 
-        configuration.channel_configurations->push_back(adc_channel_configuration);
+        configuration->channel_configurations->push_back(adc_channel_configuration);
     }
 
     return configuration;

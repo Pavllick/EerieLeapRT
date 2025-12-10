@@ -19,7 +19,7 @@ static const auto adc_inverse_base_range_voltage_interpolator = std::make_unique
 
 AdcCalibrator::AdcCalibrator(
     InterpolationMethod interpolation_method,
-    const std::shared_ptr<std::vector<CalibrationData>> calibration_data)
+    const std::shared_ptr<std::pmr::vector<CalibrationData>> calibration_data)
     : calibration_data_(std::move(calibration_data)) {
 
     std::vector<CalibrationData> adc_calibration_data_normalized;
@@ -65,7 +65,7 @@ InterpolationMethod AdcCalibrator::GetInterpolationMethod() const {
     return calibrated_voltage_interpolator_->GetInterpolationMethod();
 }
 
-std::shared_ptr<std::vector<CalibrationData>> AdcCalibrator::GetCalibrationTable() const {
+std::shared_ptr<std::pmr::vector<CalibrationData>> AdcCalibrator::GetCalibrationTable() const {
     return calibration_data_;
 }
 
