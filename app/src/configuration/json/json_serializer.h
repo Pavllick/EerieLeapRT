@@ -19,9 +19,9 @@ using namespace eerie_leap::utilities::memory;
 template <typename T>
 class JsonSerializer {
 private:
-    static std::unique_ptr<ExtString> Encode(const T& config) {
+    static std::pmr::string Encode(const T& config) {
         boost::json::value jv = boost::json::value_from(config, Mrm::GetBoostExtPmr());
-        ExtString result;
+        std::pmr::string result(Mrm::GetExtPmr());
 
         boost::json::serializer sr;
         sr.reset(&jv);
@@ -33,7 +33,7 @@ private:
             result.append(sv.data(), sv.size());
         }
 
-        return std::make_unique<ExtString>(std::move(result));
+        return result;
     }
 
     static T Decode(std::string_view json_str) {
@@ -45,26 +45,26 @@ private:
 public:
     JsonSerializer() = default;
 
-    std::unique_ptr<ExtString> Serialize(const T& obj, size_t *payload_len_out = nullptr) {
+    std::pmr::string Serialize(const T& obj, size_t *payload_len_out = nullptr) {
         LOG_MODULE_DECLARE(json_serializer_logger);
 
         auto json_str = Encode(obj);
-        if(json_str->empty()) {
+        if(json_str.empty()) {
             LOG_ERR("Failed to serialize object.");
-            return nullptr;
+            return {};
         }
 
         return json_str;
     }
 
-    ext_unique_ptr<T> Deserialize(std::string_view json_str) {
+    pmr_unique_ptr<T> Deserialize(std::string_view json_str) {
         LOG_MODULE_DECLARE(json_serializer_logger);
 
         try {
-            return make_unique_ext<T>(Decode(json_str));
+            return make_unique_pmr<T>(Mrm::GetExtPmr(), Decode(json_str));
         } catch(...) {
             LOG_ERR("Failed to deserialize object.");
-            return nullptr;
+            return {};
         }
     }
 };

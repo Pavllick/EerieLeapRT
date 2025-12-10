@@ -129,13 +129,13 @@ std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
             size_t script_size = fs_service_->GetFileSize(sensor->configuration.script_path);
 
             if(script_size != 0) {
-                auto buffer = make_unique_pmr<ExtVector>(mr, script_size);
+                std::pmr::vector<uint8_t> buffer(script_size, Mrm::GetExtPmr());
 
                 size_t out_len = 0;
-                fs_service_->ReadFile(sensor->configuration.script_path, buffer->data(), script_size, out_len);
+                fs_service_->ReadFile(sensor->configuration.script_path, buffer.data(), script_size, out_len);
 
                 sensor->configuration.lua_script = make_shared_pmr<LuaScript>(mr, LuaScript::CreateExt());
-                sensor->configuration.lua_script->Load(std::span<const uint8_t>(buffer->data(), buffer->size()));
+                sensor->configuration.lua_script->Load(std::span<const uint8_t>(buffer.data(), buffer.size()));
             }
         }
 

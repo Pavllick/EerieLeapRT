@@ -36,7 +36,7 @@ private:
 
     std::string configuration_name_;
     std::shared_ptr<IFsService> fs_service_;
-    ext_unique_ptr<CborSerializer<T>> serializer_;
+    std::unique_ptr<CborSerializer<T>> serializer_;
 
     const std::string configuration_file_path_ = configuration_dir_ + "/" + configuration_name_ + ".cbor";
 
@@ -65,40 +65,40 @@ private:
 
         auto config_bytes = serializer_->Serialize(*configuration);
 
-        if (!config_bytes) {
+        if(config_bytes.empty()) {
             LOG_ERR("Failed to serialize configuration %s.", configuration_file_path_.c_str());
             return false;
         }
 
-        return fs_service_->WriteFile(configuration_file_path_, config_bytes->data(), config_bytes->size());
+        return fs_service_->WriteFile(configuration_file_path_, config_bytes.data(), config_bytes.size());
     }
 
     std::optional<LoadedConfig<T>> LoadProcessor() {
         LOG_MODULE_DECLARE(configuration_service_logger);
 
-        if (!fs_service_->Exists(configuration_file_path_)) {
+        if(!fs_service_->Exists(configuration_file_path_)) {
             LOG_ERR("Configuration file %s does not exist.", configuration_file_path_.c_str());
             return std::nullopt;
         }
 
         size_t buffer_size = fs_service_->GetFileSize(configuration_file_path_);
-        auto buffer = make_unique_ext<ExtVector>(buffer_size);
+        std::pmr::vector<uint8_t> buffer(buffer_size, Mrm::GetExtPmr());
         size_t out_len = 0;
 
-        if (!fs_service_->ReadFile(configuration_file_path_, buffer->data(), buffer_size, out_len)) {
+        if(!fs_service_->ReadFile(configuration_file_path_, buffer.data(), buffer_size, out_len)) {
             LOG_ERR("Failed to read configuration file %s.", configuration_file_path_.c_str());
             return std::nullopt;
         }
 
-        auto config_bytes = std::span<const uint8_t>(buffer->data(), out_len);
+        auto config_bytes = std::span<const uint8_t>(buffer.data(), out_len);
         auto configuration = serializer_->Deserialize(config_bytes);
 
-        if (configuration == nullptr) {
+        if(configuration == nullptr) {
             LOG_ERR("Failed to deserialize configuration %s.", configuration_file_path_.c_str());
             return std::nullopt;
         }
 
-        uint32_t crc = crc32_ieee(buffer->data(), buffer_size);
+        uint32_t crc = crc32_ieee(buffer.data(), buffer_size);
 
         LoadedConfig<T> loaded_config {
             .config_raw = std::move(buffer),
@@ -133,10 +133,10 @@ public:
         task_load_.instance = this;
         k_work_init(&task_load_.work, WorkTaskLoad);
 
-        serializer_ = make_unique_ext<CborSerializer<T>>(
+        serializer_ = std::make_unique<CborSerializer<T>>(
             CborTrait<T>::Encode, CborTrait<T>::Decode, CborTrait<T>::GetSerializingSize);
 
-        if (!fs_service_->Exists(configuration_dir_))
+        if(!fs_service_->Exists(configuration_dir_))
             fs_service_->CreateDirectory(configuration_dir_);
     }
 

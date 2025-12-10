@@ -1,5 +1,4 @@
 #include "canbus_configuration_validator.h"
-#include "domain/canbus_domain/models/can_signal_configuration.h"
 #include "canbus_configuration_json_parser.h"
 
 namespace eerie_leap::domain::canbus_domain::configuration::parsers {
@@ -93,13 +92,13 @@ pmr_unique_ptr<CanbusConfiguration> CanbusConfigurationJsonParser::Deserialize(s
                 size_t script_size = fs_service_->GetFileSize(message_configuration->script_path);
 
                 if(script_size != 0) {
-                    ext_unique_ptr<ExtVector> buffer = make_unique_ext<ExtVector>(script_size);
+                    std::pmr::vector<uint8_t> buffer(script_size, Mrm::GetExtPmr());
 
                     size_t out_len = 0;
-                    fs_service_->ReadFile(message_configuration->script_path, buffer->data(), script_size, out_len);
+                    fs_service_->ReadFile(message_configuration->script_path, buffer.data(), script_size, out_len);
 
                     message_configuration->lua_script = std::make_shared<LuaScript>(LuaScript::CreateExt());
-                    message_configuration->lua_script->Load(std::span<const uint8_t>(buffer->data(), buffer->size()));
+                    message_configuration->lua_script->Load(std::span<const uint8_t>(buffer.data(), buffer.size()));
                 }
             }
 

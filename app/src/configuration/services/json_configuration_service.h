@@ -30,7 +30,7 @@ private:
 
     std::string configuration_name_;
     std::shared_ptr<IFsService> fs_service_;
-    ext_unique_ptr<JsonSerializer<T>> serializer_;
+    std::unique_ptr<JsonSerializer<T>> serializer_;
 
     const std::string configuration_file_path_ = configuration_dir_ + "/" + configuration_name_ + ".json";
 
@@ -62,12 +62,12 @@ private:
 
         auto json_str = serializer_->Serialize(*configuration);
 
-        if (!json_str) {
+        if(json_str.empty()) {
             LOG_ERR("Failed to serialize configuration %s.", configuration_file_path_.c_str());
             return false;
         }
 
-        return fs_service_->WriteFile(configuration_file_path_, json_str->c_str(), json_str->size());
+        return fs_service_->WriteFile(configuration_file_path_, json_str.c_str(), json_str.size());
     }
 
     std::optional<LoadedConfig<T>> LoadProcessor() {
@@ -82,15 +82,15 @@ private:
         }
 
         size_t buffer_size = fs_service_->GetFileSize(configuration_file_path_);
-        auto buffer = make_unique_ext<ExtVector>(buffer_size);
+        std::pmr::vector<uint8_t> buffer(buffer_size, Mrm::GetExtPmr());
         size_t out_len = 0;
 
-        if (!fs_service_->ReadFile(configuration_file_path_, buffer->data(), buffer_size, out_len)) {
+        if (!fs_service_->ReadFile(configuration_file_path_, buffer.data(), buffer_size, out_len)) {
             LOG_ERR("Failed to read configuration file %s.", configuration_file_path_.c_str());
             return std::nullopt;
         }
 
-        std::string_view json_str(reinterpret_cast<const char*>(buffer->data()), out_len);
+        std::string_view json_str(reinterpret_cast<const char*>(buffer.data()), out_len);
         auto configuration = serializer_->Deserialize(json_str);
 
         if (configuration == nullptr) {
@@ -98,7 +98,7 @@ private:
             return std::nullopt;
         }
 
-        uint32_t crc = crc32_ieee(buffer->data(), buffer_size);
+        uint32_t crc = crc32_ieee(buffer.data(), buffer_size);
 
         LoadedConfig<T> loaded_config {
             .config = std::move(configuration),
@@ -132,7 +132,7 @@ public:
         task_load_.instance = this;
         k_work_init(&task_load_.work, WorkTaskLoad);
 
-        serializer_ = make_unique_ext<JsonSerializer<T>>();
+        serializer_ = std::make_unique<JsonSerializer<T>>();
 
         if(!fs_service_)
             return;

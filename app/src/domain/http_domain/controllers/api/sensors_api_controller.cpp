@@ -1,22 +1,14 @@
 #include <utility>
 #include <zephyr/logging/log.h>
 
-#include "utilities/voltage_interpolator/interpolation_method.h"
-#include "utilities/memory/heap_allocator.h"
-
 #include "sensors_api_controller.h"
 
 namespace eerie_leap::domain::http_domain::controllers::api {
 
-using namespace eerie_leap::utilities::memory;
-using namespace eerie_leap::utilities::voltage_interpolator;
-
 LOG_MODULE_REGISTER(sensors_api_controller_logger);
 
-const size_t SensorsApiController::sensors_config_post_buffer_size_;
-
-ext_unique_ptr<ExtVector> SensorsApiController::sensors_config_post_buffer_;
-std::unique_ptr<ExtString> SensorsApiController::sensors_config_get_buffer_;
+std::pmr::vector<uint8_t> SensorsApiController::sensors_config_post_buffer_(0, Mrm::GetExtPmr());
+std::pmr::string SensorsApiController::sensors_config_get_buffer_;
 
 std::unique_ptr<SensorsJsonParser> SensorsApiController::sensors_json_parser_ = nullptr;
 std::shared_ptr<SensorsConfigurationManager> SensorsApiController::sensors_configuration_manager_ = nullptr;
@@ -27,8 +19,8 @@ SensorsApiController::SensorsApiController(
     std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager,
     std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service) {
 
-    if(!sensors_config_post_buffer_)
-        sensors_config_post_buffer_ = make_unique_ext<ExtVector>(sensors_config_post_buffer_size_);
+    if(sensors_config_post_buffer_.empty())
+        sensors_config_post_buffer_.resize(sensors_config_post_buffer_size_);
 
     if(!sensors_json_parser_)
         sensors_json_parser_ = std::make_unique<SensorsJsonParser>(nullptr);
@@ -53,8 +45,8 @@ int SensorsApiController::sensors_config_get_handler(http_client_ctx *client, en
         auto config = sensors_json_parser_->Serialize(*sensors, 16, 16);
         sensors_config_get_buffer_ = json_serializer_->Serialize(*config);
 
-        response_ctx->body = (uint8_t*)sensors_config_get_buffer_->c_str();
-        response_ctx->body_len = sensors_config_get_buffer_->size();
+        response_ctx->body = (uint8_t*)sensors_config_get_buffer_.c_str();
+        response_ctx->body_len = sensors_config_get_buffer_.size();
         response_ctx->final_chunk = true;
     }
 
@@ -81,12 +73,12 @@ int SensorsApiController::sensors_config_post_handler(http_client_ctx *client, e
 		return 0;
 	}
 
-	if (request_ctx->data_len + cursor > sensors_config_post_buffer_->size()) {
+	if (request_ctx->data_len + cursor > sensors_config_post_buffer_.size()) {
 		cursor = 0;
 		return -ENOMEM;
 	}
 
-	memcpy(sensors_config_post_buffer_->data() + cursor, request_ctx->data, request_ctx->data_len);
+	memcpy(sensors_config_post_buffer_.data() + cursor, request_ctx->data, request_ctx->data_len);
 	cursor += request_ctx->data_len;
 
     static std::string error_msg;
@@ -95,7 +87,7 @@ int SensorsApiController::sensors_config_post_handler(http_client_ctx *client, e
         LOG_DBG("JSON payload received successfully, len=%zu", cursor);
 
         try {
-            std::span<uint8_t> buffer(sensors_config_post_buffer_->data(), cursor);
+            std::span<uint8_t> buffer(sensors_config_post_buffer_.data(), cursor);
             UpdateSensorsConfig(buffer);
         } catch (const std::exception &e) {
             LOG_ERR("Failed to parse JSON: %s", e.what());

@@ -11,7 +11,7 @@
 #include <zcbor_encode.h>
 #include <zcbor_decode.h>
 
-#include "utilities/memory/heap_allocator.h"
+#include "utilities/memory/memory_resource_manager.h"
 
 namespace eerie_leap::configuration::cbor {
 
@@ -27,15 +27,15 @@ public:
     CborSerializer(EncodeFn encoder, DecodeFn decoder, GetSerializingSizeFn getSerializingSizeFn)
         : encodeFn_(encoder), decodeFn_(decoder), getSerializingSizeFn_(getSerializingSizeFn) {}
 
-    ext_unique_ptr<ExtVector> Serialize(const T& obj, size_t *payload_len_out = nullptr) {
+    std::pmr::vector<uint8_t> Serialize(const T& obj, size_t *payload_len_out = nullptr) {
         LOG_MODULE_DECLARE(cbor_serializer_logger);
 
-        auto buffer = make_unique_ext<ExtVector>(getSerializingSizeFn_(obj));
+        std::pmr::vector<uint8_t> buffer(getSerializingSizeFn_(obj), Mrm::GetExtPmr());
 
         size_t obj_size = 0;
-        if(encodeFn_(buffer->data(), buffer->size(), &obj, &obj_size)) {
+        if(encodeFn_(buffer.data(), buffer.size(), &obj, &obj_size)) {
             LOG_ERR("Failed to encode object.");
-            return nullptr;
+            return {};
         }
 
         if (payload_len_out != nullptr)
@@ -44,10 +44,10 @@ public:
         return buffer;
     }
 
-    ext_unique_ptr<T> Deserialize(std::span<const uint8_t> input) {
+    pmr_unique_ptr<T> Deserialize(std::span<const uint8_t> input) {
         LOG_MODULE_DECLARE(cbor_serializer_logger);
 
-        auto obj = make_unique_ext<T>();
+        auto obj = make_unique_pmr<T>(Mrm::GetExtPmr());
         if(decodeFn_(input.data(), input.size(), obj.get(), nullptr)) {
             LOG_ERR("Failed to decode object.");
             return nullptr;
