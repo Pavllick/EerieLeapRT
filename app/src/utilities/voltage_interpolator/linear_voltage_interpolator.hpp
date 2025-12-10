@@ -13,10 +13,10 @@ namespace eerie_leap::utilities::voltage_interpolator {
 class LinearVoltageInterpolator : public IVoltageInterpolator {
 private:
     static const InterpolationMethod INTERPOLATION_METHOD = InterpolationMethod::LINEAR;
-    std::shared_ptr<std::vector<CalibrationData>> calibration_table_;
+    std::shared_ptr<std::pmr::vector<CalibrationData>> calibration_table_;
 
 public:
-    explicit LinearVoltageInterpolator(const std::shared_ptr<std::vector<CalibrationData>> calibration_table)
+    explicit LinearVoltageInterpolator(std::shared_ptr<std::pmr::vector<CalibrationData>> calibration_table)
         : calibration_table_(std::move(calibration_table)) {
 
         if(!calibration_table_ || calibration_table_->size() < 2)
@@ -54,7 +54,7 @@ public:
         return y0 + ratio * (y1 - y0);
     }
 
-    const std::shared_ptr<std::vector<CalibrationData>> GetCalibrationTable() const override {
+    const std::shared_ptr<std::pmr::vector<CalibrationData>> GetCalibrationTable() const override {
         return calibration_table_;
     }
 

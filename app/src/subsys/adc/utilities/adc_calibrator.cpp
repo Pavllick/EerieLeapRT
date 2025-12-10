@@ -6,7 +6,7 @@ namespace eerie_leap::subsys::adc::utilities {
 
 using namespace eerie_leap::utilities::voltage_interpolator;
 
-static const std::vector<CalibrationData> adc_inverse_base_range_data {
+static const std::pmr::vector<CalibrationData> adc_inverse_base_range_data {
     {0.0, 0.0},
 #ifdef CONFIG_ZTEST
     {CONFIG_EERIE_LEAP_ADC_VOLTAGE_MAX_MV / 1000.0f, CONFIG_EERIE_LEAP_ADC_VOLTAGE_MAX_MV / 1000.0f}
@@ -14,7 +14,7 @@ static const std::vector<CalibrationData> adc_inverse_base_range_data {
     {CONFIG_EERIE_LEAP_SENSOR_VOLTAGE_MAX_MV / 1000.0f, CONFIG_EERIE_LEAP_ADC_VOLTAGE_MAX_MV / 1000.0f}
 #endif
 };
-static const auto adc_inverse_base_range_data_ptr = std::make_shared<std::vector<CalibrationData>>(adc_inverse_base_range_data);
+static const auto adc_inverse_base_range_data_ptr = std::make_shared<std::pmr::vector<CalibrationData>>(adc_inverse_base_range_data);
 static const auto adc_inverse_base_range_voltage_interpolator = std::make_unique<LinearVoltageInterpolator>(adc_inverse_base_range_data_ptr);
 
 AdcCalibrator::AdcCalibrator(
@@ -22,7 +22,7 @@ AdcCalibrator::AdcCalibrator(
     const std::shared_ptr<std::pmr::vector<CalibrationData>> calibration_data)
     : calibration_data_(std::move(calibration_data)) {
 
-    std::vector<CalibrationData> adc_calibration_data_normalized;
+    std::pmr::vector<CalibrationData> adc_calibration_data_normalized;
     for(auto& calibration_data : *calibration_data_) {
         adc_calibration_data_normalized.push_back({
             .voltage = adc_inverse_base_range_voltage_interpolator->Interpolate(calibration_data.value),
@@ -30,7 +30,7 @@ AdcCalibrator::AdcCalibrator(
         });
     }
 
-    auto adc_calibration_data_normalized_ptr = std::make_shared<std::vector<CalibrationData>>(adc_calibration_data_normalized);
+    auto adc_calibration_data_normalized_ptr = std::make_shared<std::pmr::vector<CalibrationData>>(adc_calibration_data_normalized);
 
     switch (interpolation_method) {
     case InterpolationMethod::LINEAR:
@@ -46,11 +46,11 @@ AdcCalibrator::AdcCalibrator(
     }
 }
 
-static const std::vector<CalibrationData> adc_base_range_data {
+static const std::pmr::vector<CalibrationData> adc_base_range_data {
     {0.0, 0.0},
     {CONFIG_EERIE_LEAP_ADC_VOLTAGE_MAX_MV / 1000.0f, CONFIG_EERIE_LEAP_SENSOR_VOLTAGE_MAX_MV / 1000.0f}
 };
-static const auto adc_base_range_data_ptr = std::make_shared<std::vector<CalibrationData>>(adc_base_range_data);
+static const auto adc_base_range_data_ptr = std::make_shared<std::pmr::vector<CalibrationData>>(adc_base_range_data);
 static const auto adc_base_range_voltage_interpolator = std::make_unique<LinearVoltageInterpolator>(adc_base_range_data_ptr);
 
 float AdcCalibrator::InterpolateToInputRange(float value) {

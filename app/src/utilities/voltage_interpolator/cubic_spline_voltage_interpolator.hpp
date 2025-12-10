@@ -13,12 +13,12 @@ namespace eerie_leap::utilities::voltage_interpolator {
 class CubicSplineVoltageInterpolator : public IVoltageInterpolator {
 private:
     static const InterpolationMethod INTERPOLATION_METHOD = InterpolationMethod::CUBIC_SPLINE;
-    std::shared_ptr<std::vector<CalibrationData>> calibration_table_;
+    std::shared_ptr<std::pmr::vector<CalibrationData>> calibration_table_;
     std::vector<float> h_, alpha_, l_, mu_, z_;
     std::vector<float> a_, b_, c_, d_;
 
 public:
-    explicit CubicSplineVoltageInterpolator(const std::shared_ptr<std::vector<CalibrationData>> calibration_table)
+    explicit CubicSplineVoltageInterpolator(std::shared_ptr<std::pmr::vector<CalibrationData>> calibration_table)
         : calibration_table_(std::move(calibration_table)) {
 
         if(!calibration_table_ || calibration_table_->size() < 2)
@@ -86,7 +86,7 @@ public:
         return a_[i] + b_[i] * dx + c_[i] * dx * dx + d_[i] * dx * dx * dx;
     }
 
-    const std::shared_ptr<std::vector<CalibrationData>> GetCalibrationTable() const override {
+    const std::shared_ptr<std::pmr::vector<CalibrationData>> GetCalibrationTable() const override {
         return calibration_table_;
     }
 

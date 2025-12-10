@@ -27,7 +27,7 @@ inline const char* GetInterpolationMethodName(InterpolationMethod method) {
     return InterpolationMethodNames[static_cast<std::uint8_t>(method)].data();
 }
 
-inline InterpolationMethod GetInterpolationMethod(const std::string& name) {
+inline InterpolationMethod GetInterpolationMethod(std::string_view name) {
     for(size_t i = 0; i < size(InterpolationMethodNames); ++i)
         if(InterpolationMethodNames[i] == name)
             return static_cast<InterpolationMethod>(i);

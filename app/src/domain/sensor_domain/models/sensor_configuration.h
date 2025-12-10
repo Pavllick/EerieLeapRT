@@ -29,8 +29,8 @@ struct SensorConfiguration {
     std::pmr::string script_path;
     uint32_t sampling_rate_ms = 100;
 
-    std::unique_ptr<IVoltageInterpolator> voltage_interpolator = nullptr;
-    std::unique_ptr<ExpressionEvaluator> expression_evaluator = nullptr;
+    pmr_unique_ptr<IVoltageInterpolator> voltage_interpolator = nullptr;
+    pmr_unique_ptr<ExpressionEvaluator> expression_evaluator = nullptr;
     std::shared_ptr<LuaScript> lua_script = nullptr;
 
     // connection_string data source decomposition objects

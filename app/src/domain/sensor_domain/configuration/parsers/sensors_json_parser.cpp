@@ -130,22 +130,22 @@ std::vector<std::shared_ptr<Sensor>> SensorsJsonParser::Deserialize(
             interpolation_method = GetInterpolationMethod(std::string(sensor_config.configuration.interpolation_method));
 
         if(interpolation_method != InterpolationMethod::NONE && sensor_config.configuration.calibration_table.size() > 0) {
-            std::vector<CalibrationData> calibration_table;
+            std::pmr::vector<CalibrationData> calibration_table(mr);
             for(auto& calibration_data : sensor_config.configuration.calibration_table) {
                 calibration_table.push_back({
                     .voltage = calibration_data.voltage,
                     .value = calibration_data.value});
             }
 
-            auto calibration_table_ptr = make_shared_pmr<std::vector<CalibrationData>>(mr, calibration_table);
+            auto calibration_table_ptr = make_shared_pmr<std::pmr::vector<CalibrationData>>(mr, calibration_table);
 
             switch (interpolation_method) {
             case InterpolationMethod::LINEAR:
-                sensor->configuration.voltage_interpolator = std::make_unique<LinearVoltageInterpolator>(calibration_table_ptr);
+                sensor->configuration.voltage_interpolator = make_unique_pmr<LinearVoltageInterpolator>(mr, calibration_table_ptr);
                 break;
 
             case InterpolationMethod::CUBIC_SPLINE:
-                sensor->configuration.voltage_interpolator = std::make_unique<CubicSplineVoltageInterpolator>(calibration_table_ptr);
+                sensor->configuration.voltage_interpolator = make_unique_pmr<CubicSplineVoltageInterpolator>(mr, calibration_table_ptr);
                 break;
 
             default:
@@ -157,8 +157,8 @@ std::vector<std::shared_ptr<Sensor>> SensorsJsonParser::Deserialize(
         }
 
         if(!sensor_config.configuration.expression.empty()) {
-            sensor->configuration.expression_evaluator = std::make_unique<ExpressionEvaluator>(
-                std::string(sensor_config.configuration.expression));
+            sensor->configuration.expression_evaluator = make_unique_pmr<ExpressionEvaluator>(
+                mr, std::string(sensor_config.configuration.expression));
         } else {
             sensor->configuration.expression_evaluator = nullptr;
         }

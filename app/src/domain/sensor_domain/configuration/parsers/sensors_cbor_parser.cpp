@@ -143,7 +143,7 @@ std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
 
         auto interpolation_method = static_cast<InterpolationMethod>(sensor_config.configuration.interpolation_method);
         if(interpolation_method != InterpolationMethod::NONE && sensor_config.configuration.calibration_table_present) {
-            std::vector<CalibrationData> calibration_table;
+            std::pmr::vector<CalibrationData> calibration_table(mr);
             calibration_table.reserve(sensor_config.configuration.calibration_table.float32float.size());
             for(const auto& calibration_data : sensor_config.configuration.calibration_table.float32float) {
                 calibration_table.push_back({
@@ -151,15 +151,15 @@ std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
                     .value = calibration_data.float32float});
             }
 
-            auto calibration_table_ptr = make_shared_pmr<std::vector<CalibrationData>>(mr, calibration_table);
+            auto calibration_table_ptr = make_shared_pmr<std::pmr::vector<CalibrationData>>(mr, calibration_table);
 
             switch(interpolation_method) {
             case InterpolationMethod::LINEAR:
-                sensor->configuration.voltage_interpolator = std::make_unique<LinearVoltageInterpolator>(calibration_table_ptr);
+                sensor->configuration.voltage_interpolator = make_unique_pmr<LinearVoltageInterpolator>(mr, calibration_table_ptr);
                 break;
 
             case InterpolationMethod::CUBIC_SPLINE:
-                sensor->configuration.voltage_interpolator = std::make_unique<CubicSplineVoltageInterpolator>(calibration_table_ptr);
+                sensor->configuration.voltage_interpolator = make_unique_pmr<CubicSplineVoltageInterpolator>(mr, calibration_table_ptr);
                 break;
 
             default:
@@ -171,8 +171,8 @@ std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
         }
 
         if(sensor_config.configuration.expression_present)
-            sensor->configuration.expression_evaluator = std::make_unique<ExpressionEvaluator>(
-                CborHelpers::ToStdString(sensor_config.configuration.expression));
+            sensor->configuration.expression_evaluator = make_unique_pmr<ExpressionEvaluator>(
+                mr, CborHelpers::ToStdString(sensor_config.configuration.expression));
         else
             sensor->configuration.expression_evaluator = nullptr;
 

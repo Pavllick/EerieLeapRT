@@ -456,11 +456,11 @@ void SetupAdcConfiguration(std::shared_ptr<AdcConfigurationManager> adc_configur
 void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager) {
     // Test Sensors
 
-    std::vector<CalibrationData> calibration_data_1 {
+    std::pmr::vector<CalibrationData> calibration_data_1 {
         {0.0, 2000.0},
         {5.0, 2100.0}
     };
-    auto calibration_data_1_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_1);
+    auto calibration_data_1_ptr = std::make_shared<std::pmr::vector<CalibrationData>>(calibration_data_1);
 
     auto sensor_1 = make_shared_pmr<Sensor>(Mrm::GetExtPmr(), "sensor_1");
 
@@ -475,11 +475,11 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
     sensor_1->configuration.voltage_interpolator = std::make_unique<LinearVoltageInterpolator>(calibration_data_1_ptr);
     // sensor_1->configuration.expression_evaluator = std::make_unique<ExpressionEvaluator>("x * 2 + sensor_2 + 1");
 
-    std::vector<CalibrationData> calibration_data_2 {
+    std::pmr::vector<CalibrationData> calibration_data_2 {
         {0.0, 90.0},
         {5.0, 100.0},
     };
-    auto calibration_data_2_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_2);
+    auto calibration_data_2_ptr = std::make_shared<std::pmr::vector<CalibrationData>>(calibration_data_2);
 
     auto sensor_2 = make_shared_pmr<Sensor>(Mrm::GetExtPmr(), "sensor_2");
 
@@ -568,11 +568,11 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
     // std::vector<std::shared_ptr<Sensor>> sensors;
 
     // for(int i = 0; i < 50; i++) {
-    //     std::vector<CalibrationData> calibration_data_1 {
+    //     std::pmr::vector<CalibrationData> calibration_data_1 {
     //         {0.0, 0.0},
     //         {5.0, 100.0}
     //     };
-    //     auto calibration_data_1_ptr = make_shared_ext<std::vector<CalibrationData>>(calibration_data_1);
+    //     auto calibration_data_1_ptr = make_shared_pmr<std::pmr::vector<CalibrationData>>(Mrm::GetExtPmr(), calibration_data_1);
 
     //     auto sensor = make_shared_pmr<Sensor>(Mrm::GetExtPmr(), "sensor_" + std::to_string(i));
 
@@ -584,7 +584,7 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
     //     sensor->configuration.channel = 0;
     //     sensor->configuration.script_path = "scripts/sensor_1.lua";
     //     sensor->configuration.sampling_rate_ms = 50;
-    //     sensor->configuration.voltage_interpolator = std::make_unique<LinearVoltageInterpolator>(calibration_data_1_ptr);
+    //     sensor->configuration.voltage_interpolator = make_unique_pmr<LinearVoltageInterpolator>(Mrm::GetExtPmr(), calibration_data_1_ptr);
     //     sensor->configuration.expression_evaluator = std::make_unique<ExpressionEvaluator>("x * 2 + 1");
 
     //     sensors.push_back(sensor);
