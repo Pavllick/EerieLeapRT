@@ -2,6 +2,7 @@
 
 #include "memory_resource.h"
 #include "boost_memory_resource.h"
+#include <memory_resource>
 
 namespace eerie_leap::utilities::memory {
 
@@ -11,6 +12,7 @@ private:
     static BoostExtMemoryResource ext_boost_memory_resource;
 
 public:
+    static std::pmr::memory_resource* DefaultPmr();
     static std::pmr::memory_resource* GetExtPmr();
     static boost::container::pmr::memory_resource* GetBoostExtPmr();
 };

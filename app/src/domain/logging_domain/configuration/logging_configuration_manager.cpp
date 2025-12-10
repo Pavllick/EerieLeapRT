@@ -13,8 +13,8 @@ LoggingConfigurationManager::LoggingConfigurationManager(
         json_configuration_service_(std::move(json_configuration_service)),
         configuration_(nullptr) {
 
-    cbor_parser_ = make_unique_ext<LoggingConfigurationCborParser>();
-    json_parser_ = make_unique_ext<LoggingConfigurationJsonParser>();
+    cbor_parser_ = std::make_unique<LoggingConfigurationCborParser>();
+    json_parser_ = std::make_unique<LoggingConfigurationJsonParser>();
     std::shared_ptr<LoggingConfiguration> configuration = nullptr;
 
     try {
@@ -51,7 +51,7 @@ bool LoggingConfigurationManager::ApplyJsonConfiguration() {
 
             json_config_checksum_ = json_config_loaded->checksum;
 
-            if(!Update(configuration, true))
+            if(!Update(*configuration, true))
                 return false;
         } catch(const std::exception& e) {
             LOG_ERR("Failed to deserialize JSON configuration. %s", e.what());
@@ -110,7 +110,7 @@ std::shared_ptr<LoggingConfiguration> LoggingConfigurationManager::Get(bool forc
     auto cbor_config = std::move(cbor_config_data.value().config);
 
     auto configuration = cbor_parser_->Deserialize(*cbor_config);
-    configuration_ = std::make_shared<LoggingConfiguration>(configuration);
+    configuration_ = make_shared_pmr<LoggingConfiguration>(Mrm::GetExtPmr(), std::move(*configuration));
 
     json_config_checksum_ = cbor_config->json_config_checksum;
 
@@ -118,7 +118,7 @@ std::shared_ptr<LoggingConfiguration> LoggingConfigurationManager::Get(bool forc
 }
 
 bool LoggingConfigurationManager::CreateDefaultConfiguration() {
-    auto configuration = std::make_unique<LoggingConfiguration>();
+    auto configuration = make_unique_pmr<LoggingConfiguration>(Mrm::GetExtPmr());
 
     return Update(*configuration);
 }

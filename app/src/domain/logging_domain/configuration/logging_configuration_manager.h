@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "utilities/memory/heap_allocator.h"
+#include "utilities/memory/memory_resource_manager.h"
 #include "configuration/cbor/cbor_logging_config/cbor_logging_config.h"
 #include "configuration/services/cbor_configuration_service.h"
 #include "configuration/services/json_configuration_service.h"
@@ -22,8 +22,8 @@ private:
     std::unique_ptr<CborConfigurationService<CborLoggingConfig>> cbor_configuration_service_;
     std::unique_ptr<JsonConfigurationService<JsonLoggingConfig>> json_configuration_service_;
 
-    ext_unique_ptr<LoggingConfigurationCborParser> cbor_parser_;
-    ext_unique_ptr<LoggingConfigurationJsonParser> json_parser_;
+    std::unique_ptr<LoggingConfigurationCborParser> cbor_parser_;
+    std::unique_ptr<LoggingConfigurationJsonParser> json_parser_;
 
     std::shared_ptr<LoggingConfiguration> configuration_;
 

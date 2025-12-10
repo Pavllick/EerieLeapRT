@@ -22,11 +22,10 @@ ext_unique_ptr<JsonLoggingConfig> LoggingConfigurationJsonParser::Serialize(cons
     return config;
 }
 
-LoggingConfiguration LoggingConfigurationJsonParser::Deserialize(const JsonLoggingConfig& config) {
-    LoggingConfiguration configuration {
-        .logging_interval_ms = config.logging_interval_ms,
-        .max_log_size_mb = config.max_log_size_mb
-    };
+pmr_unique_ptr<LoggingConfiguration> LoggingConfigurationJsonParser::Deserialize(const JsonLoggingConfig& config) {
+    auto configuration = make_unique_pmr<LoggingConfiguration>(Mrm::GetExtPmr());
+    configuration->logging_interval_ms = config.logging_interval_ms;
+    configuration->max_log_size_mb = config.max_log_size_mb;
 
     for(auto& sensor_logging_config : config.sensor_configs) {
         SensorLoggingConfiguration sensor_logging_configuration {
@@ -35,7 +34,7 @@ LoggingConfiguration LoggingConfigurationJsonParser::Deserialize(const JsonLoggi
             .log_only_new_data = sensor_logging_config.log_only_new_data
         };
 
-        configuration.sensor_configurations.emplace(sensor_logging_config.sensor_id_hash, sensor_logging_configuration);
+        configuration->sensor_configurations.emplace(sensor_logging_config.sensor_id_hash, sensor_logging_configuration);
     }
 
     return configuration;

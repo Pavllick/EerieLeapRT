@@ -2,7 +2,7 @@
 
 #include <zephyr/data/json.h>
 
-#include "utilities/memory/heap_allocator.h"
+#include "utilities/memory/memory_resource_manager.h"
 #include "configuration/json/configs/json_logging_config.h"
 #include "domain/logging_domain/models/logging_configuration.h"
 
@@ -17,7 +17,7 @@ public:
     LoggingConfigurationJsonParser() = default;
 
     ext_unique_ptr<JsonLoggingConfig> Serialize(const LoggingConfiguration& configuration);
-    LoggingConfiguration Deserialize(const JsonLoggingConfig& config);
+    pmr_unique_ptr<LoggingConfiguration> Deserialize(const JsonLoggingConfig& config);
 };
 
 } // namespace eerie_leap::domain::logging_domain::configuration::parsers
