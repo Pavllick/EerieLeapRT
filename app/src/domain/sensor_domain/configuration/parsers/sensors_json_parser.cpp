@@ -17,12 +17,12 @@ using namespace eerie_leap::domain::sensor_domain::utilities;
 SensorsJsonParser::SensorsJsonParser(std::shared_ptr<IFsService> fs_service)
     : fs_service_(std::move(fs_service)) {}
 
-ext_unique_ptr<JsonSensorsConfig> SensorsJsonParser::Serialize(
+pmr_unique_ptr<JsonSensorsConfig> SensorsJsonParser::Serialize(
     const std::vector<std::shared_ptr<Sensor>>& sensors,
     uint32_t gpio_channel_count,
     uint32_t adc_channel_count) {
 
-    auto config = make_unique_ext<JsonSensorsConfig>();
+    auto config = make_unique_pmr<JsonSensorsConfig>(Mrm::GetExtPmr());
 
     SensorsOrderResolver order_resolver;
 
@@ -31,7 +31,7 @@ ext_unique_ptr<JsonSensorsConfig> SensorsJsonParser::Serialize(
         sensor->configuration.UpdateConnectionString();
         SensorValidator::Validate(*sensor, gpio_channel_count, adc_channel_count);
 
-        auto sensor_config = make_unique_ext<JsonSensorConfig>();
+        auto sensor_config = make_unique_pmr<JsonSensorConfig>(Mrm::GetExtPmr());
 
         sensor_config->id = json::string(sensor->id);
         sensor_config->configuration.type = json::string(GetSensorTypeName(sensor->configuration.type));

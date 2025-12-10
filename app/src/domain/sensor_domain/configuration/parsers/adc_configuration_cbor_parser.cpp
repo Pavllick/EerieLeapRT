@@ -4,8 +4,8 @@
 
 namespace eerie_leap::domain::sensor_domain::configuration::parsers {
 
-ext_unique_ptr<CborAdcConfig> AdcConfigurationCborParser::Serialize(const AdcConfiguration& adc_configuration) {
-    auto adc_config = make_unique_ext<CborAdcConfig>();
+pmr_unique_ptr<CborAdcConfig> AdcConfigurationCborParser::Serialize(const AdcConfiguration& adc_configuration) {
+    auto adc_config = make_unique_pmr<CborAdcConfig>(Mrm::GetExtPmr());
 
     adc_config->samples = adc_configuration.samples;
 
@@ -40,7 +40,7 @@ ext_unique_ptr<CborAdcConfig> AdcConfigurationCborParser::Serialize(const AdcCon
             throw std::runtime_error("ADC channel configuration is invalid. Calibration table is missing.");
         }
 
-        adc_config->CborAdcChannelConfig_m.push_back(adc_channel_config);
+        adc_config->CborAdcChannelConfig_m.push_back(std::move(adc_channel_config));
     }
 
     return adc_config;
@@ -70,7 +70,7 @@ pmr_unique_ptr<AdcConfiguration> AdcConfigurationCborParser::Deserialize(std::pm
             throw std::runtime_error("ADC channel configuration is invalid. Calibration table is missing.");
         }
 
-        configuration->channel_configurations->push_back(adc_channel_configuration);
+        configuration->channel_configurations->push_back(std::move(adc_channel_configuration));
     }
 
     return configuration;

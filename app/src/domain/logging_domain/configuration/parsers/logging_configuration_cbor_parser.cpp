@@ -4,8 +4,8 @@
 
 namespace eerie_leap::domain::logging_domain::configuration::parsers {
 
-ext_unique_ptr<CborLoggingConfig> LoggingConfigurationCborParser::Serialize(const LoggingConfiguration& logging_configuration) {
-    auto logging_config = make_unique_ext<CborLoggingConfig>();
+pmr_unique_ptr<CborLoggingConfig> LoggingConfigurationCborParser::Serialize(const LoggingConfiguration& logging_configuration) {
+    auto logging_config = make_unique_pmr<CborLoggingConfig>(Mrm::GetExtPmr());
 
     logging_config->logging_interval_ms = logging_configuration.logging_interval_ms;
     logging_config->max_log_size_mb = logging_configuration.max_log_size_mb;
@@ -18,7 +18,7 @@ ext_unique_ptr<CborLoggingConfig> LoggingConfigurationCborParser::Serialize(cons
             .log_only_new_data = sensor_configuration.log_only_new_data
         };
 
-        logging_config->CborSensorLoggingConfig_m.push_back(sensor_logging_config);
+        logging_config->CborSensorLoggingConfig_m.push_back(std::move(sensor_logging_config));
     }
 
     return logging_config;
@@ -36,7 +36,7 @@ pmr_unique_ptr<LoggingConfiguration> LoggingConfigurationCborParser::Deserialize
             .log_only_new_data = sensor_logging_config.log_only_new_data
         };
 
-        configuration->sensor_configurations.emplace(sensor_logging_config.sensor_id_hash, sensor_logging_configuration);
+        configuration->sensor_configurations.emplace(sensor_logging_config.sensor_id_hash, std::move(sensor_logging_configuration));
     }
 
     return configuration;

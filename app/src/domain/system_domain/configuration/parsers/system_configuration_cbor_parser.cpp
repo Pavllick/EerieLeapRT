@@ -5,10 +5,10 @@
 
 namespace eerie_leap::domain::system_domain::configuration::parsers {
 
-ext_unique_ptr<CborSystemConfig> SystemConfigurationCborParser::Serialize(const SystemConfiguration& configuration) {
+pmr_unique_ptr<CborSystemConfig> SystemConfigurationCborParser::Serialize(const SystemConfiguration& configuration) {
     SystemConfigurationValidator::Validate(configuration);
 
-    auto config = make_unique_ext<CborSystemConfig>();
+    auto config = make_unique_pmr<CborSystemConfig>(Mrm::GetExtPmr());
     memset(config.get(), 0, sizeof(CborSystemConfig));
 
     config->device_id = configuration.device_id;

@@ -12,10 +12,10 @@ using namespace eerie_leap::utilities::cbor;
 CanbusConfigurationCborParser::CanbusConfigurationCborParser(std::shared_ptr<IFsService> fs_service)
     : fs_service_(std::move(fs_service)) {}
 
-ext_unique_ptr<CborCanbusConfig> CanbusConfigurationCborParser::Serialize(const CanbusConfiguration& configuration) {
+pmr_unique_ptr<CborCanbusConfig> CanbusConfigurationCborParser::Serialize(const CanbusConfiguration& configuration) {
     CanbusConfigurationValidator::Validate(configuration);
 
-    auto config = make_unique_ext<CborCanbusConfig>();
+    auto config = make_unique_pmr<CborCanbusConfig>(Mrm::GetExtPmr());
 
     for(const auto& [bus_channel, channel_configuration] : configuration.channel_configurations) {
         CborCanChannelConfig channel_config = {
@@ -47,10 +47,10 @@ ext_unique_ptr<CborCanbusConfig> CanbusConfigurationCborParser::Serialize(const 
                 });
             }
 
-            channel_config.CborCanMessageConfig_m.push_back(message_config);
+            channel_config.CborCanMessageConfig_m.push_back(std::move(message_config));
         }
 
-        config->CborCanChannelConfig_m.push_back(channel_config);
+        config->CborCanChannelConfig_m.push_back(std::move(channel_config));
     }
 
     return config;
@@ -88,7 +88,7 @@ pmr_unique_ptr<CanbusConfiguration> CanbusConfigurationCborParser::Deserialize(s
                 signal_configuration.name = CborHelpers::ToStdString(signal_config.name);
                 signal_configuration.unit = CborHelpers::ToStdString(signal_config.unit);
 
-                message_configuration->signal_configurations.emplace_back(std::move(signal_configuration));
+                message_configuration->signal_configurations.push_back(std::move(signal_configuration));
             }
 
             if(fs_service_ != nullptr
@@ -109,7 +109,7 @@ pmr_unique_ptr<CanbusConfiguration> CanbusConfigurationCborParser::Deserialize(s
                 }
             }
 
-            channel_configuration.message_configurations.emplace_back(std::move(message_configuration));
+            channel_configuration.message_configurations.push_back(std::move(message_configuration));
         }
 
         configuration->channel_configurations.emplace(

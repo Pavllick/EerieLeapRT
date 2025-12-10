@@ -22,7 +22,7 @@ private:
 public:
     explicit SensorsCborParser(std::shared_ptr<IFsService> fs_service);
 
-    ext_unique_ptr<CborSensorsConfig> Serialize(
+    pmr_unique_ptr<CborSensorsConfig> Serialize(
         const std::vector<std::shared_ptr<Sensor>>& sensors,
         uint32_t gpio_channel_count,
         uint32_t adc_channel_count);

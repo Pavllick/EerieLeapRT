@@ -10,8 +10,8 @@ namespace eerie_leap::domain::sensor_domain::configuration::parsers {
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::voltage_interpolator;
 
-ext_unique_ptr<JsonAdcConfig> AdcConfigurationJsonParser::Serialize(const AdcConfiguration& configuration) {
-    auto config = make_unique_ext<JsonAdcConfig>();
+pmr_unique_ptr<JsonAdcConfig> AdcConfigurationJsonParser::Serialize(const AdcConfiguration& configuration) {
+    auto config = make_unique_pmr<JsonAdcConfig>(Mrm::GetExtPmr());
 
     config->samples = configuration.samples;
 
@@ -44,7 +44,7 @@ ext_unique_ptr<JsonAdcConfig> AdcConfigurationJsonParser::Serialize(const AdcCon
                 .value = calibration_data.value});
         }
 
-        config->channel_configs.push_back(channel_configuration);
+        config->channel_configs.push_back(std::move(channel_configuration));
     }
 
     return config;
@@ -77,7 +77,7 @@ pmr_unique_ptr<AdcConfiguration> AdcConfigurationJsonParser::Deserialize(std::pm
         auto calibration_table_ptr = make_shared_pmr<std::pmr::vector<CalibrationData>>(mr, calibration_table);
         adc_channel_configuration->calibrator = make_shared_pmr<AdcCalibrator>(mr, interpolation_method, calibration_table_ptr);
 
-        configuration->channel_configurations->push_back(adc_channel_configuration);
+        configuration->channel_configurations->push_back(std::move(adc_channel_configuration));
     }
 
     return configuration;

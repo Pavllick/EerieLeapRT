@@ -6,10 +6,10 @@ namespace eerie_leap::domain::canbus_domain::configuration::parsers {
 CanbusConfigurationJsonParser::CanbusConfigurationJsonParser(std::shared_ptr<IFsService> fs_service)
     : fs_service_(std::move(fs_service)) {}
 
-ext_unique_ptr<JsonCanbusConfig> CanbusConfigurationJsonParser::Serialize(const CanbusConfiguration& configuration) {
+pmr_unique_ptr<JsonCanbusConfig> CanbusConfigurationJsonParser::Serialize(const CanbusConfiguration& configuration) {
     CanbusConfigurationValidator::Validate(configuration);
 
-    auto config = make_unique_ext<JsonCanbusConfig>();
+    auto config = make_unique_pmr<JsonCanbusConfig>(Mrm::GetExtPmr());
 
     for(const auto& [bus_channel, channel_configuration] : configuration.channel_configurations) {
         JsonCanChannelConfig channel_config;

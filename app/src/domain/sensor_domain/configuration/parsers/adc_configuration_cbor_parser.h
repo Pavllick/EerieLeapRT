@@ -15,7 +15,7 @@ class AdcConfigurationCborParser {
 public:
     AdcConfigurationCborParser() = default;
 
-    ext_unique_ptr<CborAdcConfig> Serialize(const AdcConfiguration& adc_configuration);
+    pmr_unique_ptr<CborAdcConfig> Serialize(const AdcConfiguration& adc_configuration);
     pmr_unique_ptr<AdcConfiguration> Deserialize(std::pmr::memory_resource* mr, const CborAdcConfig& adc_config);
 };
 

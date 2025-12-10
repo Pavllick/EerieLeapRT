@@ -21,7 +21,7 @@ private:
 public:
     explicit CanbusConfigurationJsonParser(std::shared_ptr<IFsService> fs_service);
 
-    ext_unique_ptr<JsonCanbusConfig> Serialize(const CanbusConfiguration& configuration);
+    pmr_unique_ptr<JsonCanbusConfig> Serialize(const CanbusConfiguration& configuration);
     pmr_unique_ptr<CanbusConfiguration> Deserialize(std::pmr::memory_resource* mr, const JsonCanbusConfig& config);
 };
 

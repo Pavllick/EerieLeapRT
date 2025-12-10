@@ -4,10 +4,10 @@
 
 namespace eerie_leap::domain::system_domain::configuration::parsers {
 
-ext_unique_ptr<JsonSystemConfig> SystemConfigurationJsonParser::Serialize(const SystemConfiguration& configuration) {
+pmr_unique_ptr<JsonSystemConfig> SystemConfigurationJsonParser::Serialize(const SystemConfiguration& configuration) {
     SystemConfigurationValidator::Validate(configuration);
 
-    auto config = make_unique_ext<JsonSystemConfig>();
+    auto config = make_unique_pmr<JsonSystemConfig>(Mrm::GetExtPmr());
 
     config->com_user_refresh_rate_ms = configuration.com_user_refresh_rate_ms;
 

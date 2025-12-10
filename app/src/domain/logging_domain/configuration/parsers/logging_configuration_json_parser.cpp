@@ -2,8 +2,8 @@
 
 namespace eerie_leap::domain::logging_domain::configuration::parsers {
 
-ext_unique_ptr<JsonLoggingConfig> LoggingConfigurationJsonParser::Serialize(const LoggingConfiguration& configuration) {
-    auto config = make_unique_ext<JsonLoggingConfig>();
+pmr_unique_ptr<JsonLoggingConfig> LoggingConfigurationJsonParser::Serialize(const LoggingConfiguration& configuration) {
+    auto config = make_unique_pmr<JsonLoggingConfig>(Mrm::GetExtPmr());
 
     config->logging_interval_ms = configuration.logging_interval_ms;
     config->max_log_size_mb = configuration.max_log_size_mb;
@@ -16,7 +16,7 @@ ext_unique_ptr<JsonLoggingConfig> LoggingConfigurationJsonParser::Serialize(cons
             .log_only_new_data = sensor_configuration.log_only_new_data
         };
 
-        config->sensor_configs.push_back(sensor_logging_config);
+        config->sensor_configs.push_back(std::move(sensor_logging_config));
     }
 
     return config;
@@ -34,7 +34,7 @@ pmr_unique_ptr<LoggingConfiguration> LoggingConfigurationJsonParser::Deserialize
             .log_only_new_data = sensor_logging_config.log_only_new_data
         };
 
-        configuration->sensor_configurations.emplace(sensor_logging_config.sensor_id_hash, sensor_logging_configuration);
+        configuration->sensor_configurations.emplace(sensor_logging_config.sensor_id_hash, std::move(sensor_logging_configuration));
     }
 
     return configuration;

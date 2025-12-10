@@ -21,12 +21,12 @@ using namespace eerie_leap::domain::sensor_domain::utilities;
 SensorsCborParser::SensorsCborParser(std::shared_ptr<IFsService> fs_service)
     : fs_service_(std::move(fs_service)) {}
 
-ext_unique_ptr<CborSensorsConfig> SensorsCborParser::Serialize(
+pmr_unique_ptr<CborSensorsConfig> SensorsCborParser::Serialize(
     const std::vector<std::shared_ptr<Sensor>>& sensors,
     uint32_t gpio_channel_count,
     uint32_t adc_channel_count) {
 
-    auto sensors_config = make_unique_ext<CborSensorsConfig>();
+    auto sensors_config = make_unique_pmr<CborSensorsConfig>(Mrm::GetExtPmr());
 
     SensorsOrderResolver order_resolver;
 
@@ -35,7 +35,7 @@ ext_unique_ptr<CborSensorsConfig> SensorsCborParser::Serialize(
         sensor->configuration.UpdateConnectionString();
         SensorValidator::Validate(*sensor, gpio_channel_count, adc_channel_count);
 
-        auto sensor_config = make_unique_ext<CborSensorConfig>();
+        auto sensor_config = make_unique_pmr<CborSensorConfig>(Mrm::GetExtPmr());
 
         sensor_config->id = CborHelpers::ToZcborString(sensor->id);
         sensor_config->configuration.type = std::to_underlying(sensor->configuration.type);

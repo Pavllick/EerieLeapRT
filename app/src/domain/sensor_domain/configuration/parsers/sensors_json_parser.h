@@ -24,7 +24,7 @@ private:
 public:
     explicit SensorsJsonParser(std::shared_ptr<IFsService> fs_service);
 
-    ext_unique_ptr<JsonSensorsConfig> Serialize(
+    pmr_unique_ptr<JsonSensorsConfig> Serialize(
         const std::vector<std::shared_ptr<Sensor>>& sensors,
         uint32_t gpio_channel_count,
         uint32_t adc_channel_count);

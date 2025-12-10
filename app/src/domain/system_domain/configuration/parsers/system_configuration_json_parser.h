@@ -16,7 +16,7 @@ class SystemConfigurationJsonParser {
 public:
     SystemConfigurationJsonParser() = default;
 
-    ext_unique_ptr<JsonSystemConfig> Serialize(const SystemConfiguration& configuration);
+    pmr_unique_ptr<JsonSystemConfig> Serialize(const SystemConfiguration& configuration);
     pmr_unique_ptr<SystemConfiguration> Deserialize(
         std::pmr::memory_resource* mr,
         const JsonSystemConfig& config,
