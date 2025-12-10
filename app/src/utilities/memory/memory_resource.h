@@ -30,6 +30,11 @@ std::shared_ptr<T> make_shared_pmr(std::pmr::memory_resource* mr, Args&&... args
     return std::allocate_shared<T>(std::pmr::polymorphic_allocator<T>(mr), std::forward<Args>(args)...);
 }
 
+template<typename T, typename... Args>
+std::shared_ptr<T> make_shared_pmr(const std::pmr::polymorphic_allocator<std::byte>& alloc, Args&&... args) {
+    return std::allocate_shared<T>(alloc, std::forward<Args>(args)...);
+}
+
 template<class T>
 class pmr_deleter {
 private:
@@ -68,6 +73,11 @@ pmr_unique_ptr<T> make_unique_pmr(std::pmr::memory_resource* mr, Args&&... args)
         prm_allocator.deallocate(ptr, 1);
         throw;
     }
+}
+
+template<typename T, typename... Args>
+pmr_unique_ptr<T> make_unique_pmr(std::pmr::polymorphic_allocator<std::byte> alloc, Args&&... args) {
+    return make_unique_pmr<T>(alloc.resource(), std::forward<Args>(args)...);
 }
 
 } // namespace eerie_leap::utilities::memory

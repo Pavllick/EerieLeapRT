@@ -24,15 +24,15 @@ ext_unique_ptr<CborCanbusConfig> CanbusConfigurationCborParser::Serialize(const 
             .bus_channel = bus_channel,
             .bitrate = channel_configuration.bitrate,
             .data_bitrate = channel_configuration.data_bitrate,
-            .dbc_file_path = CborHelpers::ToZcborString(&channel_configuration.dbc_file_path)
+            .dbc_file_path = CborHelpers::ToZcborString(channel_configuration.dbc_file_path)
         };
 
         for(const auto& message_configuration : channel_configuration.message_configurations) {
             CborCanMessageConfig message_config = {
                 .frame_id = message_configuration.frame_id,
                 .send_interval_ms = message_configuration.send_interval_ms,
-                .script_path = CborHelpers::ToZcborString(&message_configuration.script_path),
-                .name = CborHelpers::ToZcborString(&message_configuration.name),
+                .script_path = CborHelpers::ToZcborString(message_configuration.script_path),
+                .name = CborHelpers::ToZcborString(message_configuration.name),
                 .message_size = message_configuration.message_size
             };
 
@@ -42,8 +42,8 @@ ext_unique_ptr<CborCanbusConfig> CanbusConfigurationCborParser::Serialize(const 
                     .size_bits = signal_configuration.size_bits,
                     .factor = signal_configuration.factor,
                     .offset = signal_configuration.offset,
-                    .name = CborHelpers::ToZcborString(&signal_configuration.name),
-                    .unit = CborHelpers::ToZcborString(&signal_configuration.unit)
+                    .name = CborHelpers::ToZcborString(signal_configuration.name),
+                    .unit = CborHelpers::ToZcborString(signal_configuration.unit)
                 });
             }
 

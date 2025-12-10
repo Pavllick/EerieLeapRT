@@ -5,7 +5,7 @@ namespace eerie_leap::utilities::memory {
 ExtMemoryResource Mrm::ext_memory_resource_;
 BoostExtMemoryResource Mrm::ext_boost_memory_resource(&ext_memory_resource_);
 
-std::pmr::memory_resource* Mrm::DefaultPmr() {
+std::pmr::memory_resource* Mrm::GetDefaultPmr() {
     return std::pmr::get_default_resource();
 }
 

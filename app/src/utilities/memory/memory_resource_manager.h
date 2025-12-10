@@ -12,7 +12,7 @@ private:
     static BoostExtMemoryResource ext_boost_memory_resource;
 
 public:
-    static std::pmr::memory_resource* DefaultPmr();
+    static std::pmr::memory_resource* GetDefaultPmr();
     static std::pmr::memory_resource* GetExtPmr();
     static boost::container::pmr::memory_resource* GetBoostExtPmr();
 };

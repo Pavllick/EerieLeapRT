@@ -1,7 +1,7 @@
 #include <memory>
 #include <zephyr/logging/log.h>
 
-#include "utilities/memory/heap_allocator.h"
+#include "utilities/memory/memory_resource_manager.h"
 #include "utilities/dev_tools/system_info.h"
 #include "utilities/guid/guid_generator.h"
 
@@ -462,20 +462,18 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
     };
     auto calibration_data_1_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_1);
 
-    auto sensor_1 = std::make_shared<Sensor>("sensor_1");
-    sensor_1->metadata = {
-        .name = "Sensor 1",
-        .unit = "km/h",
-        .description = "Test Sensor 1"
-    };
-    sensor_1->configuration = {
-        .type = SensorType::PHYSICAL_ANALOG,
-        .channel = 0,
-        .script_path = "scripts/sensor_1.lua",
-        .sampling_rate_ms = 1000,
-        .voltage_interpolator = std::make_unique<LinearVoltageInterpolator>(calibration_data_1_ptr),
-        // .expression_evaluator = std::make_unique<ExpressionEvaluator>("x * 2 + sensor_2 + 1")
-    };
+    auto sensor_1 = make_shared_pmr<Sensor>(Mrm::GetExtPmr(), "sensor_1");
+
+    sensor_1->metadata.name = "Sensor 1";
+    sensor_1->metadata.unit = "km/h";
+    sensor_1->metadata.description = "Test Sensor 1";
+
+    sensor_1->configuration.type = SensorType::PHYSICAL_ANALOG;
+    sensor_1->configuration.channel = 0;
+    sensor_1->configuration.script_path = "scripts/sensor_1.lua";
+    sensor_1->configuration.sampling_rate_ms = 1000;
+    sensor_1->configuration.voltage_interpolator = std::make_unique<LinearVoltageInterpolator>(calibration_data_1_ptr);
+    // sensor_1->configuration.expression_evaluator = std::make_unique<ExpressionEvaluator>("x * 2 + sensor_2 + 1");
 
     std::vector<CalibrationData> calibration_data_2 {
         {0.0, 90.0},
@@ -483,92 +481,78 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
     };
     auto calibration_data_2_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_2);
 
-    auto sensor_2 = std::make_shared<Sensor>("sensor_2");
-    sensor_2->metadata = {
-        .name = "Sensor 2",
-        .unit = "km/h",
-        .description = "Test Sensor 2"
-    };
-    sensor_2->configuration = {
-        .type = SensorType::PHYSICAL_ANALOG,
-        .channel = 1,
-        .sampling_rate_ms = 1000,
-        .voltage_interpolator = std::make_unique<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
-        .expression_evaluator = std::make_unique<ExpressionEvaluator>("x * 4 + 1.6")
-    };
+    auto sensor_2 = make_shared_pmr<Sensor>(Mrm::GetExtPmr(), "sensor_2");
 
-    auto sensor_3 = std::make_shared<Sensor>("sensor_3");
-    sensor_3->metadata = {
-        .name = "Sensor 3",
-        .unit = "km/h",
-        .description = "Test Sensor 3"
-    };
-    sensor_3->configuration = {
-        .type = SensorType::VIRTUAL_ANALOG,
-        .sampling_rate_ms = 2000,
-        .expression_evaluator = std::make_unique<ExpressionEvaluator>("2 + 8.34")
-    };
+    sensor_2->metadata.name = "Sensor 2";
+    sensor_2->metadata.unit = "km/h";
+    sensor_2->metadata.description = "Test Sensor 2";
 
-    auto sensor_4 = std::make_shared<Sensor>("sensor_4");
-    sensor_4->metadata = {
-        .name = "Sensor 4",
-        .unit = "",
-        .description = "Test Sensor 4"
-    };
-    sensor_4->configuration = {
-        .type = SensorType::PHYSICAL_INDICATOR,
-        .channel = 1,
-        .sampling_rate_ms = 1000
-    };
+    sensor_2->configuration.type = SensorType::PHYSICAL_ANALOG;
+    sensor_2->configuration.channel = 1;
+    sensor_2->configuration.sampling_rate_ms = 1000;
+    sensor_2->configuration.voltage_interpolator = std::make_unique<CubicSplineVoltageInterpolator>(calibration_data_2_ptr);
+    sensor_2->configuration.expression_evaluator = std::make_unique<ExpressionEvaluator>("x * 4 + 1.6");
 
-    auto sensor_5 = std::make_shared<Sensor>("sensor_5");
-    sensor_5->metadata = {
-        .name = "Sensor 5",
-        .unit = "",
-        .description = "Test Sensor 5"
-    };
-    sensor_5->configuration = {
-        .type = SensorType::VIRTUAL_INDICATOR,
-        .sampling_rate_ms = 1000,
-        .expression_evaluator = std::make_unique<ExpressionEvaluator>("sensor_1 < 400")
-    };
+    auto sensor_3 = make_shared_pmr<Sensor>(Mrm::GetExtPmr(), "sensor_3");
 
-    auto sensor_6 = std::make_shared<Sensor>("sensor_6");
-    sensor_6->metadata = {
-        .name = "Sensor 6",
-        .unit = "",
-        .description = "Test Sensor 6"
-    };
-    sensor_6->configuration = {
-        .type = SensorType::CANBUS_ANALOG,
-        .sampling_rate_ms = 1000,
-        .canbus_source = std::make_unique<CanbusSource>(0, 790, "RPM")
-    };
+    sensor_3->metadata.name = "Sensor 3";
+    sensor_3->metadata.unit = "km/h";
+    sensor_3->metadata.description = "Test Sensor 3";
 
-    auto sensor_7 = std::make_shared<Sensor>("sensor_7");
-    sensor_7->metadata = {
-        .name = "Sensor 7",
-        .unit = "",
-        .description = "Test Sensor 7"
-    };
-    sensor_7->configuration = {
-        .type = SensorType::CANBUS_RAW,
-        .sampling_rate_ms = 300,
-        .canbus_source = std::make_unique<CanbusSource>(0, 790)
-    };
+    sensor_3->configuration.type = SensorType::VIRTUAL_ANALOG;
+    sensor_3->configuration.sampling_rate_ms = 2000;
+    sensor_3->configuration.expression_evaluator = std::make_unique<ExpressionEvaluator>("2 + 8.34");
 
-    auto sensor_8 = std::make_shared<Sensor>("sensor_8");
-    sensor_8->metadata = {
-        .name = "Sensor 8",
-        .unit = "",
-        .description = "Test Sensor 8"
-    };
-    sensor_8->configuration = {
-        .type = SensorType::USER_ANALOG,
-        .script_path = "scripts/sensor_8.lua",
-        .sampling_rate_ms = 500,
-        .expression_evaluator = std::make_unique<ExpressionEvaluator>("x * 2")
-    };
+    auto sensor_4 = make_shared_pmr<Sensor>(Mrm::GetExtPmr(), "sensor_4");
+
+    sensor_4->metadata.name = "Sensor 4";
+    sensor_4->metadata.unit = "";
+    sensor_4->metadata.description = "Test Sensor 4";
+
+    sensor_4->configuration.type = SensorType::PHYSICAL_INDICATOR;
+    sensor_4->configuration.channel = 1;
+    sensor_4->configuration.sampling_rate_ms = 1000;
+
+    auto sensor_5 = make_shared_pmr<Sensor>(Mrm::GetExtPmr(), "sensor_5");
+
+    sensor_5->metadata.name = "Sensor 5";
+    sensor_5->metadata.unit = "";
+    sensor_5->metadata.description = "Test Sensor 5";
+
+    sensor_5->configuration.type = SensorType::VIRTUAL_INDICATOR;
+    sensor_5->configuration.sampling_rate_ms = 1000;
+    sensor_5->configuration.expression_evaluator = std::make_unique<ExpressionEvaluator>("sensor_1 < 400");
+
+    auto sensor_6 = make_shared_pmr<Sensor>(Mrm::GetExtPmr(), "sensor_6");
+
+    sensor_6->metadata.name = "Sensor 6";
+    sensor_6->metadata.unit = "";
+    sensor_6->metadata.description = "Test Sensor 6";
+
+    sensor_6->configuration.type = SensorType::CANBUS_ANALOG;
+    sensor_6->configuration.sampling_rate_ms = 1000;
+    sensor_6->configuration.canbus_source = make_unique_pmr<CanbusSource>(Mrm::GetExtPmr(), 0, 790, "RPM");
+
+    auto sensor_7 = make_shared_pmr<Sensor>(Mrm::GetExtPmr(), "sensor_7");
+
+    sensor_7->metadata.name = "Sensor 7";
+    sensor_7->metadata.unit = "";
+    sensor_7->metadata.description = "Test Sensor 7";
+
+    sensor_7->configuration.type = SensorType::CANBUS_RAW;
+    sensor_7->configuration.sampling_rate_ms = 300;
+    sensor_7->configuration.canbus_source = make_unique_pmr<CanbusSource>(Mrm::GetExtPmr(), 0, 790);
+
+    auto sensor_8 = make_shared_pmr<Sensor>(Mrm::GetExtPmr(), "sensor_8");
+
+    sensor_8->metadata.name = "Sensor 8";
+    sensor_8->metadata.unit = "";
+    sensor_8->metadata.description = "Test Sensor 8";
+
+    sensor_8->configuration.type = SensorType::USER_ANALOG;
+    sensor_8->configuration.script_path = "scripts/sensor_8.lua";
+    sensor_8->configuration.sampling_rate_ms = 500;
+    sensor_8->configuration.expression_evaluator = std::make_unique<ExpressionEvaluator>("x * 2");
 
     std::vector<std::shared_ptr<Sensor>> sensors = {
         sensor_1,
@@ -590,20 +574,19 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
     //     };
     //     auto calibration_data_1_ptr = make_shared_ext<std::vector<CalibrationData>>(calibration_data_1);
 
-    //     auto sensor = make_shared_ext<Sensor>("sensor_" + std::to_string(i));
-    //     sensor->metadata = {
-    //         .name = "Sensor " + std::to_string(i),
-    //         .unit = "km/h",
-    //         .description = "Test Sensor " + std::to_string(i)
-    //     };
-    //     sensor->configuration = {
-    //         .type = SensorType::PHYSICAL_ANALOG,
-    //         .channel = 0,
-    //         .script_path = "scripts/sensor_1.lua",
-    //         .sampling_rate_ms = 50,
-    //         .voltage_interpolator = std::make_unique<LinearVoltageInterpolator>(calibration_data_1_ptr),
-    //         .expression_evaluator = std::make_unique<ExpressionEvaluator>("x * 2 + 1")
-    //     };
+    //     auto sensor = make_shared_pmr<Sensor>(Mrm::GetExtPmr(), "sensor_" + std::to_string(i));
+
+    //     sensor->metadata.name = "Sensor " + std::to_string(i);
+    //     sensor->metadata.unit = "km/h";
+    //     sensor->metadata.description = "Test Sensor " + std::to_string(i);
+
+    //     sensor->configuration.type = SensorType::PHYSICAL_ANALOG;
+    //     sensor->configuration.channel = 0;
+    //     sensor->configuration.script_path = "scripts/sensor_1.lua";
+    //     sensor->configuration.sampling_rate_ms = 50;
+    //     sensor->configuration.voltage_interpolator = std::make_unique<LinearVoltageInterpolator>(calibration_data_1_ptr);
+    //     sensor->configuration.expression_evaluator = std::make_unique<ExpressionEvaluator>("x * 2 + 1");
+
     //     sensors.push_back(sensor);
     // }
 
@@ -615,7 +598,7 @@ void SetupLoggingConfiguration(std::shared_ptr<SensorsConfigurationManager> sens
 
     auto sensors = sensors_configuration_manager->Get();
 
-    auto logging_configuration = std::make_unique<LoggingConfiguration>();
+    auto logging_configuration = make_unique_pmr<LoggingConfiguration>(Mrm::GetExtPmr());
     logging_configuration->logging_interval_ms = 100;
 
     SensorLoggingConfiguration sensor_logging_config_1 = {

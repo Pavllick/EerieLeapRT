@@ -37,7 +37,7 @@ ext_unique_ptr<CborSensorsConfig> SensorsCborParser::Serialize(
 
         auto sensor_config = make_unique_ext<CborSensorConfig>();
 
-        sensor_config->id = CborHelpers::ToZcborString(&sensor->id);
+        sensor_config->id = CborHelpers::ToZcborString(sensor->id);
         sensor_config->configuration.type = std::to_underlying(sensor->configuration.type);
 
         if(sensor->configuration.channel.has_value()) {
@@ -47,8 +47,8 @@ ext_unique_ptr<CborSensorsConfig> SensorsCborParser::Serialize(
             sensor_config->configuration.channel_present = false;
         }
 
-        sensor_config->configuration.connection_string = CborHelpers::ToZcborString(&sensor->configuration.connection_string);
-        sensor_config->configuration.script_path = CborHelpers::ToZcborString(&sensor->configuration.script_path);
+        sensor_config->configuration.connection_string = CborHelpers::ToZcborString(sensor->configuration.connection_string);
+        sensor_config->configuration.script_path = CborHelpers::ToZcborString(sensor->configuration.script_path);
         sensor_config->configuration.sampling_rate_ms = sensor->configuration.sampling_rate_ms;
 
         auto interpolation_method = sensor->configuration.voltage_interpolator != nullptr
@@ -78,15 +78,15 @@ ext_unique_ptr<CborSensorsConfig> SensorsCborParser::Serialize(
 
         if(sensor->configuration.expression_evaluator != nullptr) {
             sensor_config->configuration.expression_present = true;
-            sensor_config->configuration.expression = CborHelpers::ToZcborString(&sensor->configuration.expression_evaluator->GetExpression());
+            sensor_config->configuration.expression = CborHelpers::ToZcborString(sensor->configuration.expression_evaluator->GetExpression());
         } else {
             sensor_config->configuration.expression_present = false;
         }
 
-        sensor_config->metadata.unit = CborHelpers::ToZcborString(&sensor->metadata.unit);
-        sensor_config->metadata.name = CborHelpers::ToZcborString(&sensor->metadata.name);
+        sensor_config->metadata.unit = CborHelpers::ToZcborString(sensor->metadata.unit);
+        sensor_config->metadata.name = CborHelpers::ToZcborString(sensor->metadata.name);
 
-        sensor_config->metadata.description = CborHelpers::ToZcborString(&sensor->metadata.description);
+        sensor_config->metadata.description = CborHelpers::ToZcborString(sensor->metadata.description);
 
         sensors_config->CborSensorConfig_m.push_back(std::move(*sensor_config));
 
@@ -107,7 +107,7 @@ std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
     SensorsOrderResolver order_resolver;
 
     for(const auto& sensor_config : sensors_config.CborSensorConfig_m) {
-        auto sensor = std::make_shared<Sensor>(CborHelpers::ToStdString(sensor_config.id));
+        auto sensor = make_shared_pmr<Sensor>(Mrm::GetExtPmr(), CborHelpers::ToStdString(sensor_config.id));
 
         sensor->configuration.type = static_cast<SensorType>(sensor_config.configuration.type);
 
@@ -128,12 +128,12 @@ std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
             size_t script_size = fs_service_->GetFileSize(sensor->configuration.script_path);
 
             if(script_size != 0) {
-                ext_unique_ptr<ExtVector> buffer = make_unique_ext<ExtVector>(script_size);
+                auto buffer = make_unique_pmr<ExtVector>(Mrm::GetExtPmr(), script_size);
 
                 size_t out_len = 0;
                 fs_service_->ReadFile(sensor->configuration.script_path, buffer->data(), script_size, out_len);
 
-                sensor->configuration.lua_script = std::make_shared<LuaScript>(LuaScript::CreateExt());
+                sensor->configuration.lua_script = make_shared_pmr<LuaScript>(Mrm::GetExtPmr(), LuaScript::CreateExt());
                 sensor->configuration.lua_script->Load(std::span<const uint8_t>(buffer->data(), buffer->size()));
             }
         }
@@ -150,7 +150,7 @@ std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
                     .value = calibration_data.float32float});
             }
 
-            auto calibration_table_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_table);
+            auto calibration_table_ptr = make_shared_pmr<std::vector<CalibrationData>>(Mrm::GetExtPmr(), calibration_table);
 
             switch(interpolation_method) {
             case InterpolationMethod::LINEAR:

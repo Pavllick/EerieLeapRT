@@ -4,7 +4,7 @@
 #include <vector>
 #include <unordered_map>
 
-#include "utilities/memory/heap_allocator.h"
+#include "utilities/memory/memory_resource_manager.h"
 #include "subsys/fs/services/i_fs_service.h"
 #include "configuration/cbor/cbor_sensors_config/cbor_sensors_config.h"
 #include "configuration/services/cbor_configuration_service.h"
@@ -29,8 +29,8 @@ private:
     std::unique_ptr<CborConfigurationService<CborSensorsConfig>> cbor_configuration_service_;
     std::unique_ptr<JsonConfigurationService<JsonSensorsConfig>> json_configuration_service_;
 
-    ext_unique_ptr<SensorsCborParser> cbor_parser_;
-    ext_unique_ptr<SensorsJsonParser> json_parser_;
+    std::unique_ptr<SensorsCborParser> cbor_parser_;
+    std::unique_ptr<SensorsJsonParser> json_parser_;
 
     std::vector<std::shared_ptr<Sensor>> sensors_;
     int gpio_channel_count_;

@@ -90,7 +90,7 @@ std::vector<std::shared_ptr<Sensor>> SensorsJsonParser::Deserialize(
     SensorsOrderResolver order_resolver;
 
     for(const auto& sensor_config : config.sensors) {
-        auto sensor = std::make_shared<Sensor>(std::string(sensor_config.id));
+        auto sensor = make_shared_pmr<Sensor>(Mrm::GetExtPmr(), std::string(sensor_config.id));
 
         sensor->metadata.name = std::string(sensor_config.metadata.name);
         sensor->metadata.unit = std::string(sensor_config.metadata.unit);
@@ -114,12 +114,12 @@ std::vector<std::shared_ptr<Sensor>> SensorsJsonParser::Deserialize(
             size_t script_size = fs_service_->GetFileSize(sensor->configuration.script_path);
 
             if(script_size != 0) {
-                ext_unique_ptr<ExtVector> buffer = make_unique_ext<ExtVector>(script_size);
+                auto buffer = make_unique_pmr<ExtVector>(Mrm::GetExtPmr(), script_size);
 
                 size_t out_len = 0;
                 fs_service_->ReadFile(sensor->configuration.script_path, buffer->data(), script_size, out_len);
 
-                sensor->configuration.lua_script = std::make_shared<LuaScript>(LuaScript::CreateExt());
+                sensor->configuration.lua_script = make_shared_pmr<LuaScript>(Mrm::GetExtPmr(), LuaScript::CreateExt());
                 sensor->configuration.lua_script->Load(std::span<const uint8_t>(buffer->data(), buffer->size()));
             }
         }
@@ -136,7 +136,7 @@ std::vector<std::shared_ptr<Sensor>> SensorsJsonParser::Deserialize(
                     .value = calibration_data.value});
             }
 
-            auto calibration_table_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_table);
+            auto calibration_table_ptr = make_shared_pmr<std::vector<CalibrationData>>(Mrm::GetExtPmr(), calibration_table);
 
             switch (interpolation_method) {
             case InterpolationMethod::LINEAR:

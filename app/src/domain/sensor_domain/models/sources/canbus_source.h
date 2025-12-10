@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory_resource>
 #include <cstdint>
 #include <string>
 
@@ -12,20 +13,38 @@ using namespace eerie_leap::utilities::string;
 // NOTE:: connection_string format:
 // "bus_channel/frame_id</signal_name>"
 struct CanbusSource {
+    using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+
     uint8_t bus_channel;
     uint32_t frame_id;
-    std::string signal_name;
+    std::pmr::string signal_name;
     size_t signal_name_hash = 0;
 
-    CanbusSource(uint8_t bus_channel, uint32_t frame_id, std::string signal_name)
-        : bus_channel(bus_channel), frame_id(frame_id), signal_name(std::move(signal_name)) {
+    CanbusSource(std::allocator_arg_t, const allocator_type& alloc, uint8_t bus_channel, uint32_t frame_id, std::string_view signal_name)
+        : bus_channel(bus_channel), frame_id(frame_id), signal_name(signal_name, alloc) {
 
         if(!signal_name.empty())
             signal_name_hash = StringHelpers::GetHash(signal_name);
     }
 
-    CanbusSource(uint8_t bus_channel, uint32_t frame_id)
-        : CanbusSource(bus_channel, frame_id, "") {}
+    CanbusSource(std::allocator_arg_t alloc_arg, const allocator_type& alloc, uint8_t bus_channel, uint32_t frame_id)
+        : CanbusSource(alloc_arg, alloc, bus_channel, frame_id, "") {}
+
+
+    CanbusSource(const CanbusSource&) = delete;
+    CanbusSource& operator=(const CanbusSource&) = delete;
+
+    CanbusSource(CanbusSource&& other) noexcept
+        : bus_channel(other.bus_channel),
+        frame_id(other.frame_id),
+        signal_name(other.signal_name),
+        signal_name_hash(other.signal_name_hash) {}
+
+    CanbusSource(CanbusSource&& other, const allocator_type& alloc) noexcept
+        : bus_channel(other.bus_channel),
+        frame_id(other.frame_id),
+        signal_name(other.signal_name, alloc),
+        signal_name_hash(other.signal_name_hash) {}
 
     std::string ToConnectionString() const {
         std::string connection_string = std::to_string(bus_channel);
@@ -36,7 +55,7 @@ struct CanbusSource {
         return connection_string;
     }
 
-    static CanbusSource FromConnectionString(const std::string& connection_string) {
+    static CanbusSource FromConnectionString(const allocator_type& alloc, const std::string_view connection_string) {
         if(connection_string.empty())
             throw std::invalid_argument("Invalid format: empty connection string");
 
@@ -49,8 +68,9 @@ struct CanbusSource {
         uint32_t frame_id_value = 0;
         std::string signal_name_value;
 
-        bus_channel_value = std::stoul(connection_string.substr(0, delimiter_pos), nullptr, 0);
-        std::string connection_str = connection_string.substr(delimiter_pos + 1);
+        std::string connection_str = std::string(connection_string);
+        bus_channel_value = std::stoul(connection_str.substr(0, delimiter_pos), nullptr, 0);
+        connection_str = connection_str.substr(delimiter_pos + 1);
         delimiter_pos = connection_str.find('/');
 
         if(delimiter_pos == std::string::npos) {
@@ -60,7 +80,7 @@ struct CanbusSource {
             signal_name_value = connection_str.substr(delimiter_pos + 1);
         }
 
-        return {bus_channel_value, frame_id_value, signal_name_value};
+        return {std::allocator_arg, alloc, bus_channel_value, frame_id_value, signal_name_value};
     }
 };
 

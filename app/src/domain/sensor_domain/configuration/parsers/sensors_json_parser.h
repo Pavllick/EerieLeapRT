@@ -5,7 +5,7 @@
 
 #include <zephyr/data/json.h>
 
-#include "utilities/memory/heap_allocator.h"
+#include "utilities/memory/memory_resource_manager.h"
 #include "subsys/fs/services/i_fs_service.h"
 #include "configuration/json/configs/json_sensors_config.h"
 #include "domain/sensor_domain/models/sensor.h"

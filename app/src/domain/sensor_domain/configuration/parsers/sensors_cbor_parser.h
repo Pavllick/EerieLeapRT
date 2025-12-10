@@ -4,7 +4,7 @@
 #include <memory>
 #include <span>
 
-#include "utilities/memory/heap_allocator.h"
+#include "utilities/memory/memory_resource_manager.h"
 #include "subsys/fs/services/i_fs_service.h"
 #include "configuration/cbor/cbor_sensors_config/cbor_sensors_config.h"
 #include "domain/sensor_domain/models/sensor.h"

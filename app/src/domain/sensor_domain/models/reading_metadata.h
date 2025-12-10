@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory_resource>
 #include <optional>
 #include <unordered_map>
 #include <variant>
@@ -23,7 +24,21 @@ using ReadingMetadataValue = std::variant<
 >;
 
 struct ReadingMetadata {
-    std::unordered_map<ReadingMetadataTag, ReadingMetadataValue> tags;
+    using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+
+    std::pmr::unordered_map<ReadingMetadataTag, ReadingMetadataValue> tags;
+
+    ReadingMetadata(std::allocator_arg_t, const allocator_type& alloc)
+        : tags(alloc.resource()) {}
+
+    ReadingMetadata(const ReadingMetadata&) = delete;
+    ReadingMetadata& operator=(const ReadingMetadata&) = delete;
+
+    ReadingMetadata(ReadingMetadata&& other) noexcept
+        : tags(std::move(other.tags)) {}
+
+    ReadingMetadata(ReadingMetadata&& other, const allocator_type& alloc) noexcept
+        : tags(std::move(other.tags), alloc.resource()) {}
 
     void AddTag(const ReadingMetadataTag tag, const ReadingMetadataValue& value) {
         tags[tag] = value;

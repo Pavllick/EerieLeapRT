@@ -39,10 +39,10 @@ Mdf4LoggerSensorReading::Mdf4LoggerSensorReading(
 
             can_raw_channel_groups_.emplace(sensor->id_hash, channel_group);
         } else {
-            auto channel_group = mdf4_file_->CreateChannelGroup(data_group, sensor->id_hash, sensor->id);
+            auto channel_group = mdf4_file_->CreateChannelGroup(data_group, sensor->id_hash, std::string(sensor->id));
             channel_group->AddSourceInformation(source_information);
 
-            mdf4_file_->CreateDataChannel(channel_group, MdfDataType::Float32, "value", sensor->metadata.unit);
+            mdf4_file_->CreateDataChannel(channel_group, MdfDataType::Float32, "value", std::string(sensor->metadata.unit));
 
             if(sensor->configuration.expression_evaluator != nullptr
                 && logging_configuration->sensor_configurations.at(sensor->id_hash).log_raw_value

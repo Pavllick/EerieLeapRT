@@ -8,7 +8,7 @@ using namespace eerie_leap::domain::sensor_domain::models;
 
 class SensorValidator {
 public:
-    static void ValidateId(const std::string& id);
+    static void ValidateId(const std::string_view id);
     static void ValidateType(const SensorConfiguration& sensor_configuration);
     static void ValidateChannel(
         const SensorConfiguration& sensor_configuration,

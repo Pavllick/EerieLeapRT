@@ -2,7 +2,7 @@
 
 namespace eerie_leap::domain::sensor_domain::configuration::parsers {
 
-void SensorValidator::ValidateId(const std::string& id) {
+void SensorValidator::ValidateId(const std::string_view id) {
     if(id.empty())
         throw std::runtime_error("Sensor ID cannot be empty.");
 

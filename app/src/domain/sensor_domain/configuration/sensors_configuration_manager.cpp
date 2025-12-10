@@ -20,8 +20,8 @@ SensorsConfigurationManager::SensorsConfigurationManager(
         gpio_channel_count_(gpio_channel_count),
         adc_channel_count_(adc_channel_count) {
 
-    cbor_parser_ = make_unique_ext<SensorsCborParser>(sd_fs_service_);
-    json_parser_ = make_unique_ext<SensorsJsonParser>(sd_fs_service_);
+    cbor_parser_ = std::make_unique<SensorsCborParser>(sd_fs_service_);
+    json_parser_ = std::make_unique<SensorsJsonParser>(sd_fs_service_);
 
     const std::vector<std::shared_ptr<Sensor>>* sensors = nullptr;
 
