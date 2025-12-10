@@ -2,7 +2,7 @@
 
 #include <zephyr/data/json.h>
 
-#include "utilities/memory/heap_allocator.h"
+#include "utilities/memory/memory_resource_manager.h"
 #include "configuration/json/configs/json_system_config.h"
 #include "domain/system_domain/models/system_configuration.h"
 
@@ -17,7 +17,8 @@ public:
     SystemConfigurationJsonParser() = default;
 
     ext_unique_ptr<JsonSystemConfig> Serialize(const SystemConfiguration& configuration);
-    SystemConfiguration Deserialize(
+    pmr_unique_ptr<SystemConfiguration> Deserialize(
+        std::pmr::memory_resource* mr,
         const JsonSystemConfig& config,
         uint64_t device_id,
         uint32_t hw_version,

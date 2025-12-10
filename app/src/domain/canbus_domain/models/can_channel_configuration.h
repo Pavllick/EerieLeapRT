@@ -1,6 +1,5 @@
 #pragma once
 
-#include <memory>
 #include <memory_resource>
 #include <cstdint>
 #include <string>

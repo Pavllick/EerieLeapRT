@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include <memory>
+#include <memory_resource>
 #include <vector>
 
 #include "subsys/modbus/modbus.h"
@@ -34,7 +34,7 @@ private:
     std::shared_ptr<Modbus> modbus_;
     std::shared_ptr<SystemConfigurationManager> system_configuration_manager_;
 
-    std::shared_ptr<std::vector<ComUserConfiguration>> com_user_configurations_;
+    std::shared_ptr<std::pmr::vector<ComUserConfiguration>> com_user_configurations_;
     k_sem com_semaphore_;
     k_sem availability_semaphore_;
 
@@ -54,7 +54,7 @@ public:
     int Get(uint8_t user_id, ComRequestType com_request_type, void* data, size_t size_bytes, k_timeout_t timeout = K_NO_WAIT);
     int Send(uint8_t user_id, ComRequestType com_request_type, void* data, size_t size_bytes, k_timeout_t timeout = K_NO_WAIT);
 
-    std::shared_ptr<std::vector<ComUserConfiguration>> GetUsers() { return com_user_configurations_; }
+    std::shared_ptr<std::pmr::vector<ComUserConfiguration>> GetUsers() { return com_user_configurations_; }
 };
 
 } // namespace eerie_leap::domain::user_com_domain

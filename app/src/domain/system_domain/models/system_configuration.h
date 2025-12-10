@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory_resource>
 #include <cstdint>
 #include <vector>
 #include <string>
@@ -9,13 +10,37 @@
 namespace eerie_leap::domain::system_domain::models {
 
 struct SystemConfiguration {
+    using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+
     uint64_t device_id;
     uint32_t hw_version;
     uint32_t sw_version;
     uint32_t build_number;
 
     uint32_t com_user_refresh_rate_ms;
-    std::vector<ComUserConfiguration> com_user_configurations;
+    std::pmr::vector<ComUserConfiguration> com_user_configurations;
+
+    SystemConfiguration(std::allocator_arg_t, const allocator_type& alloc)
+        : com_user_configurations(alloc) {}
+
+    SystemConfiguration(const SystemConfiguration&) = delete;
+    SystemConfiguration& operator=(const SystemConfiguration&) = delete;
+
+    SystemConfiguration(SystemConfiguration&& other) noexcept
+        : device_id(other.device_id),
+        hw_version(other.hw_version),
+        sw_version(other.sw_version),
+        build_number(other.build_number),
+        com_user_refresh_rate_ms(other.com_user_refresh_rate_ms),
+        com_user_configurations(std::move(other.com_user_configurations)) {}
+
+    SystemConfiguration(SystemConfiguration&& other, const allocator_type& alloc)
+        : device_id(other.device_id),
+        hw_version(other.hw_version),
+        sw_version(other.sw_version),
+        build_number(other.build_number),
+        com_user_refresh_rate_ms(other.com_user_refresh_rate_ms),
+        com_user_configurations(std::move(other.com_user_configurations), alloc) {}
 
     std::string GetFormattedHwVersion() const {
         uint8_t hw_version_major = (hw_version >> 24) & 0xFF;

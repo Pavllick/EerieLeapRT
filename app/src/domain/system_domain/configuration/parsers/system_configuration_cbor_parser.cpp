@@ -29,24 +29,27 @@ ext_unique_ptr<CborSystemConfig> SystemConfigurationCborParser::Serialize(const 
     return config;
 }
 
-SystemConfiguration SystemConfigurationCborParser::Deserialize(const CborSystemConfig& config) {
-    SystemConfiguration configuration;
+pmr_unique_ptr<SystemConfiguration> SystemConfigurationCborParser::Deserialize(
+    std::pmr::memory_resource* mr,
+    const CborSystemConfig& config) {
 
-    configuration.device_id = config.device_id;
-    configuration.hw_version = config.hw_version;
-    configuration.sw_version = config.sw_version;
-    configuration.build_number = config.build_number;
-    configuration.com_user_refresh_rate_ms = config.com_user_refresh_rate_ms;
+    auto configuration = make_unique_pmr<SystemConfiguration>(mr);
+
+    configuration->device_id = config.device_id;
+    configuration->hw_version = config.hw_version;
+    configuration->sw_version = config.sw_version;
+    configuration->build_number = config.build_number;
+    configuration->com_user_refresh_rate_ms = config.com_user_refresh_rate_ms;
 
     for(size_t i = 0; i < config.CborComUserConfig_m_count; ++i) {
         const auto& com_user_config = config.CborComUserConfig_m[i];
-        configuration.com_user_configurations.push_back({
+        configuration->com_user_configurations.push_back({
             .device_id = com_user_config.device_id,
             .server_id = static_cast<uint16_t>(com_user_config.server_id)
         });
     }
 
-    SystemConfigurationValidator::Validate(configuration);
+    SystemConfigurationValidator::Validate(*configuration);
 
     return configuration;
 }

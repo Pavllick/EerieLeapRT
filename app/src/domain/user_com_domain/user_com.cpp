@@ -15,7 +15,7 @@ UserCom::UserCom(std::shared_ptr<Modbus> modbus, std::shared_ptr<SystemConfigura
     k_sem_init(&com_semaphore_, 1, 1);
     k_sem_init(&availability_semaphore_, 1, 1);
 
-    com_user_configurations_ = std::make_shared<std::vector<ComUserConfiguration>>(
+    com_user_configurations_ = std::make_shared<std::pmr::vector<ComUserConfiguration>>(
         system_configuration_manager_->Get()->com_user_configurations);
 }
 

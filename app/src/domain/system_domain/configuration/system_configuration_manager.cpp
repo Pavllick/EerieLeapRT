@@ -60,6 +60,7 @@ bool SystemConfigurationManager::ApplyJsonConfiguration() {
 
         try {
             auto configuration = json_parser_->Deserialize(
+                Mrm::GetDefaultPmr(),
                 *json_config_loaded->config,
                 configuration_->device_id,
                 configuration_->hw_version,
@@ -68,7 +69,7 @@ bool SystemConfigurationManager::ApplyJsonConfiguration() {
 
             json_config_checksum_ = json_config_loaded->checksum;
 
-            if(!Update(configuration, true))
+            if(!Update(*configuration, true))
                 return false;
         } catch(const std::exception& e) {
             LOG_ERR("Failed to deserialize JSON configuration. %s", e.what());
@@ -101,7 +102,7 @@ bool SystemConfigurationManager::UpdateBuildNumber(uint32_t build_number) {
     return true;
 }
 
-bool SystemConfigurationManager::UpdateComUsers(const std::vector<ComUserConfiguration>& com_user_configurations) {
+bool SystemConfigurationManager::UpdateComUsers(const std::pmr::vector<ComUserConfiguration>& com_user_configurations) {
     auto configuration = Get();
     if(configuration == nullptr)
         return false;
@@ -198,8 +199,8 @@ std::shared_ptr<SystemConfiguration> SystemConfigurationManager::Get(bool force_
 
     auto cbor_config = std::move(cbor_config_data.value().config);
 
-    auto configuration = cbor_parser_->Deserialize(*cbor_config);
-    configuration_ = std::make_shared<SystemConfiguration>(configuration);
+    auto configuration = cbor_parser_->Deserialize(Mrm::GetDefaultPmr(), *cbor_config);
+    configuration_ = std::make_shared<SystemConfiguration>(std::move(*configuration));
 
     json_config_checksum_ = cbor_config->json_config_checksum;
 
@@ -207,7 +208,8 @@ std::shared_ptr<SystemConfiguration> SystemConfigurationManager::Get(bool force_
 }
 
 bool SystemConfigurationManager::CreateDefaultConfiguration() {
-    auto configuration = make_unique_ext<SystemConfiguration>();
+    auto configuration = make_unique_pmr<SystemConfiguration>(Mrm::GetDefaultPmr());
+
     configuration->device_id = Rng::Get64(true);
     configuration->hw_version = 0;
     configuration->sw_version = 0;
