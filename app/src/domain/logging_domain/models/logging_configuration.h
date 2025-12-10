@@ -31,7 +31,7 @@ struct LoggingConfiguration {
     LoggingConfiguration(LoggingConfiguration&& other, const allocator_type& alloc)
         : logging_interval_ms(other.logging_interval_ms),
           max_log_size_mb(other.max_log_size_mb),
-          sensor_configurations(std::move(other.sensor_configurations), alloc.resource()) {}
+          sensor_configurations(std::move(other.sensor_configurations), alloc) {}
 };
 
 } // namespace eerie_leap::domain::logging_domain::models

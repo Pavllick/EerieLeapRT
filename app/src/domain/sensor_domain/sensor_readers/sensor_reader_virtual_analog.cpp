@@ -24,7 +24,7 @@ SensorReaderVirtualAnalog::SensorReaderVirtualAnalog(
 }
 
 void SensorReaderVirtualAnalog::Read() {
-    auto reading = std::make_shared<SensorReading>(guid_generator_->Generate(), sensor_);
+    auto reading = make_shared_pmr<SensorReading>(Mrm::GetExtPmr(), guid_generator_->Generate(), sensor_);
     reading->timestamp = time_service_->GetCurrentTime();
 
     reading->status = ReadingStatus::UNINITIALIZED;

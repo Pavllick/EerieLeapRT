@@ -33,7 +33,7 @@ std::shared_ptr<SensorReading> CanbusSensorReaderRaw::CreateRawReading() {
     if(can_frame_.data.empty())
         return nullptr;
 
-    auto reading = std::make_shared<SensorReading>(guid_generator_->Generate(), sensor_);
+    auto reading = make_shared_pmr<SensorReading>(Mrm::GetExtPmr(), guid_generator_->Generate(), sensor_);
 
     reading->value = std::nullopt;
     reading->status = ReadingStatus::RAW;

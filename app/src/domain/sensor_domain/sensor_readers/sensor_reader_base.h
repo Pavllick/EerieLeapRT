@@ -2,16 +2,18 @@
 
 #include <memory>
 
-#include "subsys/time/i_time_service.h"
+#include "utilities/memory/memory_resource_manager.h"
 #include "utilities/guid/guid_generator.h"
+#include "subsys/time/i_time_service.h"
 #include "domain/sensor_domain/models/sensor.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 #include "i_sensor_reader.h"
 
 namespace eerie_leap::domain::sensor_domain::sensor_readers {
 
-using namespace eerie_leap::subsys::time;
+using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::guid;
+using namespace eerie_leap::subsys::time;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 
 class SensorReaderBase : public ISensorReader {

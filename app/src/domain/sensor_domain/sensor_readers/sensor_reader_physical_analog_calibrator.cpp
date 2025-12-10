@@ -22,7 +22,7 @@ SensorReaderPhysicalAnalogCalibrator::SensorReaderPhysicalAnalogCalibrator(
             std::move(adc_configuration_manager)) { }
 
 void SensorReaderPhysicalAnalogCalibrator::Read() {
-    auto reading = std::make_shared<SensorReading>(guid_generator_->Generate(), sensor_);
+    auto reading = make_shared_pmr<SensorReading>(Mrm::GetExtPmr(), guid_generator_->Generate(), sensor_);
     reading->timestamp = time_service_->GetCurrentTime();
 
     float voltage = AdcChannelReader();

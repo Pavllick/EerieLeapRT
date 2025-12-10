@@ -1,6 +1,6 @@
 #pragma once
 
-#include <memory>
+#include <memory_resource>
 #include <optional>
 #include <string>
 #include <chrono>
@@ -16,15 +16,45 @@ using namespace std::chrono;
 using namespace eerie_leap::utilities::guid;
 
 struct SensorReading {
+    using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+
     const Guid id;
     const std::shared_ptr<Sensor> sensor;
     std::optional<float> value;
     std::optional<system_clock::time_point> timestamp;
     ReadingStatus status = ReadingStatus::UNINITIALIZED;
-    std::optional<std::string> error_message;
+    std::optional<std::pmr::string> error_message;
     ReadingMetadata metadata;
 
-    SensorReading(const Guid id, const std::shared_ptr<Sensor> sensor) : id(id), sensor(std::move(sensor)) {}
+    SensorReading(
+        std::allocator_arg_t,
+        const allocator_type& alloc,
+        const Guid id,
+        std::shared_ptr<Sensor> sensor)
+            : id(id),
+                sensor(std::move(sensor)),
+                metadata(std::allocator_arg, alloc) {}
+
+    SensorReading(const SensorReading&) = delete;
+    SensorReading& operator=(const SensorReading&) = delete;
+
+    SensorReading(SensorReading&& other) noexcept
+        : id(other.id),
+        sensor(other.sensor),
+        value(other.value),
+        timestamp(other.timestamp),
+        status(other.status),
+        error_message(other.error_message),
+        metadata(std::move(other.metadata)) {}
+
+    SensorReading(SensorReading&& other, const allocator_type& alloc) noexcept
+        : id(other.id),
+        sensor(other.sensor),
+        value(other.value),
+        timestamp(other.timestamp),
+        status(other.status),
+        error_message(other.error_message),
+        metadata(std::move(other.metadata)) {}
 };
 
 }

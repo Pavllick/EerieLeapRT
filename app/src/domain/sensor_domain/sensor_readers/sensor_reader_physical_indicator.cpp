@@ -24,7 +24,7 @@ SensorReaderPhysicalIndicator::SensorReaderPhysicalIndicator(
 }
 
 void SensorReaderPhysicalIndicator::Read() {
-    auto reading = std::make_shared<SensorReading>(guid_generator_->Generate(), sensor_);
+    auto reading = make_shared_pmr<SensorReading>(Mrm::GetExtPmr(), guid_generator_->Generate(), sensor_);
     reading->timestamp = time_service_->GetCurrentTime();
 
     reading->value = static_cast<float>(gpio_->ReadChannel(sensor_->configuration.channel.value()));

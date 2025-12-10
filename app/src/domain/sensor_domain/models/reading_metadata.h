@@ -29,7 +29,7 @@ struct ReadingMetadata {
     std::pmr::unordered_map<ReadingMetadataTag, ReadingMetadataValue> tags;
 
     ReadingMetadata(std::allocator_arg_t, const allocator_type& alloc)
-        : tags(alloc.resource()) {}
+        : tags(alloc) {}
 
     ReadingMetadata(const ReadingMetadata&) = delete;
     ReadingMetadata& operator=(const ReadingMetadata&) = delete;
@@ -38,7 +38,7 @@ struct ReadingMetadata {
         : tags(std::move(other.tags)) {}
 
     ReadingMetadata(ReadingMetadata&& other, const allocator_type& alloc) noexcept
-        : tags(std::move(other.tags), alloc.resource()) {}
+        : tags(std::move(other.tags), alloc) {}
 
     void AddTag(const ReadingMetadataTag tag, const ReadingMetadataValue& value) {
         tags[tag] = value;
