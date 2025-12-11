@@ -24,8 +24,8 @@ private:
     std::unique_ptr<CborConfigurationService<CborSystemConfig>> cbor_configuration_service_;
     std::unique_ptr<JsonConfigurationService<JsonSystemConfig>> json_configuration_service_;
 
-    ext_unique_ptr<SystemConfigurationCborParser> cbor_parser_;
-    ext_unique_ptr<SystemConfigurationJsonParser> json_parser_;
+    std::unique_ptr<SystemConfigurationCborParser> cbor_parser_;
+    std::unique_ptr<SystemConfigurationJsonParser> json_parser_;
 
     std::shared_ptr<SystemConfiguration> configuration_;
 

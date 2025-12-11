@@ -16,8 +16,8 @@ SystemConfigurationManager::SystemConfigurationManager(
         configuration_(nullptr),
         json_config_checksum_(0) {
 
-    cbor_parser_ = make_unique_ext<SystemConfigurationCborParser>();
-    json_parser_ = make_unique_ext<SystemConfigurationJsonParser>();
+    cbor_parser_ = std::make_unique<SystemConfigurationCborParser>();
+    json_parser_ = std::make_unique<SystemConfigurationJsonParser>();
     std::shared_ptr<SystemConfiguration> configuration = nullptr;
 
     try {

@@ -23,8 +23,8 @@ AdcConfigurationManager::AdcConfigurationManager(
         configuration_(nullptr),
         json_config_checksum_(0) {
 
-    cbor_parser_ = make_unique_ext<AdcConfigurationCborParser>();
-    json_parser_ = make_unique_ext<AdcConfigurationJsonParser>();
+    cbor_parser_ = std::make_unique<AdcConfigurationCborParser>();
+    json_parser_ = std::make_unique<AdcConfigurationJsonParser>();
     adc_manager_->Initialize();
 
     std::shared_ptr<IAdcManager> adc_manager = nullptr;
