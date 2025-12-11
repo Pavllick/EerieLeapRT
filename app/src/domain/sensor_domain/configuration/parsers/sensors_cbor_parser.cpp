@@ -35,29 +35,29 @@ pmr_unique_ptr<CborSensorsConfig> SensorsCborParser::Serialize(
         sensor->configuration.UpdateConnectionString();
         SensorValidator::Validate(*sensor, gpio_channel_count, adc_channel_count);
 
-        auto sensor_config = make_unique_pmr<CborSensorConfig>(Mrm::GetExtPmr());
+        CborSensorConfig sensor_config(std::allocator_arg, Mrm::GetExtPmr());
 
-        sensor_config->id = CborHelpers::ToZcborString(sensor->id);
-        sensor_config->configuration.type = std::to_underlying(sensor->configuration.type);
+        sensor_config.id = CborHelpers::ToZcborString(sensor->id);
+        sensor_config.configuration.type = std::to_underlying(sensor->configuration.type);
 
         if(sensor->configuration.channel.has_value()) {
-            sensor_config->configuration.channel_present = true;
-            sensor_config->configuration.channel = sensor->configuration.channel.value();
+            sensor_config.configuration.channel_present = true;
+            sensor_config.configuration.channel = sensor->configuration.channel.value();
         } else {
-            sensor_config->configuration.channel_present = false;
+            sensor_config.configuration.channel_present = false;
         }
 
-        sensor_config->configuration.connection_string = CborHelpers::ToZcborString(sensor->configuration.connection_string);
-        sensor_config->configuration.script_path = CborHelpers::ToZcborString(sensor->configuration.script_path);
-        sensor_config->configuration.sampling_rate_ms = sensor->configuration.sampling_rate_ms;
+        sensor_config.configuration.connection_string = CborHelpers::ToZcborString(sensor->configuration.connection_string);
+        sensor_config.configuration.script_path = CborHelpers::ToZcborString(sensor->configuration.script_path);
+        sensor_config.configuration.sampling_rate_ms = sensor->configuration.sampling_rate_ms;
 
         auto interpolation_method = sensor->configuration.voltage_interpolator != nullptr
             ? sensor->configuration.voltage_interpolator->GetInterpolationMethod()
             : InterpolationMethod::NONE;
 
-        sensor_config->configuration.interpolation_method = static_cast<uint32_t>(interpolation_method);
+        sensor_config.configuration.interpolation_method = static_cast<uint32_t>(interpolation_method);
         if(interpolation_method != InterpolationMethod::NONE) {
-            sensor_config->configuration.calibration_table_present = true;
+            sensor_config.configuration.calibration_table_present = true;
 
             auto& calibration_table = *sensor->configuration.voltage_interpolator->GetCalibrationTable();
 
@@ -68,27 +68,27 @@ pmr_unique_ptr<CborSensorsConfig> SensorsCborParser::Serialize(
                 });
 
             for(const auto& calibration_data : calibration_table) {
-                sensor_config->configuration.calibration_table.float32float.push_back({
+                sensor_config.configuration.calibration_table.float32float.push_back({
                     .float32float_key = calibration_data.voltage,
                     .float32float = calibration_data.value});
             }
         } else {
-            sensor_config->configuration.calibration_table_present = false;
+            sensor_config.configuration.calibration_table_present = false;
         }
 
         if(sensor->configuration.expression_evaluator != nullptr) {
-            sensor_config->configuration.expression_present = true;
-            sensor_config->configuration.expression = CborHelpers::ToZcborString(sensor->configuration.expression_evaluator->GetExpression());
+            sensor_config.configuration.expression_present = true;
+            sensor_config.configuration.expression = CborHelpers::ToZcborString(sensor->configuration.expression_evaluator->GetExpression());
         } else {
-            sensor_config->configuration.expression_present = false;
+            sensor_config.configuration.expression_present = false;
         }
 
-        sensor_config->metadata.unit = CborHelpers::ToZcborString(sensor->metadata.unit);
-        sensor_config->metadata.name = CborHelpers::ToZcborString(sensor->metadata.name);
+        sensor_config.metadata.unit = CborHelpers::ToZcborString(sensor->metadata.unit);
+        sensor_config.metadata.name = CborHelpers::ToZcborString(sensor->metadata.name);
 
-        sensor_config->metadata.description = CborHelpers::ToZcborString(sensor->metadata.description);
+        sensor_config.metadata.description = CborHelpers::ToZcborString(sensor->metadata.description);
 
-        sensors_config->CborSensorConfig_m.push_back(std::move(*sensor_config));
+        sensors_config->CborSensorConfig_m.push_back(std::move(sensor_config));
 
         order_resolver.AddSensor(sensor);
     }

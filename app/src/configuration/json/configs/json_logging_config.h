@@ -1,7 +1,6 @@
 #pragma once
 
-#include <vector>
-#include <string>
+#include <boost/container/pmr/vector.hpp>
 #include <boost/json.hpp>
 #include <nameof.hpp>
 
@@ -22,7 +21,10 @@ struct JsonSensorLoggingConfig {
 struct JsonLoggingConfig {
     uint32_t logging_interval_ms;
     uint32_t max_log_size_mb;
-    std::vector<JsonSensorLoggingConfig, HeapAllocator<JsonSensorLoggingConfig>> sensor_configs;
+    boost::container::pmr::vector<JsonSensorLoggingConfig> sensor_configs;
+
+    JsonLoggingConfig(json::storage_ptr sp = Mrm::GetBoostExtPmr())
+        : sensor_configs(sp.get()) {}
 };
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonSensorLoggingConfig const& config) {

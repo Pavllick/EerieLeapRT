@@ -1,7 +1,6 @@
 #pragma once
 
-#include <vector>
-#include <string>
+#include <boost/container/pmr/vector.hpp>
 #include <boost/json.hpp>
 #include <nameof.hpp>
 
@@ -33,11 +32,11 @@ struct JsonSensorConfigurationConfig {
     json::string script_path;
     uint32_t sampling_rate_ms;
     json::string interpolation_method;
-    std::vector<JsonSensorCalibrationDataConfig, HeapAllocator<JsonSensorCalibrationDataConfig>> calibration_table;
+    boost::container::pmr::vector<JsonSensorCalibrationDataConfig> calibration_table;
     json::string expression;
 
     JsonSensorConfigurationConfig(json::storage_ptr sp = Mrm::GetBoostExtPmr())
-        : type(sp), connection_string(sp), script_path(sp), interpolation_method(sp), expression(sp) {}
+        : type(sp), connection_string(sp), script_path(sp), interpolation_method(sp), calibration_table(sp.get()), expression(sp) {}
 };
 
 struct JsonSensorConfig {
@@ -50,7 +49,10 @@ struct JsonSensorConfig {
 };
 
 struct JsonSensorsConfig {
-    std::vector<JsonSensorConfig, HeapAllocator<JsonSensorConfig>> sensors;
+    boost::container::pmr::vector<JsonSensorConfig> sensors;
+
+    JsonSensorsConfig(json::storage_ptr sp = Mrm::GetBoostExtPmr())
+        : sensors(sp.get()) {}
 };
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonSensorMetadataConfig const& config) {

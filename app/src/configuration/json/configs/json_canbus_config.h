@@ -1,7 +1,6 @@
 #pragma once
 
-#include <vector>
-#include <string>
+#include <boost/container/pmr/vector.hpp>
 #include <boost/json.hpp>
 #include <nameof.hpp>
 
@@ -31,10 +30,10 @@ struct JsonCanMessageConfig {
 
     json::string name;
 	uint32_t message_size;
-    std::vector<JsonCanSignalConfig, HeapAllocator<JsonCanSignalConfig>> signal_configs;
+    boost::container::pmr::vector<JsonCanSignalConfig> signal_configs;
 
     JsonCanMessageConfig(json::storage_ptr sp = Mrm::GetBoostExtPmr())
-        : script_path(sp), name(sp) {}
+        : script_path(sp), name(sp), signal_configs(sp.get()) {}
 };
 
 struct JsonCanChannelConfig {
@@ -44,14 +43,17 @@ struct JsonCanChannelConfig {
     uint32_t bitrate;
     uint32_t data_bitrate;
     json::string dbc_file_path;
-    std::vector<JsonCanMessageConfig, HeapAllocator<JsonCanMessageConfig>> message_configs;
+    boost::container::pmr::vector<JsonCanMessageConfig> message_configs;
 
     JsonCanChannelConfig(json::storage_ptr sp = Mrm::GetBoostExtPmr())
-        : type(sp), dbc_file_path(sp) {}
+        : type(sp), dbc_file_path(sp), message_configs(sp.get()) {}
 };
 
 struct JsonCanbusConfig {
-    std::vector<JsonCanChannelConfig, HeapAllocator<JsonCanChannelConfig>> channel_configs;
+    boost::container::pmr::vector<JsonCanChannelConfig> channel_configs;
+
+    JsonCanbusConfig(json::storage_ptr sp = Mrm::GetBoostExtPmr())
+        : channel_configs(sp.get()) {}
 };
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonCanSignalConfig const& config) {

@@ -1,7 +1,6 @@
 #pragma once
 
-#include <vector>
-#include <string>
+#include <boost/container/pmr/vector.hpp>
 #include <boost/json.hpp>
 #include <nameof.hpp>
 
@@ -19,15 +18,18 @@ struct JsonAdcCalibrationDataConfig {
 
 struct JsonAdcChannelConfig {
     json::string interpolation_method;
-    std::vector<JsonAdcCalibrationDataConfig, HeapAllocator<JsonAdcCalibrationDataConfig>> calibration_table;
+    boost::container::pmr::vector<JsonAdcCalibrationDataConfig> calibration_table;
 
     JsonAdcChannelConfig(json::storage_ptr sp = Mrm::GetBoostExtPmr())
-        : interpolation_method(sp) {}
+        : interpolation_method(sp), calibration_table(sp.get()) {}
 };
 
 struct JsonAdcConfig {
     uint32_t samples;
-    std::vector<JsonAdcChannelConfig, HeapAllocator<JsonAdcChannelConfig>> channel_configs;
+    boost::container::pmr::vector<JsonAdcChannelConfig> channel_configs;
+
+    JsonAdcConfig(json::storage_ptr sp = Mrm::GetBoostExtPmr())
+        : channel_configs(sp.get()) {}
 };
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonAdcCalibrationDataConfig const& config) {

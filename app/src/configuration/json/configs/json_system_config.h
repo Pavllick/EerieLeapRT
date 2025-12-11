@@ -1,7 +1,6 @@
 #pragma once
 
-#include <vector>
-#include <string>
+#include <boost/container/pmr/vector.hpp>
 #include <boost/json.hpp>
 #include <nameof.hpp>
 
@@ -19,7 +18,10 @@ struct JsonComUserConfig {
 
 struct JsonSystemConfig {
     uint32_t com_user_refresh_rate_ms;
-    std::vector<JsonComUserConfig> com_user_configs;
+    boost::container::pmr::vector<JsonComUserConfig> com_user_configs;
+
+    JsonSystemConfig(json::storage_ptr sp = Mrm::GetBoostExtPmr())
+        : com_user_configs(sp.get()) {}
 };
 
 static void tag_invoke(json::value_from_tag, json::value& jv, JsonComUserConfig const& config) {
