@@ -243,7 +243,7 @@ std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const IEnvironme
     case IEnvironmentVariable::EAccessType::ReadWrite_: os << "DUMMY_NODE_VECTOR8003"; break;
     }
     bool first = true;
-    for (const std::string& n : ev.AccessNodes())
+    for (const auto& n : ev.AccessNodes())
     {
         if (first)
         {
@@ -276,7 +276,7 @@ std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const INetwork& 
     }
     os << "\"\n";
     os << "NS_:\n";
-    for (const std::string& ns : net.NewSymbols())
+    for (const auto& ns : net.NewSymbols())
     {
         os << "\t" << ns << "\n";
     };
@@ -299,12 +299,12 @@ std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const INetwork& 
     {
         if (m.MessageTransmitters_Size())
         {
-            const std::string& n = m.MessageTransmitters_Get(0);
+            const auto& n = m.MessageTransmitters_Get(0);
             os << "BO_TX_BU_ " << m.Id() << " :";
             os << " " << n;
             for (std::size_t i = 1; i < m.MessageTransmitters_Size(); i++)
             {
-                const std::string& n = m.MessageTransmitters_Get(i);
+                const auto& n = m.MessageTransmitters_Get(i);
                 os << ", " << n;
             }
             os << ";\n";
@@ -518,12 +518,12 @@ std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const ISignal& s
     os << "(" << s.Factor() << "," << s.Offset() << ") ";
     os << "[" << s.Minimum() << "|" << s.Maximum() << "] ";
     os << "\"" << s.Unit() << "\"";
-    std::string receivers;
-    for (const std::string& n : s.Receivers())
+    std::pmr::string receivers;
+    for (const auto& n : s.Receivers())
     {
         receivers += n + ", ";
     }
-    if (receivers.size())
+    if (!receivers.empty())
     {
         receivers.erase(receivers.end() - 1);
         receivers.erase(receivers.end() - 1);

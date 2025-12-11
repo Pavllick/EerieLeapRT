@@ -16,13 +16,31 @@ void DbcMessage::RegisterSignal(const dbcppp::ISignal* signal) {
         throw std::runtime_error("Failed to register signal. Signal with name '" + std::string(signal->Name()) + "' already exists.");
 }
 
-DbcMessage::DbcMessage(const dbcppp::IMessage* message) : message_(message) {
+DbcMessage::DbcMessage(
+    std::allocator_arg_t,
+    allocator_type alloc,
+    const dbcppp::IMessage* message)
+        : message_(message),
+        signals_container_(alloc),
+        signals_(alloc),
+        allocator_(alloc) {
+
     for(const dbcppp::ISignal& signal : message_->Signals())
         RegisterSignal(&signal);
 }
 
-DbcMessage::DbcMessage(uint32_t id, std::string name, uint32_t message_size) {
+DbcMessage::DbcMessage(
+    std::allocator_arg_t,
+    allocator_type alloc,
+    uint32_t id,
+    std::pmr::string name,
+    uint32_t message_size)
+        : signals_container_(alloc),
+        signals_(alloc),
+        allocator_(alloc) {
+
     message_container_ = dbcppp::IMessage::Create(
+        allocator_.resource(),
         id,
         std::move(name),
         message_size,
@@ -48,8 +66,9 @@ uint32_t DbcMessage::MessageSize() const {
     return message_->MessageSize();
 }
 
-void DbcMessage::AddSignal(std::string name, uint32_t start_bit, uint32_t size_bits, float factor, float offset, std::string unit) {
+void DbcMessage::AddSignal(std::pmr::string name, uint32_t start_bit, uint32_t size_bits, float factor, float offset, std::pmr::string unit) {
     auto signal = dbcppp::ISignal::Create(
+        allocator_.resource(),
         message_->MessageSize(),
         std::move(name),
         dbcppp::ISignal::EMultiplexer::NoMux,
@@ -58,8 +77,8 @@ void DbcMessage::AddSignal(std::string name, uint32_t start_bit, uint32_t size_b
         size_bits,
         dbcppp::ISignal::EByteOrder::LittleEndian,
         dbcppp::ISignal::EValueType::Signed,
-        static_cast<double>(factor),
-        static_cast<double>(offset),
+        factor,
+        offset,
         0.0,
         0.0,
         std::move(unit),
@@ -96,7 +115,7 @@ std::vector<uint8_t> DbcMessage::EncodeMessage(const SignalReader& signal_reader
    std::vector<uint8_t> bytes(MessageSize(), 0);
 
    for(const auto& [signal_name_hash, signal] : signals_) {
-      auto value = static_cast<double>(signal_reader(signal_name_hash));
+      auto value = signal_reader(signal_name_hash);
       auto value_raw = signal->PhysToRaw(value);
       signal->Encode(value_raw, bytes.data());
    }

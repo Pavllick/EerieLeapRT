@@ -6,7 +6,6 @@
 #include "ValueTableImpl.h"
 #include "MessageImpl.h"
 #include "EnvironmentVariableImpl.h"
-#include "SignalTypeImpl.h"
 #include "AttributeDefinitionImpl.h"
 #include "AttributeImpl.h"
 
@@ -16,21 +15,45 @@ namespace dbcppp
         : public INetwork
     {
     public:
-        NetworkImpl(
-              std::string&& version
-            , std::vector<std::string>&& new_symbols
-            , BitTimingImpl&& bit_timing
-            , std::vector<NodeImpl>&& nodes
-            , std::vector<ValueTableImpl>&& value_tables
-            , std::vector<ext_unique_ptr<IMessage>>&& messages
-            , std::vector<EnvironmentVariableImpl>&& environment_variables
-            , std::vector<AttributeDefinitionImpl>&& attribute_definitions
-            , std::vector<AttributeImpl>&& attribute_defaults
-            , std::vector<AttributeImpl>&& attribute_values
-            , std::string&& comment);
+        using allocator_type = std::pmr::polymorphic_allocator<>;
 
-        const std::string& Version() const override;
-        const std::string& NewSymbols_Get(std::size_t i) const override;
+        NetworkImpl(
+              std::allocator_arg_t
+            , allocator_type alloc
+            , std::pmr::string&& version
+            , std::pmr::vector<std::pmr::string>&& new_symbols
+            , BitTimingImpl&& bit_timing
+            , std::pmr::vector<NodeImpl>&& nodes
+            , std::pmr::vector<ValueTableImpl>&& value_tables
+            , std::pmr::vector<MessageImpl>&& messages
+            , std::pmr::vector<EnvironmentVariableImpl>&& environment_variables
+            , std::pmr::vector<AttributeDefinitionImpl>&& attribute_definitions
+            , std::pmr::vector<AttributeImpl>&& attribute_defaults
+            , std::pmr::vector<AttributeImpl>&& attribute_values
+            , std::pmr::string&& comment);
+
+        NetworkImpl(const NetworkImpl&) = delete;
+        NetworkImpl& operator=(const NetworkImpl&) noexcept = default;
+        NetworkImpl& operator=(NetworkImpl&&) noexcept = default;
+        NetworkImpl(NetworkImpl &&) = default;
+        ~NetworkImpl() = default;
+
+        NetworkImpl(NetworkImpl &&other, allocator_type alloc)
+            : _version(std::move(other._version), alloc)
+            , _new_symbols(std::move(other._new_symbols), alloc)
+            , _bit_timing(other._bit_timing)
+            , _nodes(std::move(other._nodes), alloc)
+            , _value_tables(std::move(other._value_tables), alloc)
+            , _messages(std::move(other._messages), alloc)
+            , _environment_variables(std::move(other._environment_variables), alloc)
+            , _attribute_definitions(std::move(other._attribute_definitions), alloc)
+            , _attribute_defaults(std::move(other._attribute_defaults), alloc)
+            , _attribute_values(std::move(other._attribute_values), alloc)
+            , _comment(std::move(other._comment), alloc)
+            {}
+
+        const std::string_view Version() const override;
+        const std::pmr::string& NewSymbols_Get(std::size_t i) const override;
         uint64_t NewSymbols_Size() const override;
         const IBitTiming& BitTiming() const override;
         const INode& Nodes_Get(std::size_t i) const override;
@@ -47,36 +70,36 @@ namespace dbcppp
         uint64_t AttributeDefaults_Size() const override;
         const IAttribute& AttributeValues_Get(std::size_t i) const override;
         uint64_t AttributeValues_Size() const override;
-        const std::string& Comment() const override;
+        const std::string_view Comment() const override;
 
         const IMessage* ParentMessage(const ISignal* sig) const override;
 
         bool operator==(const INetwork& rhs) const override;
         bool operator!=(const INetwork& rhs) const override;
 
-        std::string& version();
-        std::vector<std::string>& newSymbols();
+        std::string_view version();
+        std::pmr::vector<std::pmr::string>& newSymbols();
         BitTimingImpl& bitTiming();
-        std::vector<NodeImpl>& nodes();
-        std::vector<ValueTableImpl>& valueTables();
-        std::vector<ext_unique_ptr<IMessage>>& messages();
-        std::vector<EnvironmentVariableImpl>& environmentVariables();
-        std::vector<AttributeDefinitionImpl>& attributeDefinitions();
-        std::vector<AttributeImpl>& attributeDefaults();
-        std::vector<AttributeImpl>& attributeValues();
-        std::string& comment();
+        std::pmr::vector<NodeImpl>& nodes();
+        std::pmr::vector<ValueTableImpl>& valueTables();
+        std::pmr::vector<MessageImpl>& messages();
+        std::pmr::vector<EnvironmentVariableImpl>& environmentVariables();
+        std::pmr::vector<AttributeDefinitionImpl>& attributeDefinitions();
+        std::pmr::vector<AttributeImpl>& attributeDefaults();
+        std::pmr::vector<AttributeImpl>& attributeValues();
+        std::string_view comment();
 
     private:
-        std::string _version;
-        std::vector<std::string> _new_symbols;
+        std::pmr::string _version;
+        std::pmr::vector<std::pmr::string> _new_symbols;
         BitTimingImpl _bit_timing;
-        std::vector<NodeImpl> _nodes;
-        std::vector<ValueTableImpl> _value_tables;
-        std::vector<ext_unique_ptr<IMessage>> _messages;
-        std::vector<EnvironmentVariableImpl> _environment_variables;
-        std::vector<AttributeDefinitionImpl> _attribute_definitions;
-        std::vector<AttributeImpl> _attribute_defaults;
-        std::vector<AttributeImpl> _attribute_values;
-        std::string _comment;
+        std::pmr::vector<NodeImpl> _nodes;
+        std::pmr::vector<ValueTableImpl> _value_tables;
+        std::pmr::vector<MessageImpl> _messages;
+        std::pmr::vector<EnvironmentVariableImpl> _environment_variables;
+        std::pmr::vector<AttributeDefinitionImpl> _attribute_definitions;
+        std::pmr::vector<AttributeImpl> _attribute_defaults;
+        std::pmr::vector<AttributeImpl> _attribute_values;
+        std::pmr::string _comment;
     };
 }

@@ -4,26 +4,39 @@
 using namespace dbcppp;
 
 std::unique_ptr<IAttribute> IAttribute::Create(
-      std::string&& name
+      std::pmr::memory_resource* mr
+    , std::pmr::string&& name
     , IAttributeDefinition::EObjectType object_type
     , value_t value)
 {
     return std::make_unique<AttributeImpl>(
-          std::move(name)
+          std::allocator_arg
+        , mr
+        , std::move(name)
         , object_type
         , std::move(value));
 }
 
-AttributeImpl::AttributeImpl(std::string&& name, IAttributeDefinition::EObjectType object_type, IAttribute::value_t value)
-    : _name(std::move(name))
-    , _object_type(std::move(object_type))
+AttributeImpl::AttributeImpl(std::allocator_arg_t, allocator_type alloc)
+    : _name(alloc) {}
+
+AttributeImpl::AttributeImpl(
+      std::allocator_arg_t
+    , allocator_type alloc
+    , std::pmr::string&& name
+    , IAttributeDefinition::EObjectType object_type
+    , IAttribute::value_t value)
+
+    : _name(std::move(name), alloc)
+    , _object_type(object_type)
     , _value(std::move(value))
+    , _allocator(alloc)
 {}
 std::unique_ptr<IAttribute> AttributeImpl::Clone() const
 {
-    return std::make_unique<AttributeImpl>(*this);
+    return std::make_unique<AttributeImpl>(*this, _allocator);
 }
-const std::string& AttributeImpl::Name() const
+const std::string_view AttributeImpl::Name() const
 {
     return _name;
 }

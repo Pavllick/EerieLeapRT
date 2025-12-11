@@ -4,32 +4,40 @@
 using namespace dbcppp;
 
 std::unique_ptr<INode> INode::Create(
-    std::string&& name,
-    std::string&& comment,
-    std::vector<std::unique_ptr<IAttribute>>&& attribute_values)
+    std::pmr::memory_resource* mr,
+    std::pmr::string&& name,
+    std::pmr::string&& comment,
+    std::pmr::vector<std::unique_ptr<IAttribute>>&& attribute_values)
 {
-    std::vector<AttributeImpl> avs;
+    std::pmr::vector<AttributeImpl> avs(mr);
     for (auto& av : attribute_values)
     {
         avs.push_back(std::move(static_cast<AttributeImpl&>(*av)));
         av.reset(nullptr);
     }
-    return std::make_unique<NodeImpl>(std::move(name), std::move(comment), std::move(avs));
+    return std::make_unique<NodeImpl>(std::allocator_arg, mr, std::move(name), std::move(comment), std::move(avs));
 }
-NodeImpl::NodeImpl(std::string&& name, std::string&& comment, std::vector<AttributeImpl>&& attribute_values)
-    : _name(std::move(name))
-    , _comment(std::move(comment))
-    , _attribute_values(std::move(attribute_values))
+NodeImpl::NodeImpl(
+      std::allocator_arg_t
+    , allocator_type alloc
+    , std::pmr::string&& name
+    , std::pmr::string&& comment
+    , std::pmr::vector<AttributeImpl>&& attribute_values)
+
+    : _name(name, alloc)
+    , _comment(comment, alloc)
+    , _attribute_values(std::move(attribute_values), alloc)
+    , _allocator(alloc)
 {}
 std::unique_ptr<INode> NodeImpl::Clone() const
 {
-    return std::make_unique<NodeImpl>(*this);
+    return std::make_unique<NodeImpl>(*this, _allocator);
 }
-const std::string& NodeImpl::Name() const
+const std::string_view NodeImpl::Name() const
 {
     return _name;
 }
-const std::string& NodeImpl::Comment() const
+const std::string_view NodeImpl::Comment() const
 {
     return _comment;
 }

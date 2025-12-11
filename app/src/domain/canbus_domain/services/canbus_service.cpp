@@ -99,17 +99,17 @@ void CanbusService::ConfigureUserSignals(const CanChannelConfiguration& channel_
         else
             message = channel_configuration.dbc->AddMessage(
                 message_configuration->frame_id,
-                std::string(message_configuration->name),
+                message_configuration->name,
                 message_configuration->message_size);
 
         for(const auto& signal_configuration : message_configuration->signal_configurations) {
             message->AddSignal(
-                std::string(signal_configuration.name),
+                signal_configuration.name,
                 signal_configuration.start_bit,
                 signal_configuration.size_bits,
                 signal_configuration.factor,
                 signal_configuration.offset,
-                std::string(signal_configuration.unit));
+                signal_configuration.unit);
         }
     }
 }

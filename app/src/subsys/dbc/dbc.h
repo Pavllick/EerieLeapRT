@@ -3,7 +3,7 @@
 #include <zephyr/kernel.h>
 #include <string>
 #include <unordered_map>
-#include <memory>
+#include <memory_resource>
 #include <streambuf>
 
 #include "subsys/dbc/dbcppp/include/Network.h"
@@ -14,21 +14,37 @@
 namespace eerie_leap::subsys::dbc {
 
 class Dbc {
+public:
+   using allocator_type = std::pmr::polymorphic_allocator<>;
+
 private:
-   std::unique_ptr<dbcppp::INetwork> net_;
-   std::unordered_map<uint32_t, DbcMessage> messages_;
+   pmr_unique_ptr<dbcppp::INetwork> net_;
+   std::pmr::unordered_map<uint32_t, DbcMessage> messages_;
    bool is_loaded_;
+
+   allocator_type allocator_;
 
    const dbcppp::IMessage* GetDbcMessage(uint32_t frame_id) const;
 
 public:
-   Dbc();
-   virtual ~Dbc() = default;
+   Dbc(std::allocator_arg_t, allocator_type alloc);
+
+   Dbc(const Dbc&) = delete;
+   Dbc& operator=(const Dbc&) noexcept = default;
+   Dbc& operator=(Dbc&&) noexcept = default;
+   Dbc(Dbc&&) noexcept = default;
+   ~Dbc() = default;
+
+   Dbc(Dbc&& other, allocator_type alloc)
+      : net_(std::move(other.net_)),
+      messages_(std::move(other.messages_)),
+      is_loaded_(other.is_loaded_),
+      allocator_(alloc) {}
 
    bool IsLoaded() const { return is_loaded_; }
    bool LoadDbcFile(std::streambuf& dbc_content);
 
-   DbcMessage* AddMessage(uint32_t id, std::string name, uint8_t message_size);
+   DbcMessage* AddMessage(uint32_t id, std::pmr::string name, uint8_t message_size);
    DbcMessage* GetOrRegisterMessage(uint32_t frame_id);
    bool HasMessage(uint32_t frame_id) const;
 };

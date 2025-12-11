@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <memory_resource>
 #include <string>
 #include <cstddef>
 #include <memory>
@@ -22,13 +23,14 @@ namespace dbcppp
         };
 
         static std::unique_ptr<ISignalMultiplexerValue> Create(
-              std::string&& switch_name
-            , std::vector<Range>&& value_ranges);
+              std::pmr::memory_resource* mr
+            , std::pmr::string&& switch_name
+            , std::pmr::vector<Range>&& value_ranges);
 
         virtual std::unique_ptr<ISignalMultiplexerValue> Clone() const = 0;
 
         virtual ~ISignalMultiplexerValue() = default;
-        virtual const std::string& SwitchName() const = 0;
+        virtual const std::string_view SwitchName() const = 0;
         virtual const Range& ValueRanges_Get(std::size_t i) const = 0;
         virtual uint64_t ValueRanges_Size() const = 0;
 

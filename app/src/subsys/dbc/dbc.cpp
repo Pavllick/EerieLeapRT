@@ -1,27 +1,34 @@
 #include <stdexcept>
 
+#include "utilities/memory/memory_resource_manager.h"
+
 #include "dbc.h"
 
 namespace eerie_leap::subsys::dbc {
 
-Dbc::Dbc() : is_loaded_(false) {}
+using namespace eerie_leap::utilities::memory;
+
+Dbc::Dbc(std::allocator_arg_t, allocator_type alloc)
+   : messages_(alloc),
+   is_loaded_(false),
+   allocator_(alloc) {}
 
 bool Dbc::LoadDbcFile(std::streambuf& dbc_content) {
    messages_.clear();
 
    std::istream stream(&dbc_content);
-   net_ = dbcppp::INetwork::LoadDBCFromIs(stream);
+   net_ = dbcppp::INetwork::LoadDBCFromIs(allocator_.resource(), stream);
 
    is_loaded_ = net_ != nullptr;
 
    return is_loaded_;
 }
 
-DbcMessage* Dbc::AddMessage(uint32_t id, std::string name, uint8_t message_size) {
+DbcMessage* Dbc::AddMessage(uint32_t id, std::pmr::string name, uint8_t message_size) {
    if(messages_.contains(id))
       throw std::runtime_error("Duplicate Frame ID.");
 
-   messages_.emplace(id, DbcMessage(id, std::move(name), message_size));
+   messages_.emplace(id, DbcMessage(std::allocator_arg, allocator_, id, std::move(name), message_size));
 
    return &messages_.at(id);
 }
@@ -34,7 +41,7 @@ DbcMessage* Dbc::GetOrRegisterMessage(uint32_t frame_id) {
    if(message == nullptr)
       throw std::runtime_error("Invalid Frame ID.");
 
-   messages_.emplace(frame_id, DbcMessage(message));
+   messages_.emplace(frame_id, DbcMessage(std::allocator_arg, allocator_, message));
 
    return &messages_.at(frame_id);
 }

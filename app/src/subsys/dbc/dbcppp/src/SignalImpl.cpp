@@ -1,3 +1,4 @@
+#include <memory_resource>
 #include <algorithm>
 #include <limits>
 #include "Helper.h"
@@ -270,9 +271,10 @@ ISignal::raw_t phys_to_raw(const ISignal* sig, double phys) noexcept
     T result = T((phys - sigi->Offset()) / sigi->Factor());
     return *reinterpret_cast<ISignal::raw_t*>(&result);
 }
-ext_unique_ptr<ISignal> ISignal::Create(
-      uint16_t message_size
-    , std::string name
+pmr_unique_ptr<ISignal> ISignal::Create(
+      std::pmr::memory_resource* mr
+    , uint16_t message_size
+    , std::pmr::string name
     , EMultiplexer multiplexer_indicator
     , uint64_t multiplexer_switch_value
     , uint16_t start_bit
@@ -283,33 +285,34 @@ ext_unique_ptr<ISignal> ISignal::Create(
     , float offset
     , float minimum
     , float maximum
-    , std::string unit
-    , std::vector<std::string>&& receivers
-    , std::vector<std::unique_ptr<IAttribute>>&& attribute_values
-    , std::vector<std::unique_ptr<IValueEncodingDescription>>&& value_encoding_descriptions
-    , std::string comment
+    , std::pmr::string unit
+    , std::pmr::vector<std::pmr::string>&& receivers
+    , std::pmr::vector<std::unique_ptr<IAttribute>>&& attribute_values
+    , std::pmr::vector<std::unique_ptr<IValueEncodingDescription>>&& value_encoding_descriptions
+    , std::pmr::string comment
     , EExtendedValueType extended_value_type
-    , std::vector<std::unique_ptr<ISignalMultiplexerValue>>&& signal_multiplexer_values)
+    , std::pmr::vector<std::unique_ptr<ISignalMultiplexerValue>>&& signal_multiplexer_values)
 {
-    std::vector<AttributeImpl> avs;
+    std::pmr::vector<AttributeImpl> avs(mr);
     for (auto& av : attribute_values)
     {
         avs.push_back(std::move(static_cast<AttributeImpl&>(*av)));
         av.reset(nullptr);
     }
-    std::vector<ValueEncodingDescriptionImpl> veds;
+    std::pmr::vector<ValueEncodingDescriptionImpl> veds(mr);
     for (auto& ved : value_encoding_descriptions)
     {
         veds.push_back(std::move(static_cast<ValueEncodingDescriptionImpl&>(*ved)));
         ved.reset(nullptr);
     }
-    std::vector<SignalMultiplexerValueImpl> smvs;
+    std::pmr::vector<SignalMultiplexerValueImpl> smvs(mr);
     for (auto& smv : signal_multiplexer_values)
     {
         smvs.push_back(std::move(static_cast<SignalMultiplexerValueImpl&>(*smv)));
     }
-    auto result = make_unique_ext<SignalImpl>(
-          message_size
+    auto result = make_unique_pmr<SignalImpl>(
+          mr
+        , message_size
         , std::move(name)
         , multiplexer_indicator
         , multiplexer_switch_value
@@ -333,8 +336,10 @@ ext_unique_ptr<ISignal> ISignal::Create(
 
 
 SignalImpl::SignalImpl(
-      uint16_t message_size
-    , std::string name
+      std::allocator_arg_t
+    , allocator_type alloc
+    , uint16_t message_size
+    , std::pmr::string name
     , EMultiplexer multiplexer_indicator
     , uint64_t multiplexer_switch_value
     , uint16_t start_bit
@@ -345,29 +350,32 @@ SignalImpl::SignalImpl(
     , float offset
     , float minimum
     , float maximum
-    , std::string unit
-    , std::vector<std::string>&& receivers
-    , std::vector<AttributeImpl>&& attribute_values
-    , std::vector<ValueEncodingDescriptionImpl>&& value_encoding_descriptions
-    , std::string comment
+    , std::pmr::string unit
+    , std::pmr::vector<std::pmr::string>&& receivers
+    , std::pmr::vector<AttributeImpl>&& attribute_values
+    , std::pmr::vector<ValueEncodingDescriptionImpl>&& value_encoding_descriptions
+    , std::pmr::string comment
     , EExtendedValueType extended_value_type
-    , std::vector<SignalMultiplexerValueImpl>&& signal_multiplexer_values)
+    , std::pmr::vector<SignalMultiplexerValueImpl>&& signal_multiplexer_values)
 
-    : _name(name)
-    , _multiplexer_indicator(std::move(multiplexer_indicator))
-    , _multiplexer_switch_value(std::move(multiplexer_switch_value))
-    , _start_bit(std::move(start_bit))
-    , _bit_size(std::move(bit_size))
-    , _byte_order(std::move(byte_order))
-    , _value_type(std::move(value_type))
-    , _factor(std::move(factor))
-    , _offset(std::move(offset))
-    , _minimum(std::move(minimum))
-    , _maximum(std::move(maximum))
-    , _unit(unit)
-    , _comment(comment)
-    , _extended_value_type(std::move(extended_value_type))
-    , _signal_multiplexer_values(std::move(signal_multiplexer_values))
+    : _name(std::move(name), alloc)
+    , _multiplexer_indicator(multiplexer_indicator)
+    , _multiplexer_switch_value(multiplexer_switch_value)
+    , _start_bit(start_bit)
+    , _bit_size(bit_size)
+    , _byte_order(byte_order)
+    , _value_type(value_type)
+    , _factor(factor)
+    , _offset(offset)
+    , _minimum(minimum)
+    , _maximum(maximum)
+    , _unit(unit, alloc)
+    , _receivers(std::move(receivers), alloc)
+    , _attribute_values(std::move(attribute_values), alloc)
+    , _value_encoding_descriptions(std::move(value_encoding_descriptions), alloc)
+    , _comment(std::move(comment), alloc)
+    , _extended_value_type(extended_value_type)
+    , _signal_multiplexer_values(std::move(signal_multiplexer_values), alloc)
     , _error(EErrorCode::NoError)
 {
     message_size = message_size < 8 ? 8 : message_size;
@@ -514,7 +522,7 @@ SignalImpl::SignalImpl(
         break;
     }
 }
-const std::string& SignalImpl::Name() const
+const std::string_view SignalImpl::Name() const
 {
     return _name;
 }
@@ -558,35 +566,35 @@ float SignalImpl::Maximum() const
 {
     return _maximum;
 }
-const std::string& SignalImpl::Unit() const
+const std::string_view SignalImpl::Unit() const
 {
     return _unit;
 }
-const std::string& SignalImpl::Receivers_Get(std::size_t i) const
+const std::pmr::string& SignalImpl::Receivers_Get(std::size_t i) const
 {
-    return "";
+    return _receivers[i];
 }
 uint64_t SignalImpl::Receivers_Size() const
 {
-    return 0;
+    return _receivers.size();
 }
 const IValueEncodingDescription& SignalImpl::ValueEncodingDescriptions_Get(std::size_t i) const
 {
-    return ValueEncodingDescriptionImpl();
+    return _value_encoding_descriptions[i];
 }
 uint64_t SignalImpl::ValueEncodingDescriptions_Size() const
 {
-    return 0;
+    return _value_encoding_descriptions.size();
 }
 const IAttribute& SignalImpl::AttributeValues_Get(std::size_t i) const
 {
-    return AttributeImpl();
+    return _attribute_values[i];
 }
 uint64_t SignalImpl::AttributeValues_Size() const
 {
-    return 0;
+    return _attribute_values.size();
 }
-const std::string& SignalImpl::Comment() const
+const std::string_view SignalImpl::Comment() const
 {
     return _comment;
 }
@@ -625,6 +633,24 @@ bool SignalImpl::operator==(const ISignal& rhs) const
     equal &= _minimum == rhs.Minimum();
     equal &= _maximum == rhs.Maximum();
     equal &= _unit == rhs.Unit();
+    for (const auto& r : rhs.Receivers())
+    {
+        auto beg = _receivers.begin();
+        auto end = _receivers.end();
+        equal &= std::find(beg, end, r) != end;
+    }
+    for (const auto& attr : rhs.AttributeValues())
+    {
+        auto beg = _attribute_values.begin();
+        auto end = _attribute_values.end();
+        equal &= std::find(beg, end, attr) != end;
+    }
+    for (const auto& ved : rhs.ValueEncodingDescriptions())
+    {
+        auto beg = _value_encoding_descriptions.begin();
+        auto end = _value_encoding_descriptions.end();
+        equal &= std::find(beg, end, ved) != end;
+    }
     equal &= _comment == rhs.Comment();
     equal &= _extended_value_type == rhs.ExtendedValueType();
     for (const auto& smv : rhs.SignalMultiplexerValues())
