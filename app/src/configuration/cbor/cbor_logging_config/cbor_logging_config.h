@@ -14,18 +14,21 @@ struct CborSensorLoggingConfig {
 };
 
 struct CborLoggingConfig {
-	using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+	using allocator_type = std::pmr::polymorphic_allocator<>;
 
 	uint32_t logging_interval_ms;
 	uint32_t max_log_size_mb;
 	std::pmr::vector<CborSensorLoggingConfig> CborSensorLoggingConfig_m;
 	uint32_t json_config_checksum;
 
-	CborLoggingConfig(std::allocator_arg_t, const allocator_type& alloc)
+	CborLoggingConfig(std::allocator_arg_t, allocator_type alloc)
         : CborSensorLoggingConfig_m(alloc) {}
 
     CborLoggingConfig(const CborLoggingConfig&) = delete;
-    CborLoggingConfig& operator=(const CborLoggingConfig&) = delete;
+	CborLoggingConfig& operator=(const CborLoggingConfig&) noexcept = default;
+	CborLoggingConfig& operator=(CborLoggingConfig&&) noexcept = default;
+	CborLoggingConfig(CborLoggingConfig&&) noexcept = default;
+	~CborLoggingConfig() = default;
 
 	CborLoggingConfig(CborLoggingConfig&& other, allocator_type alloc)
         : logging_interval_ms(other.logging_interval_ms),

@@ -12,7 +12,7 @@ namespace eerie_leap::domain::canbus_domain::models {
 using namespace eerie_leap::subsys::lua_script;
 
 struct CanMessageConfiguration {
-    using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+    using allocator_type = std::pmr::polymorphic_allocator<>;
 
     uint32_t frame_id;
     uint32_t send_interval_ms;
@@ -24,32 +24,26 @@ struct CanMessageConfiguration {
 
     std::shared_ptr<LuaScript> lua_script;
 
-    CanMessageConfiguration(std::allocator_arg_t, const allocator_type& alloc)
+    CanMessageConfiguration(std::allocator_arg_t, allocator_type alloc)
         : script_path(alloc),
         name(alloc),
         signal_configurations(alloc),
         lua_script(nullptr) {}
 
     CanMessageConfiguration(const CanMessageConfiguration&) = delete;
-    CanMessageConfiguration& operator=(const CanMessageConfiguration&) = delete;
+	CanMessageConfiguration& operator=(const CanMessageConfiguration&) noexcept = default;
+	CanMessageConfiguration& operator=(CanMessageConfiguration&&) noexcept = default;
+	CanMessageConfiguration(CanMessageConfiguration&&) noexcept = default;
+	~CanMessageConfiguration() = default;
 
-    CanMessageConfiguration(CanMessageConfiguration&& other) noexcept
-        : frame_id(other.frame_id),
-        send_interval_ms(other.send_interval_ms),
-        script_path(std::move(other.script_path)),
-        name(std::move(other.name)),
-        message_size(other.message_size),
-        signal_configurations(std::move(other.signal_configurations)),
-        lua_script(std::move(lua_script)) {}
-
-    CanMessageConfiguration(CanMessageConfiguration&& other, const allocator_type& alloc)
+    CanMessageConfiguration(CanMessageConfiguration&& other, allocator_type alloc)
         : frame_id(other.frame_id),
         send_interval_ms(other.send_interval_ms),
         script_path(std::move(other.script_path), alloc),
         name(std::move(other.name), alloc),
         message_size(other.message_size),
         signal_configurations(std::move(other.signal_configurations), alloc),
-        lua_script(std::move(lua_script)) {}
+        lua_script(std::move(other.lua_script)) {}
 };
 
 } // namespace eerie_leap::domain::canbus_domain::models

@@ -18,7 +18,7 @@ struct CborCanSignalConfig {
 };
 
 struct CborCanMessageConfig {
-	using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+	using allocator_type = std::pmr::polymorphic_allocator<>;
 
 	uint32_t frame_id;
 	uint32_t send_interval_ms;
@@ -28,11 +28,14 @@ struct CborCanMessageConfig {
 	uint32_t message_size;
 	std::pmr::vector<CborCanSignalConfig> CborCanSignalConfig_m;
 
-	CborCanMessageConfig(std::allocator_arg_t, const allocator_type& alloc)
+	CborCanMessageConfig(std::allocator_arg_t, allocator_type alloc)
         : CborCanSignalConfig_m(alloc) {}
 
     CborCanMessageConfig(const CborCanMessageConfig&) = delete;
-    CborCanMessageConfig& operator=(const CborCanMessageConfig&) = delete;
+	CborCanMessageConfig& operator=(const CborCanMessageConfig&) noexcept = default;
+	CborCanMessageConfig& operator=(CborCanMessageConfig&&) noexcept = default;
+	CborCanMessageConfig(CborCanMessageConfig&&) noexcept = default;
+	~CborCanMessageConfig() = default;
 
 	CborCanMessageConfig(CborCanMessageConfig&& other, allocator_type alloc)
         : frame_id(other.frame_id),
@@ -44,7 +47,7 @@ struct CborCanMessageConfig {
 };
 
 struct CborCanChannelConfig {
-	using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+	using allocator_type = std::pmr::polymorphic_allocator<>;
 
 	uint32_t type;
 	bool is_extended_id;
@@ -54,11 +57,14 @@ struct CborCanChannelConfig {
 	struct zcbor_string dbc_file_path;
 	std::pmr::vector<CborCanMessageConfig> CborCanMessageConfig_m;
 
-	CborCanChannelConfig(std::allocator_arg_t, const allocator_type& alloc)
+	CborCanChannelConfig(std::allocator_arg_t, allocator_type alloc)
         : CborCanMessageConfig_m(alloc) {}
 
     CborCanChannelConfig(const CborCanChannelConfig&) = delete;
-    CborCanChannelConfig& operator=(const CborCanChannelConfig&) = delete;
+	CborCanChannelConfig& operator=(const CborCanChannelConfig&) noexcept = default;
+	CborCanChannelConfig& operator=(CborCanChannelConfig&&) noexcept = default;
+	CborCanChannelConfig(CborCanChannelConfig&&) noexcept = default;
+	~CborCanChannelConfig() = default;
 
 	CborCanChannelConfig(CborCanChannelConfig&& other, allocator_type alloc)
         : type(other.type),
@@ -71,16 +77,19 @@ struct CborCanChannelConfig {
 };
 
 struct CborCanbusConfig {
-	using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+	using allocator_type = std::pmr::polymorphic_allocator<>;
 
 	std::pmr::vector<CborCanChannelConfig> CborCanChannelConfig_m;
 	uint32_t json_config_checksum;
 
-	CborCanbusConfig(std::allocator_arg_t, const allocator_type& alloc)
+	CborCanbusConfig(std::allocator_arg_t, allocator_type alloc)
         : CborCanChannelConfig_m(alloc) {}
 
     CborCanbusConfig(const CborCanbusConfig&) = delete;
-    CborCanbusConfig& operator=(const CborCanbusConfig&) = delete;
+	CborCanbusConfig& operator=(const CborCanbusConfig&) noexcept = default;
+	CborCanbusConfig& operator=(CborCanbusConfig&&) noexcept = default;
+	CborCanbusConfig(CborCanbusConfig&&) noexcept = default;
+	~CborCanbusConfig() = default;
 
 	CborCanbusConfig(CborCanbusConfig&& other, allocator_type alloc)
         : CborCanChannelConfig_m(std::move(other.CborCanChannelConfig_m), alloc),

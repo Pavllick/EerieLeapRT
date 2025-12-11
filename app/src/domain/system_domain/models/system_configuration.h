@@ -10,7 +10,7 @@
 namespace eerie_leap::domain::system_domain::models {
 
 struct SystemConfiguration {
-    using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+    using allocator_type = std::pmr::polymorphic_allocator<>;
 
     uint64_t device_id;
     uint32_t hw_version;
@@ -20,21 +20,15 @@ struct SystemConfiguration {
     uint32_t com_user_refresh_rate_ms;
     std::pmr::vector<ComUserConfiguration> com_user_configurations;
 
-    SystemConfiguration(std::allocator_arg_t, const allocator_type& alloc)
+    SystemConfiguration(std::allocator_arg_t, allocator_type alloc)
         : com_user_configurations(alloc) {}
 
     SystemConfiguration(const SystemConfiguration&) = delete;
     SystemConfiguration& operator=(const SystemConfiguration&) = delete;
 
-    SystemConfiguration(SystemConfiguration&& other) noexcept
-        : device_id(other.device_id),
-        hw_version(other.hw_version),
-        sw_version(other.sw_version),
-        build_number(other.build_number),
-        com_user_refresh_rate_ms(other.com_user_refresh_rate_ms),
-        com_user_configurations(std::move(other.com_user_configurations)) {}
+    SystemConfiguration(SystemConfiguration&&) noexcept = default;
 
-    SystemConfiguration(SystemConfiguration&& other, const allocator_type& alloc)
+    SystemConfiguration(SystemConfiguration&& other, allocator_type alloc)
         : device_id(other.device_id),
         hw_version(other.hw_version),
         sw_version(other.sw_version),

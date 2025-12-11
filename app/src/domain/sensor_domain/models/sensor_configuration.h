@@ -20,7 +20,7 @@ using namespace eerie_leap::subsys::lua_script;
 using namespace eerie_leap::domain::sensor_domain::models::sources;
 
 struct SensorConfiguration {
-    using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+    using allocator_type = std::pmr::polymorphic_allocator<>;
 
     SensorType type;
 
@@ -37,26 +37,18 @@ struct SensorConfiguration {
     pmr_unique_ptr<CanbusSource> canbus_source = nullptr;
 
     SensorConfiguration(
-        std::allocator_arg_t, const allocator_type& alloc)
+        std::allocator_arg_t, allocator_type alloc)
             : connection_string(alloc),
             script_path(alloc),
             alloc_(alloc) {}
 
     SensorConfiguration(const SensorConfiguration&) = delete;
-    SensorConfiguration& operator=(const SensorConfiguration&) = delete;
+	SensorConfiguration& operator=(const SensorConfiguration&) noexcept = default;
+	SensorConfiguration& operator=(SensorConfiguration&&) noexcept = default;
+	SensorConfiguration(SensorConfiguration&&) noexcept = default;
+	~SensorConfiguration() = default;
 
-    SensorConfiguration(SensorConfiguration&& other) noexcept
-        : type(other.type),
-        channel(other.channel),
-        connection_string(other.connection_string),
-        script_path(other.script_path),
-        sampling_rate_ms(other.sampling_rate_ms),
-        voltage_interpolator(std::move(other.voltage_interpolator)),
-        expression_evaluator(std::move(other.expression_evaluator)),
-        lua_script(other.lua_script),
-        canbus_source(std::move(other.canbus_source)) {}
-
-    SensorConfiguration(SensorConfiguration&& other, const allocator_type& alloc) noexcept
+    SensorConfiguration(SensorConfiguration&& other, allocator_type alloc) noexcept
         : type(other.type),
         channel(other.channel),
         connection_string(other.connection_string, alloc),

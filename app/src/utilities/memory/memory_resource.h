@@ -31,7 +31,7 @@ std::shared_ptr<T> make_shared_pmr(std::pmr::memory_resource* mr, Args&&... args
 }
 
 template<typename T, typename... Args>
-std::shared_ptr<T> make_shared_pmr(const std::pmr::polymorphic_allocator<std::byte>& alloc, Args&&... args) {
+std::shared_ptr<T> make_shared_pmr(const std::pmr::polymorphic_allocator<>& alloc, Args&&... args) {
     return std::allocate_shared<T>(alloc, std::forward<Args>(args)...);
 }
 
@@ -126,7 +126,7 @@ pmr_unique_ptr<T> make_unique_pmr(std::pmr::memory_resource* mr, Args&&... args)
 }
 
 template<typename T, typename... Args>
-pmr_unique_ptr<T> make_unique_pmr(std::pmr::polymorphic_allocator<std::byte> alloc, Args&&... args) {
+pmr_unique_ptr<T> make_unique_pmr(std::pmr::polymorphic_allocator<> alloc, Args&&... args) {
     return make_unique_pmr<T>(alloc.resource(), std::forward<Args>(args)...);
 }
 

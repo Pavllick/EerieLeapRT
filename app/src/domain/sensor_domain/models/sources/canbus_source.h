@@ -13,34 +13,30 @@ using namespace eerie_leap::utilities::string;
 // NOTE:: connection_string format:
 // "bus_channel/frame_id</signal_name>"
 struct CanbusSource {
-    using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+    using allocator_type = std::pmr::polymorphic_allocator<>;
 
     uint8_t bus_channel;
     uint32_t frame_id;
     std::pmr::string signal_name;
     size_t signal_name_hash = 0;
 
-    CanbusSource(std::allocator_arg_t, const allocator_type& alloc, uint8_t bus_channel, uint32_t frame_id, std::string_view signal_name)
+    CanbusSource(std::allocator_arg_t, allocator_type alloc, uint8_t bus_channel, uint32_t frame_id, std::string_view signal_name)
         : bus_channel(bus_channel), frame_id(frame_id), signal_name(signal_name, alloc) {
 
         if(!signal_name.empty())
             signal_name_hash = StringHelpers::GetHash(signal_name);
     }
 
-    CanbusSource(std::allocator_arg_t alloc_arg, const allocator_type& alloc, uint8_t bus_channel, uint32_t frame_id)
+    CanbusSource(std::allocator_arg_t alloc_arg, allocator_type alloc, uint8_t bus_channel, uint32_t frame_id)
         : CanbusSource(alloc_arg, alloc, bus_channel, frame_id, "") {}
 
 
     CanbusSource(const CanbusSource&) = delete;
     CanbusSource& operator=(const CanbusSource&) = delete;
 
-    CanbusSource(CanbusSource&& other) noexcept
-        : bus_channel(other.bus_channel),
-        frame_id(other.frame_id),
-        signal_name(other.signal_name),
-        signal_name_hash(other.signal_name_hash) {}
+    CanbusSource(CanbusSource&&) noexcept = default;
 
-    CanbusSource(CanbusSource&& other, const allocator_type& alloc) noexcept
+    CanbusSource(CanbusSource&& other, allocator_type alloc) noexcept
         : bus_channel(other.bus_channel),
         frame_id(other.frame_id),
         signal_name(other.signal_name, alloc),
@@ -55,7 +51,7 @@ struct CanbusSource {
         return connection_string;
     }
 
-    static CanbusSource FromConnectionString(const allocator_type& alloc, const std::string_view connection_string) {
+    static CanbusSource FromConnectionString(allocator_type alloc, const std::string_view connection_string) {
         if(connection_string.empty())
             throw std::invalid_argument("Invalid format: empty connection string");
 

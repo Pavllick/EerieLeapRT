@@ -24,20 +24,20 @@ using ReadingMetadataValue = std::variant<
 >;
 
 struct ReadingMetadata {
-    using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+    using allocator_type = std::pmr::polymorphic_allocator<>;
 
     std::pmr::unordered_map<ReadingMetadataTag, ReadingMetadataValue> tags;
 
-    ReadingMetadata(std::allocator_arg_t, const allocator_type& alloc)
+    ReadingMetadata(std::allocator_arg_t, allocator_type alloc)
         : tags(alloc) {}
 
     ReadingMetadata(const ReadingMetadata&) = delete;
-    ReadingMetadata& operator=(const ReadingMetadata&) = delete;
+	ReadingMetadata& operator=(const ReadingMetadata&) noexcept = default;
+	ReadingMetadata& operator=(ReadingMetadata&&) noexcept = default;
+	ReadingMetadata(ReadingMetadata&&) noexcept = default;
+	~ReadingMetadata() = default;
 
-    ReadingMetadata(ReadingMetadata&& other) noexcept
-        : tags(std::move(other.tags)) {}
-
-    ReadingMetadata(ReadingMetadata&& other, const allocator_type& alloc) noexcept
+    ReadingMetadata(ReadingMetadata&& other, allocator_type alloc) noexcept
         : tags(std::move(other.tags), alloc) {}
 
     void AddTag(const ReadingMetadataTag tag, const ReadingMetadataValue& value) {

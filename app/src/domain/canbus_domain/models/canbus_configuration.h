@@ -8,20 +8,20 @@
 namespace eerie_leap::domain::canbus_domain::models {
 
 struct CanbusConfiguration {
-    using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+    using allocator_type = std::pmr::polymorphic_allocator<>;
 
     std::pmr::unordered_map<uint8_t, CanChannelConfiguration> channel_configurations;
 
-    CanbusConfiguration(std::allocator_arg_t, const allocator_type& alloc)
+    CanbusConfiguration(std::allocator_arg_t, allocator_type alloc)
         : channel_configurations(alloc) {}
 
     CanbusConfiguration(const CanbusConfiguration&) = delete;
-    CanbusConfiguration& operator=(const CanbusConfiguration&) = delete;
+	CanbusConfiguration& operator=(const CanbusConfiguration&) noexcept = default;
+	CanbusConfiguration& operator=(CanbusConfiguration&&) noexcept = default;
+	CanbusConfiguration(CanbusConfiguration&&) noexcept = default;
+	~CanbusConfiguration() = default;
 
-    CanbusConfiguration(CanbusConfiguration&& other) noexcept
-        : channel_configurations(std::move(other.channel_configurations)) {}
-
-    CanbusConfiguration(CanbusConfiguration&& other, const allocator_type& alloc)
+    CanbusConfiguration(CanbusConfiguration&& other, allocator_type alloc)
         : channel_configurations(std::move(other.channel_configurations), alloc) {}
 };
 

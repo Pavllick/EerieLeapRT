@@ -20,22 +20,25 @@ struct CborSensorCalibrationDataMap_float32float {
 };
 
 struct CborSensorCalibrationDataMap {
-	using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+	using allocator_type = std::pmr::polymorphic_allocator<>;
 
 	std::pmr::vector<CborSensorCalibrationDataMap_float32float> float32float;
 
-	CborSensorCalibrationDataMap(std::allocator_arg_t, const allocator_type& alloc)
+	CborSensorCalibrationDataMap(std::allocator_arg_t, allocator_type alloc)
         : float32float(alloc) {}
 
     CborSensorCalibrationDataMap(const CborSensorCalibrationDataMap&) = delete;
-    CborSensorCalibrationDataMap& operator=(const CborSensorCalibrationDataMap&) = delete;
+	CborSensorCalibrationDataMap& operator=(const CborSensorCalibrationDataMap&) noexcept = default;
+	CborSensorCalibrationDataMap& operator=(CborSensorCalibrationDataMap&&) noexcept = default;
+	CborSensorCalibrationDataMap(CborSensorCalibrationDataMap&&) noexcept = default;
+	~CborSensorCalibrationDataMap() = default;
 
 	CborSensorCalibrationDataMap(CborSensorCalibrationDataMap&& other, allocator_type alloc)
         : float32float(std::move(other.float32float), alloc) {}
 };
 
 struct CborSensorConfigurationConfig {
-	using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+	using allocator_type = std::pmr::polymorphic_allocator<>;
 
 	uint32_t type;
 	uint32_t sampling_rate_ms;
@@ -49,11 +52,14 @@ struct CborSensorConfigurationConfig {
 	struct zcbor_string expression;
 	bool expression_present;
 
-	CborSensorConfigurationConfig(std::allocator_arg_t, const allocator_type& alloc)
+	CborSensorConfigurationConfig(std::allocator_arg_t, allocator_type alloc)
         : calibration_table(std::allocator_arg, alloc) {}
 
     CborSensorConfigurationConfig(const CborSensorConfigurationConfig&) = delete;
-    CborSensorConfigurationConfig& operator=(const CborSensorConfigurationConfig&) = delete;
+	CborSensorConfigurationConfig& operator=(const CborSensorConfigurationConfig&) noexcept = default;
+	CborSensorConfigurationConfig& operator=(CborSensorConfigurationConfig&&) noexcept = default;
+	CborSensorConfigurationConfig(CborSensorConfigurationConfig&&) noexcept = default;
+	~CborSensorConfigurationConfig() = default;
 
 	CborSensorConfigurationConfig(CborSensorConfigurationConfig&& other, allocator_type alloc)
         : type(other.type),
@@ -70,17 +76,20 @@ struct CborSensorConfigurationConfig {
 };
 
 struct CborSensorConfig {
-	using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+	using allocator_type = std::pmr::polymorphic_allocator<>;
 
 	struct zcbor_string id;
 	struct CborSensorMetadataConfig metadata;
 	struct CborSensorConfigurationConfig configuration;
 
-	CborSensorConfig(std::allocator_arg_t, const allocator_type& alloc)
+	CborSensorConfig(std::allocator_arg_t, allocator_type alloc)
         : configuration(std::allocator_arg, alloc) {}
 
     CborSensorConfig(const CborSensorConfig&) = delete;
-    CborSensorConfig& operator=(const CborSensorConfig&) = delete;
+	CborSensorConfig& operator=(const CborSensorConfig&) noexcept = default;
+	CborSensorConfig& operator=(CborSensorConfig&&) noexcept = default;
+	CborSensorConfig(CborSensorConfig&&) noexcept = default;
+	~CborSensorConfig() = default;
 
 	CborSensorConfig(CborSensorConfig&& other, allocator_type alloc)
         : id(other.id),
@@ -89,16 +98,19 @@ struct CborSensorConfig {
 };
 
 struct CborSensorsConfig {
-	using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+	using allocator_type = std::pmr::polymorphic_allocator<>;
 
 	std::pmr::vector<CborSensorConfig> CborSensorConfig_m;
 	uint32_t json_config_checksum;
 
-	CborSensorsConfig(std::allocator_arg_t, const allocator_type& alloc)
+	CborSensorsConfig(std::allocator_arg_t, allocator_type alloc)
         : CborSensorConfig_m(alloc) {}
 
     CborSensorsConfig(const CborSensorsConfig&) = delete;
-    CborSensorsConfig& operator=(const CborSensorsConfig&) = delete;
+	CborSensorsConfig& operator=(const CborSensorsConfig&) noexcept = default;
+	CborSensorsConfig& operator=(CborSensorsConfig&&) noexcept = default;
+	CborSensorsConfig(CborSensorsConfig&&) noexcept = default;
+	~CborSensorsConfig() = default;
 
 	CborSensorsConfig(CborSensorsConfig&& other, allocator_type alloc)
         : CborSensorConfig_m(std::move(other.CborSensorConfig_m), alloc),

@@ -18,7 +18,7 @@ using namespace eerie_leap::subsys::canbus;
 using namespace eerie_leap::subsys::dbc;
 
 struct CanChannelConfiguration {
-    using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+    using allocator_type = std::pmr::polymorphic_allocator<>;
 
     CanbusType type;
     bool is_extended_id = false;
@@ -30,25 +30,18 @@ struct CanChannelConfiguration {
 
     std::shared_ptr<Dbc> dbc;
 
-    CanChannelConfiguration(std::allocator_arg_t, const allocator_type& alloc)
+    CanChannelConfiguration(std::allocator_arg_t, allocator_type alloc)
         : dbc_file_path(alloc),
         message_configurations(alloc),
         dbc(make_shared_pmr<Dbc>(alloc)) {}
 
     CanChannelConfiguration(const CanChannelConfiguration&) = delete;
-    CanChannelConfiguration& operator=(const CanChannelConfiguration&) = delete;
+	CanChannelConfiguration& operator=(const CanChannelConfiguration&) noexcept = default;
+	CanChannelConfiguration& operator=(CanChannelConfiguration&&) noexcept = default;
+	CanChannelConfiguration(CanChannelConfiguration&&) noexcept = default;
+	~CanChannelConfiguration() = default;
 
-    CanChannelConfiguration(CanChannelConfiguration&& other) noexcept
-        : type(other.type),
-        is_extended_id(other.is_extended_id),
-        bus_channel(other.bus_channel),
-        bitrate(other.bitrate),
-        data_bitrate(other.data_bitrate),
-        dbc_file_path(std::move(other.dbc_file_path)),
-        message_configurations(std::move(other.message_configurations)),
-        dbc(std::move(other.dbc)) {}
-
-    CanChannelConfiguration(CanChannelConfiguration&& other, const allocator_type& alloc)
+    CanChannelConfiguration(CanChannelConfiguration&& other, allocator_type alloc)
         : type(other.type),
         is_extended_id(other.is_extended_id),
         bus_channel(other.bus_channel),
