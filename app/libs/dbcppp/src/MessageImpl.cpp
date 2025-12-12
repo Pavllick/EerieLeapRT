@@ -12,9 +12,9 @@ pmr_unique_ptr<IMessage> IMessage::Create(
     , std::pmr::string&& transmitter
     , std::pmr::vector<std::pmr::string>&& message_transmitters
     , std::pmr::vector<pmr_unique_ptr<ISignal>>&& signals_
-    , std::pmr::vector<std::unique_ptr<IAttribute>>&& attribute_values
+    , std::pmr::vector<pmr_unique_ptr<IAttribute>>&& attribute_values
     , std::pmr::string&& comment
-    , std::pmr::vector<std::unique_ptr<ISignalGroup>>&& signal_groups)
+    , std::pmr::vector<pmr_unique_ptr<ISignalGroup>>&& signal_groups)
 {
     std::pmr::vector<SignalImpl> ss(mr);
     std::pmr::vector<AttributeImpl> avs(mr);

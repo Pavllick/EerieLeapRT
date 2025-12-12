@@ -1,20 +1,27 @@
 
 #pragma once
 
+#include <memory_resource>
 #include <string>
-#include <memory>
+
+#include <eerie_memory.hpp>
+
+using namespace eerie_memory;
 
 namespace dbcppp
 {
     class IValueEncodingDescription
     {
     public:
-        static std::unique_ptr<IValueEncodingDescription> Create(int64_t value, std::string&& description);
-        virtual std::unique_ptr<IValueEncodingDescription> Clone() const = 0;
+        static pmr_unique_ptr<IValueEncodingDescription> Create(
+              std::pmr::memory_resource* mr
+            , int64_t value
+            , std::pmr::string&& description);
+        virtual pmr_unique_ptr<IValueEncodingDescription> Clone() const = 0;
         virtual ~IValueEncodingDescription() = default;
 
         virtual int64_t Value() const = 0;
-        virtual const std::string& Description() const = 0;
+        virtual const std::string_view Description() const = 0;
 
         virtual bool operator==(const IValueEncodingDescription& rhs) const = 0;
         virtual bool operator!=(const IValueEncodingDescription& rhs) const = 0;

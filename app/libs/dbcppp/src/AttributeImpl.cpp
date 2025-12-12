@@ -3,15 +3,14 @@
 
 using namespace dbcppp;
 
-std::unique_ptr<IAttribute> IAttribute::Create(
+pmr_unique_ptr<IAttribute> IAttribute::Create(
       std::pmr::memory_resource* mr
     , std::pmr::string&& name
     , IAttributeDefinition::EObjectType object_type
     , value_t value)
 {
-    return std::make_unique<AttributeImpl>(
-          std::allocator_arg
-        , mr
+    return make_unique_pmr<AttributeImpl>(
+          mr
         , std::move(name)
         , object_type
         , std::move(value));
@@ -32,9 +31,9 @@ AttributeImpl::AttributeImpl(
     , _value(std::move(value))
     , _allocator(alloc)
 {}
-std::unique_ptr<IAttribute> AttributeImpl::Clone() const
+pmr_unique_ptr<IAttribute> AttributeImpl::Clone() const
 {
-    return std::make_unique<AttributeImpl>(*this, _allocator);
+    return make_unique_pmr<AttributeImpl>(_allocator, *this);
 }
 const std::string_view AttributeImpl::Name() const
 {

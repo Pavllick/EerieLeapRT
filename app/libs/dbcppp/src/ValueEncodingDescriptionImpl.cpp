@@ -3,25 +3,35 @@
 
 using namespace dbcppp;
 
-std::unique_ptr<IValueEncodingDescription> IValueEncodingDescription::Create(int64_t value, std::string&& description)
+pmr_unique_ptr<IValueEncodingDescription> IValueEncodingDescription::Create(
+    std::pmr::memory_resource* mr
+    , int64_t value
+    , std::pmr::string&& description)
 {
-    return std::make_unique<ValueEncodingDescriptionImpl>(value, std::move(description));
+    return make_unique_pmr<ValueEncodingDescriptionImpl>(
+          mr
+        , value
+        , std::move(description));
 }
 
-std::unique_ptr<IValueEncodingDescription> ValueEncodingDescriptionImpl::Clone() const
-{
-    return std::make_unique<ValueEncodingDescriptionImpl>(*this);
-}
-
-ValueEncodingDescriptionImpl::ValueEncodingDescriptionImpl(int64_t value, std::string&& description)
+ValueEncodingDescriptionImpl::ValueEncodingDescriptionImpl(
+      std::allocator_arg_t
+    , allocator_type alloc
+    , int64_t value
+    , std::pmr::string&& description)
     : _value(value)
     , _description(std::move(description))
+    , _allocator(alloc)
 {}
+pmr_unique_ptr<IValueEncodingDescription> ValueEncodingDescriptionImpl::Clone() const
+{
+    return make_unique_pmr<ValueEncodingDescriptionImpl>(_allocator, *this);
+}
 int64_t ValueEncodingDescriptionImpl::Value() const
 {
     return _value;
 }
-const std::string& ValueEncodingDescriptionImpl::Description() const
+const std::string_view ValueEncodingDescriptionImpl::Description() const
 {
     return _description;
 }

@@ -494,6 +494,13 @@ struct NetworkBuilder : boost::static_visitor<> {
 
 class error_streambuf : public std::streambuf {
 public:
+    using allocator_type = std::pmr::polymorphic_allocator<>;
+
+    error_streambuf(std::allocator_arg_t, allocator_type alloc)
+        : buffer(alloc)
+    {
+    }
+
     int overflow(int c) override {
         if(c != EOF) {
             buffer += static_cast<char>(c);
@@ -507,16 +514,16 @@ public:
     }
 
 private:
-    std::string buffer;
+    std::pmr::string buffer;
 };
 
-std::optional<AST::G_Network> ParseFromMemory(const char* begin, const char* end) {
+std::optional<AST::G_Network> ParseFromMemory(std::pmr::memory_resource* mr, const char* begin, const char* end) {
     using boost::spirit::x3::with;
     using boost::spirit::x3::error_handler_tag;
     using boost::spirit::x3::phrase_parse;
     using error_handler_type = boost::spirit::x3::error_handler<const char*>;
 
-    static error_streambuf error_buffer;
+    static error_streambuf error_buffer(std::allocator_arg, mr);
     static std::ostream error_stream(&error_buffer);
 
     error_handler_type error_handler(begin, end, error_stream);

@@ -38,15 +38,15 @@ namespace dbcppp
             , _attribute_values(other._attribute_values, alloc)
             , _allocator(alloc) {}
 
-        virtual std::unique_ptr<INode> Clone() const override;
+        pmr_unique_ptr<INode> Clone() const override;
 
-        virtual const std::string_view Name() const override;
-        virtual const IAttribute& AttributeValues_Get(std::size_t i) const override;
-        virtual uint64_t AttributeValues_Size() const override;
-        virtual const std::string_view Comment() const override;
+        const std::string_view Name() const override;
+        const IAttribute& AttributeValues_Get(std::size_t i) const override;
+        uint64_t AttributeValues_Size() const override;
+        const std::string_view Comment() const override;
 
-        virtual bool operator==(const INode& rhs) const override;
-        virtual bool operator!=(const INode& rhs) const override;
+        bool operator==(const INode& rhs) const override;
+        bool operator!=(const INode& rhs) const override;
 
     private:
         std::pmr::string _name;

@@ -33,14 +33,14 @@ namespace dbcppp
             , _value_ranges(other._value_ranges, alloc)
             , _allocator(alloc) {}
 
-        virtual std::unique_ptr<ISignalMultiplexerValue> Clone() const override;
+        pmr_unique_ptr<ISignalMultiplexerValue> Clone() const override;
 
-        virtual const std::string_view SwitchName() const override;
-        virtual const Range& ValueRanges_Get(std::size_t i) const override;
-        virtual uint64_t ValueRanges_Size() const override;
+        const std::string_view SwitchName() const override;
+        const Range& ValueRanges_Get(std::size_t i) const override;
+        uint64_t ValueRanges_Size() const override;
 
-        virtual bool operator==(const ISignalMultiplexerValue& rhs) const override;
-        virtual bool operator!=(const ISignalMultiplexerValue& rhs) const override;
+        bool operator==(const ISignalMultiplexerValue& rhs) const override;
+        bool operator!=(const ISignalMultiplexerValue& rhs) const override;
 
     private:
         std::pmr::string _switch_name;

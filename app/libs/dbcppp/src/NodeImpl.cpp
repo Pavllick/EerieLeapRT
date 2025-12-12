@@ -3,11 +3,11 @@
 
 using namespace dbcppp;
 
-std::unique_ptr<INode> INode::Create(
+pmr_unique_ptr<INode> INode::Create(
     std::pmr::memory_resource* mr,
     std::pmr::string&& name,
     std::pmr::string&& comment,
-    std::pmr::vector<std::unique_ptr<IAttribute>>&& attribute_values)
+    std::pmr::vector<pmr_unique_ptr<IAttribute>>&& attribute_values)
 {
     std::pmr::vector<AttributeImpl> avs(mr);
     for (auto& av : attribute_values)
@@ -15,7 +15,7 @@ std::unique_ptr<INode> INode::Create(
         avs.push_back(std::move(static_cast<AttributeImpl&>(*av)));
         av.reset(nullptr);
     }
-    return std::make_unique<NodeImpl>(std::allocator_arg, mr, std::move(name), std::move(comment), std::move(avs));
+    return make_unique_pmr<NodeImpl>(mr, std::move(name), std::move(comment), std::move(avs));
 }
 NodeImpl::NodeImpl(
       std::allocator_arg_t
@@ -29,9 +29,9 @@ NodeImpl::NodeImpl(
     , _attribute_values(std::move(attribute_values), alloc)
     , _allocator(alloc)
 {}
-std::unique_ptr<INode> NodeImpl::Clone() const
+pmr_unique_ptr<INode> NodeImpl::Clone() const
 {
-    return std::make_unique<NodeImpl>(*this, _allocator);
+    return make_unique_pmr<NodeImpl>(_allocator, *this);
 }
 const std::string_view NodeImpl::Name() const
 {

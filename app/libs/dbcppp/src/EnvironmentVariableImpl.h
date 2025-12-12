@@ -66,27 +66,27 @@ namespace dbcppp
             , _comment(other._comment, alloc)
             , _allocator(alloc) {}
 
-        virtual std::unique_ptr<IEnvironmentVariable> Clone() const override;
+        pmr_unique_ptr<IEnvironmentVariable> Clone() const override;
 
-        virtual const std::string_view Name() const override;
-        virtual EVarType VarType() const override;
-        virtual double Minimum() const override;
-        virtual double Maximum() const override;
-        virtual const std::string_view Unit() const override;
-        virtual double InitialValue() const override;
-        virtual uint64_t EvId() const override;
-        virtual EAccessType AccessType() const override;
-        virtual const std::pmr::string& AccessNodes_Get(std::size_t i) const override;
-        virtual uint64_t AccessNodes_Size() const override;
-        virtual const IValueEncodingDescription& ValueEncodingDescriptions_Get(std::size_t i) const override;
-        virtual uint64_t ValueEncodingDescriptions_Size() const override;
-        virtual uint64_t DataSize() const override;
-        virtual const IAttribute& AttributeValues_Get(std::size_t i) const override;
-        virtual uint64_t AttributeValues_Size() const override;
-        virtual const std::string_view Comment() const override;
+        const std::string_view Name() const override;
+        EVarType VarType() const override;
+        double Minimum() const override;
+        double Maximum() const override;
+        const std::string_view Unit() const override;
+        double InitialValue() const override;
+        uint64_t EvId() const override;
+        EAccessType AccessType() const override;
+        const std::pmr::string& AccessNodes_Get(std::size_t i) const override;
+        uint64_t AccessNodes_Size() const override;
+        const IValueEncodingDescription& ValueEncodingDescriptions_Get(std::size_t i) const override;
+        uint64_t ValueEncodingDescriptions_Size() const override;
+        uint64_t DataSize() const override;
+        const IAttribute& AttributeValues_Get(std::size_t i) const override;
+        uint64_t AttributeValues_Size() const override;
+        const std::string_view Comment() const override;
 
-        virtual bool operator==(const IEnvironmentVariable& rhs) const override;
-        virtual bool operator!=(const IEnvironmentVariable& rhs) const override;
+        bool operator==(const IEnvironmentVariable& rhs) const override;
+        bool operator!=(const IEnvironmentVariable& rhs) const override;
 
     private:
         std::pmr::string _name;

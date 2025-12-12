@@ -1,43 +1,53 @@
 #include <algorithm>
-#include "dbcppp/Network.h"
 #include "ValueTableImpl.h"
 
 using namespace dbcppp;
 
-std::unique_ptr<IValueTable> IValueTable::Create(
-      std::string&& name
-    , std::optional<std::unique_ptr<ISignalType>>&& signal_type
-    , std::vector<std::unique_ptr<IValueEncodingDescription>>&& value_encoding_descriptions)
+pmr_unique_ptr<IValueTable> IValueTable::Create(
+      std::pmr::memory_resource* mr
+    , std::pmr::string&& name
+    , std::optional<pmr_unique_ptr<ISignalType>>&& signal_type
+    , std::pmr::vector<pmr_unique_ptr<IValueEncodingDescription>>&& value_encoding_descriptions)
 {
-    std::optional<SignalTypeImpl> st;
-    std::vector<ValueEncodingDescriptionImpl> veds;
+    std::pmr::vector<ValueEncodingDescriptionImpl> veds(mr);
     veds.reserve(value_encoding_descriptions.size());
-    if (signal_type)
-    {
-        st = std::move(static_cast<SignalTypeImpl&>(**signal_type));
-        (*signal_type).reset(nullptr);
-    }
     for (auto& ved : value_encoding_descriptions)
     {
         veds.push_back(std::move(static_cast<ValueEncodingDescriptionImpl&>(*ved)));
         ved.reset(nullptr);
     }
-    return std::make_unique<ValueTableImpl>(std::move(name), std::move(st), std::move(veds));
+
+    if (signal_type)
+    {
+        return make_unique_pmr<ValueTableImpl>(
+              mr
+            , std::move(name)
+            , std::move(static_cast<SignalTypeImpl&>(*signal_type.value()))
+            , std::move(veds));
+    }
+    return make_unique_pmr<ValueTableImpl>(
+        mr
+        , std::move(name)
+        , std::nullopt
+        , std::move(veds));
 }
 ValueTableImpl::ValueTableImpl(
-      std::string&& name
+      std::allocator_arg_t
+    , allocator_type alloc
+    , std::pmr::string&& name
     , std::optional<SignalTypeImpl>&& signal_type
-    , std::vector<ValueEncodingDescriptionImpl>&& value_encoding_descriptions)
+    , std::pmr::vector<ValueEncodingDescriptionImpl>&& value_encoding_descriptions)
 
     : _name(std::move(name))
-    , _signal_type(std::move(signal_type))
+    , _signal_type(signal_type)
     , _value_encoding_descriptions(std::move(value_encoding_descriptions))
+    , _allocator(alloc)
 {}
-std::unique_ptr<IValueTable> ValueTableImpl::Clone() const
+pmr_unique_ptr<IValueTable> ValueTableImpl::Clone() const
 {
-    return std::make_unique<ValueTableImpl>(*this);
+    return make_unique_pmr<ValueTableImpl>(_allocator, *this);
 }
-const std::string& ValueTableImpl::Name() const
+const std::string_view ValueTableImpl::Name() const
 {
     return _name;
 }

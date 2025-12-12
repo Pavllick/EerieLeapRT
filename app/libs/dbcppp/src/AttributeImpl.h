@@ -35,14 +35,14 @@ namespace dbcppp
             , _value(other._value)
             , _allocator(alloc) {}
 
-        virtual std::unique_ptr<IAttribute> Clone() const override;
+        pmr_unique_ptr<IAttribute> Clone() const override;
 
-        virtual const std::string_view Name() const override;
-        virtual IAttributeDefinition::EObjectType ObjectType() const override;
-        virtual const value_t& Value() const override;
+        const std::string_view Name() const override;
+        IAttributeDefinition::EObjectType ObjectType() const override;
+        const value_t& Value() const override;
 
-        virtual bool operator==(const IAttribute& rhs) const override;
-        virtual bool operator!=(const IAttribute& rhs) const override;
+        bool operator==(const IAttribute& rhs) const override;
+        bool operator!=(const IAttribute& rhs) const override;
 
     private:
         std::pmr::string _name;

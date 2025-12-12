@@ -3,7 +3,7 @@
 
 using namespace dbcppp;
 
-std::unique_ptr<IEnvironmentVariable> IEnvironmentVariable::Create(
+pmr_unique_ptr<IEnvironmentVariable> IEnvironmentVariable::Create(
       std::pmr::memory_resource* mr
     , std::pmr::string&& name
     , EVarType var_type
@@ -14,9 +14,9 @@ std::unique_ptr<IEnvironmentVariable> IEnvironmentVariable::Create(
     , uint64_t ev_id
     , EAccessType access_type
     , std::pmr::vector<std::pmr::string>&& access_nodes
-    , std::pmr::vector<std::unique_ptr<IValueEncodingDescription>>&& value_encoding_descriptions
+    , std::pmr::vector<pmr_unique_ptr<IValueEncodingDescription>>&& value_encoding_descriptions
     , uint64_t data_size
-    , std::pmr::vector<std::unique_ptr<IAttribute>>&& attribute_values
+    , std::pmr::vector<pmr_unique_ptr<IAttribute>>&& attribute_values
     , std::pmr::string&& comment)
 {
     std::pmr::vector<AttributeImpl> avs(mr);
@@ -33,9 +33,8 @@ std::unique_ptr<IEnvironmentVariable> IEnvironmentVariable::Create(
         veds.push_back(std::move(static_cast<ValueEncodingDescriptionImpl&>(*ved)));
         ved.reset(nullptr);
     }
-    return std::make_unique<EnvironmentVariableImpl>(
-          std::allocator_arg
-        , mr
+    return make_unique_pmr<EnvironmentVariableImpl>(
+          mr
         , std::move(name)
         , var_type
         , minimum
@@ -83,9 +82,9 @@ EnvironmentVariableImpl::EnvironmentVariableImpl(
     , _comment(std::move(comment), alloc)
     , _allocator(alloc)
 {}
-std::unique_ptr<IEnvironmentVariable> EnvironmentVariableImpl::Clone() const
+pmr_unique_ptr<IEnvironmentVariable> EnvironmentVariableImpl::Clone() const
 {
-    return std::make_unique<EnvironmentVariableImpl>(*this, _allocator);
+    return make_unique_pmr<EnvironmentVariableImpl>(_allocator, *this);
 }
 const std::string_view EnvironmentVariableImpl::Name() const
 {

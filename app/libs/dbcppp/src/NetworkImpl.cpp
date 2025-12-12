@@ -10,14 +10,14 @@ pmr_unique_ptr<INetwork> INetwork::Create(
       std::pmr::memory_resource* mr
     , std::pmr::string&& version
     , std::pmr::vector<std::pmr::string>&& new_symbols
-    , std::unique_ptr<IBitTiming>&& bit_timing
-    , std::pmr::vector<std::unique_ptr<INode>>&& nodes
-    , std::pmr::vector<std::unique_ptr<IValueTable>>&& value_tables
+    , pmr_unique_ptr<IBitTiming>&& bit_timing
+    , std::pmr::vector<pmr_unique_ptr<INode>>&& nodes
+    , std::pmr::vector<pmr_unique_ptr<IValueTable>>&& value_tables
     , std::pmr::vector<pmr_unique_ptr<IMessage>>&& messages
-    , std::pmr::vector<std::unique_ptr<IEnvironmentVariable>>&& environment_variables
-    , std::pmr::vector<std::unique_ptr<IAttributeDefinition>>&& attribute_definitions
-    , std::pmr::vector<std::unique_ptr<IAttribute>>&& attribute_defaults
-    , std::pmr::vector<std::unique_ptr<IAttribute>>&& attribute_values
+    , std::pmr::vector<pmr_unique_ptr<IEnvironmentVariable>>&& environment_variables
+    , std::pmr::vector<pmr_unique_ptr<IAttributeDefinition>>&& attribute_definitions
+    , std::pmr::vector<pmr_unique_ptr<IAttribute>>&& attribute_defaults
+    , std::pmr::vector<pmr_unique_ptr<IAttribute>>&& attribute_values
     , std::pmr::string&& comment)
 {
     BitTimingImpl bt = std::move(static_cast<BitTimingImpl&>(*bit_timing));
@@ -246,7 +246,7 @@ std::string_view NetworkImpl::comment()
 {
     return _comment;
 }
-void INetwork::Merge(std::unique_ptr<INetwork>&& other)
+void INetwork::Merge(pmr_unique_ptr<INetwork>&& other)
 {
     auto& self = static_cast<NetworkImpl&>(*this);
     auto& o = static_cast<NetworkImpl&>(*other);

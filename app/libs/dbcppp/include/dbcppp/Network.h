@@ -23,14 +23,14 @@ namespace dbcppp
               std::pmr::memory_resource* mr
             , std::pmr::string&& version
             , std::pmr::vector<std::pmr::string>&& new_symbols
-            , std::unique_ptr<IBitTiming>&& bit_timing
-            , std::pmr::vector<std::unique_ptr<INode>>&& nodes
-            , std::pmr::vector<std::unique_ptr<IValueTable>>&& value_tables
+            , pmr_unique_ptr<IBitTiming>&& bit_timing
+            , std::pmr::vector<pmr_unique_ptr<INode>>&& nodes
+            , std::pmr::vector<pmr_unique_ptr<IValueTable>>&& value_tables
             , std::pmr::vector<pmr_unique_ptr<IMessage>>&& messages
-            , std::pmr::vector<std::unique_ptr<IEnvironmentVariable>>&& environment_variables
-            , std::pmr::vector<std::unique_ptr<IAttributeDefinition>>&& attribute_definitions
-            , std::pmr::vector<std::unique_ptr<IAttribute>>&& attribute_defaults
-            , std::pmr::vector<std::unique_ptr<IAttribute>>&& attribute_values
+            , std::pmr::vector<pmr_unique_ptr<IEnvironmentVariable>>&& environment_variables
+            , std::pmr::vector<pmr_unique_ptr<IAttributeDefinition>>&& attribute_definitions
+            , std::pmr::vector<pmr_unique_ptr<IAttribute>>&& attribute_defaults
+            , std::pmr::vector<pmr_unique_ptr<IAttribute>>&& attribute_values
             , std::pmr::string&& comment);
         static pmr_unique_ptr<INetwork> LoadDBCFromIs(std::pmr::memory_resource* mr, std::istream &is);
 
@@ -71,6 +71,6 @@ namespace dbcppp
         virtual bool operator==(const INetwork& rhs) const = 0;
         virtual bool operator!=(const INetwork& rhs) const = 0;
 
-        void Merge(std::unique_ptr<INetwork>&& other);
+        void Merge(pmr_unique_ptr<INetwork>&& other);
     };
 }

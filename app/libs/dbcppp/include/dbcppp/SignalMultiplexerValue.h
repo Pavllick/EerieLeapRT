@@ -11,6 +11,10 @@
 
 #include "Iterator.h"
 
+#include <eerie_memory.hpp>
+
+using namespace eerie_memory;
+
 namespace dbcppp
 {
     class ISignalMultiplexerValue
@@ -22,12 +26,12 @@ namespace dbcppp
             std::size_t to;
         };
 
-        static std::unique_ptr<ISignalMultiplexerValue> Create(
+        static pmr_unique_ptr<ISignalMultiplexerValue> Create(
               std::pmr::memory_resource* mr
             , std::pmr::string&& switch_name
             , std::pmr::vector<Range>&& value_ranges);
 
-        virtual std::unique_ptr<ISignalMultiplexerValue> Clone() const = 0;
+        virtual pmr_unique_ptr<ISignalMultiplexerValue> Clone() const = 0;
 
         virtual ~ISignalMultiplexerValue() = default;
         virtual const std::string_view SwitchName() const = 0;

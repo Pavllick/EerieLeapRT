@@ -2,23 +2,35 @@
 
 using namespace dbcppp;
 
-std::unique_ptr<IBitTiming> IBitTiming::Create(uint64_t baudrate, uint64_t BTR1, uint64_t BTR2)
+pmr_unique_ptr<IBitTiming> IBitTiming::Create(
+      std::pmr::memory_resource* mr
+    , uint64_t baudrate
+    , uint64_t BTR1
+    , uint64_t BTR2)
 {
-    return std::make_unique<BitTimingImpl>(baudrate, BTR1, BTR2);
+    return make_unique_pmr<BitTimingImpl>(mr, baudrate, BTR1, BTR2);
 }
-BitTimingImpl::BitTimingImpl()
+BitTimingImpl::BitTimingImpl(std::allocator_arg_t, allocator_type alloc)
     : _baudrate(0)
     , _BTR1(0)
     , _BTR2(0)
+    , _allocator(alloc)
 {}
-BitTimingImpl::BitTimingImpl(uint64_t baudrate, uint64_t BTR1, uint64_t BTR2)
-    : _baudrate(std::move(baudrate))
-    , _BTR1(std::move(BTR1))
-    , _BTR2(std::move(BTR2))
+BitTimingImpl::BitTimingImpl(
+      std::allocator_arg_t
+    , allocator_type alloc
+    , uint64_t baudrate
+    , uint64_t BTR1
+    , uint64_t BTR2)
+
+    : _baudrate(baudrate)
+    , _BTR1(BTR1)
+    , _BTR2(BTR2)
+    , _allocator(alloc)
 {}
-std::unique_ptr<IBitTiming> BitTimingImpl::Clone() const
+pmr_unique_ptr<IBitTiming> BitTimingImpl::Clone() const
 {
-    return std::make_unique<BitTimingImpl>(*this);
+    return make_unique_pmr<BitTimingImpl>(_allocator, *this);
 }
 uint64_t BitTimingImpl::Baudrate() const
 {

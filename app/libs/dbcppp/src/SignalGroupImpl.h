@@ -9,26 +9,52 @@ namespace dbcppp
         : public ISignalGroup
     {
     public:
-        virtual std::unique_ptr<ISignalGroup> Clone() const override;
+        using allocator_type = std::pmr::polymorphic_allocator<>;
 
         SignalGroupImpl(
-              uint64_t message_id
-            , std::string&& name
+              std::allocator_arg_t
+            , allocator_type alloc
+            , uint64_t message_id
+            , std::pmr::string&& name
             , uint64_t repetitions
-            , std::vector<std::string>&& signal_names);
-        virtual uint64_t MessageId() const override;
-        virtual const std::string& Name() const override;
-        virtual uint64_t Repetitions() const override;
-        virtual const std::string& SignalNames_Get(std::size_t i) const override;
-        virtual uint64_t SignalNames_Size() const override;
+            , std::pmr::vector<std::pmr::string>&& signal_names);
 
-        virtual bool operator==(const ISignalGroup& rhs) const override;
-        virtual bool operator!=(const ISignalGroup& rhs) const override;
+        SignalGroupImpl& operator=(const SignalGroupImpl&) noexcept = default;
+        SignalGroupImpl& operator=(SignalGroupImpl&&) noexcept = default;
+        SignalGroupImpl(SignalGroupImpl&&) noexcept = default;
+        ~SignalGroupImpl() = default;
+
+        SignalGroupImpl(SignalGroupImpl&& other, allocator_type alloc)
+            : _message_id(other._message_id)
+            , _name(std::move(other._name))
+            , _repetitions(other._repetitions)
+            , _signal_names(std::move(other._signal_names))
+            , _allocator(alloc) {}
+
+        SignalGroupImpl(const SignalGroupImpl& other, allocator_type alloc = {})
+            : _message_id(other._message_id)
+            , _name(other._name, alloc)
+            , _repetitions(other._repetitions)
+            , _signal_names(other._signal_names, alloc)
+            , _allocator(alloc) {}
+
+        pmr_unique_ptr<ISignalGroup> Clone() const override;
+
+        uint64_t MessageId() const override;
+        const std::string_view Name() const override;
+        uint64_t Repetitions() const override;
+        const std::pmr::string& SignalNames_Get(std::size_t i) const override;
+        uint64_t SignalNames_Size() const override;
+
+        bool operator==(const ISignalGroup& rhs) const override;
+        bool operator!=(const ISignalGroup& rhs) const override;
 
     private:
         uint64_t _message_id;
-        std::string _name;
+        std::pmr::string _name;
         uint64_t _repetitions;
-        std::vector<std::string> _signal_names;
+        std::pmr::vector<std::pmr::string> _signal_names;
+
+        allocator_type _allocator;
     };
 }

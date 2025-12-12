@@ -30,9 +30,9 @@ namespace dbcppp
             , std::pmr::string&& transmitter
             , std::pmr::vector<std::pmr::string>&& message_transmitters
             , std::pmr::vector<pmr_unique_ptr<ISignal>>&& signals_
-            , std::pmr::vector<std::unique_ptr<IAttribute>>&& attribute_values
+            , std::pmr::vector<pmr_unique_ptr<IAttribute>>&& attribute_values
             , std::pmr::string&& comment
-            , std::pmr::vector<std::unique_ptr<ISignalGroup>>&& signal_groups);
+            , std::pmr::vector<pmr_unique_ptr<ISignalGroup>>&& signal_groups);
 
         virtual pmr_unique_ptr<IMessage> Clone() const = 0;
 

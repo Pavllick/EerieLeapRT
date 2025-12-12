@@ -2,8 +2,9 @@
 
 using namespace dbcppp;
 
-std::unique_ptr<ISignalType> ISignalType::Create(
-      std::string&& name
+pmr_unique_ptr<ISignalType> ISignalType::Create(
+      std::pmr::memory_resource* mr
+    , std::pmr::string&& name
     , uint64_t signal_size
     , ISignal::EByteOrder byte_order
     , ISignal::EValueType value_type
@@ -11,12 +12,13 @@ std::unique_ptr<ISignalType> ISignalType::Create(
     , double offset
     , double minimum
     , double maximum
-    , std::string&& unit
+    , std::pmr::string&& unit
     , double default_value
-    , std::string&& value_table)
+    , std::pmr::string&& value_table)
 {
-    return std::make_unique<SignalTypeImpl>(
-          std::move(name)
+    return make_unique_pmr<SignalTypeImpl>(
+          mr
+        , std::move(name)
         , signal_size
         , byte_order
         , value_type
@@ -30,7 +32,9 @@ std::unique_ptr<ISignalType> ISignalType::Create(
 }
 
 SignalTypeImpl::SignalTypeImpl(
-      std::string&& name
+      std::allocator_arg_t
+    , allocator_type alloc
+    , std::pmr::string&& name
     , uint64_t signal_size
     , ISignal::EByteOrder byte_order
     , ISignal::EValueType value_type
@@ -38,9 +42,9 @@ SignalTypeImpl::SignalTypeImpl(
     , double offset
     , double minimum
     , double maximum
-    , std::string&& unit
+    , std::pmr::string&& unit
     , double default_value
-    , std::string&& value_table)
+    , std::pmr::string&& value_table)
 
     : _name(std::move(name))
     , _signal_size(std::move(signal_size))
@@ -53,12 +57,13 @@ SignalTypeImpl::SignalTypeImpl(
     , _unit(std::move(unit))
     , _default_value(std::move(default_value))
     , _value_table(std::move(value_table))
+    , _allocator(alloc)
 {}
-std::unique_ptr<ISignalType> SignalTypeImpl::Clone() const
+pmr_unique_ptr<ISignalType> SignalTypeImpl::Clone() const
 {
-    return std::make_unique<SignalTypeImpl>(*this);
+    return make_unique_pmr<SignalTypeImpl>(_allocator, *this);
 }
-const std::string& SignalTypeImpl::Name() const
+const std::string_view SignalTypeImpl::Name() const
 {
     return _name;
 }
@@ -90,7 +95,7 @@ double SignalTypeImpl::Maximum() const
 {
     return _maximum;
 }
-const std::string& SignalTypeImpl::Unit() const
+const std::string_view SignalTypeImpl::Unit() const
 {
     return _unit;
 }
@@ -98,7 +103,7 @@ double SignalTypeImpl::DefaultValue() const
 {
     return _default_value;
 }
-const std::string& SignalTypeImpl::ValueTable() const
+const std::string_view SignalTypeImpl::ValueTable() const
 {
     return _value_table;
 }

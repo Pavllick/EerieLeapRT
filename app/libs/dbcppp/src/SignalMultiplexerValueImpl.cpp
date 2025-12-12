@@ -3,14 +3,13 @@
 
 using namespace dbcppp;
 
-std::unique_ptr<ISignalMultiplexerValue> ISignalMultiplexerValue::Create(
+pmr_unique_ptr<ISignalMultiplexerValue> ISignalMultiplexerValue::Create(
       std::pmr::memory_resource* mr
     , std::pmr::string&& switch_name
     , std::pmr::vector<Range>&& value_ranges)
 {
-    return std::make_unique<SignalMultiplexerValueImpl>(
-          std::allocator_arg
-        , mr
+    return make_unique_pmr<SignalMultiplexerValueImpl>(
+          mr
         , std::move(switch_name)
         , std::move(value_ranges));
 }
@@ -26,9 +25,9 @@ SignalMultiplexerValueImpl::SignalMultiplexerValueImpl(
     , _allocator(alloc)
 {}
 
-std::unique_ptr<ISignalMultiplexerValue> SignalMultiplexerValueImpl::Clone() const
+pmr_unique_ptr<ISignalMultiplexerValue> SignalMultiplexerValueImpl::Clone() const
 {
-    return std::make_unique<SignalMultiplexerValueImpl>(*this, _allocator);
+    return make_unique_pmr<SignalMultiplexerValueImpl>(_allocator, *this);
 }
 
 const std::string_view SignalMultiplexerValueImpl::SwitchName() const

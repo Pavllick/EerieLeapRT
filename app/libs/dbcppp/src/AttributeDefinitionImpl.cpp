@@ -3,31 +3,40 @@
 
 using namespace dbcppp;
 
-std::unique_ptr<IAttributeDefinition> IAttributeDefinition::Create(
-      std::string&& name
+pmr_unique_ptr<IAttributeDefinition> IAttributeDefinition::Create(
+      std::pmr::memory_resource* mr
+    , std::pmr::string&& name
     , EObjectType object_type
     , value_type_t&& value_type)
 {
-    return std::make_unique<AttributeDefinitionImpl>(
-          std::move(name)
+    return make_unique_pmr<AttributeDefinitionImpl>(
+          mr
+        , std::move(name)
         , object_type
         , std::move(value_type));
 }
 
-AttributeDefinitionImpl::AttributeDefinitionImpl(std::string&& name, EObjectType object_type, value_type_t value_type)
-    : _name(std::move(name))
+AttributeDefinitionImpl::AttributeDefinitionImpl(
+    std::allocator_arg_t
+    , allocator_type alloc
+    , std::pmr::string&& name
+    , EObjectType object_type
+    , value_type_t value_type)
+
+    : _name(std::move(name), alloc)
     , _object_type(std::move(object_type))
     , _value_type(std::move(value_type))
+    , _allocator(alloc)
 {}
-std::unique_ptr<IAttributeDefinition> AttributeDefinitionImpl::Clone() const
+pmr_unique_ptr<IAttributeDefinition> AttributeDefinitionImpl::Clone() const
 {
-    return std::make_unique<AttributeDefinitionImpl>(*this);
+    return make_unique_pmr<AttributeDefinitionImpl>(_allocator, *this);
 }
 IAttributeDefinition::EObjectType AttributeDefinitionImpl::ObjectType() const
 {
     return _object_type;
 }
-const std::string& AttributeDefinitionImpl::Name() const
+const std::string_view AttributeDefinitionImpl::Name() const
 {
     return _name;
 }

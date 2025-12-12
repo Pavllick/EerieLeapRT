@@ -35,7 +35,7 @@ namespace dbcppp
             ReadWrite_      = 0x8003
         };
 
-        static std::unique_ptr<IEnvironmentVariable> Create(
+        static pmr_unique_ptr<IEnvironmentVariable> Create(
               std::pmr::memory_resource* mr
             , std::pmr::string&& name
             , EVarType var_type
@@ -46,12 +46,12 @@ namespace dbcppp
             , uint64_t ev_id
             , EAccessType access_type
             , std::pmr::vector<std::pmr::string>&& access_nodes
-            , std::pmr::vector<std::unique_ptr<IValueEncodingDescription>>&& value_encoding_descriptions
+            , std::pmr::vector<pmr_unique_ptr<IValueEncodingDescription>>&& value_encoding_descriptions
             , uint64_t data_size
-            , std::pmr::vector<std::unique_ptr<IAttribute>>&& attribute_values
+            , std::pmr::vector<pmr_unique_ptr<IAttribute>>&& attribute_values
             , std::pmr::string&& comment);
 
-        virtual std::unique_ptr<IEnvironmentVariable> Clone() const = 0;
+        virtual pmr_unique_ptr<IEnvironmentVariable> Clone() const = 0;
 
         virtual ~IEnvironmentVariable() = default;
         virtual const std::string_view Name() const = 0;

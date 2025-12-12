@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory_resource>
 #include <cstddef>
 #include <string>
 #include <vector>
@@ -8,6 +9,10 @@
 #include <memory>
 
 #include "Iterator.h"
+
+#include <eerie_memory.hpp>
+
+using namespace eerie_memory;
 
 namespace dbcppp
 {
@@ -46,16 +51,17 @@ namespace dbcppp
         };
         using value_type_t = std::variant<ValueTypeInt, ValueTypeHex, ValueTypeFloat, ValueTypeString, ValueTypeEnum>;
 
-        static std::unique_ptr<IAttributeDefinition> Create(
-              std::string&& name
+        static pmr_unique_ptr<IAttributeDefinition> Create(
+              std::pmr::memory_resource* mr
+            , std::pmr::string&& name
             , EObjectType object_type
             , value_type_t&& value_type);
 
-        virtual std::unique_ptr<IAttributeDefinition> Clone() const = 0;
+        virtual pmr_unique_ptr<IAttributeDefinition> Clone() const = 0;
 
         virtual ~IAttributeDefinition() = default;
         virtual EObjectType ObjectType() const = 0;
-        virtual const std::string& Name() const = 0;
+        virtual const std::string_view Name() const = 0;
         virtual const value_type_t& ValueType() const = 0;
 
         virtual bool operator==(const IAttributeDefinition& rhs) const = 0;

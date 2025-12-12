@@ -445,7 +445,7 @@ std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const INetwork& 
         for (const ISignalGroup& sg : m.SignalGroups())
         {
             os << "SIG_GROUP_ " << sg.MessageId() << " " << sg.Name() << " " << sg.Repetitions() << " :";
-            for (const std::string& name : sg.SignalNames())
+            for (const auto& name : sg.SignalNames())
             {
                 os << " " << name;
             }

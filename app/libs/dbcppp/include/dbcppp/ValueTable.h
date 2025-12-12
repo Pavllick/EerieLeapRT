@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory_resource>
 #include <vector>
 #include <string>
 #include <memory>
@@ -13,15 +14,16 @@ namespace dbcppp
     class IValueTable
     {
     public:
-        static std::unique_ptr<IValueTable> Create(
-              std::string&& name
-            , std::optional<std::unique_ptr<ISignalType>>&& signal_type
-            , std::vector<std::unique_ptr<IValueEncodingDescription>>&& value_encoding_descriptions);
+        static pmr_unique_ptr<IValueTable> Create(
+              std::pmr::memory_resource* mr
+            , std::pmr::string&& name
+            , std::optional<pmr_unique_ptr<ISignalType>>&& signal_type
+            , std::pmr::vector<pmr_unique_ptr<IValueEncodingDescription>>&& value_encoding_descriptions);
 
-        virtual std::unique_ptr<IValueTable> Clone() const = 0;
+        virtual pmr_unique_ptr<IValueTable> Clone() const = 0;
 
         virtual ~IValueTable() = default;
-        virtual const std::string& Name() const = 0;
+        virtual const std::string_view Name() const = 0;
         virtual std::optional<std::reference_wrapper<const ISignalType>> SignalType() const = 0;
         virtual const IValueEncodingDescription& ValueEncodingDescriptions_Get(std::size_t i) const = 0;
         virtual uint64_t ValueEncodingDescriptions_Size() const = 0;

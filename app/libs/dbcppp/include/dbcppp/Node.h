@@ -10,18 +10,22 @@
 #include "Iterator.h"
 #include "Attribute.h"
 
+#include <eerie_memory.hpp>
+
+using namespace eerie_memory;
+
 namespace dbcppp
 {
     class INode
     {
     public:
-        static std::unique_ptr<INode> Create(
-            std::pmr::memory_resource* mr,
-            std::pmr::string&& name,
-            std::pmr::string&& comment,
-            std::pmr::vector<std::unique_ptr<IAttribute>>&& attribute_values);
+        static pmr_unique_ptr<INode> Create(
+              std::pmr::memory_resource* mr
+            , std::pmr::string&& name
+            , std::pmr::string&& comment
+            , std::pmr::vector<pmr_unique_ptr<IAttribute>>&& attribute_values);
 
-        virtual std::unique_ptr<INode> Clone() const = 0;
+        virtual pmr_unique_ptr<INode> Clone() const = 0;
 
         virtual ~INode() = default;
         virtual const std::string_view Name() const = 0;

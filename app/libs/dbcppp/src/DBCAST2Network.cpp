@@ -72,9 +72,9 @@ static auto getNewSymbols(std::pmr::memory_resource* mr, const G_Network& gnet)
     }
     return nodes;
 }
-static auto getSignalType(const G_Network& gnet, const G_ValueTable& vt)
+static auto getSignalType(std::pmr::memory_resource* mr, const G_Network& gnet, const G_ValueTable& vt)
 {
-    std::optional<std::unique_ptr<ISignalType>> signal_type;
+    std::optional<pmr_unique_ptr<ISignalType>> signal_type;
     auto iter = std::ranges::find_if(gnet.signal_types.begin(), gnet.signal_types.end(),
         [&](const auto& st)
         {
@@ -84,7 +84,8 @@ static auto getSignalType(const G_Network& gnet, const G_ValueTable& vt)
     {
         auto& st = *iter;
         signal_type = ISignalType::Create(
-              std::string(st.name)
+              mr
+            , std::pmr::string(st.name, mr)
             , st.size
             , st.byte_order == '0' ? ISignal::EByteOrder::BigEndian : ISignal::EByteOrder::LittleEndian
             , st.value_type == '+' ? ISignal::EValueType::Unsigned : ISignal::EValueType::Signed
@@ -92,40 +93,40 @@ static auto getSignalType(const G_Network& gnet, const G_ValueTable& vt)
             , st.offset
             , st.minimum
             , st.maximum
-            , std::string(st.unit)
+            , std::pmr::string(st.unit, mr)
             , st.default_value
-            , std::string(st.value_table_name));
+            , std::pmr::string(st.value_table_name, mr));
     }
     return signal_type;
 }
 static auto getValueTables(std::pmr::memory_resource* mr, const G_Network& gnet)
 {
-    std::pmr::vector<std::unique_ptr<IValueTable>> value_tables(mr);
+    std::pmr::vector<pmr_unique_ptr<IValueTable>> value_tables(mr);
     for (const auto& vt : gnet.value_tables)
     {
-        auto sig_type = getSignalType(gnet, vt);
-        std::vector<std::unique_ptr<IValueEncodingDescription>> copy_ved;
+        auto sig_type = getSignalType(mr, gnet, vt);
+        std::pmr::vector<pmr_unique_ptr<IValueEncodingDescription>> copy_ved(mr);
         for (const auto& ved : vt.value_encoding_descriptions)
         {
-            auto desc = ved.description;
-            auto pved = IValueEncodingDescription::Create(ved.value, std::move(desc));
+            auto desc = std::pmr::string(ved.description, mr);
+            auto pved = IValueEncodingDescription::Create(mr, ved.value, std::move(desc));
             copy_ved.push_back(std::move(pved));
         }
-        auto nvt = IValueTable::Create(std::string(vt.name), std::move(sig_type), std::move(copy_ved));
+        auto nvt = IValueTable::Create(mr, std::pmr::string(vt.name), std::move(sig_type), std::move(copy_ved));
         value_tables.push_back(std::move(nvt));
     }
     return value_tables;
 }
-static auto getBitTiming(const G_Network& gnet)
+static auto getBitTiming(std::pmr::memory_resource* mr, const G_Network& gnet)
 {
-    std::unique_ptr<IBitTiming> bit_timing;
+    pmr_unique_ptr<IBitTiming> bit_timing;
     if (gnet.bit_timing)
     {
-        bit_timing = IBitTiming::Create(gnet.bit_timing->baudrate, gnet.bit_timing->BTR1, gnet.bit_timing->BTR2);
+        bit_timing = IBitTiming::Create(mr, gnet.bit_timing->baudrate, gnet.bit_timing->BTR1, gnet.bit_timing->BTR2);
     }
     else
     {
-        bit_timing = IBitTiming::Create(0, 0, 0);
+        bit_timing = IBitTiming::Create(mr, 0, 0, 0);
     }
     return bit_timing;
 }
@@ -185,7 +186,7 @@ inline auto boost_variant_to_std_variant(variant_attr_value_t const& attr)
 
 static auto getAttributeValues(std::pmr::memory_resource* mr, const G_Network& gnet, const G_Node& n, Cache const& cache)
 {
-    std::pmr::vector<std::unique_ptr<IAttribute>> attribute_values(mr);
+    std::pmr::vector<pmr_unique_ptr<IAttribute>> attribute_values(mr);
 
     auto node_it = cache.Nodes.find(n.name);
 
@@ -218,7 +219,7 @@ static auto getComment(std::pmr::memory_resource* mr, const G_Network& gnet, con
 }
 static auto getNodes(std::pmr::memory_resource* mr, const G_Network& gnet, Cache const& cache)
 {
-    std::pmr::vector<std::unique_ptr<INode>> nodes(mr);
+    std::pmr::vector<pmr_unique_ptr<INode>> nodes(mr);
     for (const auto& n : gnet.nodes)
     {
         auto comment = getComment(mr, gnet, n, cache);
@@ -234,7 +235,7 @@ static auto getNodes(std::pmr::memory_resource* mr, const G_Network& gnet, Cache
 }
 static auto getAttributeValues(std::pmr::memory_resource* mr, const G_Network& gnet, const G_Message& m, const G_Signal& s, Cache const& cache)
 {
-    std::pmr::vector<std::unique_ptr<IAttribute>> attribute_values(mr);
+    std::pmr::vector<pmr_unique_ptr<IAttribute>> attribute_values(mr);
     auto const message_it = cache.Messages.find(m.id);
 
     if (message_it != cache.Messages.end()) {
@@ -262,7 +263,7 @@ static auto getAttributeValues(std::pmr::memory_resource* mr, const G_Network& g
 }
 static auto getValueDescriptions(std::pmr::memory_resource* mr, const G_Network& gnet, const G_Message& m, const G_Signal& s, Cache const& cache)
 {
-    std::pmr::vector<std::unique_ptr<IValueEncodingDescription>> value_descriptions(mr);
+    std::pmr::vector<pmr_unique_ptr<IValueEncodingDescription>> value_descriptions(mr);
     auto const message_it = cache.Messages.find(m.id);
 
     if (message_it != cache.Messages.end()) {
@@ -276,8 +277,8 @@ static auto getValueDescriptions(std::pmr::memory_resource* mr, const G_Network&
 
                 for (const auto& vd : vds)
                 {
-                    auto desc = vd.description;
-                    auto pvd = IValueEncodingDescription::Create(vd.value, std::move(desc));
+                    auto desc = std::pmr::string(vd.description, mr);
+                    auto pvd = IValueEncodingDescription::Create(mr, vd.value, std::move(desc));
                     value_descriptions.push_back(std::move(pvd));
                 }
             }
@@ -322,7 +323,7 @@ static auto getSignalExtendedValueType(const G_Network& gnet, const G_Message& m
 }
 static auto getSignalMultiplexerValues(std::pmr::memory_resource* mr, const G_Network& gnet, const std::string& s, const uint64_t m)
 {
-    std::pmr::vector<std::unique_ptr<ISignalMultiplexerValue>> signal_multiplexer_values(mr);
+    std::pmr::vector<pmr_unique_ptr<ISignalMultiplexerValue>> signal_multiplexer_values(mr);
     for (const auto& gsmv : gnet.signal_multiplexer_values)
     {
         if (gsmv.signal_name == s && gsmv.message_id == m)
@@ -440,7 +441,7 @@ static auto getMessageTransmitters(std::pmr::memory_resource* mr, const G_Networ
 }
 static auto getAttributeValues(std::pmr::memory_resource* mr, const G_Network& gnet, const G_Message& m, Cache const& cache)
 {
-    std::pmr::vector<std::unique_ptr<IAttribute>> attribute_values(mr);
+    std::pmr::vector<pmr_unique_ptr<IAttribute>> attribute_values(mr);
 
     auto message_it = cache.Messages.find(m.id);
 
@@ -470,7 +471,7 @@ static auto getComment(std::pmr::memory_resource* mr, const G_Network& gnet, con
 }
 static auto getSignalGroups(std::pmr::memory_resource* mr, const G_Network& gnet, const G_Message& m)
 {
-    std::pmr::vector<std::unique_ptr<ISignalGroup>> signal_groups(mr);
+    std::pmr::vector<pmr_unique_ptr<ISignalGroup>> signal_groups(mr);
     for (const auto& sg : gnet.signal_groups)
     {
         if (sg.message_id == m.id)
@@ -478,10 +479,11 @@ static auto getSignalGroups(std::pmr::memory_resource* mr, const G_Network& gnet
             auto name = sg.signal_group_name;
             auto signal_names = sg.signal_names;
             auto signal_group = ISignalGroup::Create(
-                  sg.message_id
-                , std::move(name)
+                  mr
+                , sg.message_id
+                , std::move(std::pmr::string(name, mr))
                 , sg.repetitions
-                , std::move(signal_names));
+                , std::move(std::pmr::vector<std::pmr::string>(signal_names.begin(), signal_names.end(), mr)));
             signal_groups.push_back(std::move(signal_group));
         }
     }
@@ -521,7 +523,7 @@ static auto getMessages(std::pmr::memory_resource* mr, const G_Network& gnet, Ca
 }
 static auto getValueDescriptions(std::pmr::memory_resource* mr, const G_Network& gnet, const G_EnvironmentVariable& ev, Cache const& cache)
 {
-    std::pmr::vector<std::unique_ptr<IValueEncodingDescription>> value_descriptions(mr);
+    std::pmr::vector<pmr_unique_ptr<IValueEncodingDescription>> value_descriptions(mr);
     auto env_it = cache.EnvVars.find(ev.name);
 
     if (env_it != cache.EnvVars.end()) {
@@ -532,8 +534,8 @@ static auto getValueDescriptions(std::pmr::memory_resource* mr, const G_Network&
 
             for (const auto& vd : vds)
             {
-                auto desc = vd.description;
-                auto pvd = IValueEncodingDescription::Create(vd.value, std::move(desc));
+                auto desc = std::pmr::string(vd.description, mr);
+                auto pvd = IValueEncodingDescription::Create(mr, vd.value, std::move(desc));
                 value_descriptions.push_back(std::move(pvd));
             }
         }
@@ -542,7 +544,7 @@ static auto getValueDescriptions(std::pmr::memory_resource* mr, const G_Network&
 }
 static auto getAttributeValues(std::pmr::memory_resource* mr, const G_Network& gnet, const G_EnvironmentVariable& ev, const Cache& cache)
 {
-    std::pmr::vector<std::unique_ptr<IAttribute>> attribute_values(mr);
+    std::pmr::vector<pmr_unique_ptr<IAttribute>> attribute_values(mr);
 
     auto env_it = cache.EnvVars.find(ev.name);
 
@@ -577,7 +579,7 @@ static auto getComment(std::pmr::memory_resource* mr, const G_Network& gnet, con
 }
 static auto getEnvironmentVariables(std::pmr::memory_resource* mr, const G_Network& gnet, Cache const& cache)
 {
-    std::pmr::vector<std::unique_ptr<IEnvironmentVariable>> environment_variables(mr);
+    std::pmr::vector<pmr_unique_ptr<IEnvironmentVariable>> environment_variables(mr);
     for (const auto& ev : gnet.environment_variables)
     {
         IEnvironmentVariable::EVarType var_type;
@@ -632,7 +634,7 @@ static auto getEnvironmentVariables(std::pmr::memory_resource* mr, const G_Netwo
 }
 static auto getAttributeDefinitions(std::pmr::memory_resource* mr, const G_Network& gnet)
 {
-    std::pmr::vector<std::unique_ptr<IAttributeDefinition>> attribute_definitions(mr);
+    std::pmr::vector<pmr_unique_ptr<IAttributeDefinition>> attribute_definitions(mr);
     struct VisitorValueType
     {
         IAttributeDefinition::value_type_t operator()(const G_AttributeValueTypeInt& cn)
@@ -698,14 +700,18 @@ static auto getAttributeDefinitions(std::pmr::memory_resource* mr, const G_Netwo
         VisitorValueType vvt;
         auto value = boost_variant_to_std_variant(cvt.value);
         std::visit(vvt, value);
-        auto nad = IAttributeDefinition::Create(std::move(std::string(ad.name)), object_type, std::visit(vvt, value));
+        auto nad = IAttributeDefinition::Create(
+              mr
+            , std::move(std::pmr::string(ad.name, mr))
+            , object_type
+            , std::visit(vvt, value));
         attribute_definitions.push_back(std::move(nad));
     }
     return attribute_definitions;
 }
 static auto getAttributeDefaults(std::pmr::memory_resource* mr, const G_Network& gnet)
 {
-    std::pmr::vector<std::unique_ptr<IAttribute>> attribute_defaults(mr);
+    std::pmr::vector<pmr_unique_ptr<IAttribute>> attribute_defaults(mr);
     for (auto& ad : gnet.attribute_defaults)
     {
         auto value = boost_variant_to_std_variant(ad.value);
@@ -720,7 +726,7 @@ static auto getAttributeDefaults(std::pmr::memory_resource* mr, const G_Network&
 }
 static auto getAttributeValues(std::pmr::memory_resource* mr, const G_Network& gnet, Cache const& cache)
 {
-    std::pmr::vector<std::unique_ptr<IAttribute>> attribute_values(mr);
+    std::pmr::vector<pmr_unique_ptr<IAttribute>> attribute_values(mr);
 
     attribute_values.reserve(cache.NetworkAttributes.size());
 
@@ -889,7 +895,7 @@ pmr_unique_ptr<INetwork> DBCAST2Network(std::pmr::memory_resource* mr, const G_N
           mr
         , getVersion(mr, gnet)
         , getNewSymbols(mr, gnet)
-        , getBitTiming(gnet)
+        , getBitTiming(mr, gnet)
         , getNodes(mr, gnet, cache)
         , getValueTables(mr, gnet)
         , getMessages(mr, gnet, cache)
@@ -902,9 +908,10 @@ pmr_unique_ptr<INetwork> DBCAST2Network(std::pmr::memory_resource* mr, const G_N
 
 pmr_unique_ptr<INetwork> INetwork::LoadDBCFromIs(std::pmr::memory_resource* mr, std::istream& is)
 {
-    std::string str((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
+    std::pmr::string str(mr);
+    str.assign((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
     pmr_unique_ptr<dbcppp::INetwork> network;
-    if (auto gnet = dbcppp::DBCX3::ParseFromMemory(str.c_str(), str.c_str() + str.size()))
+    if (auto gnet = dbcppp::DBCX3::ParseFromMemory(mr, str.c_str(), str.c_str() + str.size()))
     {
         network = DBCAST2Network(mr, *gnet);
     }

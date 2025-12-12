@@ -287,11 +287,11 @@ pmr_unique_ptr<ISignal> ISignal::Create(
     , float maximum
     , std::pmr::string unit
     , std::pmr::vector<std::pmr::string>&& receivers
-    , std::pmr::vector<std::unique_ptr<IAttribute>>&& attribute_values
-    , std::pmr::vector<std::unique_ptr<IValueEncodingDescription>>&& value_encoding_descriptions
+    , std::pmr::vector<pmr_unique_ptr<IAttribute>>&& attribute_values
+    , std::pmr::vector<pmr_unique_ptr<IValueEncodingDescription>>&& value_encoding_descriptions
     , std::pmr::string comment
     , EExtendedValueType extended_value_type
-    , std::pmr::vector<std::unique_ptr<ISignalMultiplexerValue>>&& signal_multiplexer_values)
+    , std::pmr::vector<pmr_unique_ptr<ISignalMultiplexerValue>>&& signal_multiplexer_values)
 {
     std::pmr::vector<AttributeImpl> avs(mr);
     for (auto& av : attribute_values)
