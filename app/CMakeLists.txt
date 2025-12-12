@@ -154,11 +154,13 @@ file(GLOB_RECURSE APP_SOURCES
 # add_subdirectory(libs/dbcppp)
 add_subdirectory(libs/muparser)
 add_subdirectory(libs/nameof)
+add_subdirectory(libs/leap_memory)
 
 target_link_libraries(app PRIVATE
     # dbcppp
     muparser
     nameof
+    leap_memory
 )
 
 # Include headers

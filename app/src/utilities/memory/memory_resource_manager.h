@@ -1,10 +1,13 @@
 #pragma once
 
+#include <leap_memory.hpp>
+
 #include "memory_resource.h"
 #include "boost_memory_resource.h"
-#include <memory_resource>
 
 namespace eerie_leap::utilities::memory {
+
+using namespace leap_memory;
 
 class Mrm {
 private:
