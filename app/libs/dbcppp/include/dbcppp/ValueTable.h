@@ -5,13 +5,12 @@
 #include <memory>
 #include <optional>
 
-#include "Export.h"
 #include "SignalType.h"
 #include "ValueEncodingDescription.h"
 
 namespace dbcppp
 {
-    class DBCPPP_API IValueTable
+    class IValueTable
     {
     public:
         static std::unique_ptr<IValueTable> Create(

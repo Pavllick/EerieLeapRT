@@ -4,11 +4,9 @@
 #include <string>
 #include <memory>
 
-#include "Export.h"
-
 namespace dbcppp
 {
-    class DBCPPP_API IValueEncodingDescription
+    class IValueEncodingDescription
     {
     public:
         static std::unique_ptr<IValueEncodingDescription> Create(int64_t value, std::string&& description);

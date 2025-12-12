@@ -6,8 +6,8 @@
 #include <memory_resource>
 #include <streambuf>
 
-#include "subsys/dbc/dbcppp/include/Network.h"
-#include "subsys/dbc/dbcppp/include/Message.h"
+#include <dbcppp/Network.h>
+#include <dbcppp/Message.h>
 
 #include "dbc_message.h"
 

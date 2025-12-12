@@ -36,7 +36,7 @@ bool bit_is_inbetween(const ISignal& sig, std::size_t i_bit, uint64_t switch_val
                 start++;
             }
         }
-        if (std::find(match_bits.begin(), match_bits.end(), i_bit) != match_bits.end()) {
+        if (std::ranges::find(match_bits.begin(), match_bits.end(), i_bit) != match_bits.end()) {
             return true;
         }
         else {
@@ -105,7 +105,7 @@ std::set<uint64_t> get_mux_values(const IMessage& msg)
     return mux_values;
 }
 
-DBCPPP_API std::ostream& dbcppp::Network2Human::operator<<(std::ostream& os, const IMessage& msg)
+std::ostream& dbcppp::Network2Human::operator<<(std::ostream& os, const IMessage& msg)
 {
     os << boost::format("  %-12s%s\n") % "Name:" % msg.Name();
     os << boost::format("  %-12s0x%X\n") % "ID:" % msg.Id();
@@ -368,7 +368,7 @@ DBCPPP_API std::ostream& dbcppp::Network2Human::operator<<(std::ostream& os, con
     print_value_tables();
     return os;
 }
-DBCPPP_API std::ostream& dbcppp::Network2Human::operator<<(std::ostream& os, const INetwork& net)
+std::ostream& dbcppp::Network2Human::operator<<(std::ostream& os, const INetwork& net)
 {
     os << boost::format("================================= Messages =================================\n");
     for (const IMessage& msg : net.Messages())

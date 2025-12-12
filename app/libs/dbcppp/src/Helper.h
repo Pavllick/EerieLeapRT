@@ -4,13 +4,12 @@
 
 #include <zephyr/sys/byteorder.h>
 
-#include "Export.h"
 #include "EndianConfig.h"
 
 namespace dbcppp
 {
     class NodeImpl;
-    struct DBCPPP_API SharedNodeCmp
+    struct SharedNodeCmp
     {
         bool operator()(const NodeImpl& lhs, const NodeImpl& rhs) const;
     };

@@ -7,15 +7,14 @@
 #include <variant>
 #include <memory>
 
-#include "Export.h"
 #include "Iterator.h"
 
 namespace dbcppp
 {
-    class DBCPPP_API IAttributeDefinition
+    class IAttributeDefinition
     {
     public:
-        enum class EObjectType
+        enum class EObjectType : std::uint8_t
         {
             Network,
             Node,

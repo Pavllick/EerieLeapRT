@@ -150,17 +150,16 @@ file(GLOB_RECURSE APP_SOURCES
   src/*.c
 )
 
-# dbcppp moved over to subsys/dbc, in order to optimize memory usage
-# add_subdirectory(libs/dbcppp)
+add_subdirectory(libs/dbcppp)
 add_subdirectory(libs/muparser)
 add_subdirectory(libs/nameof)
-add_subdirectory(libs/leap_memory)
+add_subdirectory(libs/eerie_memory)
 
 target_link_libraries(app PRIVATE
-    # dbcppp
+    dbcppp
     muparser
     nameof
-    leap_memory
+    eerie_memory
 )
 
 # Include headers

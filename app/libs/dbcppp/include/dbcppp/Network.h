@@ -1,48 +1,44 @@
 #pragma once
 
-#include <memory>
+#include <memory_resource>
 #include <string>
 #include <vector>
 #include <istream>
-#include <functional>
-#include <unordered_map>
-#include <filesystem>
 
-#include "Export.h"
 #include "Iterator.h"
 #include "BitTiming.h"
 #include "ValueTable.h"
 #include "Node.h"
 #include "Message.h"
 #include "EnvironmentVariable.h"
-#include "SignalType.h"
 #include "AttributeDefinition.h"
 #include "Attribute.h"
 
 namespace dbcppp
 {
-    class DBCPPP_API INetwork
+    class INetwork
     {
     public:
-        static std::unique_ptr<INetwork> Create(
-              std::string&& version
-            , std::vector<std::string>&& new_symbols
+        static pmr_unique_ptr<INetwork> Create(
+              std::pmr::memory_resource* mr
+            , std::pmr::string&& version
+            , std::pmr::vector<std::pmr::string>&& new_symbols
             , std::unique_ptr<IBitTiming>&& bit_timing
-            , std::vector<std::unique_ptr<INode>>&& nodes
-            , std::vector<std::unique_ptr<IValueTable>>&& value_tables
-            , std::vector<std::unique_ptr<IMessage>>&& messages
-            , std::vector<std::unique_ptr<IEnvironmentVariable>>&& environment_variables
-            , std::vector<std::unique_ptr<IAttributeDefinition>>&& attribute_definitions
-            , std::vector<std::unique_ptr<IAttribute>>&& attribute_defaults
-            , std::vector<std::unique_ptr<IAttribute>>&& attribute_values
-            , std::string&& comment);
-        static std::unique_ptr<INetwork> LoadDBCFromIs(std::istream &is);
+            , std::pmr::vector<std::unique_ptr<INode>>&& nodes
+            , std::pmr::vector<std::unique_ptr<IValueTable>>&& value_tables
+            , std::pmr::vector<pmr_unique_ptr<IMessage>>&& messages
+            , std::pmr::vector<std::unique_ptr<IEnvironmentVariable>>&& environment_variables
+            , std::pmr::vector<std::unique_ptr<IAttributeDefinition>>&& attribute_definitions
+            , std::pmr::vector<std::unique_ptr<IAttribute>>&& attribute_defaults
+            , std::pmr::vector<std::unique_ptr<IAttribute>>&& attribute_values
+            , std::pmr::string&& comment);
+        static pmr_unique_ptr<INetwork> LoadDBCFromIs(std::pmr::memory_resource* mr, std::istream &is);
 
-        virtual std::unique_ptr<INetwork> Clone() const = 0;
+        virtual pmr_unique_ptr<INetwork> Clone() const = 0;
 
         virtual ~INetwork() = default;
-        virtual const std::string& Version() const = 0;
-        virtual const std::string& NewSymbols_Get(std::size_t i) const = 0;
+        virtual const std::string_view Version() const = 0;
+        virtual const std::pmr::string& NewSymbols_Get(std::size_t i) const = 0;
         virtual uint64_t NewSymbols_Size() const = 0;
         virtual const IBitTiming& BitTiming() const = 0;
         virtual const INode& Nodes_Get(std::size_t i) const = 0;
@@ -59,9 +55,9 @@ namespace dbcppp
         virtual uint64_t AttributeDefaults_Size() const = 0;
         virtual const IAttribute& AttributeValues_Get(std::size_t i) const = 0;
         virtual uint64_t AttributeValues_Size() const = 0;
-        virtual const std::string& Comment() const = 0;
+        virtual const std::string_view Comment() const = 0;
 
-        DBCPPP_MAKE_ITERABLE(INetwork, NewSymbols, std::string);
+        DBCPPP_MAKE_ITERABLE(INetwork, NewSymbols, std::pmr::string);
         DBCPPP_MAKE_ITERABLE(INetwork, Nodes, INode);
         DBCPPP_MAKE_ITERABLE(INetwork, ValueTables, IValueTable);
         DBCPPP_MAKE_ITERABLE(INetwork, Messages, IMessage);

@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <dbcppp/SignalGroup.h>
+#include "dbcppp/SignalGroup.h"
 
 namespace dbcppp
 {

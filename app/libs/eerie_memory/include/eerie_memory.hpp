@@ -3,7 +3,7 @@
 #include <memory>
 #include <memory_resource>
 
-namespace leap_memory {
+namespace eerie_memory {
 
 template<typename T, typename... Args>
 std::shared_ptr<T> make_shared_pmr(std::pmr::memory_resource* mr, Args&&... args) {
@@ -110,4 +110,4 @@ pmr_unique_ptr<T> make_unique_pmr(std::pmr::polymorphic_allocator<> alloc, Args&
     return make_unique_pmr<T>(alloc.resource(), std::forward<Args>(args)...);
 }
 
-} // namespace leap_memory
+} // namespace eerie_memory

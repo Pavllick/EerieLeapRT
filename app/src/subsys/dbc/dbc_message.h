@@ -6,7 +6,7 @@
 #include <memory>
 #include <functional>
 
-#include "subsys/dbc/dbcppp/include/Network.h"
+#include <dbcppp/Network.h>
 
 #include "utilities/memory/memory_resource_manager.h"
 

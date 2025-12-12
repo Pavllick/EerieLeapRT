@@ -4,28 +4,29 @@
 using namespace dbcppp;
 
 std::unique_ptr<IEnvironmentVariable> IEnvironmentVariable::Create(
-      std::string&& name
+      std::pmr::memory_resource* mr
+    , std::pmr::string&& name
     , EVarType var_type
     , double minimum
     , double maximum
-    , std::string&& unit
+    , std::pmr::string&& unit
     , double initial_value
     , uint64_t ev_id
     , EAccessType access_type
-    , std::vector<std::string>&& access_nodes
-    , std::vector<std::unique_ptr<IValueEncodingDescription>>&& value_encoding_descriptions
+    , std::pmr::vector<std::pmr::string>&& access_nodes
+    , std::pmr::vector<std::unique_ptr<IValueEncodingDescription>>&& value_encoding_descriptions
     , uint64_t data_size
-    , std::vector<std::unique_ptr<IAttribute>>&& attribute_values
-    , std::string&& comment)
+    , std::pmr::vector<std::unique_ptr<IAttribute>>&& attribute_values
+    , std::pmr::string&& comment)
 {
-    std::vector<AttributeImpl> avs;
+    std::pmr::vector<AttributeImpl> avs(mr);
     avs.reserve(attribute_values.size());
     for (auto& av : attribute_values)
     {
         avs.push_back(std::move(static_cast<AttributeImpl&>(*av)));
         av.reset(nullptr);
     }
-    std::vector<ValueEncodingDescriptionImpl> veds;
+    std::pmr::vector<ValueEncodingDescriptionImpl> veds(mr);
     veds.reserve(value_encoding_descriptions.size());
     for (auto& ved : value_encoding_descriptions)
     {
@@ -33,7 +34,9 @@ std::unique_ptr<IEnvironmentVariable> IEnvironmentVariable::Create(
         ved.reset(nullptr);
     }
     return std::make_unique<EnvironmentVariableImpl>(
-          std::move(name)
+          std::allocator_arg
+        , mr
+        , std::move(name)
         , var_type
         , minimum
         , maximum
@@ -49,39 +52,42 @@ std::unique_ptr<IEnvironmentVariable> IEnvironmentVariable::Create(
 }
 
 EnvironmentVariableImpl::EnvironmentVariableImpl(
-      std::string&& name
+      std::allocator_arg_t
+    , allocator_type alloc
+    , std::pmr::string&& name
     , EVarType var_type
     , double minimum
     , double maximum
-    , std::string&& unit
+    , std::pmr::string&& unit
     , double initial_value
     , uint64_t ev_id
     , EAccessType access_type
-    , std::vector<std::string>&& access_nodes
-    , std::vector<ValueEncodingDescriptionImpl>&& value_encoding_descriptions
+    , std::pmr::vector<std::pmr::string>&& access_nodes
+    , std::pmr::vector<ValueEncodingDescriptionImpl>&& value_encoding_descriptions
     , uint64_t data_size
-    , std::vector<AttributeImpl>&& attribute_values
-    , std::string&& comment)
+    , std::pmr::vector<AttributeImpl>&& attribute_values
+    , std::pmr::string&& comment)
 
-    : _name(std::move(name))
+    : _name(std::move(name), alloc)
     , _var_type(std::move(var_type))
     , _minimum(std::move(minimum))
     , _maximum(std::move(maximum))
-    , _unit(std::move(unit))
+    , _unit(std::move(unit), alloc)
     , _initial_value(std::move(initial_value))
     , _ev_id(std::move(ev_id))
     , _access_type(std::move(access_type))
-    , _access_nodes(std::move(access_nodes))
-    , _value_encoding_descriptions(std::move(value_encoding_descriptions))
+    , _access_nodes(std::move(access_nodes), alloc)
+    , _value_encoding_descriptions(std::move(value_encoding_descriptions), alloc)
     , _data_size(std::move(data_size))
-    , _attribute_values(std::move(attribute_values))
-    , _comment(std::move(comment))
+    , _attribute_values(std::move(attribute_values), alloc)
+    , _comment(std::move(comment), alloc)
+    , _allocator(alloc)
 {}
 std::unique_ptr<IEnvironmentVariable> EnvironmentVariableImpl::Clone() const
 {
-    return std::make_unique<EnvironmentVariableImpl>(*this);
+    return std::make_unique<EnvironmentVariableImpl>(*this, _allocator);
 }
-const std::string& EnvironmentVariableImpl::Name() const
+const std::string_view EnvironmentVariableImpl::Name() const
 {
     return _name;
 }
@@ -97,7 +103,7 @@ double EnvironmentVariableImpl::Maximum() const
 {
     return _maximum;
 }
-const std::string& EnvironmentVariableImpl::Unit() const
+const std::string_view EnvironmentVariableImpl::Unit() const
 {
     return _unit;
 }
@@ -113,7 +119,7 @@ IEnvironmentVariable::EAccessType EnvironmentVariableImpl::AccessType() const
 {
     return _access_type;
 }
-const std::string& EnvironmentVariableImpl::AccessNodes_Get(std::size_t i) const
+const std::pmr::string& EnvironmentVariableImpl::AccessNodes_Get(std::size_t i) const
 {
     return _access_nodes[i];
 }
@@ -141,7 +147,7 @@ uint64_t EnvironmentVariableImpl::AttributeValues_Size() const
 {
     return _attribute_values.size();
 }
-const std::string& EnvironmentVariableImpl::Comment() const
+const std::string_view EnvironmentVariableImpl::Comment() const
 {
     return _comment;
 }
@@ -159,20 +165,20 @@ bool EnvironmentVariableImpl::operator==(const IEnvironmentVariable& rhs) const
     {
         auto beg = _access_nodes.begin();
         auto end = _access_nodes.end();
-        result &= std::find(beg, end, node) != end;
+        result &= std::ranges::find(beg, end, node) != end;
     }
     for (const auto& ved : rhs.ValueEncodingDescriptions())
     {
         auto beg = _value_encoding_descriptions.begin();
         auto end = _value_encoding_descriptions.end();
-        result &= std::find(beg, end, ved) != end;
+        result &= std::ranges::find(beg, end, ved) != end;
     }
     result &= _data_size == rhs.DataSize();
     for (const auto& attr : rhs.AttributeValues())
     {
         auto beg = _attribute_values.begin();
         auto end = _attribute_values.end();
-        result &= std::find(beg, end, attr) != end;
+        result &= std::ranges::find(beg, end, attr) != end;
     }
     result &= _comment == rhs.Comment();
     return result;

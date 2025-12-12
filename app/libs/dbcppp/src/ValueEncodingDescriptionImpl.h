@@ -2,7 +2,7 @@
 #pragma once
 
 #include <string>
-#include <dbcppp/ValueEncodingDescription.h>
+#include "dbcppp/ValueEncodingDescription.h"
 
 namespace dbcppp
 {

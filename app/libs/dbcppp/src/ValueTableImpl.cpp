@@ -67,7 +67,7 @@ bool ValueTableImpl::operator==(const IValueTable& rhs) const
     {
         auto beg = _value_encoding_descriptions.begin();
         auto end = _value_encoding_descriptions.end();
-        equal &= std::find(beg, end, ved) != end;
+        equal &= std::ranges::find(beg, end, ved) != end;
     }
     return equal;
 }

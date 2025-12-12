@@ -63,7 +63,7 @@ bool SignalGroupImpl::operator==(const ISignalGroup& rhs) const
     {
         auto beg = _signal_names.begin();
         auto end = _signal_names.end();
-        equal &= std::find(beg, end, signal_name) != end;
+        equal &= std::ranges::find(beg, end, signal_name) != end;
     }
     return equal;
 }

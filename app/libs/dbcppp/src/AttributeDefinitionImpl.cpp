@@ -72,7 +72,7 @@ bool AttributeDefinitionImpl::operator==(const IAttributeDefinition& rhs) const
             {
                 auto beg = rhs_.values.begin();
                 auto end = rhs_.values.end();
-                equal &= std::find(beg, end, v) != end;
+                equal &= std::ranges::find(beg, end, v) != end;
             }
         }
     }

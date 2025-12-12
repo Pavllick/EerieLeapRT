@@ -4,7 +4,7 @@
 using namespace dbcppp;
 using namespace dbcppp::Network2DBC;
 
-DBCPPP_API std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const na_t& na)
+std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const na_t& na)
 {
     const auto& net = std::get<0>(na);
     const auto& iattr = std::get<1>(na);
@@ -148,7 +148,7 @@ DBCPPP_API std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const
     os << ";\n";
     return os;
 }
-DBCPPP_API std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const IAttributeDefinition& ad)
+std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const IAttributeDefinition& ad)
 {
     struct VisitorValueType
     {
@@ -209,7 +209,7 @@ DBCPPP_API std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const
     os << ";\n";
     return os;
 }
-DBCPPP_API std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const IBitTiming& bt)
+std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const IBitTiming& bt)
 {
     os << "BS_:";
     if (bt.Baudrate() != 0 && bt.BTR1() != 0 && bt.BTR2() != 0)
@@ -219,7 +219,7 @@ DBCPPP_API std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const
     os << "\n";
     return os;
 }
-DBCPPP_API std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const IEnvironmentVariable& ev)
+std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const IEnvironmentVariable& ev)
 {
     os << "EV_ " << ev.Name() << ": ";
     switch (ev.VarType())
@@ -243,7 +243,7 @@ DBCPPP_API std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const
     case IEnvironmentVariable::EAccessType::ReadWrite_: os << "DUMMY_NODE_VECTOR8003"; break;
     }
     bool first = true;
-    for (const std::string& n : ev.AccessNodes())
+    for (const auto& n : ev.AccessNodes())
     {
         if (first)
         {
@@ -258,7 +258,7 @@ DBCPPP_API std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const
     os << ";\n";
     return os;
 }
-DBCPPP_API std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const IMessage& m)
+std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const IMessage& m)
 {
     os << "BO_ " << m.Id() << " " << m.Name() << ": " << m.MessageSize() << " " << m.Transmitter() << "\n";
     for (const ISignal& s : m.Signals())
@@ -267,7 +267,7 @@ DBCPPP_API std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const
     };
     return os;
 }
-DBCPPP_API std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const INetwork& net)
+std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const INetwork& net)
 {
     os << "VERSION \"";
     if (net.Version() != "")
@@ -276,7 +276,7 @@ DBCPPP_API std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const
     }
     os << "\"\n";
     os << "NS_:\n";
-    for (const std::string& ns : net.NewSymbols())
+    for (const auto& ns : net.NewSymbols())
     {
         os << "\t" << ns << "\n";
     };
@@ -299,12 +299,12 @@ DBCPPP_API std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const
     {
         if (m.MessageTransmitters_Size())
         {
-            const std::string& n = m.MessageTransmitters_Get(0);
+            const auto& n = m.MessageTransmitters_Get(0);
             os << "BO_TX_BU_ " << m.Id() << " :";
             os << " " << n;
             for (std::size_t i = 1; i < m.MessageTransmitters_Size(); i++)
             {
-                const std::string& n = m.MessageTransmitters_Get(i);
+                const auto& n = m.MessageTransmitters_Get(i);
                 os << ", " << n;
             }
             os << ";\n";
@@ -491,12 +491,12 @@ DBCPPP_API std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const
     }
     return os;
 }
-DBCPPP_API std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const INode& n)
+std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const INode& n)
 {
     os << n.Name();
     return os;
 }
-DBCPPP_API std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const ISignal& s)
+std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const ISignal& s)
 {
     os << "\tSG_ " << s.Name() << " ";
     switch (s.MultiplexerIndicator())
@@ -518,12 +518,12 @@ DBCPPP_API std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const
     os << "(" << s.Factor() << "," << s.Offset() << ") ";
     os << "[" << s.Minimum() << "|" << s.Maximum() << "] ";
     os << "\"" << s.Unit() << "\"";
-    std::string receivers;
-    for (const std::string& n : s.Receivers())
+    std::pmr::string receivers;
+    for (const auto& n : s.Receivers())
     {
         receivers += n + ", ";
     }
-    if (receivers.size())
+    if (!receivers.empty())
     {
         receivers.erase(receivers.end() - 1);
         receivers.erase(receivers.end() - 1);
@@ -533,7 +533,7 @@ DBCPPP_API std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const
     os << "\n";
     return os;
 }
-DBCPPP_API std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const ISignalType& st)
+std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const ISignalType& st)
 {
     os << "SGTYPE_ " << st.Name() << " : " << st.SignalSize() << "@";
     switch (st.ByteOrder())
@@ -553,7 +553,7 @@ DBCPPP_API std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const
     os << ";";
     return os;
 }
-DBCPPP_API std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const IValueTable& vt)
+std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const IValueTable& vt)
 {
     if (vt.ValueEncodingDescriptions_Size())
     {

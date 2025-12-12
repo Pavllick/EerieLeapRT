@@ -7,12 +7,11 @@
 #include <functional>
 #include <cstdint>
 
-#include "Export.h"
 #include "Iterator.h"
 
 namespace dbcppp
 {
-    class DBCPPP_API ISignalGroup
+    class ISignalGroup
     {
     public:
         static std::unique_ptr<ISignalGroup> Create(

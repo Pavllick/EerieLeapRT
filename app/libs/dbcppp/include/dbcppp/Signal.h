@@ -6,20 +6,21 @@
 #include <string>
 #include <cstddef>
 
-#include "Export.h"
 #include "Iterator.h"
-#include "Node.h"
 #include "Attribute.h"
 #include "SignalMultiplexerValue.h"
 #include "ValueEncodingDescription.h"
 
+#include <eerie_memory.hpp>
+
+using namespace eerie_memory;
+
 namespace dbcppp
 {
-    class DBCPPP_API ISignal
+    class ISignal
     {
     public:
-        enum class EErrorCode
-            : uint64_t
+        enum class EErrorCode : uint8_t
         {
             NoError,
             MaschinesFloatEncodingNotSupported = 1,
@@ -27,67 +28,68 @@ namespace dbcppp
             SignalExceedsMessageSize = 4,
             WrongBitSizeForExtendedDataType = 8
         };
-        enum class EMultiplexer
+        enum class EMultiplexer : uint8_t
         {
             NoMux, MuxSwitch, MuxValue
         };
-        enum class EByteOrder
+        enum class EByteOrder : uint8_t
         {
             BigEndian = 0,
             LittleEndian = 1
         };
-        enum class EValueType
+        enum class EValueType : uint8_t
         {
             Signed, Unsigned
         };
-        enum class EExtendedValueType
+        enum class EExtendedValueType : uint8_t
         {
             Integer, Float, Double
         };
 
-        static std::unique_ptr<ISignal> Create(
-              uint64_t message_size
-            , std::string&& name
+        static pmr_unique_ptr<ISignal> Create(
+              std::pmr::memory_resource* mr
+            , uint16_t message_size
+            , std::pmr::string name
             , EMultiplexer multiplexer_indicator
             , uint64_t multiplexer_switch_value
-            , uint64_t start_bit
-            , uint64_t bit_size
+            , uint16_t start_bit
+            , uint16_t bit_size
             , EByteOrder byte_order
             , EValueType value_type
-            , double factor
-            , double offset
-            , double minimum
-            , double maximum
-            , std::string&& unit
-            , std::vector<std::string>&& receivers
-            , std::vector<std::unique_ptr<IAttribute>>&& attribute_values
-            , std::vector<std::unique_ptr<IValueEncodingDescription>>&& value_encoding_description
-            , std::string&& comment
+            , float factor
+            , float offset
+            , float minimum
+            , float maximum
+            , std::pmr::string unit
+            , std::pmr::vector<std::pmr::string>&& receivers
+            , std::pmr::vector<std::unique_ptr<IAttribute>>&& attribute_values
+            , std::pmr::vector<std::unique_ptr<IValueEncodingDescription>>&& value_encoding_description
+            , std::pmr::string comment
             , EExtendedValueType extended_value_type
-            , std::vector<std::unique_ptr<ISignalMultiplexerValue>>&& signal_multiplexer_values);
+            , std::pmr::vector<std::unique_ptr<ISignalMultiplexerValue>>&& signal_multiplexer_values);
 
-        virtual std::unique_ptr<ISignal> Clone() const = 0;
+        virtual pmr_unique_ptr<ISignal> Clone() const = 0;
 
         virtual ~ISignal() = default;
-        virtual const std::string& Name() const = 0;
+        virtual const std::string_view Name() const = 0;
         virtual EMultiplexer MultiplexerIndicator() const = 0;
         virtual uint64_t MultiplexerSwitchValue() const = 0;
-        virtual uint64_t StartBit() const = 0;
-        virtual uint64_t BitSize() const = 0;
+        virtual uint16_t StartBit() const = 0;
+        virtual uint16_t BitSize() const = 0;
         virtual EByteOrder ByteOrder() const = 0;
         virtual EValueType ValueType() const = 0;
-        virtual double Factor() const = 0;
-        virtual double Offset() const = 0;
-        virtual double Minimum() const = 0;
-        virtual double Maximum() const = 0;
-        virtual const std::string& Unit() const = 0;
-        virtual const std::string& Receivers_Get(std::size_t i) const = 0;
+        virtual float Factor() const = 0;
+        virtual float Offset() const = 0;
+        virtual float Minimum() const = 0;
+        virtual float Maximum() const = 0;
+        virtual const std::string_view Unit() const = 0;
+        virtual const std::pmr::string& Receivers_Get(std::size_t i) const = 0;
         virtual uint64_t Receivers_Size() const = 0;
         virtual const IValueEncodingDescription& ValueEncodingDescriptions_Get(std::size_t i) const = 0;
         virtual uint64_t ValueEncodingDescriptions_Size() const = 0;
         virtual const IAttribute& AttributeValues_Get(std::size_t i) const = 0;
         virtual uint64_t AttributeValues_Size() const = 0;
-        virtual const std::string& Comment() const = 0;
+        virtual const std::string_view Comment() const = 0;
         virtual EExtendedValueType ExtendedValueType() const = 0;
         virtual const ISignalMultiplexerValue& SignalMultiplexerValues_Get(std::size_t i) const = 0;
         virtual uint64_t SignalMultiplexerValues_Size() const = 0;
@@ -118,7 +120,7 @@ namespace dbcppp
         inline double RawToPhys(raw_t raw) const noexcept { return _raw_to_phys(this, raw); }
         inline raw_t PhysToRaw(double phys) const noexcept { return _phys_to_raw(this, phys); }
 
-        DBCPPP_MAKE_ITERABLE(ISignal, Receivers, std::string);
+        DBCPPP_MAKE_ITERABLE(ISignal, Receivers, std::pmr::string);
         DBCPPP_MAKE_ITERABLE(ISignal, ValueEncodingDescriptions, IValueEncodingDescription);
         DBCPPP_MAKE_ITERABLE(ISignal, AttributeValues, IAttribute);
         DBCPPP_MAKE_ITERABLE(ISignal, SignalMultiplexerValues, ISignalMultiplexerValue);

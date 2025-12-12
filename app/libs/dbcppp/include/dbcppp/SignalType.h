@@ -4,7 +4,6 @@
 #include <string>
 #include <memory>
 
-#include "Export.h"
 #include "Signal.h"
 
 namespace dbcppp

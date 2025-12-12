@@ -3,11 +3,9 @@
 #include <memory>
 #include <cstdint>
 
-#include "Export.h"
-
 namespace dbcppp
 {
-    class DBCPPP_API IBitTiming
+    class IBitTiming
     {
     public:
         static std::unique_ptr<IBitTiming> Create(uint64_t baudrate, uint64_t BTR1, uint64_t BTR2);
