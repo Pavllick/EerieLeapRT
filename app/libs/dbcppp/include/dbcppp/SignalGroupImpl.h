@@ -44,7 +44,7 @@ namespace dbcppp
         const std::string_view Name() const override;
         uint64_t Repetitions() const override;
         const std::pmr::string& SignalNames_Get(std::size_t i) const override;
-        uint64_t SignalNames_Size() const override;
+        std::size_t SignalNames_Size() const override;
 
         bool operator==(const ISignalGroup& rhs) const override;
         bool operator!=(const ISignalGroup& rhs) const override;

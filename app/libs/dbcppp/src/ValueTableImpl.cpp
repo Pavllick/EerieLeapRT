@@ -1,5 +1,5 @@
 #include <algorithm>
-#include "ValueTableImpl.h"
+#include "dbcppp/ValueTableImpl.h"
 
 using namespace dbcppp;
 
@@ -64,7 +64,7 @@ const IValueEncodingDescription& ValueTableImpl::ValueEncodingDescriptions_Get(s
 {
     return _value_encoding_descriptions[i];
 }
-uint64_t ValueTableImpl::ValueEncodingDescriptions_Size() const
+std::size_t ValueTableImpl::ValueEncodingDescriptions_Size() const
 {
     return _value_encoding_descriptions.size();
 }

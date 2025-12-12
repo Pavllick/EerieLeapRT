@@ -26,7 +26,7 @@ namespace dbcppp
         virtual const std::string_view Name() const = 0;
         virtual std::optional<std::reference_wrapper<const ISignalType>> SignalType() const = 0;
         virtual const IValueEncodingDescription& ValueEncodingDescriptions_Get(std::size_t i) const = 0;
-        virtual uint64_t ValueEncodingDescriptions_Size() const = 0;
+        virtual std::size_t ValueEncodingDescriptions_Size() const = 0;
 
         DBCPPP_MAKE_ITERABLE(IValueTable, ValueEncodingDescriptions, IValueEncodingDescription);
 

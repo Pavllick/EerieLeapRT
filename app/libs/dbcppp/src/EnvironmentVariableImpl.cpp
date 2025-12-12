@@ -1,5 +1,5 @@
 #include <algorithm>
-#include "EnvironmentVariableImpl.h"
+#include "dbcppp/EnvironmentVariableImpl.h"
 
 using namespace dbcppp;
 
@@ -122,7 +122,7 @@ const std::pmr::string& EnvironmentVariableImpl::AccessNodes_Get(std::size_t i) 
 {
     return _access_nodes[i];
 }
-uint64_t EnvironmentVariableImpl::AccessNodes_Size() const
+std::size_t EnvironmentVariableImpl::AccessNodes_Size() const
 {
     return _access_nodes.size();
 }
@@ -130,7 +130,7 @@ const IValueEncodingDescription& EnvironmentVariableImpl::ValueEncodingDescripti
 {
     return _value_encoding_descriptions[i];
 }
-uint64_t EnvironmentVariableImpl::ValueEncodingDescriptions_Size() const
+std::size_t EnvironmentVariableImpl::ValueEncodingDescriptions_Size() const
 {
     return _value_encoding_descriptions.size();
 }
@@ -142,7 +142,7 @@ const IAttribute& EnvironmentVariableImpl::AttributeValues_Get(std::size_t i) co
 {
     return _attribute_values[i];
 }
-uint64_t EnvironmentVariableImpl::AttributeValues_Size() const
+std::size_t EnvironmentVariableImpl::AttributeValues_Size() const
 {
     return _attribute_values.size();
 }

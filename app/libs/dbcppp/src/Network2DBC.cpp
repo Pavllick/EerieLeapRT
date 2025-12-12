@@ -1,5 +1,5 @@
 #include "dbcppp/Network2Functions.h"
-#include "NetworkImpl.h"
+#include "dbcppp/NetworkImpl.h"
 
 using namespace dbcppp;
 using namespace dbcppp::Network2DBC;

@@ -3,8 +3,8 @@
 #include <vector>
 #include <memory>
 
-#include "dbcppp/Node.h"
-#include "AttributeImpl.h"
+#include "Node.h"
+#include "dbcppp/AttributeImpl.h"
 
 namespace dbcppp
 {
@@ -42,7 +42,7 @@ namespace dbcppp
 
         const std::string_view Name() const override;
         const IAttribute& AttributeValues_Get(std::size_t i) const override;
-        uint64_t AttributeValues_Size() const override;
+        std::size_t AttributeValues_Size() const override;
         const std::string_view Comment() const override;
 
         bool operator==(const INode& rhs) const override;

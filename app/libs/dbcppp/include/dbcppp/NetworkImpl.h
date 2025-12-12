@@ -2,12 +2,12 @@
 
 #include "dbcppp/Message.h"
 #include "dbcppp/Network.h"
-#include "BitTimingImpl.h"
-#include "ValueTableImpl.h"
-#include "MessageImpl.h"
-#include "EnvironmentVariableImpl.h"
-#include "AttributeDefinitionImpl.h"
-#include "AttributeImpl.h"
+#include "dbcppp/BitTimingImpl.h"
+#include "dbcppp/ValueTableImpl.h"
+#include "dbcppp/MessageImpl.h"
+#include "dbcppp/EnvironmentVariableImpl.h"
+#include "dbcppp/AttributeDefinitionImpl.h"
+#include "dbcppp/AttributeImpl.h"
 
 namespace dbcppp
 {
@@ -72,22 +72,22 @@ namespace dbcppp
 
         const std::string_view Version() const override;
         const std::pmr::string& NewSymbols_Get(std::size_t i) const override;
-        uint64_t NewSymbols_Size() const override;
+        std::size_t NewSymbols_Size() const override;
         const IBitTiming& BitTiming() const override;
         const INode& Nodes_Get(std::size_t i) const override;
-        uint64_t Nodes_Size() const override;
+        std::size_t Nodes_Size() const override;
         const IValueTable& ValueTables_Get(std::size_t i) const override;
-        uint64_t ValueTables_Size() const override;
+        std::size_t ValueTables_Size() const override;
         const IMessage& Messages_Get(std::size_t i) const override;
-        uint64_t Messages_Size() const override;
+        std::size_t Messages_Size() const override;
         const IEnvironmentVariable& EnvironmentVariables_Get(std::size_t i) const override;
-        uint64_t EnvironmentVariables_Size() const override;
+        std::size_t EnvironmentVariables_Size() const override;
         const IAttributeDefinition& AttributeDefinitions_Get(std::size_t i) const override;
-        uint64_t AttributeDefinitions_Size() const override;
+        std::size_t AttributeDefinitions_Size() const override;
         const IAttribute& AttributeDefaults_Get(std::size_t i) const override;
-        uint64_t AttributeDefaults_Size() const override;
+        std::size_t AttributeDefaults_Size() const override;
         const IAttribute& AttributeValues_Get(std::size_t i) const override;
-        uint64_t AttributeValues_Size() const override;
+        std::size_t AttributeValues_Size() const override;
         const std::string_view Comment() const override;
 
         const IMessage* ParentMessage(const ISignal* sig) const override;

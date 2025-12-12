@@ -2,7 +2,7 @@
 #include <memory>
 #include "dbcppp/Network.h"
 #include "dbcppp/Signal.h"
-#include "NetworkImpl.h"
+#include "dbcppp/NetworkImpl.h"
 
 using namespace dbcppp;
 
@@ -119,7 +119,7 @@ const std::pmr::string& NetworkImpl::NewSymbols_Get(std::size_t i) const
 {
     return _new_symbols[i];
 }
-uint64_t NetworkImpl::NewSymbols_Size() const
+std::size_t NetworkImpl::NewSymbols_Size() const
 {
     return _new_symbols.size();
 }
@@ -131,7 +131,7 @@ const INode& NetworkImpl::Nodes_Get(std::size_t i) const
 {
     return _nodes[i];
 }
-uint64_t NetworkImpl::Nodes_Size() const
+std::size_t NetworkImpl::Nodes_Size() const
 {
     return _nodes.size();
 }
@@ -139,7 +139,7 @@ const IValueTable& NetworkImpl::ValueTables_Get(std::size_t i) const
 {
     return _value_tables[i];
 }
-uint64_t NetworkImpl::ValueTables_Size() const
+std::size_t NetworkImpl::ValueTables_Size() const
 {
     return _value_tables.size();
 }
@@ -147,7 +147,7 @@ const IMessage& NetworkImpl::Messages_Get(std::size_t i) const
 {
     return _messages[i];
 }
-uint64_t NetworkImpl::Messages_Size() const
+std::size_t NetworkImpl::Messages_Size() const
 {
     return _messages.size();
 }
@@ -155,7 +155,7 @@ const IEnvironmentVariable& NetworkImpl::EnvironmentVariables_Get(std::size_t i)
 {
     return _environment_variables[i];
 }
-uint64_t NetworkImpl::EnvironmentVariables_Size() const
+std::size_t NetworkImpl::EnvironmentVariables_Size() const
 {
     return _environment_variables.size();
 }
@@ -163,7 +163,7 @@ const IAttributeDefinition& NetworkImpl::AttributeDefinitions_Get(std::size_t i)
 {
     return _attribute_definitions[i];
 }
-uint64_t NetworkImpl::AttributeDefinitions_Size() const
+std::size_t NetworkImpl::AttributeDefinitions_Size() const
 {
     return _attribute_definitions.size();
 }
@@ -171,7 +171,7 @@ const IAttribute& NetworkImpl::AttributeDefaults_Get(std::size_t i) const
 {
     return _attribute_defaults[i];
 }
-uint64_t NetworkImpl::AttributeDefaults_Size() const
+std::size_t NetworkImpl::AttributeDefaults_Size() const
 {
     return _attribute_defaults.size();
 }
@@ -179,7 +179,7 @@ const IAttribute& NetworkImpl::AttributeValues_Get(std::size_t i) const
 {
     return _attribute_values[i];
 }
-uint64_t NetworkImpl::AttributeValues_Size() const
+std::size_t NetworkImpl::AttributeValues_Size() const
 {
     return _attribute_values.size();
 }

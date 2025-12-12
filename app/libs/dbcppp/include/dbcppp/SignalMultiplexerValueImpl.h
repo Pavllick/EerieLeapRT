@@ -37,7 +37,7 @@ namespace dbcppp
 
         const std::string_view SwitchName() const override;
         const Range& ValueRanges_Get(std::size_t i) const override;
-        uint64_t ValueRanges_Size() const override;
+        std::size_t ValueRanges_Size() const override;
 
         bool operator==(const ISignalMultiplexerValue& rhs) const override;
         bool operator!=(const ISignalMultiplexerValue& rhs) const override;

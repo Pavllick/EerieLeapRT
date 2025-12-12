@@ -84,15 +84,15 @@ namespace dbcppp
         virtual float Maximum() const = 0;
         virtual const std::string_view Unit() const = 0;
         virtual const std::pmr::string& Receivers_Get(std::size_t i) const = 0;
-        virtual uint64_t Receivers_Size() const = 0;
+        virtual std::size_t Receivers_Size() const = 0;
         virtual const IValueEncodingDescription& ValueEncodingDescriptions_Get(std::size_t i) const = 0;
-        virtual uint64_t ValueEncodingDescriptions_Size() const = 0;
+        virtual std::size_t ValueEncodingDescriptions_Size() const = 0;
         virtual const IAttribute& AttributeValues_Get(std::size_t i) const = 0;
-        virtual uint64_t AttributeValues_Size() const = 0;
+        virtual std::size_t AttributeValues_Size() const = 0;
         virtual const std::string_view Comment() const = 0;
         virtual EExtendedValueType ExtendedValueType() const = 0;
         virtual const ISignalMultiplexerValue& SignalMultiplexerValues_Get(std::size_t i) const = 0;
-        virtual uint64_t SignalMultiplexerValues_Size() const = 0;
+        virtual std::size_t SignalMultiplexerValues_Size() const = 0;
 
         virtual bool Error(EErrorCode code) const = 0;
 

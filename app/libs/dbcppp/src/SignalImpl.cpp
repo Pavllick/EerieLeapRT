@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <limits>
 #include "Helper.h"
-#include "SignalImpl.h"
+#include "dbcppp/SignalImpl.h"
 
 using namespace dbcppp;
 
@@ -579,7 +579,7 @@ const std::pmr::string& SignalImpl::Receivers_Get(std::size_t i) const
 {
     return _receivers[i];
 }
-uint64_t SignalImpl::Receivers_Size() const
+std::size_t SignalImpl::Receivers_Size() const
 {
     return _receivers.size();
 }
@@ -587,7 +587,7 @@ const IValueEncodingDescription& SignalImpl::ValueEncodingDescriptions_Get(std::
 {
     return _value_encoding_descriptions[i];
 }
-uint64_t SignalImpl::ValueEncodingDescriptions_Size() const
+std::size_t SignalImpl::ValueEncodingDescriptions_Size() const
 {
     return _value_encoding_descriptions.size();
 }
@@ -595,7 +595,7 @@ const IAttribute& SignalImpl::AttributeValues_Get(std::size_t i) const
 {
     return _attribute_values[i];
 }
-uint64_t SignalImpl::AttributeValues_Size() const
+std::size_t SignalImpl::AttributeValues_Size() const
 {
     return _attribute_values.size();
 }
@@ -611,7 +611,7 @@ const ISignalMultiplexerValue& SignalImpl::SignalMultiplexerValues_Get(std::size
 {
     return _signal_multiplexer_values[i];
 }
-uint64_t SignalImpl::SignalMultiplexerValues_Size() const
+std::size_t SignalImpl::SignalMultiplexerValues_Size() const
 {
     return _signal_multiplexer_values.size();
 }

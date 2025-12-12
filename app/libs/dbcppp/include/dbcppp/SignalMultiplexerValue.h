@@ -36,7 +36,7 @@ namespace dbcppp
         virtual ~ISignalMultiplexerValue() = default;
         virtual const std::string_view SwitchName() const = 0;
         virtual const Range& ValueRanges_Get(std::size_t i) const = 0;
-        virtual uint64_t ValueRanges_Size() const = 0;
+        virtual std::size_t ValueRanges_Size() const = 0;
 
         DBCPPP_MAKE_ITERABLE(ISignalMultiplexerValue, ValueRanges, Range);
 

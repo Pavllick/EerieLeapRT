@@ -1,5 +1,5 @@
 #include <algorithm>
-#include "MessageImpl.h"
+#include "dbcppp/MessageImpl.h"
 
 using namespace dbcppp;
 
@@ -114,7 +114,7 @@ const std::pmr::string& MessageImpl::MessageTransmitters_Get(std::size_t i) cons
 {
     return _message_transmitters[i];
 }
-uint64_t MessageImpl::MessageTransmitters_Size() const
+std::size_t MessageImpl::MessageTransmitters_Size() const
 {
     return _message_transmitters.size();
 }
@@ -122,7 +122,7 @@ const ISignal& MessageImpl::Signals_Get(std::size_t i) const
 {
     return _signals[i];
 }
-uint64_t MessageImpl::Signals_Size() const
+std::size_t MessageImpl::Signals_Size() const
 {
     return _signals.size();
 }
@@ -130,7 +130,7 @@ const IAttribute& MessageImpl::AttributeValues_Get(std::size_t i) const
 {
     return _attribute_values[i];
 }
-uint64_t MessageImpl::AttributeValues_Size() const
+std::size_t MessageImpl::AttributeValues_Size() const
 {
     return _attribute_values.size();
 }
@@ -142,7 +142,7 @@ const ISignalGroup& MessageImpl::SignalGroups_Get(std::size_t i) const
 {
     return _signal_groups[i];
 }
-uint64_t MessageImpl::SignalGroups_Size() const
+std::size_t MessageImpl::SignalGroups_Size() const
 {
     return _signal_groups.size();
 }

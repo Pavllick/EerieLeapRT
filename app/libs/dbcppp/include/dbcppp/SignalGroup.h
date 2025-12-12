@@ -33,7 +33,7 @@ namespace dbcppp
         virtual const std::string_view Name() const = 0;
         virtual uint64_t Repetitions() const = 0;
         virtual const std::pmr::string& SignalNames_Get(std::size_t i) const = 0;
-        virtual uint64_t SignalNames_Size() const = 0;
+        virtual std::size_t SignalNames_Size() const = 0;
 
         DBCPPP_MAKE_ITERABLE(ISignalGroup, SignalNames, std::pmr::string);
 

@@ -63,12 +63,12 @@ namespace dbcppp
         virtual uint64_t EvId() const = 0;
         virtual EAccessType AccessType() const = 0;
         virtual const std::pmr::string& AccessNodes_Get(std::size_t i) const = 0;
-        virtual uint64_t AccessNodes_Size() const = 0;
+        virtual std::size_t AccessNodes_Size() const = 0;
         virtual const IValueEncodingDescription& ValueEncodingDescriptions_Get(std::size_t i) const = 0;
-        virtual uint64_t ValueEncodingDescriptions_Size() const = 0;
+        virtual std::size_t ValueEncodingDescriptions_Size() const = 0;
         virtual uint64_t DataSize() const = 0;
         virtual const IAttribute& AttributeValues_Get(std::size_t i) const = 0;
-        virtual uint64_t AttributeValues_Size() const = 0;
+        virtual std::size_t AttributeValues_Size() const = 0;
         virtual const std::string_view Comment() const = 0;
 
         DBCPPP_MAKE_ITERABLE(IEnvironmentVariable, AccessNodes, std::pmr::string);

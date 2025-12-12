@@ -5,9 +5,9 @@
 
 #include "dbcppp/Signal.h"
 #include "dbcppp/Node.h"
-#include "AttributeImpl.h"
-#include "SignalMultiplexerValueImpl.h"
-#include "ValueEncodingDescriptionImpl.h"
+#include "dbcppp/AttributeImpl.h"
+#include "dbcppp/SignalMultiplexerValueImpl.h"
+#include "dbcppp/ValueEncodingDescriptionImpl.h"
 
 namespace dbcppp
 {
@@ -108,15 +108,15 @@ namespace dbcppp
         float Maximum() const override;
         const std::string_view Unit() const override;
         const std::pmr::string& Receivers_Get(std::size_t i) const override;
-        uint64_t Receivers_Size() const override;
+        std::size_t Receivers_Size() const override;
         const IValueEncodingDescription& ValueEncodingDescriptions_Get(std::size_t i) const override;
-        uint64_t ValueEncodingDescriptions_Size() const override;
+        std::size_t ValueEncodingDescriptions_Size() const override;
         const IAttribute& AttributeValues_Get(std::size_t i) const override;
-        uint64_t AttributeValues_Size() const override;
+        std::size_t AttributeValues_Size() const override;
         const std::string_view Comment() const override;
         EExtendedValueType ExtendedValueType() const override;
         const ISignalMultiplexerValue& SignalMultiplexerValues_Get(std::size_t i) const override;
-        uint64_t SignalMultiplexerValues_Size() const override;
+        std::size_t SignalMultiplexerValues_Size() const override;
         bool Error(EErrorCode code) const override;
 
         bool operator==(const ISignal& rhs) const override;

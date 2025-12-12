@@ -1,5 +1,5 @@
 #include <algorithm>
-#include "NodeImpl.h"
+#include "dbcppp/NodeImpl.h"
 
 using namespace dbcppp;
 
@@ -45,7 +45,7 @@ const IAttribute& NodeImpl::AttributeValues_Get(std::size_t i) const
 {
     return _attribute_values[i];
 }
-uint64_t NodeImpl::AttributeValues_Size() const
+std::size_t NodeImpl::AttributeValues_Size() const
 {
     return _attribute_values.size();
 }

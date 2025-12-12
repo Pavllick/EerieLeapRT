@@ -42,14 +42,14 @@ namespace dbcppp
         virtual uint64_t MessageSize() const = 0;
         virtual const std::string_view Transmitter() const = 0;
         virtual const std::pmr::string& MessageTransmitters_Get(std::size_t i) const = 0;
-        virtual uint64_t MessageTransmitters_Size() const = 0;
+        virtual std::size_t MessageTransmitters_Size() const = 0;
         virtual const ISignal& Signals_Get(std::size_t i) const = 0;
-        virtual uint64_t Signals_Size() const = 0;
+        virtual std::size_t Signals_Size() const = 0;
         virtual const IAttribute& AttributeValues_Get(std::size_t i) const = 0;
-        virtual uint64_t AttributeValues_Size() const = 0;
+        virtual std::size_t AttributeValues_Size() const = 0;
         virtual const std::string_view Comment() const = 0;
         virtual const ISignalGroup& SignalGroups_Get(std::size_t i) const = 0;
-        virtual uint64_t SignalGroups_Size() const = 0;
+        virtual std::size_t SignalGroups_Size() const = 0;
         virtual const ISignal* MuxSignal() const = 0;
 
         DBCPPP_MAKE_ITERABLE(IMessage, MessageTransmitters, std::pmr::string);

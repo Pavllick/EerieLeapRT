@@ -8,7 +8,7 @@
 
 #include "dbc_logger.h"
 
-#include "NetworkImpl.h"
+#include "dbcppp/NetworkImpl.h"
 #include "DBCX3.h"
 
 #include "DBCX3AdaptStructs.inl"

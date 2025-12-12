@@ -1,8 +1,8 @@
 #pragma once
 
 #include "dbcppp/EnvironmentVariable.h"
-#include "AttributeImpl.h"
-#include "ValueEncodingDescriptionImpl.h"
+#include "dbcppp/AttributeImpl.h"
+#include "dbcppp/ValueEncodingDescriptionImpl.h"
 
 namespace dbcppp
 {
@@ -77,12 +77,12 @@ namespace dbcppp
         uint64_t EvId() const override;
         EAccessType AccessType() const override;
         const std::pmr::string& AccessNodes_Get(std::size_t i) const override;
-        uint64_t AccessNodes_Size() const override;
+        std::size_t AccessNodes_Size() const override;
         const IValueEncodingDescription& ValueEncodingDescriptions_Get(std::size_t i) const override;
-        uint64_t ValueEncodingDescriptions_Size() const override;
+        std::size_t ValueEncodingDescriptions_Size() const override;
         uint64_t DataSize() const override;
         const IAttribute& AttributeValues_Get(std::size_t i) const override;
-        uint64_t AttributeValues_Size() const override;
+        std::size_t AttributeValues_Size() const override;
         const std::string_view Comment() const override;
 
         bool operator==(const IEnvironmentVariable& rhs) const override;

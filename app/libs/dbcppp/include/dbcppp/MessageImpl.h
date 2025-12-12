@@ -1,10 +1,10 @@
 #pragma once
 
 #include "dbcppp/Message.h"
-#include "SignalImpl.h"
-#include "NodeImpl.h"
-#include "AttributeImpl.h"
-#include "SignalGroupImpl.h"
+#include "dbcppp/SignalImpl.h"
+#include "dbcppp/NodeImpl.h"
+#include "dbcppp/AttributeImpl.h"
+#include "dbcppp/SignalGroupImpl.h"
 
 namespace dbcppp
 {
@@ -102,14 +102,14 @@ namespace dbcppp
         uint64_t MessageSize() const override;
         const std::string_view Transmitter() const override;
         const std::pmr::string& MessageTransmitters_Get(std::size_t i) const override;
-        uint64_t MessageTransmitters_Size() const override;
+        std::size_t MessageTransmitters_Size() const override;
         const ISignal& Signals_Get(std::size_t i) const override;
-        uint64_t Signals_Size() const override;
+        std::size_t Signals_Size() const override;
         const IAttribute& AttributeValues_Get(std::size_t i) const override;
-        uint64_t AttributeValues_Size() const override;
+        std::size_t AttributeValues_Size() const override;
         const std::string_view Comment() const override;
         const ISignalGroup& SignalGroups_Get(std::size_t i) const override;
-        uint64_t SignalGroups_Size() const override;
+        std::size_t SignalGroups_Size() const override;
         const ISignal* MuxSignal() const override;
 
         EErrorCode Error() const override;

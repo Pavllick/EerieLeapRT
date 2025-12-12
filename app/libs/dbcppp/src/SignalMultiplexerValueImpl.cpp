@@ -1,5 +1,5 @@
 #include <algorithm>
-#include "SignalMultiplexerValueImpl.h"
+#include "dbcppp/SignalMultiplexerValueImpl.h"
 
 using namespace dbcppp;
 
@@ -38,7 +38,7 @@ const ISignalMultiplexerValue::Range& SignalMultiplexerValueImpl::ValueRanges_Ge
 {
     return _value_ranges[i];
 }
-uint64_t SignalMultiplexerValueImpl::ValueRanges_Size() const
+std::size_t SignalMultiplexerValueImpl::ValueRanges_Size() const
 {
     return _value_ranges.size();
 }

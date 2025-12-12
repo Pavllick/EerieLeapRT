@@ -1,5 +1,5 @@
 #include <algorithm>
-#include "SignalGroupImpl.h"
+#include "dbcppp/SignalGroupImpl.h"
 
 using namespace dbcppp;
 
@@ -52,7 +52,7 @@ const std::pmr::string& SignalGroupImpl::SignalNames_Get(std::size_t i) const
 {
     return _signal_names[i];
 }
-uint64_t SignalGroupImpl::SignalNames_Size() const
+std::size_t SignalGroupImpl::SignalNames_Size() const
 {
     return _signal_names.size();
 }

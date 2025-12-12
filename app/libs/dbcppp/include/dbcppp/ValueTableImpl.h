@@ -5,8 +5,8 @@
 #include <functional>
 
 #include "dbcppp/ValueTable.h"
-#include "SignalTypeImpl.h"
-#include "ValueEncodingDescriptionImpl.h"
+#include "dbcppp/SignalTypeImpl.h"
+#include "dbcppp/ValueEncodingDescriptionImpl.h"
 
 namespace dbcppp
 {
@@ -46,7 +46,7 @@ namespace dbcppp
         const std::string_view Name() const override;
         std::optional<std::reference_wrapper<const ISignalType>> SignalType() const override;
         const IValueEncodingDescription& ValueEncodingDescriptions_Get(std::size_t i) const override;
-        uint64_t ValueEncodingDescriptions_Size() const override;
+        std::size_t ValueEncodingDescriptions_Size() const override;
 
         bool operator==(const IValueTable& rhs) const override;
         bool operator!=(const IValueTable& rhs) const override;
