@@ -65,7 +65,7 @@ public:
    bool HasSignal(const std::string_view signal_name) const;
 
    double GetSignalValue(size_t signal_name_hash, const void* bytes) const;
-   std::vector<uint8_t> EncodeMessage(const SignalReader& signal_reader);
+   std::pmr::vector<uint8_t> EncodeMessage(const SignalReader& signal_reader);
 };
 
 } // namespace eerie_leap::subsys::dbc

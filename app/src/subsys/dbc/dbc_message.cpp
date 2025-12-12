@@ -108,8 +108,8 @@ double DbcMessage::GetSignalValue(size_t signal_name_hash, const void* bytes) co
    return signal->RawToPhys(decoded_value);
 }
 
-std::vector<uint8_t> DbcMessage::EncodeMessage(const SignalReader& signal_reader) {
-   std::vector<uint8_t> bytes(MessageSize(), 0);
+std::pmr::vector<uint8_t> DbcMessage::EncodeMessage(const SignalReader& signal_reader) {
+   std::pmr::vector<uint8_t> bytes(MessageSize(), 0, allocator_);
 
    for(const auto& [signal_name_hash, signal] : signals_) {
       auto value = signal_reader(signal_name_hash);
