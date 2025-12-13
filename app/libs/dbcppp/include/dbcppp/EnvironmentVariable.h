@@ -87,22 +87,6 @@ namespace dbcppp
             , _comment(other._comment, alloc)
             , _allocator(alloc) {}
 
-        static EnvironmentVariable Create(
-              std::pmr::memory_resource* mr
-            , std::pmr::string&& name
-            , EVarType var_type
-            , double minimum
-            , double maximum
-            , std::pmr::string&& unit
-            , double initial_value
-            , uint64_t ev_id
-            , EAccessType access_type
-            , std::pmr::vector<std::pmr::string>&& access_nodes
-            , std::pmr::vector<ValueEncodingDescription>&& value_encoding_descriptions
-            , uint64_t data_size
-            , std::pmr::vector<Attribute>&& attribute_values
-            , std::pmr::string&& comment);
-
         EnvironmentVariable Clone() const;
 
         const std::string_view Name() const;

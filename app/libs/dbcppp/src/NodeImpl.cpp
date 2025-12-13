@@ -3,15 +3,6 @@
 
 using namespace dbcppp;
 
-Node Node::Create(
-    std::pmr::memory_resource* mr,
-    std::pmr::string&& name,
-    std::pmr::string&& comment,
-    std::pmr::vector<Attribute>&& attribute_values)
-{
-
-    return {std::allocator_arg, mr, std::move(name), std::move(comment), std::move(attribute_values)};
-}
 Node::Node(
       std::allocator_arg_t
     , allocator_type alloc
@@ -19,9 +10,9 @@ Node::Node(
     , std::pmr::string&& comment
     , std::pmr::vector<Attribute>&& attribute_values)
 
-    : _name(std::move(name))
-    , _comment(std::move(comment))
-    , _attribute_values(std::move(attribute_values))
+    : _name(std::move(name), alloc)
+    , _comment(std::move(comment), alloc)
+    , _attribute_values(std::move(attribute_values), alloc)
     , _allocator(alloc)
 {}
 Node Node::Clone() const
@@ -46,16 +37,15 @@ std::size_t Node::AttributeValues_Size() const
 }
 bool Node::operator==(const Node& rhs) const
 {
-    bool equal = true;
-    equal &= _name == rhs.Name();
-    equal &= _comment == rhs.Comment();
-    for (const auto& attr : rhs.AttributeValues())
-    {
-        auto beg = _attribute_values.begin();
-        auto end = _attribute_values.end();
-        equal &= std::ranges::find(beg, end, attr) != end;
-    }
-    return equal;
+    if (_name != rhs._name) return false;
+    if (_comment != rhs._comment) return false;
+    if (_attribute_values.size() != rhs._attribute_values.size()) return false;
+
+    return std::ranges::is_permutation(
+        _attribute_values.begin(),
+        _attribute_values.end(),
+        rhs._attribute_values.begin(),
+        rhs._attribute_values.end());
 }
 bool Node::operator!=(const Node& rhs) const
 {

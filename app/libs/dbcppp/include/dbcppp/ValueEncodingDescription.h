@@ -31,11 +31,6 @@ namespace dbcppp
             , _description(other._description, alloc)
             , _allocator(alloc) {}
 
-        static ValueEncodingDescription Create(
-              std::pmr::memory_resource* mr
-            , int64_t value
-            , std::pmr::string&& description);
-
         ValueEncodingDescription Clone() const;
 
         int64_t Value() const;

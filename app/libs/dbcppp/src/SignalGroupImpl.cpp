@@ -4,23 +4,6 @@
 
 using namespace dbcppp;
 
-SignalGroup SignalGroup::Create(
-      std::pmr::memory_resource* mr
-    , uint64_t message_id
-    , std::pmr::string&& name
-    , uint64_t repetitions
-    , std::pmr::vector<std::pmr::string>&& signal_names)
-{
-    return {
-          std::allocator_arg
-        , mr
-        , message_id
-        , std::move(name)
-        , repetitions
-        , std::move(signal_names)
-    };
-}
-
 SignalGroup::SignalGroup(
       std::allocator_arg_t
     , allocator_type alloc

@@ -43,12 +43,6 @@ namespace dbcppp
             , _value_encoding_descriptions(other._value_encoding_descriptions, alloc)
             , _allocator(alloc) {}
 
-        static ValueTable Create(
-              std::pmr::memory_resource* mr
-            , std::pmr::string&& name
-            , std::optional<SignalType>&& signal_type
-            , std::pmr::vector<ValueEncodingDescription>&& value_encoding_descriptions);
-
         ValueTable Clone() const;
 
         const std::string_view Name() const;

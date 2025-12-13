@@ -6,37 +6,6 @@
 
 using namespace dbcppp;
 
-Network Network::Create(
-      std::pmr::memory_resource* mr
-    , std::pmr::string&& version
-    , std::pmr::vector<std::pmr::string>&& new_symbols
-    , BitTiming&& bit_timing
-    , std::pmr::vector<Node>&& nodes
-    , std::pmr::vector<ValueTable>&& value_tables
-    , std::pmr::vector<Message>&& messages
-    , std::pmr::vector<EnvironmentVariable>&& environment_variables
-    , std::pmr::vector<AttributeDefinition>&& attribute_definitions
-    , std::pmr::vector<Attribute>&& attribute_defaults
-    , std::pmr::vector<Attribute>&& attribute_values
-    , std::pmr::string&& comment)
-{
-    return {
-          std::allocator_arg
-        , mr
-        , std::move(version)
-        , std::move(new_symbols)
-        , std::move(bit_timing)
-        , std::move(nodes)
-        , std::move(value_tables)
-        , std::move(messages)
-        , std::move(environment_variables)
-        , std::move(attribute_definitions)
-        , std::move(attribute_defaults)
-        , std::move(attribute_values)
-        , std::move(comment)
-    };
-}
-
 Network::Network(
       std::allocator_arg_t alloc_arg
     , allocator_type alloc

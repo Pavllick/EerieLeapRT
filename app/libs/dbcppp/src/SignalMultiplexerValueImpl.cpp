@@ -3,19 +3,6 @@
 
 using namespace dbcppp;
 
-SignalMultiplexerValue SignalMultiplexerValue::Create(
-      std::pmr::memory_resource* mr
-    , std::pmr::string&& switch_name
-    , std::pmr::vector<Range>&& value_ranges)
-{
-    return {
-          std::allocator_arg
-        , mr
-        , std::move(switch_name)
-        , std::move(value_ranges)
-    };
-}
-
 SignalMultiplexerValue::SignalMultiplexerValue(
       std::allocator_arg_t
     , allocator_type alloc

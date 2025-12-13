@@ -26,9 +26,9 @@ namespace dbcppp
         ~Node() = default;
 
         Node(Node&& other, allocator_type alloc)
-            : _name(std::move(other._name))
-            , _comment(std::move(other._comment))
-            , _attribute_values(std::move(other._attribute_values))
+            : _name(std::move(other._name), alloc)
+            , _comment(std::move(other._comment), alloc)
+            , _attribute_values(std::move(other._attribute_values), alloc)
             , _allocator(alloc) {}
 
         Node(const Node& other, allocator_type alloc = {})
@@ -36,12 +36,6 @@ namespace dbcppp
             , _comment(other._comment, alloc)
             , _attribute_values(other._attribute_values, alloc)
             , _allocator(alloc) {}
-
-        static Node Create(
-              std::pmr::memory_resource* mr
-            , std::pmr::string&& name
-            , std::pmr::string&& comment
-            , std::pmr::vector<Attribute>&& attribute_values);
 
         Node Clone() const;
 

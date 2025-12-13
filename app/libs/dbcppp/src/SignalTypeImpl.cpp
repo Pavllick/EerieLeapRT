@@ -3,37 +3,6 @@
 
 using namespace dbcppp;
 
-SignalType SignalType::Create(
-      std::pmr::memory_resource* mr
-    , std::pmr::string&& name
-    , uint64_t signal_size
-    , Signal::EByteOrder byte_order
-    , Signal::EValueType value_type
-    , double factor
-    , double offset
-    , double minimum
-    , double maximum
-    , std::pmr::string&& unit
-    , double default_value
-    , std::pmr::string&& value_table)
-{
-    return {
-          std::allocator_arg
-        , mr
-        , std::move(name)
-        , signal_size
-        , byte_order
-        , value_type
-        , factor
-        , offset
-        , minimum
-        , maximum
-        , std::move(unit)
-        , default_value
-        , std::move(value_table)
-    };
-}
-
 SignalType::SignalType(
       std::allocator_arg_t
     , allocator_type alloc

@@ -1,22 +1,6 @@
 #include "dbcppp/Attribute.h"
-#include "dbcppp/Network.h"
 
 using namespace dbcppp;
-
-Attribute Attribute::Create(
-      std::pmr::memory_resource* mr
-    , std::pmr::string&& name
-    , AttributeDefinition::EObjectType object_type
-    , value_t value)
-{
-    return {
-          std::allocator_arg
-        , mr
-        , std::move(name)
-        , object_type
-        , std::move(value)
-    };
-}
 
 Attribute::Attribute(std::allocator_arg_t, allocator_type alloc)
     : _name(alloc) {}

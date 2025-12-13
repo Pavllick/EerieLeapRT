@@ -3,30 +3,6 @@
 
 using namespace dbcppp;
 
-ValueTable ValueTable::Create(
-      std::pmr::memory_resource* mr
-    , std::pmr::string&& name
-    , std::optional<SignalType>&& signal_type
-    , std::pmr::vector<ValueEncodingDescription>&& value_encoding_descriptions)
-{
-    if (signal_type)
-    {
-        return {
-              std::allocator_arg
-            , mr
-            , std::move(name)
-            , std::move(signal_type.value())
-            , std::move(value_encoding_descriptions)
-        };
-    }
-    return {
-          std::allocator_arg
-        , mr
-        , std::move(name)
-        , std::nullopt
-        , std::move(value_encoding_descriptions)
-    };
-}
 ValueTable::ValueTable(
       std::allocator_arg_t
     , allocator_type alloc
@@ -35,7 +11,7 @@ ValueTable::ValueTable(
     , std::pmr::vector<ValueEncodingDescription>&& value_encoding_descriptions)
 
     : _name(std::move(name))
-    , _signal_type(signal_type)
+    , _signal_type(signal_type.has_value() ? std::move(signal_type) : std::nullopt)
     , _value_encoding_descriptions(std::move(value_encoding_descriptions))
     , _allocator(alloc)
 {}

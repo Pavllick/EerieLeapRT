@@ -4,41 +4,6 @@
 
 using namespace dbcppp;
 
-EnvironmentVariable EnvironmentVariable::Create(
-      std::pmr::memory_resource* mr
-    , std::pmr::string&& name
-    , EVarType var_type
-    , double minimum
-    , double maximum
-    , std::pmr::string&& unit
-    , double initial_value
-    , uint64_t ev_id
-    , EAccessType access_type
-    , std::pmr::vector<std::pmr::string>&& access_nodes
-    , std::pmr::vector<ValueEncodingDescription>&& value_encoding_descriptions
-    , uint64_t data_size
-    , std::pmr::vector<Attribute>&& attribute_values
-    , std::pmr::string&& comment)
-{
-    return {
-          std::allocator_arg
-        , mr
-        , std::move(name)
-        , var_type
-        , minimum
-        , maximum
-        , std::move(unit)
-        , initial_value
-        , ev_id
-        , access_type
-        , std::move(access_nodes)
-        , std::move(value_encoding_descriptions)
-        , data_size
-        , std::move(attribute_values)
-        , std::move(comment)
-    };
-}
-
 EnvironmentVariable::EnvironmentVariable(
       std::allocator_arg_t
     , allocator_type alloc

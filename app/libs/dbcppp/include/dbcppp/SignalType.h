@@ -60,20 +60,6 @@ namespace dbcppp
             , _default_value(other._default_value)
             , _value_table(other._value_table, alloc) {}
 
-        static SignalType Create(
-              std::pmr::memory_resource* mr
-            , std::pmr::string&& name
-            , uint64_t signal_size
-            , Signal::EByteOrder byte_order
-            , Signal::EValueType value_type
-            , double factor
-            , double offset
-            , double minimum
-            , double maximum
-            , std::pmr::string&& unit
-            , double default_value
-            , std::pmr::string&& value_table);
-
         SignalType Clone() const;
 
         const std::string_view Name() const;

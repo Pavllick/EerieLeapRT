@@ -120,28 +120,6 @@ namespace dbcppp
             , _error(other._error)
             , _allocator(alloc) {}
 
-        static Signal Create(
-              std::pmr::memory_resource* mr
-            , uint16_t message_size
-            , std::pmr::string name
-            , EMultiplexer multiplexer_indicator
-            , uint64_t multiplexer_switch_value
-            , uint16_t start_bit
-            , uint16_t bit_size
-            , EByteOrder byte_order
-            , EValueType value_type
-            , float factor
-            , float offset
-            , float minimum
-            , float maximum
-            , std::pmr::string unit
-            , std::pmr::vector<std::pmr::string>&& receivers
-            , std::pmr::vector<Attribute>&& attribute_values
-            , std::pmr::vector<ValueEncodingDescription>&& value_encoding_description
-            , std::pmr::string comment
-            , EExtendedValueType extended_value_type
-            , std::pmr::vector<SignalMultiplexerValue>&& signal_multiplexer_values);
-
         Signal Clone() const;
 
         const std::string_view Name() const;

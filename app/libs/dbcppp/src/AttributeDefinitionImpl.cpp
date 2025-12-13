@@ -3,21 +3,6 @@
 
 using namespace dbcppp;
 
-AttributeDefinition AttributeDefinition::Create(
-      std::pmr::memory_resource* mr
-    , std::pmr::string&& name
-    , EObjectType object_type
-    , value_type_t&& value_type)
-{
-    return {
-          std::allocator_arg
-        , mr
-        , std::move(name)
-        , object_type
-        , std::move(value_type)
-    };
-}
-
 AttributeDefinition::AttributeDefinition(
     std::allocator_arg_t
     , allocator_type alloc

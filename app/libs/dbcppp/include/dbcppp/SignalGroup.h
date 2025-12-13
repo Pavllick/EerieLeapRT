@@ -41,13 +41,6 @@ namespace dbcppp
             , _signal_names(other._signal_names, alloc)
             , _allocator(alloc) {}
 
-        static SignalGroup Create(
-              std::pmr::memory_resource* mr
-            , uint64_t message_id
-            , std::pmr::string&& name
-            , uint64_t repetitions
-            , std::pmr::vector<std::pmr::string>&& signal_names);
-
         SignalGroup Clone() const;
 
         uint64_t MessageId() const;

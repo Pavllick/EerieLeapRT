@@ -1,21 +1,6 @@
-
 #include "dbcppp/ValueEncodingDescription.h"
-#include <memory>
 
 using namespace dbcppp;
-
-ValueEncodingDescription ValueEncodingDescription::Create(
-    std::pmr::memory_resource* mr
-    , int64_t value
-    , std::pmr::string&& description)
-{
-    return {
-          std::allocator_arg
-        , mr
-        , value
-        , std::move(description)
-    };
-}
 
 ValueEncodingDescription::ValueEncodingDescription(
       std::allocator_arg_t

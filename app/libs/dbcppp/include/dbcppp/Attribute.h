@@ -14,7 +14,7 @@ namespace dbcppp
         using allocator_type = std::pmr::polymorphic_allocator<>;
 
         using hex_value_t = int64_t;
-        using value_t = std::variant<int64_t, double, std::string>;
+        using value_t = std::variant<int64_t, double, std::pmr::string>;
 
         Attribute(std::allocator_arg_t, allocator_type alloc);
         Attribute(
@@ -40,12 +40,6 @@ namespace dbcppp
             , _object_type(other._object_type)
             , _value(other._value)
             , _allocator(alloc) {}
-
-        static Attribute Create(
-              std::pmr::memory_resource* mr
-            , std::pmr::string&& name
-            , AttributeDefinition::EObjectType object_type
-            , value_t value);
 
         Attribute Clone() const;
 

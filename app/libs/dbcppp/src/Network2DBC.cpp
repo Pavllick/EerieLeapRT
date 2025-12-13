@@ -21,7 +21,7 @@ std::ostream& dbcppp::Network2DBC::operator<<(std::ostream& os, const na_t& na)
         {
             _os << " " << d;
         }
-        void operator()(const std::string& s) const
+        void operator()(const std::pmr::string& s) const
         {
             _os << " \"" << s << "\"";
         }

@@ -17,8 +17,8 @@ namespace dbcppp
 
         struct Range
         {
-            std::size_t from;
-            std::size_t to;
+            uint64_t from;
+            uint64_t to;
         };
 
         SignalMultiplexerValue(
@@ -42,11 +42,6 @@ namespace dbcppp
             : _switch_name(other._switch_name, alloc)
             , _value_ranges(other._value_ranges, alloc)
             , _allocator(alloc) {}
-
-        static SignalMultiplexerValue Create(
-              std::pmr::memory_resource* mr
-            , std::pmr::string&& switch_name
-            , std::pmr::vector<Range>&& value_ranges);
 
         SignalMultiplexerValue Clone() const;
 

@@ -64,8 +64,7 @@ uint32_t DbcMessage::MessageSize() const {
 }
 
 void DbcMessage::AddSignal(std::pmr::string name, uint32_t start_bit, uint32_t size_bits, float factor, float offset, std::pmr::string unit) {
-    auto signal = dbcppp::Signal::Create(
-        allocator_.resource(),
+    signals_container_.emplace_back(
         message_->MessageSize(),
         std::move(name),
         dbcppp::Signal::EMultiplexer::NoMux,
@@ -79,15 +78,14 @@ void DbcMessage::AddSignal(std::pmr::string name, uint32_t start_bit, uint32_t s
         0.0,
         0.0,
         std::move(unit),
-        {},
-        {},
-        {},
+        std::pmr::vector<std::pmr::string>{},
+        std::pmr::vector<dbcppp::Attribute>{},
+        std::pmr::vector<dbcppp::ValueEncodingDescription>{},
         "",
         dbcppp::Signal::EExtendedValueType::Integer,
-        {});
+        std::pmr::vector<dbcppp::SignalMultiplexerValue>{});
 
-    RegisterSignal(&signal);
-    signals_container_.push_back(std::move(signal));
+    RegisterSignal(&signals_container_.back());
 }
 
 bool DbcMessage::HasSignal(size_t signal_name_hash) const {

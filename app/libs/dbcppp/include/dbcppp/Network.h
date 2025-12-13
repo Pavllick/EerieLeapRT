@@ -72,20 +72,6 @@ namespace dbcppp
             , _allocator(alloc)
             {}
 
-        static Network Create(
-              std::pmr::memory_resource* mr
-            , std::pmr::string&& version
-            , std::pmr::vector<std::pmr::string>&& new_symbols
-            , BitTiming&& bit_timing
-            , std::pmr::vector<Node>&& nodes
-            , std::pmr::vector<ValueTable>&& value_tables
-            , std::pmr::vector<Message>&& messages
-            , std::pmr::vector<EnvironmentVariable>&& environment_variables
-            , std::pmr::vector<AttributeDefinition>&& attribute_definitions
-            , std::pmr::vector<Attribute>&& attribute_defaults
-            , std::pmr::vector<Attribute>&& attribute_values
-            , std::pmr::string&& comment);
-
         static std::shared_ptr<Network> LoadDBCFromIs(std::pmr::memory_resource* mr, std::istream &is);
 
         Network Clone() const;

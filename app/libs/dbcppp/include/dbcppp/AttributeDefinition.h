@@ -41,7 +41,8 @@ namespace dbcppp
         };
         struct ValueTypeEnum
         {
-            std::vector<std::string> values;
+            // NOTE: Due to how this object is used, it is not possible to pass an allocator to the vector.
+            std::pmr::vector<std::pmr::string> values;
         };
         using value_type_t = std::variant<ValueTypeInt, ValueTypeHex, ValueTypeFloat, ValueTypeString, ValueTypeEnum>;
 
@@ -68,12 +69,6 @@ namespace dbcppp
             , _object_type(other._object_type)
             , _value_type(other._value_type)
             , _allocator(alloc) {}
-
-        static AttributeDefinition Create(
-              std::pmr::memory_resource* mr
-            , std::pmr::string&& name
-            , EObjectType object_type
-            , value_type_t&& value_type);
 
         AttributeDefinition Clone() const;
 

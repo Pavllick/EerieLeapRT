@@ -4,33 +4,6 @@
 
 using namespace dbcppp;
 
-
-Message Message::Create(
-      std::pmr::memory_resource* mr
-    , uint64_t id
-    , std::pmr::string&& name
-    , uint64_t message_size
-    , std::pmr::string&& transmitter
-    , std::pmr::vector<std::pmr::string>&& message_transmitters
-    , std::pmr::vector<Signal>&& signals_
-    , std::pmr::vector<Attribute>&& attribute_values
-    , std::pmr::string&& comment
-    , std::pmr::vector<SignalGroup>&& signal_groups)
-{
-    return {
-          std::allocator_arg
-        , mr
-        , id
-        , std::move(name)
-        , message_size
-        , std::move(transmitter)
-        , std::move(message_transmitters)
-        , std::move(signals_)
-        , std::move(attribute_values)
-        , std::move(comment)
-        , std::move(signal_groups)
-    };
-}
 Message::Message(
       std::allocator_arg_t
     , allocator_type alloc
@@ -144,6 +117,29 @@ const std::pmr::vector<Signal>& Message::signals() const
 {
     return _signals;
 }
+// Message& Message::operator=(const Message& other)
+// {
+//     _id = other._id;
+//     _name = other._name;
+//     _message_size = other._message_size;
+//     _transmitter = other._transmitter;
+//     _message_transmitters = other._message_transmitters;
+//     _signals = other._signals;
+//     _attribute_values = other._attribute_values;
+//     _comment = other._comment;
+//     _mux_signal = nullptr;
+//     for (const auto& sig : _signals)
+//     {
+//         switch (sig.MultiplexerIndicator())
+//         {
+//         case Signal::EMultiplexer::MuxSwitch:
+//             _mux_signal = &sig;
+//             break;
+//         }
+//     }
+//     _error = other._error;
+//     return *this;
+// }
 bool Message::operator==(const Message& rhs) const
 {
     bool equal = true;

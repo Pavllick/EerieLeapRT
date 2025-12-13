@@ -81,42 +81,6 @@ namespace dbcppp
             }
         }
 
-        // Message& operator=(const Message& other)
-        // {
-        //     _id = other._id;
-        //     _name = other._name;
-        //     _message_size = other._message_size;
-        //     _transmitter = other._transmitter;
-        //     _message_transmitters = other._message_transmitters;
-        //     _signals = other._signals;
-        //     _attribute_values = other._attribute_values;
-        //     _comment = other._comment;
-        //     _mux_signal = nullptr;
-        //     for (const auto& sig : _signals)
-        //     {
-        //         switch (sig.MultiplexerIndicator())
-        //         {
-        //         case Signal::EMultiplexer::MuxSwitch:
-        //             _mux_signal = &sig;
-        //             break;
-        //         }
-        //     }
-        //     _error = other._error;
-        //     return *this;
-        // }
-
-        static Message Create(
-              std::pmr::memory_resource* mr
-            , uint64_t id
-            , std::pmr::string&& name
-            , uint64_t message_size
-            , std::pmr::string&& transmitter
-            , std::pmr::vector<std::pmr::string>&& message_transmitters
-            , std::pmr::vector<Signal>&& signals_
-            , std::pmr::vector<Attribute>&& attribute_values
-            , std::pmr::string&& comment
-            , std::pmr::vector<SignalGroup>&& signal_groups);
-
         Message Clone() const;
 
         uint64_t Id() const;

@@ -132,13 +132,13 @@ decode_func_t make_decode(Alignment a, Signal::EByteOrder bo, Signal::EValueType
     constexpr auto si64b            = Alignment::size_inbetween_first_64_bit;
     constexpr auto se64bsbsfi64b    = Alignment::signal_exceeds_64_bit_size_but_signal_fits_into_64_bit;
     constexpr auto se64bsasdnfi64b  = Alignment::signal_exceeds_64_bit_size_and_signal_does_not_fit_into_64_bit;
-    constexpr auto le               = Signal::EByteOrder::LittleEndian;
-    constexpr auto be               = Signal::EByteOrder::BigEndian;
-    constexpr auto sig              = Signal::EValueType::Signed;
-    constexpr auto usig             = Signal::EValueType::Unsigned;
-    constexpr auto i                = Signal::EExtendedValueType::Integer;
-    constexpr auto f                = Signal::EExtendedValueType::Float;
-    constexpr auto d                = Signal::EExtendedValueType::Double;
+    constexpr auto le              = Signal::EByteOrder::LittleEndian;
+    constexpr auto be              = Signal::EByteOrder::BigEndian;
+    constexpr auto sig             = Signal::EValueType::Signed;
+    constexpr auto usig            = Signal::EValueType::Unsigned;
+    constexpr auto i       = Signal::EExtendedValueType::Integer;
+    constexpr auto f       = Signal::EExtendedValueType::Float;
+    constexpr auto d       = Signal::EExtendedValueType::Double;
     switch (enum_mask(a, bo, vt, evt))
     {
     case enum_mask(si64b, le, sig, i):            return template_decode<si64b, le, sig, i>;
@@ -185,13 +185,13 @@ decode_func_t make_decodeMuxSignal(Alignment a, Signal::EByteOrder bo, Signal::E
     constexpr auto si64b            = Alignment::size_inbetween_first_64_bit;
     constexpr auto se64bsbsfi64b    = Alignment::signal_exceeds_64_bit_size_but_signal_fits_into_64_bit;
     constexpr auto se64bsasdnfi64b  = Alignment::signal_exceeds_64_bit_size_and_signal_does_not_fit_into_64_bit;
-    constexpr auto le               = Signal::EByteOrder::LittleEndian;
-    constexpr auto be               = Signal::EByteOrder::BigEndian;
-    constexpr auto sig              = Signal::EValueType::Signed;
-    constexpr auto usig             = Signal::EValueType::Unsigned;
-    constexpr auto i                = Signal::EExtendedValueType::Integer;
-    constexpr auto f                = Signal::EExtendedValueType::Float;
-    constexpr auto d                = Signal::EExtendedValueType::Double;
+    constexpr auto le              = Signal::EByteOrder::LittleEndian;
+    constexpr auto be              = Signal::EByteOrder::BigEndian;
+    constexpr auto sig             = Signal::EValueType::Signed;
+    constexpr auto usig            = Signal::EValueType::Unsigned;
+    constexpr auto i       = Signal::EExtendedValueType::Integer;
+    constexpr auto f       = Signal::EExtendedValueType::Float;
+    constexpr auto d       = Signal::EExtendedValueType::Double;
     switch (enum_mask(a, bo, vt, evt))
     {
     case enum_mask(si64b, le, sig, i):            return template_decode<si64b, le, sig, i>;
@@ -273,53 +273,6 @@ Signal::raw_t phys_to_raw(const Signal* sig, double phys) noexcept
     T result = T((phys - sigi->Offset()) / sigi->Factor());
     return *reinterpret_cast<Signal::raw_t*>(&result);
 }
-Signal Signal::Create(
-      std::pmr::memory_resource* mr
-    , uint16_t message_size
-    , std::pmr::string name
-    , EMultiplexer multiplexer_indicator
-    , uint64_t multiplexer_switch_value
-    , uint16_t start_bit
-    , uint16_t bit_size
-    , EByteOrder byte_order
-    , EValueType value_type
-    , float factor
-    , float offset
-    , float minimum
-    , float maximum
-    , std::pmr::string unit
-    , std::pmr::vector<std::pmr::string>&& receivers
-    , std::pmr::vector<Attribute>&& attribute_values
-    , std::pmr::vector<ValueEncodingDescription>&& value_encoding_descriptions
-    , std::pmr::string comment
-    , EExtendedValueType extended_value_type
-    , std::pmr::vector<SignalMultiplexerValue>&& signal_multiplexer_values)
-{
-    return {
-          std::allocator_arg
-        , mr
-        , message_size
-        , std::move(name)
-        , multiplexer_indicator
-        , multiplexer_switch_value
-        , start_bit
-        , bit_size
-        , byte_order
-        , value_type
-        , factor
-        , offset
-        , minimum
-        , maximum
-        , std::move(unit)
-        , std::move(receivers)
-        , std::move(attribute_values)
-        , std::move(value_encoding_descriptions)
-        , std::move(comment)
-        , extended_value_type
-        , std::move(signal_multiplexer_values)
-    };
-}
-
 
 Signal::Signal(
       std::allocator_arg_t

@@ -83,8 +83,9 @@ static std::optional<SignalType> getSignalType(std::pmr::memory_resource* mr, co
     if (iter != gnet.signal_types.end())
     {
         auto& st = *iter;
-        return SignalType::Create(
-              mr
+        return SignalType(
+              std::allocator_arg
+            , mr
             , std::pmr::string(st.name, mr)
             , st.size
             , st.byte_order == '0' ? Signal::EByteOrder::BigEndian : Signal::EByteOrder::LittleEndian
@@ -109,22 +110,20 @@ static auto getValueTables(std::pmr::memory_resource* mr, const G_Network& gnet)
         for (const auto& ved : vt.value_encoding_descriptions)
         {
             auto desc = std::pmr::string(ved.description, mr);
-            auto pved = ValueEncodingDescription::Create(mr, ved.value, std::move(desc));
-            copy_ved.push_back(std::move(pved));
+            copy_ved.emplace_back(ved.value, std::move(desc));
         }
-        auto nvt = ValueTable::Create(mr, std::pmr::string(vt.name), std::move(sig_type), std::move(copy_ved));
-        value_tables.push_back(std::move(nvt));
+        value_tables.emplace_back(std::pmr::string(vt.name), std::move(sig_type), std::move(copy_ved));
     }
     return value_tables;
 }
-static auto getBitTiming(std::pmr::memory_resource* mr, const G_Network& gnet)
+static BitTiming getBitTiming(const G_Network& gnet)
 {
     if (gnet.bit_timing)
     {
-        return BitTiming::Create(mr, gnet.bit_timing->baudrate, gnet.bit_timing->BTR1, gnet.bit_timing->BTR2);
+        return {gnet.bit_timing->baudrate, gnet.bit_timing->BTR1, gnet.bit_timing->BTR2};
     }
 
-    return BitTiming::Create(mr, 0, 0, 0);
+    return {};
 }
 
 template <class Variant>
@@ -169,7 +168,7 @@ inline auto boost_variant_to_std_variant(variant_attr_value_t const& attr)
         value.swap(v);
     } break;
     case 2: {
-        Attribute::value_t v(std::in_place_type<std::string>, boost::get<std::string>(attr));
+        Attribute::value_t v(std::in_place_type<std::pmr::string>, boost::get<std::pmr::string>(attr));
         value.swap(v);
     } break;
     default:
@@ -193,8 +192,10 @@ static auto getAttributeValues(std::pmr::memory_resource* mr, const G_Network& g
             auto const& attr = boost::get<G_AttributeNode>(*av);
             auto name = attr.attribute_name;
             auto value{boost_variant_to_std_variant(attr.value)};
-            auto attribute = Attribute::Create(mr, std::pmr::string(name, mr), AttributeDefinition::EObjectType::Node, std::move(value));
-            attribute_values.emplace_back(std::move(attribute));
+            attribute_values.emplace_back(
+                  std::pmr::string(name, mr)
+                , AttributeDefinition::EObjectType::Node
+                , std::move(value));
         }
     }
 
@@ -220,12 +221,10 @@ static auto getNodes(std::pmr::memory_resource* mr, const G_Network& gnet, Cache
     {
         auto comment = getComment(mr, gnet, n, cache);
         auto attribute_values = getAttributeValues(mr, gnet, n, cache);
-        auto nn = Node::Create(
-            mr,
-            std::pmr::string(n.name, mr),
-            std::move(comment),
-            std::move(attribute_values));
-        nodes.push_back(std::move(nn));
+        nodes.emplace_back(
+              std::pmr::string(n.name, mr)
+            , std::move(comment)
+            , std::move(attribute_values));
     }
     return nodes;
 }
@@ -244,12 +243,10 @@ static auto getAttributeValues(std::pmr::memory_resource* mr, const G_Network& g
             {
                 auto const& attr = boost::get<G_AttributeSignal>(*av);
                 auto value{boost_variant_to_std_variant(attr.value)};
-                auto attribute = Attribute::Create(
-                    mr,
-                    std::pmr::string(attr.attribute_name, mr),
-                    AttributeDefinition::EObjectType::Signal,
-                    std::move(value));
-                attribute_values.emplace_back(std::move(attribute));
+                attribute_values.emplace_back(
+                      std::pmr::string(attr.attribute_name, mr)
+                    , AttributeDefinition::EObjectType::Signal
+                    , std::move(value));
             }
         }
 
@@ -274,8 +271,7 @@ static auto getValueDescriptions(std::pmr::memory_resource* mr, const G_Network&
                 for (const auto& vd : vds)
                 {
                     auto desc = std::pmr::string(vd.description, mr);
-                    auto pvd = ValueEncodingDescription::Create(mr, vd.value, std::move(desc));
-                    value_descriptions.push_back(std::move(pvd));
+                    value_descriptions.emplace_back(vd.value, std::move(desc));
                 }
             }
         }
@@ -317,7 +313,7 @@ static auto getSignalExtendedValueType(const G_Network& gnet, const G_Message& m
     }
     return extended_value_type;
 }
-static auto getSignalMultiplexerValues(std::pmr::memory_resource* mr, const G_Network& gnet, const std::string& s, const uint64_t m)
+static auto getSignalMultiplexerValues(std::pmr::memory_resource* mr, const G_Network& gnet, const std::pmr::string& s, const uint64_t m)
 {
     std::pmr::vector<SignalMultiplexerValue> signal_multiplexer_values(mr);
     for (const auto& gsmv : gnet.signal_multiplexer_values)
@@ -330,11 +326,9 @@ static auto getSignalMultiplexerValues(std::pmr::memory_resource* mr, const G_Ne
             {
                 value_ranges.push_back({r.from, r.to});
             }
-            auto signal_multiplexer_value = SignalMultiplexerValue::Create(
-                  mr
-                , std::pmr::string(switch_name, mr)
+            signal_multiplexer_values.emplace_back(
+                  std::pmr::string(switch_name, mr)
                 , std::move(value_ranges));
-            signal_multiplexer_values.push_back(std::move(signal_multiplexer_value));
         }
     }
     return signal_multiplexer_values;
@@ -353,7 +347,8 @@ static auto getSignals(std::pmr::memory_resource* mr, const G_Network& gnet, con
         auto extended_value_type = getSignalExtendedValueType(gnet, m, s);
         auto multiplexer_indicator = Signal::EMultiplexer::NoMux;
         auto comment = getComment(mr, gnet, m, s, cache);
-        auto signal_multiplexer_values = getSignalMultiplexerValues(mr, gnet, s.name, m.id);
+        auto signal_multiplexer_values = getSignalMultiplexerValues(
+            mr, gnet, std::pmr::string(s.name, mr), m.id);
         uint64_t multiplexer_switch_value = 0;
         if (s.multiplexer_indicator)
         {
@@ -365,7 +360,7 @@ static auto getSignals(std::pmr::memory_resource* mr, const G_Network& gnet, con
             else
             {
                 multiplexer_indicator = Signal::EMultiplexer::MuxValue;
-                std::string value = m.substr(1, m.size());
+                std::pmr::string value(m.substr(1, m.size()), mr);
                 multiplexer_switch_value = std::atoi(value.c_str());
             }
         }
@@ -377,9 +372,8 @@ static auto getSignals(std::pmr::memory_resource* mr, const G_Network& gnet, con
             receivers.emplace_back(std::pmr::string(n, mr));
         }
 
-        auto ns = Signal::Create(
-              mr
-            , m.size
+        signals.emplace_back(
+              m.size
             , std::pmr::string(s.name, mr)
             , multiplexer_indicator
             , multiplexer_switch_value
@@ -398,23 +392,22 @@ static auto getSignals(std::pmr::memory_resource* mr, const G_Network& gnet, con
             , std::move(comment)
             , extended_value_type
             , std::move(signal_multiplexer_values));
-        if (ns.Error(Signal::EErrorCode::SignalExceedsMessageSize))
+        if (signals.back().Error(Signal::EErrorCode::SignalExceedsMessageSize))
         {
             LOG_DBG("The signals '%s::%s' start_bit + bit_size exceeds the byte size of the message! Ignoring this error will lead to garbage data when using the decode function of this signal.", m.name.c_str(), s.name.c_str());
         }
-        if (ns.Error(Signal::EErrorCode::WrongBitSizeForExtendedDataType))
+        if (signals.back().Error(Signal::EErrorCode::WrongBitSizeForExtendedDataType))
         {
             LOG_DBG("The signals '%s::%s' bit_size does not fit the bit size of the specified ExtendedValueType.", m.name.c_str(), s.name.c_str());
         }
-        if (ns.Error(Signal::EErrorCode::MaschinesFloatEncodingNotSupported))
+        if (signals.back().Error(Signal::EErrorCode::MaschinesFloatEncodingNotSupported))
         {
             LOG_DBG("Signal '%s::%s' This warning appears when a signal uses type float but the system this programm is running on does not uses IEEE 754 encoding for floats.", m.name.c_str(), s.name.c_str());
         }
-        if (ns.Error(Signal::EErrorCode::MaschinesDoubleEncodingNotSupported))
+        if (signals.back().Error(Signal::EErrorCode::MaschinesDoubleEncodingNotSupported))
         {
             LOG_DBG("Signal '%s::%s' This warning appears when a signal uses type double but the system this programm is running on does not uses IEEE 754 encoding for doubles.", m.name.c_str(), s.name.c_str());
         }
-        signals.emplace_back(std::move(ns));
     }
     return signals;
 }
@@ -447,8 +440,10 @@ static auto getAttributeValues(std::pmr::memory_resource* mr, const G_Network& g
         for (auto av: message_it->second.Attributes) {
             auto const& attr = boost::get<G_AttributeMessage>(*av);
             auto value{boost_variant_to_std_variant(attr.value)};
-            auto attribute = Attribute::Create(mr, std::pmr::string(attr.attribute_name, mr), AttributeDefinition::EObjectType::Message, std::move(value));
-            attribute_values.emplace_back(std::move(attribute));
+            attribute_values.emplace_back(
+                  std::pmr::string(attr.attribute_name, mr)
+                , AttributeDefinition::EObjectType::Message
+                , std::move(value));
         }
     }
     return attribute_values;
@@ -474,13 +469,11 @@ static auto getSignalGroups(std::pmr::memory_resource* mr, const G_Network& gnet
         {
             auto name = sg.signal_group_name;
             auto signal_names = sg.signal_names;
-            auto signal_group = SignalGroup::Create(
-                  mr
-                , sg.message_id
+            signal_groups.emplace_back(
+                  sg.message_id
                 , std::move(std::pmr::string(name, mr))
                 , sg.repetitions
                 , std::move(std::pmr::vector<std::pmr::string>(signal_names.begin(), signal_names.end(), mr)));
-            signal_groups.push_back(std::move(signal_group));
         }
     }
     return signal_groups;
@@ -498,9 +491,8 @@ static auto getMessages(std::pmr::memory_resource* mr, const G_Network& gnet, Ca
         auto attribute_values = getAttributeValues(mr, gnet, m, cache);
         auto comment = getComment(mr, gnet, m, cache);
         auto signal_groups = getSignalGroups(mr, gnet, m);
-        auto msg = Message::Create(
-              mr
-            , m.id
+        messages.emplace_back(
+              m.id
             , std::pmr::string(m.name, mr)
             , m.size
             , std::pmr::string(m.transmitter, mr)
@@ -509,11 +501,10 @@ static auto getMessages(std::pmr::memory_resource* mr, const G_Network& gnet, Ca
             , std::move(attribute_values)
             , std::move(comment)
             , std::move(signal_groups));
-        if (msg.Error() == Message::EErrorCode::MuxValeWithoutMuxSignal)
+        if (messages.back().Error() == Message::EErrorCode::MuxValeWithoutMuxSignal)
         {
-            LOG_DBG("Message '%s' does have mux value but no mux signal!", msg.Name());
+            LOG_DBG("Message '%s' does have mux value but no mux signal!", messages.back().Name());
         }
-        messages.emplace_back(std::move(msg));
     }
     return messages;
 }
@@ -531,8 +522,7 @@ static auto getValueDescriptions(std::pmr::memory_resource* mr, const G_Network&
             for (const auto& vd : vds)
             {
                 auto desc = std::pmr::string(vd.description, mr);
-                auto pvd = ValueEncodingDescription::Create(mr, vd.value, std::move(desc));
-                value_descriptions.push_back(std::move(pvd));
+                value_descriptions.emplace_back(vd.value, std::move(desc));
             }
         }
     }
@@ -550,12 +540,10 @@ static auto getAttributeValues(std::pmr::memory_resource* mr, const G_Network& g
         for (auto av : env_it->second.Attributes) {
             auto const& attr = boost::get<G_AttributeEnvVar>(*av);
             auto value = boost_variant_to_std_variant(attr.value);
-            auto attribute = Attribute::Create(
-                mr,
-                std::pmr::string(attr.attribute_name, mr),
-                AttributeDefinition::EObjectType::EnvironmentVariable,
-                std::move(value));
-            attribute_values.push_back(std::move(attribute));
+            attribute_values.emplace_back(
+                  std::pmr::string(attr.attribute_name, mr)
+                , AttributeDefinition::EObjectType::EnvironmentVariable
+                , std::move(value));
         }
     }
 
@@ -580,7 +568,7 @@ static auto getEnvironmentVariables(std::pmr::memory_resource* mr, const G_Netwo
     {
         EnvironmentVariable::EVarType var_type;
         EnvironmentVariable::EAccessType access_type;
-        std::vector<std::string> access_nodes = ev.access_nodes;
+        std::pmr::vector<std::pmr::string> access_nodes = std::pmr::vector<std::pmr::string>(ev.access_nodes.begin(), ev.access_nodes.end(), mr);
         auto value_descriptions = getValueDescriptions(mr, gnet, ev, cache);
         auto attribute_values = getAttributeValues(mr, gnet, ev, cache);
         auto comment = getComment(mr, gnet, ev, cache);
@@ -609,9 +597,8 @@ static auto getEnvironmentVariables(std::pmr::memory_resource* mr, const G_Netwo
                 break;
             }
         }
-        auto env_var = EnvironmentVariable::Create(
-              mr
-            , std::pmr::string(ev.name, mr)
+        environment_variables.emplace_back(
+              std::pmr::string(ev.name, mr)
             , var_type
             , ev.minimum
             , ev.maximum
@@ -619,12 +606,11 @@ static auto getEnvironmentVariables(std::pmr::memory_resource* mr, const G_Netwo
             , ev.initial_value
             , ev.id
             , access_type
-            , std::pmr::vector<std::pmr::string>(access_nodes.begin(), access_nodes.end(), mr)
+            , std::move(access_nodes)
             , std::move(value_descriptions)
             , data_size
             , std::move(attribute_values)
             , std::move(comment));
-        environment_variables.push_back(std::move(env_var));
     }
     return environment_variables;
 }
@@ -696,12 +682,10 @@ static auto getAttributeDefinitions(std::pmr::memory_resource* mr, const G_Netwo
         VisitorValueType vvt;
         auto value = boost_variant_to_std_variant(cvt.value);
         std::visit(vvt, value);
-        auto nad = AttributeDefinition::Create(
-              mr
-            , std::move(std::pmr::string(ad.name, mr))
+        attribute_definitions.emplace_back(
+            std::move(std::pmr::string(ad.name, mr))
             , object_type
             , std::visit(vvt, value));
-        attribute_definitions.push_back(std::move(nad));
     }
     return attribute_definitions;
 }
@@ -711,12 +695,10 @@ static auto getAttributeDefaults(std::pmr::memory_resource* mr, const G_Network&
     for (auto& ad : gnet.attribute_defaults)
     {
         auto value = boost_variant_to_std_variant(ad.value);
-        auto nad = Attribute::Create(
-            mr,
-            std::pmr::string(ad.name, mr),
-            AttributeDefinition::EObjectType::Network,
-            std::move(value));
-        attribute_defaults.push_back(std::move(nad));
+        attribute_defaults.emplace_back(
+              std::pmr::string(ad.name, mr)
+            , AttributeDefinition::EObjectType::Network
+            , std::move(value));
     }
     return attribute_defaults;
 }
@@ -730,12 +712,10 @@ static auto getAttributeValues(std::pmr::memory_resource* mr, const G_Network& g
     {
         auto const& attr = boost::get<G_AttributeNetwork>(*av);
         auto value{boost_variant_to_std_variant(attr.value)};
-        auto attribute = Attribute::Create(
-              mr
-            , std::pmr::string(attr.attribute_name)
+        attribute_values.emplace_back(
+              std::pmr::string(attr.attribute_name)
             , AttributeDefinition::EObjectType::Network
             , std::move(value));
-        attribute_values.emplace_back(std::move(attribute));
     }
     return attribute_values;
 }
@@ -891,7 +871,7 @@ std::shared_ptr<Network> DBCAST2Network(std::pmr::memory_resource* mr, const G_N
         std::pmr::polymorphic_allocator<Network>(mr)
         , getVersion(mr, gnet)
         , getNewSymbols(mr, gnet)
-        , getBitTiming(mr, gnet)
+        , getBitTiming(gnet)
         , getNodes(mr, gnet, cache)
         , getValueTables(mr, gnet)
         , getMessages(mr, gnet, cache)

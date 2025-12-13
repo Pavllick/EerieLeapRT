@@ -13,7 +13,7 @@ namespace dbcppp
     {
         namespace AST
         {
-            using variant_attr_value_t = boost::variant<int64_t, double, std::string>;
+            using variant_attr_value_t = boost::variant<int64_t, double, std::pmr::string>;
             struct G_Version
                 : boost::spirit::x3::position_tagged
             {
@@ -276,7 +276,7 @@ namespace dbcppp
                 : boost::spirit::x3::position_tagged
             {
                 uint64_t message_id;
-                std::string signal_name;
+                std::pmr::string signal_name;
                 std::string switch_name;
                 std::vector<G_Range> value_ranges;
             };
