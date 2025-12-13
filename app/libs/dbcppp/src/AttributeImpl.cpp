@@ -1,53 +1,55 @@
-#include "dbcppp/AttributeImpl.h"
+#include "dbcppp/Attribute.h"
 #include "dbcppp/Network.h"
 
 using namespace dbcppp;
 
-pmr_unique_ptr<IAttribute> IAttribute::Create(
+Attribute Attribute::Create(
       std::pmr::memory_resource* mr
     , std::pmr::string&& name
-    , IAttributeDefinition::EObjectType object_type
+    , AttributeDefinition::EObjectType object_type
     , value_t value)
 {
-    return make_unique_pmr<AttributeImpl>(
-          mr
+    return {
+          std::allocator_arg
+        , mr
         , std::move(name)
         , object_type
-        , std::move(value));
+        , std::move(value)
+    };
 }
 
-AttributeImpl::AttributeImpl(std::allocator_arg_t, allocator_type alloc)
+Attribute::Attribute(std::allocator_arg_t, allocator_type alloc)
     : _name(alloc) {}
 
-AttributeImpl::AttributeImpl(
+Attribute::Attribute(
       std::allocator_arg_t
     , allocator_type alloc
     , std::pmr::string&& name
-    , IAttributeDefinition::EObjectType object_type
-    , IAttribute::value_t value)
+    , AttributeDefinition::EObjectType object_type
+    , Attribute::value_t value)
 
     : _name(std::move(name), alloc)
     , _object_type(object_type)
     , _value(std::move(value))
     , _allocator(alloc)
 {}
-pmr_unique_ptr<IAttribute> AttributeImpl::Clone() const
+Attribute Attribute::Clone() const
 {
-    return make_unique_pmr<AttributeImpl>(_allocator, *this);
+    return {*this, _allocator};
 }
-const std::string_view AttributeImpl::Name() const
+const std::string_view Attribute::Name() const
 {
     return _name;
 }
-IAttributeDefinition::EObjectType AttributeImpl::ObjectType() const
+AttributeDefinition::EObjectType Attribute::ObjectType() const
 {
     return _object_type;
 };
-const IAttribute::value_t& AttributeImpl::Value() const
+const Attribute::value_t& Attribute::Value() const
 {
     return _value;
 }
-bool AttributeImpl::operator==(const IAttribute& rhs) const
+bool Attribute::operator==(const Attribute& rhs) const
 {
     bool result = true;
     result &= _name == rhs.Name();
@@ -55,7 +57,7 @@ bool AttributeImpl::operator==(const IAttribute& rhs) const
     result &= _value == rhs.Value();
     return result;
 }
-bool AttributeImpl::operator!=(const IAttribute& rhs) const
+bool Attribute::operator!=(const Attribute& rhs) const
 {
     return !(*this == rhs);
 }

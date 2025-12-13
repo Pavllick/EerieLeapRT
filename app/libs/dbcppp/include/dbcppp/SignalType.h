@@ -1,23 +1,25 @@
 #pragma once
 
 #include <memory_resource>
-#include <cstddef>
+#include <cstdint>
 #include <string>
-#include <memory>
 
 #include "Signal.h"
 
 namespace dbcppp
 {
-    class ISignalType
+    class SignalType final
     {
     public:
-        static pmr_unique_ptr<ISignalType> Create(
-              std::pmr::memory_resource* mr
+        using allocator_type = std::pmr::polymorphic_allocator<>;
+
+        SignalType(
+              std::allocator_arg_t
+            , allocator_type alloc
             , std::pmr::string&& name
             , uint64_t signal_size
-            , ISignal::EByteOrder byte_order
-            , ISignal::EValueType value_type
+            , Signal::EByteOrder byte_order
+            , Signal::EValueType value_type
             , double factor
             , double offset
             , double minimum
@@ -26,22 +28,82 @@ namespace dbcppp
             , double default_value
             , std::pmr::string&& value_table);
 
-        virtual pmr_unique_ptr<ISignalType> Clone() const = 0;
+        SignalType& operator=(const SignalType&) noexcept = default;
+        SignalType& operator=(SignalType&&) noexcept = default;
+        SignalType(SignalType&&) noexcept = default;
+        ~SignalType() = default;
 
-        virtual ~ISignalType() = default;
-        virtual const std::string_view Name() const = 0;
-        virtual uint64_t SignalSize() const = 0;
-        virtual ISignal::EByteOrder ByteOrder() const = 0;
-        virtual ISignal::EValueType ValueType() const = 0;
-        virtual double Factor() const = 0;
-        virtual double Offset() const = 0;
-        virtual double Minimum() const = 0;
-        virtual double Maximum() const = 0;
-        virtual const std::string_view Unit() const = 0;
-        virtual double DefaultValue() const = 0;
-        virtual const std::string_view ValueTable() const = 0;
+        SignalType(SignalType&& other, allocator_type alloc)
+            : _name(std::move(other._name), alloc)
+            , _signal_size(other._signal_size)
+            , _byte_order(other._byte_order)
+            , _value_type(other._value_type)
+            , _factor(other._factor)
+            , _offset(other._offset)
+            , _minimum(other._minimum)
+            , _maximum(other._maximum)
+            , _unit(std::move(other._unit), alloc)
+            , _default_value(other._default_value)
+            , _value_table(std::move(other._value_table), alloc)
+            , _allocator(alloc) {}
 
-        virtual bool operator==(const ISignalType& rhs) const = 0;
-        virtual bool operator!=(const ISignalType& rhs) const = 0;
+        SignalType(const SignalType& other, allocator_type alloc = {})
+            : _name(other._name, alloc)
+            , _signal_size(other._signal_size)
+            , _byte_order(other._byte_order)
+            , _value_type(other._value_type)
+            , _factor(other._factor)
+            , _offset(other._offset)
+            , _minimum(other._minimum)
+            , _maximum(other._maximum)
+            , _unit(other._unit, alloc)
+            , _default_value(other._default_value)
+            , _value_table(other._value_table, alloc) {}
+
+        static SignalType Create(
+              std::pmr::memory_resource* mr
+            , std::pmr::string&& name
+            , uint64_t signal_size
+            , Signal::EByteOrder byte_order
+            , Signal::EValueType value_type
+            , double factor
+            , double offset
+            , double minimum
+            , double maximum
+            , std::pmr::string&& unit
+            , double default_value
+            , std::pmr::string&& value_table);
+
+        SignalType Clone() const;
+
+        const std::string_view Name() const;
+        uint64_t SignalSize() const;
+        Signal::EByteOrder ByteOrder() const;
+        Signal::EValueType ValueType() const;
+        double Factor() const;
+        double Offset() const;
+        double Minimum() const;
+        double Maximum() const;
+        const std::string_view Unit() const;
+        double DefaultValue() const;
+        const std::string_view ValueTable() const;
+
+        bool operator==(const SignalType& rhs) const;
+        bool operator!=(const SignalType& rhs) const;
+
+    private:
+        std::pmr::string _name;
+        uint64_t _signal_size;
+        Signal::EByteOrder _byte_order;
+        Signal::EValueType _value_type;
+        double _factor;
+        double _offset;
+        double _minimum;
+        double _maximum;
+        std::pmr::string _unit;
+        double _default_value;
+        std::pmr::string _value_table;
+
+        allocator_type _allocator;
     };
 }

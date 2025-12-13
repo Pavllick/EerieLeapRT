@@ -1,12 +1,8 @@
 #include <stdexcept>
 
-#include "utilities/memory/memory_resource_manager.h"
-
 #include "dbc.h"
 
 namespace eerie_leap::subsys::dbc {
-
-using namespace eerie_leap::utilities::memory;
 
 Dbc::Dbc(std::allocator_arg_t, allocator_type alloc)
    : messages_(alloc),
@@ -17,7 +13,7 @@ bool Dbc::LoadDbcFile(std::streambuf& dbc_content) {
    messages_.clear();
 
    std::istream stream(&dbc_content);
-   net_ = dbcppp::INetwork::LoadDBCFromIs(allocator_.resource(), stream);
+   net_ = dbcppp::Network::LoadDBCFromIs(allocator_.resource(), stream);
 
    is_loaded_ = net_ != nullptr;
 
@@ -37,7 +33,7 @@ DbcMessage* Dbc::GetOrRegisterMessage(uint32_t frame_id) {
    if(messages_.contains(frame_id))
       return &messages_.at(frame_id);
 
-   const dbcppp::IMessage* message = GetDbcMessage(frame_id);
+   const dbcppp::Message* message = GetDbcMessage(frame_id);
    if(message == nullptr)
       throw std::runtime_error("Invalid Frame ID.");
 
@@ -46,12 +42,12 @@ DbcMessage* Dbc::GetOrRegisterMessage(uint32_t frame_id) {
    return &messages_.at(frame_id);
 }
 
-const dbcppp::IMessage* Dbc::GetDbcMessage(uint32_t frame_id) const {
+const dbcppp::Message* Dbc::GetDbcMessage(uint32_t frame_id) const {
    if(!is_loaded_)
       return nullptr;
 
-   const dbcppp::IMessage* message = nullptr;
-   for(const dbcppp::IMessage& msg : net_->Messages()) {
+   const dbcppp::Message* message = nullptr;
+   for(const dbcppp::Message& msg : net_->Messages()) {
       if(msg.Id() == frame_id) {
          message = &msg;
          break;

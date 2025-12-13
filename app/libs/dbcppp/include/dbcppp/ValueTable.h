@@ -1,9 +1,11 @@
 #pragma once
 
+#include <memory>
+#include <optional>
+#include <functional>
 #include <memory_resource>
 #include <vector>
 #include <string>
-#include <memory>
 #include <optional>
 
 #include "SignalType.h"
@@ -11,26 +13,59 @@
 
 namespace dbcppp
 {
-    class IValueTable
+    class SignalType;
+    class ValueTable final
     {
     public:
-        static pmr_unique_ptr<IValueTable> Create(
+        using allocator_type = std::pmr::polymorphic_allocator<>;
+
+        ValueTable(
+              std::allocator_arg_t
+            , allocator_type alloc
+            , std::pmr::string&& name
+            , std::optional<SignalType>&& signal_type
+            , std::pmr::vector<ValueEncodingDescription>&& value_encoding_descriptions);
+
+        ValueTable& operator=(const ValueTable&) noexcept = default;
+        ValueTable& operator=(ValueTable&&) noexcept = default;
+        ValueTable(ValueTable&&) noexcept = default;
+        ~ValueTable() = default;
+
+        ValueTable(ValueTable&& other, allocator_type alloc)
+            : _name(std::move(other._name), alloc)
+            , _signal_type(std::move(other._signal_type))
+            , _value_encoding_descriptions(std::move(other._value_encoding_descriptions), alloc)
+            , _allocator(alloc) {}
+
+        ValueTable(const ValueTable& other, allocator_type alloc = {})
+            : _name(other._name, alloc)
+            , _signal_type(other._signal_type)
+            , _value_encoding_descriptions(other._value_encoding_descriptions, alloc)
+            , _allocator(alloc) {}
+
+        static ValueTable Create(
               std::pmr::memory_resource* mr
             , std::pmr::string&& name
-            , std::optional<pmr_unique_ptr<ISignalType>>&& signal_type
-            , std::pmr::vector<pmr_unique_ptr<IValueEncodingDescription>>&& value_encoding_descriptions);
+            , std::optional<SignalType>&& signal_type
+            , std::pmr::vector<ValueEncodingDescription>&& value_encoding_descriptions);
 
-        virtual pmr_unique_ptr<IValueTable> Clone() const = 0;
+        ValueTable Clone() const;
 
-        virtual ~IValueTable() = default;
-        virtual const std::string_view Name() const = 0;
-        virtual std::optional<std::reference_wrapper<const ISignalType>> SignalType() const = 0;
-        virtual const IValueEncodingDescription& ValueEncodingDescriptions_Get(std::size_t i) const = 0;
-        virtual std::size_t ValueEncodingDescriptions_Size() const = 0;
+        const std::string_view Name() const;
+        std::optional<std::reference_wrapper<const SignalType>> GetSignalType() const;
+        const ValueEncodingDescription& ValueEncodingDescriptions_Get(std::size_t i) const;
+        std::size_t ValueEncodingDescriptions_Size() const;
 
-        DBCPPP_MAKE_ITERABLE(IValueTable, ValueEncodingDescriptions, IValueEncodingDescription);
+        bool operator==(const ValueTable& rhs) const;
+        bool operator!=(const ValueTable& rhs) const;
 
-        virtual bool operator==(const IValueTable& rhs) const = 0;
-        virtual bool operator!=(const IValueTable& rhs) const = 0;
+        DBCPPP_MAKE_ITERABLE(ValueTable, ValueEncodingDescriptions, ValueEncodingDescription);
+
+    private:
+        std::pmr::string _name;
+        std::optional<SignalType> _signal_type;
+        std::pmr::vector<ValueEncodingDescription> _value_encoding_descriptions;
+
+        allocator_type _allocator;
     };
 }

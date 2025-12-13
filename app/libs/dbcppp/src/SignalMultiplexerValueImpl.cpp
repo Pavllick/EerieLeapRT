@@ -1,20 +1,22 @@
 #include <algorithm>
-#include "dbcppp/SignalMultiplexerValueImpl.h"
+#include "dbcppp/SignalMultiplexerValue.h"
 
 using namespace dbcppp;
 
-pmr_unique_ptr<ISignalMultiplexerValue> ISignalMultiplexerValue::Create(
+SignalMultiplexerValue SignalMultiplexerValue::Create(
       std::pmr::memory_resource* mr
     , std::pmr::string&& switch_name
     , std::pmr::vector<Range>&& value_ranges)
 {
-    return make_unique_pmr<SignalMultiplexerValueImpl>(
-          mr
+    return {
+          std::allocator_arg
+        , mr
         , std::move(switch_name)
-        , std::move(value_ranges));
+        , std::move(value_ranges)
+    };
 }
 
-SignalMultiplexerValueImpl::SignalMultiplexerValueImpl(
+SignalMultiplexerValue::SignalMultiplexerValue(
       std::allocator_arg_t
     , allocator_type alloc
     , std::pmr::string&& switch_name
@@ -25,25 +27,25 @@ SignalMultiplexerValueImpl::SignalMultiplexerValueImpl(
     , _allocator(alloc)
 {}
 
-pmr_unique_ptr<ISignalMultiplexerValue> SignalMultiplexerValueImpl::Clone() const
+SignalMultiplexerValue SignalMultiplexerValue::Clone() const
 {
-    return make_unique_pmr<SignalMultiplexerValueImpl>(_allocator, *this);
+    return {*this, _allocator};
 }
 
-const std::string_view SignalMultiplexerValueImpl::SwitchName() const
+const std::string_view SignalMultiplexerValue::SwitchName() const
 {
     return _switch_name;
 }
-const ISignalMultiplexerValue::Range& SignalMultiplexerValueImpl::ValueRanges_Get(std::size_t i) const
+const SignalMultiplexerValue::Range& SignalMultiplexerValue::ValueRanges_Get(std::size_t i) const
 {
     return _value_ranges[i];
 }
-std::size_t SignalMultiplexerValueImpl::ValueRanges_Size() const
+std::size_t SignalMultiplexerValue::ValueRanges_Size() const
 {
     return _value_ranges.size();
 }
 
-bool SignalMultiplexerValueImpl::operator==(const ISignalMultiplexerValue& rhs) const
+bool SignalMultiplexerValue::operator==(const SignalMultiplexerValue& rhs) const
 {
     bool equal = true;
     equal &= _switch_name == rhs.SwitchName();
@@ -56,7 +58,7 @@ bool SignalMultiplexerValueImpl::operator==(const ISignalMultiplexerValue& rhs) 
     }
     return equal;
 }
-bool SignalMultiplexerValueImpl::operator!=(const ISignalMultiplexerValue& rhs) const
+bool SignalMultiplexerValue::operator!=(const SignalMultiplexerValue& rhs) const
 {
     return !(*this == rhs);
 }

@@ -12,9 +12,11 @@
 
 namespace dbcppp
 {
-    class IMessage
+    class Message final
     {
     public:
+        using allocator_type = std::pmr::polymorphic_allocator<>;
+
         enum class EErrorCode
             : uint64_t
         {
@@ -22,44 +24,143 @@ namespace dbcppp
             MuxValeWithoutMuxSignal
         };
 
-        static pmr_unique_ptr<IMessage> Create(
+        Message(
+              std::allocator_arg_t
+            , allocator_type alloc
+            , uint64_t id
+            , std::pmr::string&& name
+            , uint64_t message_size
+            , std::pmr::string&& transmitter
+            , std::pmr::vector<std::pmr::string>&& message_transmitters
+            , std::pmr::vector<Signal>&& signals_
+            , std::pmr::vector<Attribute>&& attribute_values
+            , std::pmr::string&& comment
+            , std::pmr::vector<SignalGroup>&& signal_groups);
+
+        Message& operator=(const Message&) noexcept = delete;
+        Message& operator=(Message&&) noexcept = default;
+        Message(Message&&) noexcept = default;
+        ~Message() = default;
+
+        Message(Message&& other, allocator_type alloc)
+            : _id(other._id)
+            , _name(std::move(other._name), alloc)
+            , _message_size(other._message_size)
+            , _transmitter(std::move(other._transmitter), alloc)
+            , _message_transmitters(std::move(other._message_transmitters), alloc)
+            , _signals(std::move(other._signals), alloc)
+            , _attribute_values(std::move(other._attribute_values), alloc)
+            , _comment(std::move(other._comment), alloc)
+            , _signal_groups(std::move(other._signal_groups), alloc)
+            , _mux_signal(other._mux_signal)
+            , _error(other._error)
+            , _allocator(alloc) {}
+
+        Message(const Message& other, allocator_type alloc = {})
+            : _id(other._id)
+            , _name(other._name, alloc)
+            , _message_size(other._message_size)
+            , _transmitter(other._transmitter, alloc)
+            , _message_transmitters(other._message_transmitters, alloc)
+            , _signals(other._signals, alloc)
+            , _attribute_values(other._attribute_values, alloc)
+            , _comment(other._comment, alloc)
+            , _signal_groups(other._signal_groups, alloc)
+            , _mux_signal(nullptr)
+            , _error(other._error)
+            , _allocator(alloc)
+        {
+            for (const auto& sig : _signals)
+            {
+                switch (sig.MultiplexerIndicator())
+                {
+                case Signal::EMultiplexer::MuxSwitch:
+                    _mux_signal = &sig;
+                    break;
+                }
+            }
+        }
+
+        // Message& operator=(const Message& other)
+        // {
+        //     _id = other._id;
+        //     _name = other._name;
+        //     _message_size = other._message_size;
+        //     _transmitter = other._transmitter;
+        //     _message_transmitters = other._message_transmitters;
+        //     _signals = other._signals;
+        //     _attribute_values = other._attribute_values;
+        //     _comment = other._comment;
+        //     _mux_signal = nullptr;
+        //     for (const auto& sig : _signals)
+        //     {
+        //         switch (sig.MultiplexerIndicator())
+        //         {
+        //         case Signal::EMultiplexer::MuxSwitch:
+        //             _mux_signal = &sig;
+        //             break;
+        //         }
+        //     }
+        //     _error = other._error;
+        //     return *this;
+        // }
+
+        static Message Create(
               std::pmr::memory_resource* mr
             , uint64_t id
             , std::pmr::string&& name
             , uint64_t message_size
             , std::pmr::string&& transmitter
             , std::pmr::vector<std::pmr::string>&& message_transmitters
-            , std::pmr::vector<pmr_unique_ptr<ISignal>>&& signals_
-            , std::pmr::vector<pmr_unique_ptr<IAttribute>>&& attribute_values
+            , std::pmr::vector<Signal>&& signals_
+            , std::pmr::vector<Attribute>&& attribute_values
             , std::pmr::string&& comment
-            , std::pmr::vector<pmr_unique_ptr<ISignalGroup>>&& signal_groups);
+            , std::pmr::vector<SignalGroup>&& signal_groups);
 
-        virtual pmr_unique_ptr<IMessage> Clone() const = 0;
+        Message Clone() const;
 
-        virtual ~IMessage() = default;
-        virtual uint64_t Id() const = 0;
-        virtual const std::string_view Name() const = 0;
-        virtual uint64_t MessageSize() const = 0;
-        virtual const std::string_view Transmitter() const = 0;
-        virtual const std::pmr::string& MessageTransmitters_Get(std::size_t i) const = 0;
-        virtual std::size_t MessageTransmitters_Size() const = 0;
-        virtual const ISignal& Signals_Get(std::size_t i) const = 0;
-        virtual std::size_t Signals_Size() const = 0;
-        virtual const IAttribute& AttributeValues_Get(std::size_t i) const = 0;
-        virtual std::size_t AttributeValues_Size() const = 0;
-        virtual const std::string_view Comment() const = 0;
-        virtual const ISignalGroup& SignalGroups_Get(std::size_t i) const = 0;
-        virtual std::size_t SignalGroups_Size() const = 0;
-        virtual const ISignal* MuxSignal() const = 0;
+        uint64_t Id() const;
+        const std::string_view Name() const;
+        uint64_t MessageSize() const;
+        const std::string_view Transmitter() const;
+        const std::pmr::string& MessageTransmitters_Get(std::size_t i) const;
+        std::size_t MessageTransmitters_Size() const;
+        const Signal& Signals_Get(std::size_t i) const;
+        std::size_t Signals_Size() const;
+        const Attribute& AttributeValues_Get(std::size_t i) const;
+        std::size_t AttributeValues_Size() const;
+        const std::string_view Comment() const;
+        const SignalGroup& SignalGroups_Get(std::size_t i) const;
+        std::size_t SignalGroups_Size() const;
+        const Signal* MuxSignal() const;
 
-        DBCPPP_MAKE_ITERABLE(IMessage, MessageTransmitters, std::pmr::string);
-        DBCPPP_MAKE_ITERABLE(IMessage, Signals, ISignal);
-        DBCPPP_MAKE_ITERABLE(IMessage, AttributeValues, IAttribute);
-        DBCPPP_MAKE_ITERABLE(IMessage, SignalGroups, ISignalGroup);
+        EErrorCode Error() const;
 
-        virtual bool operator==(const IMessage& message) const = 0;
-        virtual bool operator!=(const IMessage& message) const = 0;
+        const std::pmr::vector<Signal>& signals() const;
 
-        virtual EErrorCode Error() const = 0;
+        bool operator==(const Message& rhs) const;
+        bool operator!=(const Message& rhs) const;
+
+        DBCPPP_MAKE_ITERABLE(Message, MessageTransmitters, std::pmr::string);
+        DBCPPP_MAKE_ITERABLE(Message, Signals, Signal);
+        DBCPPP_MAKE_ITERABLE(Message, AttributeValues, Attribute);
+        DBCPPP_MAKE_ITERABLE(Message, SignalGroups, SignalGroup);
+
+    private:
+        uint64_t _id;
+        std::pmr::string _name;
+        uint64_t _message_size;
+        std::pmr::string _transmitter;
+        std::pmr::vector<std::pmr::string> _message_transmitters;
+        std::pmr::vector<Signal> _signals;
+        std::pmr::vector<Attribute> _attribute_values;
+        std::pmr::string _comment;
+        std::pmr::vector<SignalGroup> _signal_groups;
+
+        const Signal* _mux_signal;
+
+        EErrorCode _error;
+
+        allocator_type _allocator;
     };
 }

@@ -1,8 +1,10 @@
+#include <memory>
 #include <memory_resource>
 #include <algorithm>
 #include <limits>
+
 #include "Helper.h"
-#include "dbcppp/SignalImpl.h"
+#include "dbcppp/Signal.h"
 
 using namespace dbcppp;
 
@@ -13,16 +15,16 @@ enum class Alignment
     signal_exceeds_64_bit_size_and_signal_does_not_fit_into_64_bit
 };
 
-template <Alignment aAlignment, ISignal::EByteOrder aByteOrder, ISignal::EValueType aValueType, ISignal::EExtendedValueType aExtendedValueType>
-ISignal::raw_t template_decode(const ISignal* sig, const void* nbytes) noexcept
+template <Alignment aAlignment, Signal::EByteOrder aByteOrder, Signal::EValueType aValueType, Signal::EExtendedValueType aExtendedValueType>
+Signal::raw_t template_decode(const Signal* sig, const void* nbytes) noexcept
 {
-    const SignalImpl* sigi = static_cast<const SignalImpl*>(sig);
+    const Signal* sigi = static_cast<const Signal*>(sig);
     uint64_t data;
     if constexpr (aAlignment == Alignment::signal_exceeds_64_bit_size_and_signal_does_not_fit_into_64_bit)
     {
         data = *reinterpret_cast<const uint64_t*>(&reinterpret_cast<const uint8_t*>(nbytes)[sigi->_byte_pos]);
         uint64_t data1 = reinterpret_cast<const uint8_t*>(nbytes)[sigi->_byte_pos + 8];
-        if constexpr (aByteOrder == ISignal::EByteOrder::BigEndian)
+        if constexpr (aByteOrder == Signal::EByteOrder::BigEndian)
         {
             //native_to_big_inplace(data);
             native_to_big_inplace(data);
@@ -40,12 +42,12 @@ ISignal::raw_t template_decode(const ISignal* sig, const void* nbytes) noexcept
             data1 <<= sigi->_fixed_start_bit_1;
             data |= data1;
         }
-        if constexpr (aExtendedValueType == ISignal::EExtendedValueType::Float ||
-            aExtendedValueType == ISignal::EExtendedValueType::Double)
+        if constexpr (aExtendedValueType == Signal::EExtendedValueType::Float ||
+            aExtendedValueType == Signal::EExtendedValueType::Double)
         {
             return data;
         }
-        if constexpr (aValueType == ISignal::EValueType::Signed)
+        if constexpr (aValueType == Signal::EValueType::Signed)
         {
             if (data & sigi->_mask_signed)
             {
@@ -64,7 +66,7 @@ ISignal::raw_t template_decode(const ISignal* sig, const void* nbytes) noexcept
         {
             data = *reinterpret_cast<const uint64_t*>(&reinterpret_cast<const uint8_t*>(nbytes)[sigi->_byte_pos]);
         }
-        if constexpr (aByteOrder == ISignal::EByteOrder::BigEndian)
+        if constexpr (aByteOrder == Signal::EByteOrder::BigEndian)
         {
             //native_to_big_inplace(data);
             native_to_big_inplace(data);
@@ -74,18 +76,18 @@ ISignal::raw_t template_decode(const ISignal* sig, const void* nbytes) noexcept
             //native_to_little_inplace(data);
             native_to_little_inplace(data);
         }
-        if constexpr (aExtendedValueType == ISignal::EExtendedValueType::Double)
+        if constexpr (aExtendedValueType == Signal::EExtendedValueType::Double)
         {
             return data;
         }
         data >>= sigi->_fixed_start_bit_0;
     }
     data &= sigi->_mask;
-    if constexpr (aExtendedValueType == ISignal::EExtendedValueType::Float)
+    if constexpr (aExtendedValueType == Signal::EExtendedValueType::Float)
     {
         return data;
     }
-    if constexpr (aValueType == ISignal::EValueType::Signed)
+    if constexpr (aValueType == Signal::EValueType::Signed)
     {
         // bit extending
         // trust the compiler to optimize this
@@ -97,7 +99,7 @@ ISignal::raw_t template_decode(const ISignal* sig, const void* nbytes) noexcept
     return data;
 }
 
-constexpr uint64_t enum_mask(Alignment a, ISignal::EByteOrder bo, ISignal::EValueType vt, ISignal::EExtendedValueType evt)
+constexpr uint64_t enum_mask(Alignment a, Signal::EByteOrder bo, Signal::EValueType vt, Signal::EExtendedValueType evt)
 {
     uint64_t result = 0;
     switch (a)
@@ -108,35 +110,35 @@ constexpr uint64_t enum_mask(Alignment a, ISignal::EByteOrder bo, ISignal::EValu
     }
     switch (bo)
     {
-    case ISignal::EByteOrder::LittleEndian:                                           result |= 0b1000; break;
-    case ISignal::EByteOrder::BigEndian:                                              result |= 0b10000; break;
+    case Signal::EByteOrder::LittleEndian:                                           result |= 0b1000; break;
+    case Signal::EByteOrder::BigEndian:                                              result |= 0b10000; break;
     }
     switch (vt)
     {
-    case ISignal::EValueType::Signed:                                                 result |= 0b100000; break;
-    case ISignal::EValueType::Unsigned:                                               result |= 0b1000000; break;
+    case Signal::EValueType::Signed:                                                 result |= 0b100000; break;
+    case Signal::EValueType::Unsigned:                                               result |= 0b1000000; break;
     }
     switch (evt)
     {
-    case ISignal::EExtendedValueType::Integer:                                        result |= 0b10000000; break;
-    case ISignal::EExtendedValueType::Float:                                          result |= 0b100000000; break;
-    case ISignal::EExtendedValueType::Double:                                         result |= 0b1000000000; break;
+    case Signal::EExtendedValueType::Integer:                                        result |= 0b10000000; break;
+    case Signal::EExtendedValueType::Float:                                          result |= 0b100000000; break;
+    case Signal::EExtendedValueType::Double:                                         result |= 0b1000000000; break;
     }
     return result;
 }
-using decode_func_t = ISignal::raw_t (*)(const ISignal*, const void*) noexcept;
-decode_func_t make_decode(Alignment a, ISignal::EByteOrder bo, ISignal::EValueType vt, ISignal::EExtendedValueType evt)
+using decode_func_t = Signal::raw_t (*)(const Signal*, const void*) noexcept;
+decode_func_t make_decode(Alignment a, Signal::EByteOrder bo, Signal::EValueType vt, Signal::EExtendedValueType evt)
 {
     constexpr auto si64b            = Alignment::size_inbetween_first_64_bit;
     constexpr auto se64bsbsfi64b    = Alignment::signal_exceeds_64_bit_size_but_signal_fits_into_64_bit;
     constexpr auto se64bsasdnfi64b  = Alignment::signal_exceeds_64_bit_size_and_signal_does_not_fit_into_64_bit;
-    constexpr auto le               = ISignal::EByteOrder::LittleEndian;
-    constexpr auto be               = ISignal::EByteOrder::BigEndian;
-    constexpr auto sig              = ISignal::EValueType::Signed;
-    constexpr auto usig             = ISignal::EValueType::Unsigned;
-    constexpr auto i                = ISignal::EExtendedValueType::Integer;
-    constexpr auto f                = ISignal::EExtendedValueType::Float;
-    constexpr auto d                = ISignal::EExtendedValueType::Double;
+    constexpr auto le               = Signal::EByteOrder::LittleEndian;
+    constexpr auto be               = Signal::EByteOrder::BigEndian;
+    constexpr auto sig              = Signal::EValueType::Signed;
+    constexpr auto usig             = Signal::EValueType::Unsigned;
+    constexpr auto i                = Signal::EExtendedValueType::Integer;
+    constexpr auto f                = Signal::EExtendedValueType::Float;
+    constexpr auto d                = Signal::EExtendedValueType::Double;
     switch (enum_mask(a, bo, vt, evt))
     {
     case enum_mask(si64b, le, sig, i):            return template_decode<si64b, le, sig, i>;
@@ -178,18 +180,18 @@ decode_func_t make_decode(Alignment a, ISignal::EByteOrder bo, ISignal::EValueTy
     }
     return nullptr;
 }
-decode_func_t make_decodeMuxSignal(Alignment a, ISignal::EByteOrder bo, ISignal::EValueType vt, ISignal::EExtendedValueType evt)
+decode_func_t make_decodeMuxSignal(Alignment a, Signal::EByteOrder bo, Signal::EValueType vt, Signal::EExtendedValueType evt)
 {
     constexpr auto si64b            = Alignment::size_inbetween_first_64_bit;
     constexpr auto se64bsbsfi64b    = Alignment::signal_exceeds_64_bit_size_but_signal_fits_into_64_bit;
     constexpr auto se64bsasdnfi64b  = Alignment::signal_exceeds_64_bit_size_and_signal_does_not_fit_into_64_bit;
-    constexpr auto le               = ISignal::EByteOrder::LittleEndian;
-    constexpr auto be               = ISignal::EByteOrder::BigEndian;
-    constexpr auto sig              = ISignal::EValueType::Signed;
-    constexpr auto usig             = ISignal::EValueType::Unsigned;
-    constexpr auto i                = ISignal::EExtendedValueType::Integer;
-    constexpr auto f                = ISignal::EExtendedValueType::Float;
-    constexpr auto d                = ISignal::EExtendedValueType::Double;
+    constexpr auto le               = Signal::EByteOrder::LittleEndian;
+    constexpr auto be               = Signal::EByteOrder::BigEndian;
+    constexpr auto sig              = Signal::EValueType::Signed;
+    constexpr auto usig             = Signal::EValueType::Unsigned;
+    constexpr auto i                = Signal::EExtendedValueType::Integer;
+    constexpr auto f                = Signal::EExtendedValueType::Float;
+    constexpr auto d                = Signal::EExtendedValueType::Double;
     switch (enum_mask(a, bo, vt, evt))
     {
     case enum_mask(si64b, le, sig, i):            return template_decode<si64b, le, sig, i>;
@@ -209,11 +211,11 @@ decode_func_t make_decodeMuxSignal(Alignment a, ISignal::EByteOrder bo, ISignal:
     }
     return nullptr;
 }
-void encode(const ISignal* sig, ISignal::raw_t raw, void* buffer) noexcept
+void encode(const Signal* sig, Signal::raw_t raw, void* buffer) noexcept
 {
-    const SignalImpl* sigi = static_cast<const SignalImpl*>(sig);
+    const Signal* sigi = static_cast<const Signal*>(sig);
     char* b = reinterpret_cast<char*>(buffer);
-    if (sigi->ByteOrder() == ISignal::EByteOrder::BigEndian)
+    if (sigi->ByteOrder() == Signal::EByteOrder::BigEndian)
     {
         uint64_t src = sigi->StartBit();
         uint64_t dst = sigi->BitSize() - 1;
@@ -258,20 +260,20 @@ void encode(const ISignal* sig, ISignal::raw_t raw, void* buffer) noexcept
     }
 }
 template <class T>
-double raw_to_phys(const ISignal* sig, ISignal::raw_t raw) noexcept
+double raw_to_phys(const Signal* sig, Signal::raw_t raw) noexcept
 {
-    const SignalImpl* sigi = static_cast<const SignalImpl*>(sig);
+    const Signal* sigi = static_cast<const Signal*>(sig);
     double draw = double(*reinterpret_cast<T*>(&raw));
     return draw * sigi->Factor() + sigi->Offset();
 }
 template <class T>
-ISignal::raw_t phys_to_raw(const ISignal* sig, double phys) noexcept
+Signal::raw_t phys_to_raw(const Signal* sig, double phys) noexcept
 {
-    const SignalImpl* sigi = static_cast<const SignalImpl*>(sig);
+    const Signal* sigi = static_cast<const Signal*>(sig);
     T result = T((phys - sigi->Offset()) / sigi->Factor());
-    return *reinterpret_cast<ISignal::raw_t*>(&result);
+    return *reinterpret_cast<Signal::raw_t*>(&result);
 }
-pmr_unique_ptr<ISignal> ISignal::Create(
+Signal Signal::Create(
       std::pmr::memory_resource* mr
     , uint16_t message_size
     , std::pmr::string name
@@ -287,31 +289,15 @@ pmr_unique_ptr<ISignal> ISignal::Create(
     , float maximum
     , std::pmr::string unit
     , std::pmr::vector<std::pmr::string>&& receivers
-    , std::pmr::vector<pmr_unique_ptr<IAttribute>>&& attribute_values
-    , std::pmr::vector<pmr_unique_ptr<IValueEncodingDescription>>&& value_encoding_descriptions
+    , std::pmr::vector<Attribute>&& attribute_values
+    , std::pmr::vector<ValueEncodingDescription>&& value_encoding_descriptions
     , std::pmr::string comment
     , EExtendedValueType extended_value_type
-    , std::pmr::vector<pmr_unique_ptr<ISignalMultiplexerValue>>&& signal_multiplexer_values)
+    , std::pmr::vector<SignalMultiplexerValue>&& signal_multiplexer_values)
 {
-    std::pmr::vector<AttributeImpl> avs(mr);
-    for (auto& av : attribute_values)
-    {
-        avs.push_back(std::move(static_cast<AttributeImpl&>(*av)));
-        av.reset(nullptr);
-    }
-    std::pmr::vector<ValueEncodingDescriptionImpl> veds(mr);
-    for (auto& ved : value_encoding_descriptions)
-    {
-        veds.push_back(std::move(static_cast<ValueEncodingDescriptionImpl&>(*ved)));
-        ved.reset(nullptr);
-    }
-    std::pmr::vector<SignalMultiplexerValueImpl> smvs(mr);
-    for (auto& smv : signal_multiplexer_values)
-    {
-        smvs.push_back(std::move(static_cast<SignalMultiplexerValueImpl&>(*smv)));
-    }
-    auto result = make_unique_pmr<SignalImpl>(
-          mr
+    return {
+          std::allocator_arg
+        , mr
         , message_size
         , std::move(name)
         , multiplexer_indicator
@@ -326,16 +312,16 @@ pmr_unique_ptr<ISignal> ISignal::Create(
         , maximum
         , std::move(unit)
         , std::move(receivers)
-        , std::move(avs)
-        , std::move(veds)
+        , std::move(attribute_values)
+        , std::move(value_encoding_descriptions)
         , std::move(comment)
         , extended_value_type
-        , std::move(smvs));
-    return result;
+        , std::move(signal_multiplexer_values)
+    };
 }
 
 
-SignalImpl::SignalImpl(
+Signal::Signal(
       std::allocator_arg_t
     , allocator_type alloc
     , uint16_t message_size
@@ -352,11 +338,11 @@ SignalImpl::SignalImpl(
     , float maximum
     , std::pmr::string unit
     , std::pmr::vector<std::pmr::string>&& receivers
-    , std::pmr::vector<AttributeImpl>&& attribute_values
-    , std::pmr::vector<ValueEncodingDescriptionImpl>&& value_encoding_descriptions
+    , std::pmr::vector<Attribute>&& attribute_values
+    , std::pmr::vector<ValueEncodingDescription>&& value_encoding_descriptions
     , std::pmr::string comment
     , EExtendedValueType extended_value_type
-    , std::pmr::vector<SignalMultiplexerValueImpl>&& signal_multiplexer_values)
+    , std::pmr::vector<SignalMultiplexerValue>&& signal_multiplexer_values)
 
     : _name(std::move(name), alloc)
     , _multiplexer_indicator(multiplexer_indicator)
@@ -523,107 +509,107 @@ SignalImpl::SignalImpl(
         break;
     }
 }
-pmr_unique_ptr<ISignal> SignalImpl::Clone() const
+Signal Signal::Clone() const
 {
-    return make_unique_pmr<SignalImpl>(_allocator, *this);
+    return {*this, _allocator};
 }
-const std::string_view SignalImpl::Name() const
+const std::string_view Signal::Name() const
 {
     return _name;
 }
-ISignal::EMultiplexer SignalImpl::MultiplexerIndicator() const
+Signal::EMultiplexer Signal::MultiplexerIndicator() const
 {
     return _multiplexer_indicator;
 }
-uint64_t SignalImpl::MultiplexerSwitchValue() const
+uint64_t Signal::MultiplexerSwitchValue() const
 {
     return _multiplexer_switch_value;
 }
-uint16_t SignalImpl::StartBit() const
+uint16_t Signal::StartBit() const
 {
     return _start_bit;
 }
-uint16_t SignalImpl::BitSize() const
+uint16_t Signal::BitSize() const
 {
     return _bit_size;
 }
-ISignal::EByteOrder SignalImpl::ByteOrder() const
+Signal::EByteOrder Signal::ByteOrder() const
 {
     return _byte_order;
 }
-ISignal::EValueType SignalImpl::ValueType() const
+Signal::EValueType Signal::ValueType() const
 {
     return _value_type;
 }
-float SignalImpl::Factor() const
+float Signal::Factor() const
 {
     return _factor;
 }
-float SignalImpl::Offset() const
+float Signal::Offset() const
 {
     return _offset;
 }
-float SignalImpl::Minimum() const
+float Signal::Minimum() const
 {
     return _minimum;
 }
-float SignalImpl::Maximum() const
+float Signal::Maximum() const
 {
     return _maximum;
 }
-const std::string_view SignalImpl::Unit() const
+const std::string_view Signal::Unit() const
 {
     return _unit;
 }
-const std::pmr::string& SignalImpl::Receivers_Get(std::size_t i) const
+const std::pmr::string& Signal::Receivers_Get(std::size_t i) const
 {
     return _receivers[i];
 }
-std::size_t SignalImpl::Receivers_Size() const
+std::size_t Signal::Receivers_Size() const
 {
     return _receivers.size();
 }
-const IValueEncodingDescription& SignalImpl::ValueEncodingDescriptions_Get(std::size_t i) const
+const ValueEncodingDescription& Signal::ValueEncodingDescriptions_Get(std::size_t i) const
 {
     return _value_encoding_descriptions[i];
 }
-std::size_t SignalImpl::ValueEncodingDescriptions_Size() const
+std::size_t Signal::ValueEncodingDescriptions_Size() const
 {
     return _value_encoding_descriptions.size();
 }
-const IAttribute& SignalImpl::AttributeValues_Get(std::size_t i) const
+const Attribute& Signal::AttributeValues_Get(std::size_t i) const
 {
     return _attribute_values[i];
 }
-std::size_t SignalImpl::AttributeValues_Size() const
+std::size_t Signal::AttributeValues_Size() const
 {
     return _attribute_values.size();
 }
-const std::string_view SignalImpl::Comment() const
+const std::string_view Signal::Comment() const
 {
     return _comment;
 }
-ISignal::EExtendedValueType SignalImpl::ExtendedValueType() const
+Signal::EExtendedValueType Signal::ExtendedValueType() const
 {
     return _extended_value_type;
 }
-const ISignalMultiplexerValue& SignalImpl::SignalMultiplexerValues_Get(std::size_t i) const
+const SignalMultiplexerValue& Signal::SignalMultiplexerValues_Get(std::size_t i) const
 {
     return _signal_multiplexer_values[i];
 }
-std::size_t SignalImpl::SignalMultiplexerValues_Size() const
+std::size_t Signal::SignalMultiplexerValues_Size() const
 {
     return _signal_multiplexer_values.size();
 }
-bool SignalImpl::Error(EErrorCode code) const
+bool Signal::Error(EErrorCode code) const
 {
     return code == _error || (uint8_t(_error) & uint8_t(code));
 }
-void SignalImpl::SetError(EErrorCode code)
+void Signal::SetError(EErrorCode code)
 {
     _error = EErrorCode(uint8_t(_error) | uint8_t(code));
 }
-bool SignalImpl::operator==(const ISignal& rhs) const
+bool Signal::operator==(const Signal& rhs) const
 {
     bool equal = true;
     equal &= _name == rhs.Name();
@@ -666,7 +652,7 @@ bool SignalImpl::operator==(const ISignal& rhs) const
     }
     return equal;
 }
-bool SignalImpl::operator!=(const ISignal& rhs) const
+bool Signal::operator!=(const Signal& rhs) const
 {
     return !(*this == rhs);
 }

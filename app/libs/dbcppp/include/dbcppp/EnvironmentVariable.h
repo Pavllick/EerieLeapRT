@@ -1,24 +1,22 @@
 #pragma once
 
 #include <memory_resource>
-#include <map>
-#include <set>
 #include <string>
 #include <string_view>
 #include <vector>
 #include <cstddef>
-#include <functional>
 
 #include "Iterator.h"
-#include "Node.h"
 #include "Attribute.h"
 #include "ValueEncodingDescription.h"
 
 namespace dbcppp
 {
-    class IEnvironmentVariable
+    class EnvironmentVariable final
     {
     public:
+        using allocator_type = std::pmr::polymorphic_allocator<>;
+
         enum class EVarType
         {
             Integer, Float, String, Data
@@ -35,7 +33,61 @@ namespace dbcppp
             ReadWrite_      = 0x8003
         };
 
-        static pmr_unique_ptr<IEnvironmentVariable> Create(
+        EnvironmentVariable(
+              std::allocator_arg_t
+            , allocator_type alloc
+            , std::pmr::string&& name
+            , EVarType var_type
+            , double minimum
+            , double maximum
+            , std::pmr::string&& unit
+            , double initial_value
+            , uint64_t ev_id
+            , EAccessType access_type
+            , std::pmr::vector<std::pmr::string>&& access_nodes
+            , std::pmr::vector<ValueEncodingDescription>&& value_encoding_descriptions
+            , uint64_t data_size
+            , std::pmr::vector<Attribute>&& attribute_values
+            , std::pmr::string&& comment);
+
+        EnvironmentVariable& operator=(const EnvironmentVariable&) noexcept = default;
+        EnvironmentVariable& operator=(EnvironmentVariable&&) noexcept = default;
+        EnvironmentVariable(EnvironmentVariable&&) noexcept = default;
+        ~EnvironmentVariable() = default;
+
+        EnvironmentVariable(EnvironmentVariable&& other, allocator_type alloc)
+            : _name(std::move(other._name), alloc)
+            , _var_type(other._var_type)
+            , _minimum(other._minimum)
+            , _maximum(other._maximum)
+            , _unit(std::move(other._unit), alloc)
+            , _initial_value(other._initial_value)
+            , _ev_id(other._ev_id)
+            , _access_type(other._access_type)
+            , _access_nodes(std::move(other._access_nodes), alloc)
+            , _value_encoding_descriptions(std::move(other._value_encoding_descriptions), alloc)
+            , _data_size(other._data_size)
+            , _attribute_values(std::move(other._attribute_values), alloc)
+            , _comment(std::move(other._comment), alloc)
+            , _allocator(alloc) {}
+
+        EnvironmentVariable(const EnvironmentVariable& other, allocator_type alloc = {})
+            : _name(other._name, alloc)
+            , _var_type(other._var_type)
+            , _minimum(other._minimum)
+            , _maximum(other._maximum)
+            , _unit(other._unit, alloc)
+            , _initial_value(other._initial_value)
+            , _ev_id(other._ev_id)
+            , _access_type(other._access_type)
+            , _access_nodes(other._access_nodes, alloc)
+            , _value_encoding_descriptions(other._value_encoding_descriptions, alloc)
+            , _data_size(other._data_size)
+            , _attribute_values(other._attribute_values, alloc)
+            , _comment(other._comment, alloc)
+            , _allocator(alloc) {}
+
+        static EnvironmentVariable Create(
               std::pmr::memory_resource* mr
             , std::pmr::string&& name
             , EVarType var_type
@@ -46,36 +98,52 @@ namespace dbcppp
             , uint64_t ev_id
             , EAccessType access_type
             , std::pmr::vector<std::pmr::string>&& access_nodes
-            , std::pmr::vector<pmr_unique_ptr<IValueEncodingDescription>>&& value_encoding_descriptions
+            , std::pmr::vector<ValueEncodingDescription>&& value_encoding_descriptions
             , uint64_t data_size
-            , std::pmr::vector<pmr_unique_ptr<IAttribute>>&& attribute_values
+            , std::pmr::vector<Attribute>&& attribute_values
             , std::pmr::string&& comment);
 
-        virtual pmr_unique_ptr<IEnvironmentVariable> Clone() const = 0;
+        EnvironmentVariable Clone() const;
 
-        virtual ~IEnvironmentVariable() = default;
-        virtual const std::string_view Name() const = 0;
-        virtual EVarType VarType() const = 0;
-        virtual double Minimum() const = 0;
-        virtual double Maximum() const = 0;
-        virtual const std::string_view Unit() const = 0;
-        virtual double InitialValue() const = 0;
-        virtual uint64_t EvId() const = 0;
-        virtual EAccessType AccessType() const = 0;
-        virtual const std::pmr::string& AccessNodes_Get(std::size_t i) const = 0;
-        virtual std::size_t AccessNodes_Size() const = 0;
-        virtual const IValueEncodingDescription& ValueEncodingDescriptions_Get(std::size_t i) const = 0;
-        virtual std::size_t ValueEncodingDescriptions_Size() const = 0;
-        virtual uint64_t DataSize() const = 0;
-        virtual const IAttribute& AttributeValues_Get(std::size_t i) const = 0;
-        virtual std::size_t AttributeValues_Size() const = 0;
-        virtual const std::string_view Comment() const = 0;
+        const std::string_view Name() const;
+        EVarType VarType() const;
+        double Minimum() const;
+        double Maximum() const;
+        const std::string_view Unit() const;
+        double InitialValue() const;
+        uint64_t EvId() const;
+        EAccessType AccessType() const;
+        const std::pmr::string& AccessNodes_Get(std::size_t i) const;
+        std::size_t AccessNodes_Size() const;
+        const ValueEncodingDescription& ValueEncodingDescriptions_Get(std::size_t i) const;
+        std::size_t ValueEncodingDescriptions_Size() const;
+        uint64_t DataSize() const;
+        const Attribute& AttributeValues_Get(std::size_t i) const;
+        std::size_t AttributeValues_Size() const;
+        const std::string_view Comment() const;
 
-        DBCPPP_MAKE_ITERABLE(IEnvironmentVariable, AccessNodes, std::pmr::string);
-        DBCPPP_MAKE_ITERABLE(IEnvironmentVariable, ValueEncodingDescriptions, IValueEncodingDescription);
-        DBCPPP_MAKE_ITERABLE(IEnvironmentVariable, AttributeValues, IAttribute);
+        bool operator==(const EnvironmentVariable& rhs) const;
+        bool operator!=(const EnvironmentVariable& rhs) const;
 
-        virtual bool operator==(const IEnvironmentVariable& rhs) const = 0;
-        virtual bool operator!=(const IEnvironmentVariable& rhs) const = 0;
+        DBCPPP_MAKE_ITERABLE(EnvironmentVariable, AccessNodes, std::pmr::string);
+        DBCPPP_MAKE_ITERABLE(EnvironmentVariable, ValueEncodingDescriptions, ValueEncodingDescription);
+        DBCPPP_MAKE_ITERABLE(EnvironmentVariable, AttributeValues, Attribute);
+
+    private:
+        std::pmr::string _name;
+        EVarType _var_type;
+        double _minimum;
+        double _maximum;
+        std::pmr::string _unit;
+        double _initial_value;
+        uint64_t _ev_id;
+        EAccessType _access_type;
+        std::pmr::vector<std::pmr::string> _access_nodes;
+        std::pmr::vector<ValueEncodingDescription> _value_encoding_descriptions;
+        uint64_t _data_size;
+        std::pmr::vector<Attribute> _attribute_values;
+        std::pmr::string _comment;
+
+        allocator_type _allocator;
     };
 }

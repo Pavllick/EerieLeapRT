@@ -1,9 +1,10 @@
 #include <algorithm>
-#include "dbcppp/EnvironmentVariableImpl.h"
+#include <memory>
+#include "dbcppp/EnvironmentVariable.h"
 
 using namespace dbcppp;
 
-pmr_unique_ptr<IEnvironmentVariable> IEnvironmentVariable::Create(
+EnvironmentVariable EnvironmentVariable::Create(
       std::pmr::memory_resource* mr
     , std::pmr::string&& name
     , EVarType var_type
@@ -14,27 +15,14 @@ pmr_unique_ptr<IEnvironmentVariable> IEnvironmentVariable::Create(
     , uint64_t ev_id
     , EAccessType access_type
     , std::pmr::vector<std::pmr::string>&& access_nodes
-    , std::pmr::vector<pmr_unique_ptr<IValueEncodingDescription>>&& value_encoding_descriptions
+    , std::pmr::vector<ValueEncodingDescription>&& value_encoding_descriptions
     , uint64_t data_size
-    , std::pmr::vector<pmr_unique_ptr<IAttribute>>&& attribute_values
+    , std::pmr::vector<Attribute>&& attribute_values
     , std::pmr::string&& comment)
 {
-    std::pmr::vector<AttributeImpl> avs(mr);
-    avs.reserve(attribute_values.size());
-    for (auto& av : attribute_values)
-    {
-        avs.push_back(std::move(static_cast<AttributeImpl&>(*av)));
-        av.reset(nullptr);
-    }
-    std::pmr::vector<ValueEncodingDescriptionImpl> veds(mr);
-    veds.reserve(value_encoding_descriptions.size());
-    for (auto& ved : value_encoding_descriptions)
-    {
-        veds.push_back(std::move(static_cast<ValueEncodingDescriptionImpl&>(*ved)));
-        ved.reset(nullptr);
-    }
-    return make_unique_pmr<EnvironmentVariableImpl>(
-          mr
+    return {
+          std::allocator_arg
+        , mr
         , std::move(name)
         , var_type
         , minimum
@@ -44,13 +32,14 @@ pmr_unique_ptr<IEnvironmentVariable> IEnvironmentVariable::Create(
         , ev_id
         , access_type
         , std::move(access_nodes)
-        , std::move(veds)
+        , std::move(value_encoding_descriptions)
         , data_size
-        , std::move(avs)
-        , std::move(comment));
+        , std::move(attribute_values)
+        , std::move(comment)
+    };
 }
 
-EnvironmentVariableImpl::EnvironmentVariableImpl(
+EnvironmentVariable::EnvironmentVariable(
       std::allocator_arg_t
     , allocator_type alloc
     , std::pmr::string&& name
@@ -62,9 +51,9 @@ EnvironmentVariableImpl::EnvironmentVariableImpl(
     , uint64_t ev_id
     , EAccessType access_type
     , std::pmr::vector<std::pmr::string>&& access_nodes
-    , std::pmr::vector<ValueEncodingDescriptionImpl>&& value_encoding_descriptions
+    , std::pmr::vector<ValueEncodingDescription>&& value_encoding_descriptions
     , uint64_t data_size
-    , std::pmr::vector<AttributeImpl>&& attribute_values
+    , std::pmr::vector<Attribute>&& attribute_values
     , std::pmr::string&& comment)
 
     : _name(std::move(name), alloc)
@@ -82,75 +71,75 @@ EnvironmentVariableImpl::EnvironmentVariableImpl(
     , _comment(std::move(comment), alloc)
     , _allocator(alloc)
 {}
-pmr_unique_ptr<IEnvironmentVariable> EnvironmentVariableImpl::Clone() const
+EnvironmentVariable EnvironmentVariable::Clone() const
 {
-    return make_unique_pmr<EnvironmentVariableImpl>(_allocator, *this);
+    return {*this, _allocator};
 }
-const std::string_view EnvironmentVariableImpl::Name() const
+const std::string_view EnvironmentVariable::Name() const
 {
     return _name;
 }
-IEnvironmentVariable::EVarType EnvironmentVariableImpl::VarType() const
+EnvironmentVariable::EVarType EnvironmentVariable::VarType() const
 {
     return _var_type;
 }
-double EnvironmentVariableImpl::Minimum() const
+double EnvironmentVariable::Minimum() const
 {
     return _minimum;
 }
-double EnvironmentVariableImpl::Maximum() const
+double EnvironmentVariable::Maximum() const
 {
     return _maximum;
 }
-const std::string_view EnvironmentVariableImpl::Unit() const
+const std::string_view EnvironmentVariable::Unit() const
 {
     return _unit;
 }
-double EnvironmentVariableImpl::InitialValue() const
+double EnvironmentVariable::InitialValue() const
 {
     return _initial_value;
 }
-uint64_t EnvironmentVariableImpl::EvId() const
+uint64_t EnvironmentVariable::EvId() const
 {
     return _ev_id;
 }
-IEnvironmentVariable::EAccessType EnvironmentVariableImpl::AccessType() const
+EnvironmentVariable::EAccessType EnvironmentVariable::AccessType() const
 {
     return _access_type;
 }
-const std::pmr::string& EnvironmentVariableImpl::AccessNodes_Get(std::size_t i) const
+const std::pmr::string& EnvironmentVariable::AccessNodes_Get(std::size_t i) const
 {
     return _access_nodes[i];
 }
-std::size_t EnvironmentVariableImpl::AccessNodes_Size() const
+std::size_t EnvironmentVariable::AccessNodes_Size() const
 {
     return _access_nodes.size();
 }
-const IValueEncodingDescription& EnvironmentVariableImpl::ValueEncodingDescriptions_Get(std::size_t i) const
+const ValueEncodingDescription& EnvironmentVariable::ValueEncodingDescriptions_Get(std::size_t i) const
 {
     return _value_encoding_descriptions[i];
 }
-std::size_t EnvironmentVariableImpl::ValueEncodingDescriptions_Size() const
+std::size_t EnvironmentVariable::ValueEncodingDescriptions_Size() const
 {
     return _value_encoding_descriptions.size();
 }
-uint64_t EnvironmentVariableImpl::DataSize() const
+uint64_t EnvironmentVariable::DataSize() const
 {
     return _data_size;
 }
-const IAttribute& EnvironmentVariableImpl::AttributeValues_Get(std::size_t i) const
+const Attribute& EnvironmentVariable::AttributeValues_Get(std::size_t i) const
 {
     return _attribute_values[i];
 }
-std::size_t EnvironmentVariableImpl::AttributeValues_Size() const
+std::size_t EnvironmentVariable::AttributeValues_Size() const
 {
     return _attribute_values.size();
 }
-const std::string_view EnvironmentVariableImpl::Comment() const
+const std::string_view EnvironmentVariable::Comment() const
 {
     return _comment;
 }
-bool EnvironmentVariableImpl::operator==(const IEnvironmentVariable& rhs) const
+bool EnvironmentVariable::operator==(const EnvironmentVariable& rhs) const
 {
     bool result = true;
     result &= _name == rhs.Name();
@@ -182,7 +171,7 @@ bool EnvironmentVariableImpl::operator==(const IEnvironmentVariable& rhs) const
     result &= _comment == rhs.Comment();
     return result;
 }
-bool EnvironmentVariableImpl::operator!=(const IEnvironmentVariable& rhs) const
+bool EnvironmentVariable::operator!=(const EnvironmentVariable& rhs) const
 {
     return !(*this == rhs);
 }

@@ -1,22 +1,24 @@
 #include <algorithm>
-#include "dbcppp/AttributeDefinitionImpl.h"
+#include "dbcppp/AttributeDefinition.h"
 
 using namespace dbcppp;
 
-pmr_unique_ptr<IAttributeDefinition> IAttributeDefinition::Create(
+AttributeDefinition AttributeDefinition::Create(
       std::pmr::memory_resource* mr
     , std::pmr::string&& name
     , EObjectType object_type
     , value_type_t&& value_type)
 {
-    return make_unique_pmr<AttributeDefinitionImpl>(
-          mr
+    return {
+          std::allocator_arg
+        , mr
         , std::move(name)
         , object_type
-        , std::move(value_type));
+        , std::move(value_type)
+    };
 }
 
-AttributeDefinitionImpl::AttributeDefinitionImpl(
+AttributeDefinition::AttributeDefinition(
     std::allocator_arg_t
     , allocator_type alloc
     , std::pmr::string&& name
@@ -28,23 +30,23 @@ AttributeDefinitionImpl::AttributeDefinitionImpl(
     , _value_type(std::move(value_type))
     , _allocator(alloc)
 {}
-pmr_unique_ptr<IAttributeDefinition> AttributeDefinitionImpl::Clone() const
+AttributeDefinition AttributeDefinition::Clone() const
 {
-    return make_unique_pmr<AttributeDefinitionImpl>(_allocator, *this);
+    return {*this, _allocator};
 }
-IAttributeDefinition::EObjectType AttributeDefinitionImpl::ObjectType() const
+AttributeDefinition::EObjectType AttributeDefinition::ObjectType() const
 {
     return _object_type;
 }
-const std::string_view AttributeDefinitionImpl::Name() const
+const std::string_view AttributeDefinition::Name() const
 {
     return _name;
 }
-const IAttributeDefinition::value_type_t& AttributeDefinitionImpl::ValueType() const
+const AttributeDefinition::value_type_t& AttributeDefinition::ValueType() const
 {
     return _value_type;
 }
-bool AttributeDefinitionImpl::operator==(const IAttributeDefinition& rhs) const
+bool AttributeDefinition::operator==(const AttributeDefinition& rhs) const
 {
     bool equal = true;
     equal &= _name == rhs.Name();
@@ -87,7 +89,7 @@ bool AttributeDefinitionImpl::operator==(const IAttributeDefinition& rhs) const
     }
     return equal;
 }
-bool AttributeDefinitionImpl::operator!=(const IAttributeDefinition& rhs) const
+bool AttributeDefinition::operator!=(const AttributeDefinition& rhs) const
 {
     return !(*this == rhs);
 }

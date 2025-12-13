@@ -8,26 +8,26 @@
 
 #include <dbcppp/Network.h>
 
-#include "utilities/memory/memory_resource_manager.h"
+#include <eerie_memory.hpp>
 
 namespace eerie_leap::subsys::dbc {
 
-using namespace eerie_leap::utilities::memory;
+using namespace eerie_memory;
 
 class DbcMessage {
 public:
    using allocator_type = std::pmr::polymorphic_allocator<>;
 
 private:
-   pmr_unique_ptr<dbcppp::IMessage> message_container_;
-   const dbcppp::IMessage* message_;
+   pmr_unique_ptr<dbcppp::Message> message_container_;
+   const dbcppp::Message* message_;
 
-   std::pmr::vector<pmr_unique_ptr<dbcppp::ISignal>> signals_container_;
-   std::pmr::unordered_map<size_t, const dbcppp::ISignal*> signals_;
+   std::pmr::vector<dbcppp::Signal> signals_container_;
+   std::pmr::unordered_map<size_t, const dbcppp::Signal*> signals_;
 
    allocator_type allocator_;
 
-   void RegisterSignal(const dbcppp::ISignal* signal);
+   void RegisterSignal(const dbcppp::Signal* signal);
 
 public:
    using SignalReader = std::function<float (size_t)>;
@@ -35,7 +35,7 @@ public:
    explicit DbcMessage(
       std::allocator_arg_t,
       allocator_type alloc,
-      const dbcppp::IMessage* message);
+      const dbcppp::Message* message);
    DbcMessage(
       std::allocator_arg_t,
       allocator_type alloc,

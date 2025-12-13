@@ -4,43 +4,65 @@
 #include <memory_resource>
 #include <string>
 #include <cstddef>
-#include <memory>
 #include <vector>
-#include <functional>
-#include <cstdint>
 
 #include "Iterator.h"
 
-#include <eerie_memory.hpp>
-
-using namespace eerie_memory;
-
 namespace dbcppp
 {
-    class ISignalMultiplexerValue
+    class SignalMultiplexerValue
     {
     public:
+        using allocator_type = std::pmr::polymorphic_allocator<>;
+
         struct Range
         {
             std::size_t from;
             std::size_t to;
         };
 
-        static pmr_unique_ptr<ISignalMultiplexerValue> Create(
+        SignalMultiplexerValue(
+              std::allocator_arg_t
+            , allocator_type alloc
+            , std::pmr::string&& switch_name
+            , std::pmr::vector<Range>&& value_ranges);
+
+        SignalMultiplexerValue(const SignalMultiplexerValue&) = delete;
+        SignalMultiplexerValue& operator=(const SignalMultiplexerValue&) = delete;
+        SignalMultiplexerValue& operator=(SignalMultiplexerValue&&) noexcept = default;
+        SignalMultiplexerValue(SignalMultiplexerValue&&) noexcept = default;
+        ~SignalMultiplexerValue() = default;
+
+        SignalMultiplexerValue(SignalMultiplexerValue&& other, allocator_type alloc)
+            : _switch_name(std::move(other._switch_name), alloc)
+            , _value_ranges(std::move(other._value_ranges), alloc)
+            , _allocator(alloc) {}
+
+        SignalMultiplexerValue(const SignalMultiplexerValue& other, allocator_type alloc = {})
+            : _switch_name(other._switch_name, alloc)
+            , _value_ranges(other._value_ranges, alloc)
+            , _allocator(alloc) {}
+
+        static SignalMultiplexerValue Create(
               std::pmr::memory_resource* mr
             , std::pmr::string&& switch_name
             , std::pmr::vector<Range>&& value_ranges);
 
-        virtual pmr_unique_ptr<ISignalMultiplexerValue> Clone() const = 0;
+        SignalMultiplexerValue Clone() const;
 
-        virtual ~ISignalMultiplexerValue() = default;
-        virtual const std::string_view SwitchName() const = 0;
-        virtual const Range& ValueRanges_Get(std::size_t i) const = 0;
-        virtual std::size_t ValueRanges_Size() const = 0;
+        const std::string_view SwitchName() const;
+        const Range& ValueRanges_Get(std::size_t i) const;
+        std::size_t ValueRanges_Size() const;
 
-        DBCPPP_MAKE_ITERABLE(ISignalMultiplexerValue, ValueRanges, Range);
+        bool operator==(const SignalMultiplexerValue& rhs) const;
+        bool operator!=(const SignalMultiplexerValue& rhs) const;
 
-        virtual bool operator==(const ISignalMultiplexerValue& rhs) const = 0;
-        virtual bool operator!=(const ISignalMultiplexerValue& rhs) const = 0;
+        DBCPPP_MAKE_ITERABLE(SignalMultiplexerValue, ValueRanges, Range);
+
+    private:
+        std::pmr::string _switch_name;
+        std::pmr::vector<Range> _value_ranges;
+
+        allocator_type _allocator;
     };
 }

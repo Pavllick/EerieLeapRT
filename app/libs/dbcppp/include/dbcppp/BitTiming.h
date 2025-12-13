@@ -1,32 +1,63 @@
 #pragma once
 
 #include <memory_resource>
-#include <memory>
 #include <cstdint>
-
-#include <eerie_memory.hpp>
-
-using namespace eerie_memory;
 
 namespace dbcppp
 {
-    class IBitTiming
+    class BitTiming final
     {
     public:
-        static pmr_unique_ptr<IBitTiming> Create(
+        using allocator_type = std::pmr::polymorphic_allocator<>;
+
+        BitTiming(
+            std::allocator_arg_t
+            , allocator_type alloc
+        );
+        BitTiming(
+              std::allocator_arg_t
+            , allocator_type alloc
+            , uint64_t baudrate
+            , uint64_t BTR1
+            , uint64_t BTR2);
+
+        BitTiming& operator=(const BitTiming&) noexcept = default;
+        BitTiming& operator=(BitTiming&&) noexcept = default;
+        BitTiming(BitTiming&&) noexcept = default;
+        ~BitTiming() = default;
+
+        BitTiming(BitTiming&& other, allocator_type alloc)
+            : _baudrate(other._baudrate)
+            , _BTR1(other._BTR1)
+            , _BTR2(other._BTR2)
+            , _allocator(alloc) {}
+
+        BitTiming(const BitTiming& other, allocator_type alloc = {})
+            : _baudrate(other._baudrate)
+            , _BTR1(other._BTR1)
+            , _BTR2(other._BTR2)
+            , _allocator(alloc) {}
+
+        static BitTiming Create(
               std::pmr::memory_resource* mr
             , uint64_t baudrate
             , uint64_t BTR1
             , uint64_t BTR2);
 
-        virtual pmr_unique_ptr<IBitTiming> Clone() const = 0;
+        BitTiming Clone() const;
 
-        virtual ~IBitTiming() = default;
-        virtual uint64_t Baudrate() const = 0;
-        virtual uint64_t BTR1() const = 0;
-        virtual uint64_t BTR2() const = 0;
+        uint64_t Baudrate() const;
+        uint64_t BTR1() const;
+        uint64_t BTR2() const;
 
-        virtual bool operator==(const IBitTiming& rhs) const = 0;
-        virtual bool operator!=(const IBitTiming& rhs) const = 0;
+        bool operator==(const BitTiming& rhs) const;
+        bool operator!=(const BitTiming& rhs) const;
+
+    private:
+        uint64_t _baudrate;
+        uint64_t _BTR1;
+        uint64_t _BTR2;
+
+        allocator_type _allocator;
     };
 }

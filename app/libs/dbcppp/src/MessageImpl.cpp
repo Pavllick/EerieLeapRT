@@ -1,52 +1,37 @@
 #include <algorithm>
-#include "dbcppp/MessageImpl.h"
+#include <memory>
+#include "dbcppp/Message.h"
 
 using namespace dbcppp;
 
 
-pmr_unique_ptr<IMessage> IMessage::Create(
+Message Message::Create(
       std::pmr::memory_resource* mr
     , uint64_t id
     , std::pmr::string&& name
     , uint64_t message_size
     , std::pmr::string&& transmitter
     , std::pmr::vector<std::pmr::string>&& message_transmitters
-    , std::pmr::vector<pmr_unique_ptr<ISignal>>&& signals_
-    , std::pmr::vector<pmr_unique_ptr<IAttribute>>&& attribute_values
+    , std::pmr::vector<Signal>&& signals_
+    , std::pmr::vector<Attribute>&& attribute_values
     , std::pmr::string&& comment
-    , std::pmr::vector<pmr_unique_ptr<ISignalGroup>>&& signal_groups)
+    , std::pmr::vector<SignalGroup>&& signal_groups)
 {
-    std::pmr::vector<SignalImpl> ss(mr);
-    std::pmr::vector<AttributeImpl> avs(mr);
-    std::pmr::vector<SignalGroupImpl> sgs(mr);
-    for (auto& s : signals_)
-    {
-        ss.push_back(std::move(static_cast<SignalImpl&>(*s)));
-        s.reset(nullptr);
-    }
-    for (auto& av : attribute_values)
-    {
-        avs.push_back(std::move(static_cast<AttributeImpl&>(*av)));
-        av.reset(nullptr);
-    }
-    for (auto& sg : signal_groups)
-    {
-        sgs.push_back(std::move(static_cast<SignalGroupImpl&>(*sg)));
-        sg.reset(nullptr);
-    }
-    return make_unique_pmr<MessageImpl>(
-        mr
+    return {
+          std::allocator_arg
+        , mr
         , id
         , std::move(name)
         , message_size
         , std::move(transmitter)
         , std::move(message_transmitters)
-        , std::move(ss)
-        , std::move(avs)
+        , std::move(signals_)
+        , std::move(attribute_values)
         , std::move(comment)
-        , std::move(sgs));
+        , std::move(signal_groups)
+    };
 }
-MessageImpl::MessageImpl(
+Message::Message(
       std::allocator_arg_t
     , allocator_type alloc
     , uint64_t id
@@ -54,10 +39,10 @@ MessageImpl::MessageImpl(
     , uint64_t message_size
     , std::pmr::string&& transmitter
     , std::pmr::vector<std::pmr::string>&& message_transmitters
-    , std::pmr::vector<SignalImpl>&& signals_
-    , std::pmr::vector<AttributeImpl>&& attribute_values
+    , std::pmr::vector<Signal>&& signals_
+    , std::pmr::vector<Attribute>&& attribute_values
     , std::pmr::string&& comment
-    , std::pmr::vector<SignalGroupImpl>&& signal_groups)
+    , std::pmr::vector<SignalGroup>&& signal_groups)
 
     : _id(id)
     , _name(std::move(name), alloc)
@@ -77,10 +62,10 @@ MessageImpl::MessageImpl(
     {
         switch (sig.MultiplexerIndicator())
         {
-        case ISignal::EMultiplexer::MuxValue:
+        case Signal::EMultiplexer::MuxValue:
             have_mux_value = true;
             break;
-        case ISignal::EMultiplexer::MuxSwitch:
+        case Signal::EMultiplexer::MuxSwitch:
             _mux_signal = &sig;
             break;
         }
@@ -90,76 +75,76 @@ MessageImpl::MessageImpl(
         _error = EErrorCode::MuxValeWithoutMuxSignal;
     }
 }
-pmr_unique_ptr<IMessage> MessageImpl::Clone() const
+Message Message::Clone() const
 {
-    return make_unique_pmr<MessageImpl>(_allocator, *this);
+    return {*this, _allocator};
 }
-uint64_t MessageImpl::Id() const
+uint64_t Message::Id() const
 {
     return _id;
 }
-const std::string_view MessageImpl::Name() const
+const std::string_view Message::Name() const
 {
     return _name;
 }
-uint64_t MessageImpl::MessageSize() const
+uint64_t Message::MessageSize() const
 {
     return _message_size;
 }
-const std::string_view MessageImpl::Transmitter() const
+const std::string_view Message::Transmitter() const
 {
     return _transmitter;
 }
-const std::pmr::string& MessageImpl::MessageTransmitters_Get(std::size_t i) const
+const std::pmr::string& Message::MessageTransmitters_Get(std::size_t i) const
 {
     return _message_transmitters[i];
 }
-std::size_t MessageImpl::MessageTransmitters_Size() const
+std::size_t Message::MessageTransmitters_Size() const
 {
     return _message_transmitters.size();
 }
-const ISignal& MessageImpl::Signals_Get(std::size_t i) const
+const Signal& Message::Signals_Get(std::size_t i) const
 {
     return _signals[i];
 }
-std::size_t MessageImpl::Signals_Size() const
+std::size_t Message::Signals_Size() const
 {
     return _signals.size();
 }
-const IAttribute& MessageImpl::AttributeValues_Get(std::size_t i) const
+const Attribute& Message::AttributeValues_Get(std::size_t i) const
 {
     return _attribute_values[i];
 }
-std::size_t MessageImpl::AttributeValues_Size() const
+std::size_t Message::AttributeValues_Size() const
 {
     return _attribute_values.size();
 }
-const std::string_view MessageImpl::Comment() const
+const std::string_view Message::Comment() const
 {
     return _comment;
 }
-const ISignalGroup& MessageImpl::SignalGroups_Get(std::size_t i) const
+const SignalGroup& Message::SignalGroups_Get(std::size_t i) const
 {
     return _signal_groups[i];
 }
-std::size_t MessageImpl::SignalGroups_Size() const
+std::size_t Message::SignalGroups_Size() const
 {
     return _signal_groups.size();
 }
-const ISignal* MessageImpl::MuxSignal() const
+const Signal* Message::MuxSignal() const
 {
     return _mux_signal;
 }
-MessageImpl::EErrorCode MessageImpl::Error() const
+Message::EErrorCode Message::Error() const
 {
     return _error;
 }
 
-const std::pmr::vector<SignalImpl>& MessageImpl::signals() const
+const std::pmr::vector<Signal>& Message::signals() const
 {
     return _signals;
 }
-bool MessageImpl::operator==(const IMessage& rhs) const
+bool Message::operator==(const Message& rhs) const
 {
     bool equal = true;
     equal &= _id == rhs.Id();
@@ -192,7 +177,7 @@ bool MessageImpl::operator==(const IMessage& rhs) const
     }
     return equal;
 }
-bool MessageImpl::operator!=(const IMessage& rhs) const
+bool Message::operator!=(const Message& rhs) const
 {
     return !(*this == rhs);
 }

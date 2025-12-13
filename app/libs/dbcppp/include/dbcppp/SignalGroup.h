@@ -1,43 +1,72 @@
-
 #pragma once
 
 #include <memory_resource>
 #include <vector>
 #include <string>
-#include <memory>
-#include <functional>
 #include <cstdint>
 
 #include "Iterator.h"
 
-#include <eerie_memory.hpp>
-
-using namespace eerie_memory;
-
 namespace dbcppp
 {
-    class ISignalGroup
+    class SignalGroup
     {
     public:
-        static pmr_unique_ptr<ISignalGroup> Create(
+        using allocator_type = std::pmr::polymorphic_allocator<>;
+
+        SignalGroup(
+              std::allocator_arg_t
+            , allocator_type alloc
+            , uint64_t message_id
+            , std::pmr::string&& name
+            , uint64_t repetitions
+            , std::pmr::vector<std::pmr::string>&& signal_names);
+
+        SignalGroup& operator=(const SignalGroup&) noexcept = default;
+        SignalGroup& operator=(SignalGroup&&) noexcept = default;
+        SignalGroup(SignalGroup&&) noexcept = default;
+        ~SignalGroup() = default;
+
+        SignalGroup(SignalGroup&& other, allocator_type alloc)
+            : _message_id(other._message_id)
+            , _name(std::move(other._name))
+            , _repetitions(other._repetitions)
+            , _signal_names(std::move(other._signal_names))
+            , _allocator(alloc) {}
+
+        SignalGroup(const SignalGroup& other, allocator_type alloc = {})
+            : _message_id(other._message_id)
+            , _name(other._name, alloc)
+            , _repetitions(other._repetitions)
+            , _signal_names(other._signal_names, alloc)
+            , _allocator(alloc) {}
+
+        static SignalGroup Create(
               std::pmr::memory_resource* mr
             , uint64_t message_id
             , std::pmr::string&& name
             , uint64_t repetitions
             , std::pmr::vector<std::pmr::string>&& signal_names);
 
-        virtual pmr_unique_ptr<ISignalGroup> Clone() const = 0;
+        SignalGroup Clone() const;
 
-        virtual ~ISignalGroup() = default;
-        virtual uint64_t MessageId() const = 0;
-        virtual const std::string_view Name() const = 0;
-        virtual uint64_t Repetitions() const = 0;
-        virtual const std::pmr::string& SignalNames_Get(std::size_t i) const = 0;
-        virtual std::size_t SignalNames_Size() const = 0;
+        uint64_t MessageId() const;
+        const std::string_view Name() const;
+        uint64_t Repetitions() const;
+        const std::pmr::string& SignalNames_Get(std::size_t i) const;
+        std::size_t SignalNames_Size() const;
 
-        DBCPPP_MAKE_ITERABLE(ISignalGroup, SignalNames, std::pmr::string);
+        bool operator==(const SignalGroup& rhs) const;
+        bool operator!=(const SignalGroup& rhs) const;
 
-        virtual bool operator==(const ISignalGroup& rhs) const = 0;
-        virtual bool operator!=(const ISignalGroup& rhs) const = 0;
+        DBCPPP_MAKE_ITERABLE(SignalGroup, SignalNames, std::pmr::string);
+
+    private:
+        uint64_t _message_id;
+        std::pmr::string _name;
+        uint64_t _repetitions;
+        std::pmr::vector<std::pmr::string> _signal_names;
+
+        allocator_type _allocator;
     };
 }

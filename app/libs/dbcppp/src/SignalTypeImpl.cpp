@@ -1,13 +1,14 @@
-#include "dbcppp/SignalTypeImpl.h"
+#include "dbcppp/SignalType.h"
+#include <memory>
 
 using namespace dbcppp;
 
-pmr_unique_ptr<ISignalType> ISignalType::Create(
+SignalType SignalType::Create(
       std::pmr::memory_resource* mr
     , std::pmr::string&& name
     , uint64_t signal_size
-    , ISignal::EByteOrder byte_order
-    , ISignal::EValueType value_type
+    , Signal::EByteOrder byte_order
+    , Signal::EValueType value_type
     , double factor
     , double offset
     , double minimum
@@ -16,8 +17,9 @@ pmr_unique_ptr<ISignalType> ISignalType::Create(
     , double default_value
     , std::pmr::string&& value_table)
 {
-    return make_unique_pmr<SignalTypeImpl>(
-          mr
+    return {
+          std::allocator_arg
+        , mr
         , std::move(name)
         , signal_size
         , byte_order
@@ -28,16 +30,17 @@ pmr_unique_ptr<ISignalType> ISignalType::Create(
         , maximum
         , std::move(unit)
         , default_value
-        , std::move(value_table));
+        , std::move(value_table)
+    };
 }
 
-SignalTypeImpl::SignalTypeImpl(
+SignalType::SignalType(
       std::allocator_arg_t
     , allocator_type alloc
     , std::pmr::string&& name
     , uint64_t signal_size
-    , ISignal::EByteOrder byte_order
-    , ISignal::EValueType value_type
+    , Signal::EByteOrder byte_order
+    , Signal::EValueType value_type
     , double factor
     , double offset
     , double minimum
@@ -59,55 +62,55 @@ SignalTypeImpl::SignalTypeImpl(
     , _value_table(std::move(value_table))
     , _allocator(alloc)
 {}
-pmr_unique_ptr<ISignalType> SignalTypeImpl::Clone() const
+SignalType SignalType::Clone() const
 {
-    return make_unique_pmr<SignalTypeImpl>(_allocator, *this);
+    return {*this, _allocator};
 }
-const std::string_view SignalTypeImpl::Name() const
+const std::string_view SignalType::Name() const
 {
     return _name;
 }
-uint64_t SignalTypeImpl::SignalSize() const
+uint64_t SignalType::SignalSize() const
 {
     return _signal_size;
 }
-ISignal::EByteOrder SignalTypeImpl::ByteOrder() const
+Signal::EByteOrder SignalType::ByteOrder() const
 {
     return _byte_order;
 }
-ISignal::EValueType SignalTypeImpl::ValueType() const
+Signal::EValueType SignalType::ValueType() const
 {
     return _value_type;
 }
-double SignalTypeImpl::Factor() const
+double SignalType::Factor() const
 {
     return _factor;
 }
-double SignalTypeImpl::Offset() const
+double SignalType::Offset() const
 {
     return _offset;
 }
-double SignalTypeImpl::Minimum() const
+double SignalType::Minimum() const
 {
     return _minimum;
 }
-double SignalTypeImpl::Maximum() const
+double SignalType::Maximum() const
 {
     return _maximum;
 }
-const std::string_view SignalTypeImpl::Unit() const
+const std::string_view SignalType::Unit() const
 {
     return _unit;
 }
-double SignalTypeImpl::DefaultValue() const
+double SignalType::DefaultValue() const
 {
     return _default_value;
 }
-const std::string_view SignalTypeImpl::ValueTable() const
+const std::string_view SignalType::ValueTable() const
 {
     return _value_table;
 }
-bool SignalTypeImpl::operator==(const ISignalType& rhs) const
+bool SignalType::operator==(const SignalType& rhs) const
 {
     bool equal = true;
     equal &= _name == rhs.Name();
@@ -122,7 +125,7 @@ bool SignalTypeImpl::operator==(const ISignalType& rhs) const
     equal &= _value_table == rhs.ValueTable();
     return equal;
 }
-bool SignalTypeImpl::operator!=(const ISignalType& rhs) const
+bool SignalType::operator!=(const SignalType& rhs) const
 {
     return !(*this == rhs);
 }

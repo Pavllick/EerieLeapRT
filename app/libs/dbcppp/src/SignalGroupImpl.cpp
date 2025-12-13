@@ -1,24 +1,27 @@
 #include <algorithm>
-#include "dbcppp/SignalGroupImpl.h"
+#include <memory>
+#include "dbcppp/SignalGroup.h"
 
 using namespace dbcppp;
 
-pmr_unique_ptr<ISignalGroup> ISignalGroup::Create(
+SignalGroup SignalGroup::Create(
       std::pmr::memory_resource* mr
     , uint64_t message_id
     , std::pmr::string&& name
     , uint64_t repetitions
     , std::pmr::vector<std::pmr::string>&& signal_names)
 {
-    return make_unique_pmr<SignalGroupImpl>(
-          mr
+    return {
+          std::allocator_arg
+        , mr
         , message_id
         , std::move(name)
         , repetitions
-        , std::move(signal_names));
+        , std::move(signal_names)
+    };
 }
 
-SignalGroupImpl::SignalGroupImpl(
+SignalGroup::SignalGroup(
       std::allocator_arg_t
     , allocator_type alloc
     , uint64_t message_id
@@ -32,32 +35,32 @@ SignalGroupImpl::SignalGroupImpl(
     , _signal_names(std::move(signal_names))
     , _allocator(alloc) {}
 
-pmr_unique_ptr<ISignalGroup> SignalGroupImpl::Clone() const
+SignalGroup SignalGroup::Clone() const
 {
-    return make_unique_pmr<SignalGroupImpl>(_allocator, *this);
+    return {*this, _allocator};
 }
-uint64_t SignalGroupImpl::MessageId() const
+uint64_t SignalGroup::MessageId() const
 {
     return _message_id;
 }
-const std::string_view SignalGroupImpl::Name() const
+const std::string_view SignalGroup::Name() const
 {
     return _name;
 }
-uint64_t SignalGroupImpl::Repetitions() const
+uint64_t SignalGroup::Repetitions() const
 {
     return _repetitions;
 }
-const std::pmr::string& SignalGroupImpl::SignalNames_Get(std::size_t i) const
+const std::pmr::string& SignalGroup::SignalNames_Get(std::size_t i) const
 {
     return _signal_names[i];
 }
-std::size_t SignalGroupImpl::SignalNames_Size() const
+std::size_t SignalGroup::SignalNames_Size() const
 {
     return _signal_names.size();
 }
 
-bool SignalGroupImpl::operator==(const ISignalGroup& rhs) const
+bool SignalGroup::operator==(const SignalGroup& rhs) const
 {
     bool equal = true;
     equal &= _message_id == rhs.MessageId();
@@ -71,7 +74,7 @@ bool SignalGroupImpl::operator==(const ISignalGroup& rhs) const
     }
     return equal;
 }
-bool SignalGroupImpl::operator!=(const ISignalGroup& rhs) const
+bool SignalGroup::operator!=(const SignalGroup& rhs) const
 {
     return !(*this == rhs);
 }

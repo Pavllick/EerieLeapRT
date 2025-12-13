@@ -1,24 +1,18 @@
 #pragma once
 
 #include <memory_resource>
-#include <cstddef>
 #include <string>
 #include <vector>
-#include <functional>
 #include <variant>
 #include <memory>
 
-#include "Iterator.h"
-
-#include <eerie_memory.hpp>
-
-using namespace eerie_memory;
-
 namespace dbcppp
 {
-    class IAttributeDefinition
+    class AttributeDefinition final
     {
     public:
+        using allocator_type = std::pmr::polymorphic_allocator<>;
+
         enum class EObjectType : std::uint8_t
         {
             Network,
@@ -51,20 +45,50 @@ namespace dbcppp
         };
         using value_type_t = std::variant<ValueTypeInt, ValueTypeHex, ValueTypeFloat, ValueTypeString, ValueTypeEnum>;
 
-        static pmr_unique_ptr<IAttributeDefinition> Create(
+        AttributeDefinition(
+              std::allocator_arg_t
+            , allocator_type alloc
+            , std::pmr::string&& name
+            , EObjectType object_type
+            , value_type_t value_type);
+
+        AttributeDefinition& operator=(const AttributeDefinition&) noexcept = default;
+        AttributeDefinition& operator=(AttributeDefinition&&) noexcept = default;
+        AttributeDefinition(AttributeDefinition&&) noexcept = default;
+        ~AttributeDefinition() = default;
+
+        AttributeDefinition(AttributeDefinition&& other, allocator_type alloc)
+            : _name(std::move(other._name))
+            , _object_type(other._object_type)
+            , _value_type(other._value_type)
+            , _allocator(alloc) {}
+
+        AttributeDefinition(const AttributeDefinition& other, allocator_type alloc = {})
+            : _name(other._name, alloc)
+            , _object_type(other._object_type)
+            , _value_type(other._value_type)
+            , _allocator(alloc) {}
+
+        static AttributeDefinition Create(
               std::pmr::memory_resource* mr
             , std::pmr::string&& name
             , EObjectType object_type
             , value_type_t&& value_type);
 
-        virtual pmr_unique_ptr<IAttributeDefinition> Clone() const = 0;
+        AttributeDefinition Clone() const;
 
-        virtual ~IAttributeDefinition() = default;
-        virtual EObjectType ObjectType() const = 0;
-        virtual const std::string_view Name() const = 0;
-        virtual const value_type_t& ValueType() const = 0;
+        EObjectType ObjectType() const;
+        const std::string_view Name() const;
+        const value_type_t& ValueType() const;
 
-        virtual bool operator==(const IAttributeDefinition& rhs) const = 0;
-        virtual bool operator!=(const IAttributeDefinition& rhs) const = 0;
+        bool operator==(const AttributeDefinition& rhs) const;
+        bool operator!=(const AttributeDefinition& rhs) const;
+
+    private:
+        std::pmr::string _name;
+        EObjectType _object_type;
+        value_type_t _value_type;
+
+        allocator_type _allocator;
     };
 }

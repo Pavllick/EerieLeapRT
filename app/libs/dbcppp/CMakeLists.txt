@@ -1,7 +1,6 @@
 set(INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(BOOST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../boost")
-set(EERIE_MEMORY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../eerie_memory")
 
 file(GLOB_RECURSE SOURCES
     "${SRC_DIR}/*.cpp"
@@ -12,13 +11,11 @@ add_library(dbcppp ${SOURCES})
 
 target_link_libraries(dbcppp PUBLIC
     zephyr_interface
-    eerie_memory
 )
 
 target_include_directories(dbcppp
     PUBLIC
         ${INC_DIR}
-        ${EERIE_MEMORY_DIR}
     PRIVATE
         ${SRC_DIR}
         ${BOOST_DIR}

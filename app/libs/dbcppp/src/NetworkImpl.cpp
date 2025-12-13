@@ -2,198 +2,155 @@
 #include <memory>
 #include "dbcppp/Network.h"
 #include "dbcppp/Signal.h"
-#include "dbcppp/NetworkImpl.h"
+#include "dbcppp/Network.h"
 
 using namespace dbcppp;
 
-pmr_unique_ptr<INetwork> INetwork::Create(
+Network Network::Create(
       std::pmr::memory_resource* mr
     , std::pmr::string&& version
     , std::pmr::vector<std::pmr::string>&& new_symbols
-    , pmr_unique_ptr<IBitTiming>&& bit_timing
-    , std::pmr::vector<pmr_unique_ptr<INode>>&& nodes
-    , std::pmr::vector<pmr_unique_ptr<IValueTable>>&& value_tables
-    , std::pmr::vector<pmr_unique_ptr<IMessage>>&& messages
-    , std::pmr::vector<pmr_unique_ptr<IEnvironmentVariable>>&& environment_variables
-    , std::pmr::vector<pmr_unique_ptr<IAttributeDefinition>>&& attribute_definitions
-    , std::pmr::vector<pmr_unique_ptr<IAttribute>>&& attribute_defaults
-    , std::pmr::vector<pmr_unique_ptr<IAttribute>>&& attribute_values
+    , BitTiming&& bit_timing
+    , std::pmr::vector<Node>&& nodes
+    , std::pmr::vector<ValueTable>&& value_tables
+    , std::pmr::vector<Message>&& messages
+    , std::pmr::vector<EnvironmentVariable>&& environment_variables
+    , std::pmr::vector<AttributeDefinition>&& attribute_definitions
+    , std::pmr::vector<Attribute>&& attribute_defaults
+    , std::pmr::vector<Attribute>&& attribute_values
     , std::pmr::string&& comment)
 {
-    BitTimingImpl bt = std::move(static_cast<BitTimingImpl&>(*bit_timing));
-    bit_timing.reset(nullptr);
-    std::pmr::vector<NodeImpl> ns(mr);
-    std::pmr::vector<ValueTableImpl> vts(mr);
-    std::pmr::vector<MessageImpl> ms;
-    std::pmr::vector<EnvironmentVariableImpl> evs(mr);
-    std::pmr::vector<AttributeDefinitionImpl> ads(mr);
-    std::pmr::vector<AttributeImpl> avds(mr);
-    std::pmr::vector<AttributeImpl> avs(mr);
-    for (auto& n : nodes)
-    {
-        ns.push_back(std::move(static_cast<NodeImpl&>(*n)));
-        n.reset(nullptr);
-    }
-    for (auto& vt : value_tables)
-    {
-        vts.push_back(std::move(static_cast<ValueTableImpl&>(*vt)));
-        vt.reset(nullptr);
-    }
-    for (auto& m : messages)
-    {
-        ms.push_back(std::move(static_cast<MessageImpl&>(*m)));
-        m.reset(nullptr);
-    }
-    for (auto& ev : environment_variables)
-    {
-        evs.push_back(std::move(static_cast<EnvironmentVariableImpl&>(*ev)));
-        ev.reset(nullptr);
-    }
-    for (auto& ad : attribute_definitions)
-    {
-        ads.push_back(std::move(static_cast<AttributeDefinitionImpl&>(*ad)));
-        ad.reset(nullptr);
-    }
-    for (auto& ad : attribute_defaults)
-    {
-        avds.push_back(std::move(static_cast<AttributeImpl&>(*ad)));
-        ad.reset(nullptr);
-    }
-    for (auto& av : attribute_values)
-    {
-        avs.push_back(std::move(static_cast<AttributeImpl&>(*av)));
-        av.reset(nullptr);
-    }
-    return make_unique_pmr<NetworkImpl>(
-          mr
+    return {
+          std::allocator_arg
+        , mr
         , std::move(version)
         , std::move(new_symbols)
-        , std::move(bt)
-        , std::move(ns)
-        , std::move(vts)
-        , std::move(ms)
-        , std::move(evs)
-        , std::move(ads)
-        , std::move(avds)
-        , std::move(avs)
-        , std::move(comment));
+        , std::move(bit_timing)
+        , std::move(nodes)
+        , std::move(value_tables)
+        , std::move(messages)
+        , std::move(environment_variables)
+        , std::move(attribute_definitions)
+        , std::move(attribute_defaults)
+        , std::move(attribute_values)
+        , std::move(comment)
+    };
 }
 
-NetworkImpl::NetworkImpl(
+Network::Network(
       std::allocator_arg_t alloc_arg
     , allocator_type alloc
     , std::pmr::string&& version
     , std::pmr::vector<std::pmr::string>&& new_symbols
-    , BitTimingImpl&& bit_timing
-    , std::pmr::vector<NodeImpl>&& nodes
-    , std::pmr::vector<ValueTableImpl>&& value_tables
-    , std::pmr::vector<MessageImpl>&& messages
-    , std::pmr::vector<EnvironmentVariableImpl>&& environment_variables
-    , std::pmr::vector<AttributeDefinitionImpl>&& attribute_definitions
-    , std::pmr::vector<AttributeImpl>&& attribute_defaults
-    , std::pmr::vector<AttributeImpl>&& attribute_values
+    , BitTiming&& bit_timing
+    , std::pmr::vector<Node>&& nodes
+    , std::pmr::vector<ValueTable>&& value_tables
+    , std::pmr::vector<Message>&& messages
+    , std::pmr::vector<EnvironmentVariable>&& environment_variables
+    , std::pmr::vector<AttributeDefinition>&& attribute_definitions
+    , std::pmr::vector<Attribute>&& attribute_defaults
+    , std::pmr::vector<Attribute>&& attribute_values
     , std::pmr::string&& comment)
 
-    : _version(std::move(version), alloc)
-    , _new_symbols(std::move(new_symbols), alloc)
+    : _version(std::move(version))
+    , _new_symbols(std::move(new_symbols))
     , _bit_timing(std::move(bit_timing))
-    , _nodes(std::move(nodes), alloc)
-    , _value_tables(std::move(value_tables), alloc)
-    , _messages(std::move(messages), alloc)
-    , _environment_variables(std::move(environment_variables), alloc)
-    , _attribute_definitions(std::move(attribute_definitions), alloc)
-    , _attribute_defaults(std::move(attribute_defaults), alloc)
-    , _attribute_values(std::move(attribute_values), alloc)
-    , _comment(std::move(comment), alloc)
-    , _allocator(alloc)
+    , _nodes(std::move(nodes))
+    , _value_tables(std::move(value_tables))
+    , _messages(std::move(messages))
+    , _environment_variables(std::move(environment_variables))
+    , _attribute_definitions(std::move(attribute_definitions))
+    , _attribute_defaults(std::move(attribute_defaults))
+    , _attribute_values(std::move(attribute_values))
+    , _comment(std::move(comment))
 {}
-pmr_unique_ptr<INetwork> NetworkImpl::Clone() const
+Network Network::Clone() const
 {
-    return make_unique_pmr< NetworkImpl>(_allocator, *this);
+    return {*this, _allocator};
 }
-const std::string_view NetworkImpl::Version() const
+const std::string_view Network::Version() const
 {
     return _version;
 }
-const std::pmr::string& NetworkImpl::NewSymbols_Get(std::size_t i) const
+const std::pmr::string& Network::NewSymbols_Get(std::size_t i) const
 {
     return _new_symbols[i];
 }
-std::size_t NetworkImpl::NewSymbols_Size() const
+std::size_t Network::NewSymbols_Size() const
 {
     return _new_symbols.size();
 }
-const IBitTiming& NetworkImpl::BitTiming() const
+const BitTiming& Network::GetBitTiming() const
 {
     return _bit_timing;
 }
-const INode& NetworkImpl::Nodes_Get(std::size_t i) const
+const Node& Network::Nodes_Get(std::size_t i) const
 {
     return _nodes[i];
 }
-std::size_t NetworkImpl::Nodes_Size() const
+std::size_t Network::Nodes_Size() const
 {
     return _nodes.size();
 }
-const IValueTable& NetworkImpl::ValueTables_Get(std::size_t i) const
+const ValueTable& Network::ValueTables_Get(std::size_t i) const
 {
     return _value_tables[i];
 }
-std::size_t NetworkImpl::ValueTables_Size() const
+std::size_t Network::ValueTables_Size() const
 {
     return _value_tables.size();
 }
-const IMessage& NetworkImpl::Messages_Get(std::size_t i) const
+const Message& Network::Messages_Get(std::size_t i) const
 {
     return _messages[i];
 }
-std::size_t NetworkImpl::Messages_Size() const
+std::size_t Network::Messages_Size() const
 {
     return _messages.size();
 }
-const IEnvironmentVariable& NetworkImpl::EnvironmentVariables_Get(std::size_t i) const
+const EnvironmentVariable& Network::EnvironmentVariables_Get(std::size_t i) const
 {
     return _environment_variables[i];
 }
-std::size_t NetworkImpl::EnvironmentVariables_Size() const
+std::size_t Network::EnvironmentVariables_Size() const
 {
     return _environment_variables.size();
 }
-const IAttributeDefinition& NetworkImpl::AttributeDefinitions_Get(std::size_t i) const
+const AttributeDefinition& Network::AttributeDefinitions_Get(std::size_t i) const
 {
     return _attribute_definitions[i];
 }
-std::size_t NetworkImpl::AttributeDefinitions_Size() const
+std::size_t Network::AttributeDefinitions_Size() const
 {
     return _attribute_definitions.size();
 }
-const IAttribute& NetworkImpl::AttributeDefaults_Get(std::size_t i) const
+const Attribute& Network::AttributeDefaults_Get(std::size_t i) const
 {
     return _attribute_defaults[i];
 }
-std::size_t NetworkImpl::AttributeDefaults_Size() const
+std::size_t Network::AttributeDefaults_Size() const
 {
     return _attribute_defaults.size();
 }
-const IAttribute& NetworkImpl::AttributeValues_Get(std::size_t i) const
+const Attribute& Network::AttributeValues_Get(std::size_t i) const
 {
     return _attribute_values[i];
 }
-std::size_t NetworkImpl::AttributeValues_Size() const
+std::size_t Network::AttributeValues_Size() const
 {
     return _attribute_values.size();
 }
-const std::string_view NetworkImpl::Comment() const
+const std::string_view Network::Comment() const
 {
     return _comment;
 }
-const IMessage* NetworkImpl::ParentMessage(const ISignal* sig) const
+const Message* Network::ParentMessage(const Signal* sig) const
 {
-    const IMessage* parent = nullptr;
+    const Message* parent = nullptr;
     for (const auto& msg : _messages)
     {
         auto iter = std::find_if(msg.signals().begin(), msg.signals().end(),
-            [&](const SignalImpl& other) { return &other == sig; });
+            [&](const Signal& other) { return &other == sig; });
         if (iter != msg.signals().end())
         {
             parent = &msg;
@@ -202,89 +159,87 @@ const IMessage* NetworkImpl::ParentMessage(const ISignal* sig) const
     }
     return parent;
 }
-std::string_view NetworkImpl::version()
+std::string_view Network::version()
 {
     return _version;
 }
-std::pmr::vector<std::pmr::string>& NetworkImpl::newSymbols()
+std::pmr::vector<std::pmr::string>& Network::newSymbols()
 {
     return _new_symbols;
 }
-BitTimingImpl& NetworkImpl::bitTiming()
+BitTiming& Network::bitTiming()
 {
     return _bit_timing;
 }
-std::pmr::vector<NodeImpl>& NetworkImpl::nodes()
+std::pmr::vector<Node>& Network::nodes()
 {
     return _nodes;
 }
-std::pmr::vector<ValueTableImpl>& NetworkImpl::valueTables()
+std::pmr::vector<ValueTable>& Network::valueTables()
 {
     return _value_tables;
 }
-std::pmr::vector<MessageImpl>& NetworkImpl::messages()
+std::pmr::vector<Message>& Network::messages()
 {
     return _messages;
 }
-std::pmr::vector<EnvironmentVariableImpl>& NetworkImpl::environmentVariables()
+std::pmr::vector<EnvironmentVariable>& Network::environmentVariables()
 {
     return _environment_variables;
 }
-std::pmr::vector<AttributeDefinitionImpl>& NetworkImpl::attributeDefinitions()
+std::pmr::vector<AttributeDefinition>& Network::attributeDefinitions()
 {
     return _attribute_definitions;
 }
-std::pmr::vector<AttributeImpl>& NetworkImpl::attributeDefaults()
+std::pmr::vector<Attribute>& Network::attributeDefaults()
 {
     return _attribute_defaults;
 }
-std::pmr::vector<AttributeImpl>& NetworkImpl::attributeValues()
+std::pmr::vector<Attribute>& Network::attributeValues()
 {
     return _attribute_values;
 }
-std::string_view NetworkImpl::comment()
+std::string_view Network::comment()
 {
     return _comment;
 }
-void INetwork::Merge(pmr_unique_ptr<INetwork>&& other)
+void Network::Merge(Network&& other)
 {
-    auto& self = static_cast<NetworkImpl&>(*this);
-    auto& o = static_cast<NetworkImpl&>(*other);
+    auto& o = other;
     for (auto& ns : o.newSymbols())
     {
-        self.newSymbols().push_back(std::move(ns));
+        newSymbols().push_back(std::move(ns));
     }
     for (auto& n : o.nodes())
     {
-        self.nodes().push_back(std::move(n));
+        nodes().push_back(std::move(n));
     }
     for (auto& vt : o.valueTables())
     {
-        self.valueTables().push_back(std::move(vt));
+        valueTables().push_back(std::move(vt));
     }
     for (auto& m : o.messages())
     {
-        self.messages().push_back(std::move(m));
+        messages().push_back(std::move(m));
     }
     for (auto& ev : o.environmentVariables())
     {
-        self.environmentVariables().push_back(std::move(ev));
+        environmentVariables().push_back(std::move(ev));
     }
     for (auto& ad : o.attributeDefinitions())
     {
-        self.attributeDefinitions().push_back(std::move(ad));
+        attributeDefinitions().push_back(std::move(ad));
     }
     for (auto& ad : o.attributeDefaults())
     {
-        self.attributeDefaults().push_back(std::move(ad));
+        attributeDefaults().push_back(std::move(ad));
     }
     for (auto& av : o.attributeValues())
     {
-        self.attributeValues().push_back(std::move(av));
+        attributeValues().push_back(std::move(av));
     }
-    other.reset(nullptr);
 }
-bool NetworkImpl::operator==(const INetwork& rhs) const
+bool Network::operator==(const Network& rhs) const
 {
     bool equal = true;
     equal &= _version == rhs.Version();
@@ -292,7 +247,7 @@ bool NetworkImpl::operator==(const INetwork& rhs) const
     {
         equal &= std::ranges::find(_new_symbols.begin(), _new_symbols.end(), new_symbol) != _new_symbols.end();
     }
-    equal &= _bit_timing == rhs.BitTiming();
+    equal &= _bit_timing == rhs.GetBitTiming();
     for (const auto& node : rhs.Nodes())
     {
         equal &= std::ranges::find(_nodes.begin(), _nodes.end(), node) != _nodes.end();
@@ -324,7 +279,7 @@ bool NetworkImpl::operator==(const INetwork& rhs) const
     equal &= _comment == rhs.Comment();
     return equal;
 }
-bool NetworkImpl::operator!=(const INetwork& rhs) const
+bool Network::operator!=(const Network& rhs) const
 {
     return !(*this == rhs);
 }

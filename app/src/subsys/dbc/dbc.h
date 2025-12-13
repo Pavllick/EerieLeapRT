@@ -1,9 +1,10 @@
 #pragma once
 
+#include <memory_resource>
+#include <memory>
 #include <zephyr/kernel.h>
 #include <string>
 #include <unordered_map>
-#include <memory_resource>
 #include <streambuf>
 
 #include <dbcppp/Network.h>
@@ -18,13 +19,13 @@ public:
    using allocator_type = std::pmr::polymorphic_allocator<>;
 
 private:
-   pmr_unique_ptr<dbcppp::INetwork> net_;
+   std::shared_ptr<dbcppp::Network> net_;
    std::pmr::unordered_map<uint32_t, DbcMessage> messages_;
    bool is_loaded_;
 
    allocator_type allocator_;
 
-   const dbcppp::IMessage* GetDbcMessage(uint32_t frame_id) const;
+   const dbcppp::Message* GetDbcMessage(uint32_t frame_id) const;
 
 public:
    Dbc(std::allocator_arg_t, allocator_type alloc);

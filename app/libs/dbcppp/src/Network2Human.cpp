@@ -1,26 +1,27 @@
+#include <set>
 
 #include <boost/format.hpp>
 #include "dbcppp/Network2Functions.h"
 
 using namespace dbcppp;
 
-bool bit_is_inbetween(const ISignal& sig, std::size_t i_bit, uint64_t switch_value = -1)
+bool bit_is_inbetween(const Signal& sig, std::size_t i_bit, uint64_t switch_value = -1)
 {
     if (switch_value != -1 &&
-        sig.MultiplexerIndicator() == ISignal::EMultiplexer::MuxValue &&
+        sig.MultiplexerIndicator() == Signal::EMultiplexer::MuxValue &&
         sig.MultiplexerSwitchValue() != switch_value)
     {
         return false;
     }
     switch (sig.ByteOrder())
     {
-    case ISignal::EByteOrder::LittleEndian:
+    case Signal::EByteOrder::LittleEndian:
     {
         std::size_t start = sig.StartBit();
         std::size_t end = sig.StartBit() + sig.BitSize();
         return start <= i_bit && end > i_bit;
     }
-    case ISignal::EByteOrder::BigEndian:
+    case Signal::EByteOrder::BigEndian:
     {
         std::vector<size_t> match_bits;
         std::size_t start = sig.StartBit();
@@ -46,17 +47,17 @@ bool bit_is_inbetween(const ISignal& sig, std::size_t i_bit, uint64_t switch_val
     }
     return false;
 }
-bool is_start_bit(const ISignal& sig, std::size_t i_bit)
+bool is_start_bit(const Signal& sig, std::size_t i_bit)
 {
     return sig.StartBit() == i_bit;
 }
-bool is_end_bit(const ISignal& sig, std::size_t i_bit)
+bool is_end_bit(const Signal& sig, std::size_t i_bit)
 {
     switch (sig.ByteOrder())
     {
-    case ISignal::EByteOrder::LittleEndian:
+    case Signal::EByteOrder::LittleEndian:
         return sig.StartBit() + sig.BitSize() - 1 == i_bit;
-    case ISignal::EByteOrder::BigEndian:
+    case Signal::EByteOrder::BigEndian:
     {
         std::size_t start = sig.StartBit();
         std::size_t n = sig.BitSize();
@@ -81,23 +82,23 @@ bool is_end_bit(const ISignal& sig, std::size_t i_bit)
     }
     return false;
 }
-const ISignal* get_mux_signal(const IMessage& msg)
+const Signal* get_mux_signal(const Message& msg)
 {
     auto beg = msg.Signals().begin();
     auto end = msg.Signals().end();
     auto iter = std::find_if(beg, end,
-        [&](const ISignal& sig)
+        [&](const Signal& sig)
         {
-            return sig.MultiplexerIndicator() == ISignal::EMultiplexer::MuxSwitch;
+            return sig.MultiplexerIndicator() == Signal::EMultiplexer::MuxSwitch;
         });
     return iter != end ? &*iter : nullptr;
 }
-std::set<uint64_t> get_mux_values(const IMessage& msg)
+std::set<uint64_t> get_mux_values(const Message& msg)
 {
     std::set<uint64_t> mux_values;
-    for (const ISignal& sig : msg.Signals())
+    for (const auto& sig : msg.Signals())
     {
-        if (sig.MultiplexerIndicator() == ISignal::EMultiplexer::MuxValue)
+        if (sig.MultiplexerIndicator() == Signal::EMultiplexer::MuxValue)
         {
             mux_values.insert(sig.MultiplexerSwitchValue());
         }
@@ -105,7 +106,7 @@ std::set<uint64_t> get_mux_values(const IMessage& msg)
     return mux_values;
 }
 
-std::ostream& dbcppp::Network2Human::operator<<(std::ostream& os, const IMessage& msg)
+std::ostream& dbcppp::Network2Human::operator<<(std::ostream& os, const Message& msg)
 {
     os << boost::format("  %-12s%s\n") % "Name:" % msg.Name();
     os << boost::format("  %-12s0x%X\n") % "ID:" % msg.Id();
@@ -114,10 +115,10 @@ std::ostream& dbcppp::Network2Human::operator<<(std::ostream& os, const IMessage
     os << boost::format("  Layout:\n");
 
     auto mux_values = get_mux_values(msg);
-    const ISignal* mux_sig = get_mux_signal(msg);
+    const Signal* mux_sig = get_mux_signal(msg);
 
-    std::vector<const ISignal*> sigs;
-    for (const ISignal& sig : msg.Signals())
+    std::vector<const Signal*> sigs;
+    for (const auto& sig : msg.Signals())
     {
         sigs.push_back(&sig);
     }
@@ -156,7 +157,7 @@ std::ostream& dbcppp::Network2Human::operator<<(std::ostream& os, const IMessage
                 {
                     auto beg = msg.Signals().begin();
                     auto end = msg.Signals().end();
-                    auto iter = std::find_if(beg, end, [&](const ISignal& sig) { return bit_is_inbetween(sig, i_bit, mux_value); });
+                    auto iter = std::find_if(beg, end, [&](const Signal& sig) { return bit_is_inbetween(sig, i_bit, mux_value); });
                     return iter != end ? &*iter : nullptr;
                 };
             int64_t depth = 0;
@@ -167,8 +168,7 @@ std::ostream& dbcppp::Network2Human::operator<<(std::ostream& os, const IMessage
                 {
                     if (is_start_bit(*sig, i_bit) && is_end_bit(*sig, i_bit))
                     {
-                        os << boost::format("<-x|");
-                        depth++;
+                        os << boost::format("<-x|");                        depth++;
                     }
                     else if (is_start_bit(*sig, i_bit))
                     {
@@ -320,9 +320,9 @@ std::ostream& dbcppp::Network2Human::operator<<(std::ostream& os, const IMessage
                 for (uint64_t mux_value : mux_values)
                 {
                     os << boost::format("       |   +--%d\n") % mux_value;
-                    for (const ISignal& sig : msg.Signals())
+                    for (const Signal& sig : msg.Signals())
                     {
-                        if (sig.MultiplexerIndicator() == ISignal::EMultiplexer::MuxValue &&
+                        if (sig.MultiplexerIndicator() == Signal::EMultiplexer::MuxValue &&
                             sig.MultiplexerSwitchValue() == mux_value)
                         {
                             if (i_mux > 1)
@@ -338,9 +338,9 @@ std::ostream& dbcppp::Network2Human::operator<<(std::ostream& os, const IMessage
                     i_mux--;
                 }
             }
-            for (const ISignal& sig : msg.Signals())
+            for (const Signal& sig : msg.Signals())
             {
-                if (sig.MultiplexerIndicator() == ISignal::EMultiplexer::NoMux)
+                if (sig.MultiplexerIndicator() == Signal::EMultiplexer::NoMux)
                 {
                     os << boost::format("       +-- %s\n") % sig.Name();
                 }
@@ -352,12 +352,12 @@ std::ostream& dbcppp::Network2Human::operator<<(std::ostream& os, const IMessage
         [&]()
         {
             os << boost::format("  Signal choices:\n\n");
-            for (const ISignal& sig : msg.Signals())
+            for (const auto& sig : msg.Signals())
             {
                 if (sig.ValueEncodingDescriptions_Size())
                 {
                     os << boost::format("    %s\n") % sig.Name();
-                    for (const IValueEncodingDescription& ved : sig.ValueEncodingDescriptions())
+                    for (const auto& ved : sig.ValueEncodingDescriptions())
                     {
                         os << boost::format("        %d %s\n") % ved.Value() % ved.Description();
                     }
@@ -368,10 +368,10 @@ std::ostream& dbcppp::Network2Human::operator<<(std::ostream& os, const IMessage
     print_value_tables();
     return os;
 }
-std::ostream& dbcppp::Network2Human::operator<<(std::ostream& os, const INetwork& net)
+std::ostream& dbcppp::Network2Human::operator<<(std::ostream& os, const Network& net)
 {
     os << boost::format("================================= Messages =================================\n");
-    for (const IMessage& msg : net.Messages())
+    for (const auto& msg : net.Messages())
     {
         os << msg;
         os << boost::format("  ------------------------------------------------------------------------\n");

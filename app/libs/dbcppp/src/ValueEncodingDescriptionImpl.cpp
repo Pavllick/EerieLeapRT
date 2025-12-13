@@ -1,20 +1,23 @@
 
-#include "dbcppp/ValueEncodingDescriptionImpl.h"
+#include "dbcppp/ValueEncodingDescription.h"
+#include <memory>
 
 using namespace dbcppp;
 
-pmr_unique_ptr<IValueEncodingDescription> IValueEncodingDescription::Create(
+ValueEncodingDescription ValueEncodingDescription::Create(
     std::pmr::memory_resource* mr
     , int64_t value
     , std::pmr::string&& description)
 {
-    return make_unique_pmr<ValueEncodingDescriptionImpl>(
-          mr
+    return {
+          std::allocator_arg
+        , mr
         , value
-        , std::move(description));
+        , std::move(description)
+    };
 }
 
-ValueEncodingDescriptionImpl::ValueEncodingDescriptionImpl(
+ValueEncodingDescription::ValueEncodingDescription(
       std::allocator_arg_t
     , allocator_type alloc
     , int64_t value
@@ -23,27 +26,27 @@ ValueEncodingDescriptionImpl::ValueEncodingDescriptionImpl(
     , _description(std::move(description))
     , _allocator(alloc)
 {}
-pmr_unique_ptr<IValueEncodingDescription> ValueEncodingDescriptionImpl::Clone() const
+ValueEncodingDescription ValueEncodingDescription::Clone() const
 {
-    return make_unique_pmr<ValueEncodingDescriptionImpl>(_allocator, *this);
+    return {*this, _allocator};
 }
-int64_t ValueEncodingDescriptionImpl::Value() const
+int64_t ValueEncodingDescription::Value() const
 {
     return _value;
 }
-const std::string_view ValueEncodingDescriptionImpl::Description() const
+const std::string_view ValueEncodingDescription::Description() const
 {
     return _description;
 }
 
-bool ValueEncodingDescriptionImpl::operator==(const IValueEncodingDescription& rhs) const
+bool ValueEncodingDescription::operator==(const ValueEncodingDescription& rhs) const
 {
     bool equal = true;
     equal &= _value == rhs.Value();
     equal &= _description == rhs.Description();
     return equal;
 }
-bool ValueEncodingDescriptionImpl::operator!=(const IValueEncodingDescription& rhs) const
+bool ValueEncodingDescription::operator!=(const ValueEncodingDescription& rhs) const
 {
     return !(*this == rhs);
 }

@@ -6,7 +6,7 @@ namespace eerie_leap::subsys::dbc {
 
 using namespace eerie_leap::utilities::string;
 
-void DbcMessage::RegisterSignal(const dbcppp::ISignal* signal) {
+void DbcMessage::RegisterSignal(const dbcppp::Signal* signal) {
     size_t signal_name_hash = StringHelpers::GetHash(signal->Name());
 
     if(!signals_.emplace(signal_name_hash, signal).second)
@@ -16,13 +16,13 @@ void DbcMessage::RegisterSignal(const dbcppp::ISignal* signal) {
 DbcMessage::DbcMessage(
     std::allocator_arg_t,
     allocator_type alloc,
-    const dbcppp::IMessage* message)
+    const dbcppp::Message* message)
         : message_(message),
         signals_container_(alloc),
         signals_(alloc),
         allocator_(alloc) {
 
-    for(const dbcppp::ISignal& signal : message_->Signals())
+    for(const auto& signal : message_->Signals())
         RegisterSignal(&signal);
 }
 
@@ -36,17 +36,17 @@ DbcMessage::DbcMessage(
         signals_(alloc),
         allocator_(alloc) {
 
-    message_container_ = dbcppp::IMessage::Create(
-        allocator_.resource(),
+    message_container_ = make_unique_pmr<dbcppp::Message>(
+        allocator_,
         id,
         std::move(name),
         message_size,
         "",
-        {},
-        {},
-        {},
+        std::pmr::vector<std::pmr::string>{},
+        std::pmr::vector<dbcppp::Signal>{},
+        std::pmr::vector<dbcppp::Attribute>{},
         "",
-        {});
+        std::pmr::vector<dbcppp::SignalGroup>{});
 
     message_ = message_container_.get();
 }
@@ -64,16 +64,16 @@ uint32_t DbcMessage::MessageSize() const {
 }
 
 void DbcMessage::AddSignal(std::pmr::string name, uint32_t start_bit, uint32_t size_bits, float factor, float offset, std::pmr::string unit) {
-    auto signal = dbcppp::ISignal::Create(
+    auto signal = dbcppp::Signal::Create(
         allocator_.resource(),
         message_->MessageSize(),
         std::move(name),
-        dbcppp::ISignal::EMultiplexer::NoMux,
+        dbcppp::Signal::EMultiplexer::NoMux,
         0,
         start_bit,
         size_bits,
-        dbcppp::ISignal::EByteOrder::LittleEndian,
-        dbcppp::ISignal::EValueType::Signed,
+        dbcppp::Signal::EByteOrder::LittleEndian,
+        dbcppp::Signal::EValueType::Signed,
         factor,
         offset,
         0.0,
@@ -83,10 +83,10 @@ void DbcMessage::AddSignal(std::pmr::string name, uint32_t start_bit, uint32_t s
         {},
         {},
         "",
-        dbcppp::ISignal::EExtendedValueType::Integer,
+        dbcppp::Signal::EExtendedValueType::Integer,
         {});
 
-    RegisterSignal(signal.get());
+    RegisterSignal(&signal);
     signals_container_.push_back(std::move(signal));
 }
 
@@ -102,7 +102,7 @@ double DbcMessage::GetSignalValue(size_t signal_name_hash, const void* bytes) co
    if(!HasSignal(signal_name_hash))
       throw std::runtime_error("DBC Signal name not found.");
 
-   const dbcppp::ISignal* signal = signals_.at(signal_name_hash);
+   const dbcppp::Signal* signal = signals_.at(signal_name_hash);
    auto decoded_value = signal->Decode(bytes);
 
    return signal->RawToPhys(decoded_value);

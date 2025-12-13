@@ -8,10 +8,10 @@
 
 namespace dbcppp
 {
-    class NodeImpl;
+    class Node;
     struct SharedNodeCmp
     {
-        bool operator()(const NodeImpl& lhs, const NodeImpl& rhs) const;
+        bool operator()(const Node& lhs, const Node& rhs) const;
     };
     inline void native_to_big_inplace(uint64_t& value)
     {

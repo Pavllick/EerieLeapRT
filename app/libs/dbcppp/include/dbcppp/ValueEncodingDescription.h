@@ -1,29 +1,53 @@
-
 #pragma once
 
 #include <memory_resource>
 #include <string>
 
-#include <eerie_memory.hpp>
-
-using namespace eerie_memory;
-
 namespace dbcppp
 {
-    class IValueEncodingDescription
+    class ValueEncodingDescription
     {
     public:
-        static pmr_unique_ptr<IValueEncodingDescription> Create(
+        using allocator_type = std::pmr::polymorphic_allocator<>;
+
+        ValueEncodingDescription(
+              std::allocator_arg_t
+            , allocator_type alloc
+            , int64_t value
+            , std::pmr::string&& description);
+
+        ValueEncodingDescription& operator=(const ValueEncodingDescription&) noexcept = default;
+        ValueEncodingDescription& operator=(ValueEncodingDescription&&) noexcept = default;
+        ValueEncodingDescription(ValueEncodingDescription&&) noexcept = default;
+        ~ValueEncodingDescription() = default;
+
+        ValueEncodingDescription(ValueEncodingDescription&& other, allocator_type alloc)
+            : _value(other._value)
+            , _description(std::move(other._description), alloc)
+            , _allocator(alloc) {}
+
+        ValueEncodingDescription(const ValueEncodingDescription& other, allocator_type alloc = {})
+            : _value(other._value)
+            , _description(other._description, alloc)
+            , _allocator(alloc) {}
+
+        static ValueEncodingDescription Create(
               std::pmr::memory_resource* mr
             , int64_t value
             , std::pmr::string&& description);
-        virtual pmr_unique_ptr<IValueEncodingDescription> Clone() const = 0;
-        virtual ~IValueEncodingDescription() = default;
 
-        virtual int64_t Value() const = 0;
-        virtual const std::string_view Description() const = 0;
+        ValueEncodingDescription Clone() const;
 
-        virtual bool operator==(const IValueEncodingDescription& rhs) const = 0;
-        virtual bool operator!=(const IValueEncodingDescription& rhs) const = 0;
+        int64_t Value() const;
+        const std::string_view Description() const;
+
+        bool operator==(const ValueEncodingDescription& rhs) const;
+        bool operator!=(const ValueEncodingDescription& rhs) const;
+
+    private:
+        int64_t _value;
+        std::pmr::string _description;
+
+        allocator_type _allocator;
     };
 }

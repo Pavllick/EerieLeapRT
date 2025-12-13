@@ -1,41 +1,65 @@
 #pragma once
 
-#include <memory_resource>
-#include <map>
-#include <string>
+#include <vector>
 #include <memory>
-#include <functional>
-#include <cstdint>
 
 #include "Iterator.h"
 #include "Attribute.h"
 
-#include <eerie_memory.hpp>
-
-using namespace eerie_memory;
-
 namespace dbcppp
 {
-    class INode
+    class Node final
     {
     public:
-        static pmr_unique_ptr<INode> Create(
+        using allocator_type = std::pmr::polymorphic_allocator<>;
+
+        Node(
+              std::allocator_arg_t
+            , allocator_type alloc
+            , std::pmr::string&& name
+            , std::pmr::string&& comment
+            , std::pmr::vector<Attribute>&& attribute_values);
+
+        Node& operator=(const Node&) noexcept = default;
+        Node& operator=(Node&&) noexcept = default;
+        Node(Node&&) noexcept = default;
+        ~Node() = default;
+
+        Node(Node&& other, allocator_type alloc)
+            : _name(std::move(other._name))
+            , _comment(std::move(other._comment))
+            , _attribute_values(std::move(other._attribute_values))
+            , _allocator(alloc) {}
+
+        Node(const Node& other, allocator_type alloc = {})
+            : _name(other._name, alloc)
+            , _comment(other._comment, alloc)
+            , _attribute_values(other._attribute_values, alloc)
+            , _allocator(alloc) {}
+
+        static Node Create(
               std::pmr::memory_resource* mr
             , std::pmr::string&& name
             , std::pmr::string&& comment
-            , std::pmr::vector<pmr_unique_ptr<IAttribute>>&& attribute_values);
+            , std::pmr::vector<Attribute>&& attribute_values);
 
-        virtual pmr_unique_ptr<INode> Clone() const = 0;
+        Node Clone() const;
 
-        virtual ~INode() = default;
-        virtual const std::string_view Name() const = 0;
-        virtual const IAttribute& AttributeValues_Get(std::size_t i) const = 0;
-        virtual std::size_t AttributeValues_Size() const = 0;
-        virtual const std::string_view Comment() const = 0;
+        const std::string_view Name() const;
+        const Attribute& AttributeValues_Get(std::size_t i) const;
+        std::size_t AttributeValues_Size() const;
+        const std::string_view Comment() const;
 
-        DBCPPP_MAKE_ITERABLE(INode, AttributeValues, IAttribute);
+        bool operator==(const Node& rhs) const;
+        bool operator!=(const Node& rhs) const;
 
-        virtual bool operator==(const dbcppp::INode& rhs) const = 0;
-        virtual bool operator!=(const dbcppp::INode& rhs) const = 0;
+        DBCPPP_MAKE_ITERABLE(Node, AttributeValues, Attribute);
+
+    private:
+        std::pmr::string _name;
+        std::pmr::string _comment;
+        std::pmr::vector<Attribute> _attribute_values;
+
+        allocator_type _allocator;
     };
 }
