@@ -3,6 +3,7 @@
 #include "utilities/cbor/cbor_helpers.hpp"
 
 #include "canbus_configuration_validator.h"
+#include "canbus_configuration_parser_helpers.hpp"
 #include "canbus_configuration_cbor_parser.h"
 
 namespace eerie_leap::domain::canbus_domain::configuration::parsers {
@@ -13,7 +14,7 @@ CanbusConfigurationCborParser::CanbusConfigurationCborParser(std::shared_ptr<IFs
     : fs_service_(std::move(fs_service)) {}
 
 pmr_unique_ptr<CborCanbusConfig> CanbusConfigurationCborParser::Serialize(const CanbusConfiguration& configuration) {
-    CanbusConfigurationValidator::Validate(configuration);
+    CanbusConfigurationValidator::Validate(configuration, fs_service_.get());
 
     auto config = make_unique_pmr<CborCanbusConfig>(Mrm::GetExtPmr());
 
@@ -69,6 +70,9 @@ pmr_unique_ptr<CanbusConfiguration> CanbusConfigurationCborParser::Deserialize(s
         channel_configuration.data_bitrate = canbus_config.data_bitrate;
         channel_configuration.dbc_file_path = CborHelpers::ToStdString(canbus_config.dbc_file_path);
 
+        if(fs_service_ != nullptr && !channel_configuration.dbc_file_path.empty())
+            CanbusConfigurationParserHelpers::LoadDbcConfiguration(fs_service_.get(), channel_configuration);
+
         for(const auto& message_config : canbus_config.CborCanMessageConfig_m) {
             auto message_configuration = make_shared_pmr<CanMessageConfiguration>(mr);
 
@@ -112,12 +116,15 @@ pmr_unique_ptr<CanbusConfiguration> CanbusConfigurationCborParser::Deserialize(s
             channel_configuration.message_configurations.push_back(std::move(message_configuration));
         }
 
-        configuration->channel_configurations.emplace(
+        bool res = configuration->channel_configurations.emplace(
             channel_configuration.bus_channel,
-            std::move(channel_configuration));
+            std::move(channel_configuration)).second;
+
+        if(!res)
+            throw std::runtime_error("Duplicate CAN bus channel " + std::to_string(channel_configuration.bus_channel));
     }
 
-    CanbusConfigurationValidator::Validate(*configuration);
+    CanbusConfigurationValidator::Validate(*configuration, fs_service_.get());
 
     return configuration;
 }

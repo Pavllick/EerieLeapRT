@@ -1,4 +1,5 @@
 #include "canbus_configuration_validator.h"
+#include "canbus_configuration_parser_helpers.hpp"
 #include "canbus_configuration_json_parser.h"
 
 namespace eerie_leap::domain::canbus_domain::configuration::parsers {
@@ -7,7 +8,7 @@ CanbusConfigurationJsonParser::CanbusConfigurationJsonParser(std::shared_ptr<IFs
     : fs_service_(std::move(fs_service)) {}
 
 pmr_unique_ptr<JsonCanbusConfig> CanbusConfigurationJsonParser::Serialize(const CanbusConfiguration& configuration) {
-    CanbusConfigurationValidator::Validate(configuration);
+    CanbusConfigurationValidator::Validate(configuration, fs_service_.get());
 
     auto config = make_unique_pmr<JsonCanbusConfig>(Mrm::GetExtPmr());
 
@@ -62,6 +63,9 @@ pmr_unique_ptr<CanbusConfiguration> CanbusConfigurationJsonParser::Deserialize(s
         channel_configuration.data_bitrate = canbus_config.data_bitrate;
         channel_configuration.dbc_file_path = std::string(canbus_config.dbc_file_path);
 
+        if(fs_service_ != nullptr && !channel_configuration.dbc_file_path.empty())
+            CanbusConfigurationParserHelpers::LoadDbcConfiguration(fs_service_.get(), channel_configuration);
+
         for(const auto& message_config : canbus_config.message_configs) {
             auto message_configuration = make_shared_pmr<CanMessageConfiguration>(mr);
 
@@ -105,12 +109,15 @@ pmr_unique_ptr<CanbusConfiguration> CanbusConfigurationJsonParser::Deserialize(s
             channel_configuration.message_configurations.emplace_back(std::move(message_configuration));
         }
 
-        configuration->channel_configurations.emplace(
+        bool res = configuration->channel_configurations.emplace(
             canbus_config.bus_channel,
-            std::move(channel_configuration));
+            std::move(channel_configuration)).second;
+
+        if(!res)
+            throw std::runtime_error("Duplicate CAN bus channel " + std::to_string(canbus_config.bus_channel));
     }
 
-    CanbusConfigurationValidator::Validate(*configuration);
+    CanbusConfigurationValidator::Validate(*configuration, fs_service_.get());
 
     return configuration;
 }

@@ -354,7 +354,7 @@ void SetupSystemConfiguration(std::shared_ptr<SystemConfigurationManager> system
 }
 
 void SetupCanbusConfiguration(std::shared_ptr<CanbusConfigurationManager> canbus_configuration_manager) {
-    auto canbus_configuration = canbus_configuration_manager->Get();
+    auto canbus_configuration = make_shared_pmr<CanbusConfiguration>(Mrm::GetExtPmr());
 
     canbus_configuration->channel_configurations.clear();
 

@@ -33,13 +33,8 @@ CanbusService::CanbusService(std::shared_ptr<IFsService> fs_service, std::shared
 
         canbus_.emplace(bus_channel, canbus);
 
-        LoadDbcConfiguration(channel_configuration);
         ConfigureUserSignals(channel_configuration);
     }
-}
-
-bool CanbusService::LoadDbcFile(Dbc& dbc, std::streambuf& dbc_content) {
-    return dbc.LoadDbcFile(dbc_content);
 }
 
 std::shared_ptr<Canbus> CanbusService::GetCanbus(uint8_t bus_channel) const {
@@ -66,26 +61,6 @@ void CanbusService::BitrateUpdated(uint8_t bus_channel, uint32_t bitrate) {
         LOG_INF("Bitrate for bus channel %d updated to %d bps.", bus_channel, bitrate);
     else
         LOG_ERR("Failed to update bitrate for bus channel %d.", bus_channel);
-}
-
-void CanbusService::LoadDbcConfiguration(const CanChannelConfiguration& channel_configuration) {
-    if(fs_service_ != nullptr && fs_service_->Exists(channel_configuration.dbc_file_path)) {
-        FsServiceStreamBuf fs_stream_buf(
-            fs_service_.get(),
-            std::string(channel_configuration.dbc_file_path),
-            FsServiceStreamBuf::OpenMode::Read);
-
-        bool res = LoadDbcFile(*channel_configuration.dbc, fs_stream_buf);
-
-        fs_stream_buf.close();
-
-        if(res)
-            LOG_INF("DBC file loaded successfully. %s", channel_configuration.dbc_file_path.c_str());
-        else
-            LOG_ERR("Failed to load DBC file. %s", channel_configuration.dbc_file_path.c_str());
-    } else if(fs_service_ != nullptr && !channel_configuration.dbc_file_path.empty()) {
-        LOG_ERR("DBC file not found. %s", channel_configuration.dbc_file_path.c_str());
-    }
 }
 
 void CanbusService::ConfigureUserSignals(const CanChannelConfiguration& channel_configuration) {

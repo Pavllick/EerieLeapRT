@@ -26,14 +26,14 @@ CanbusConfigurationManager::CanbusConfigurationManager(
 
     if(configuration == nullptr) {
         if(!CreateDefaultConfiguration()) {
-            LOG_ERR("Failed to create default Canbus configuration.");
+            LOG_ERR("Failed to create default CAN Bus configuration.");
             return;
         }
 
-        LOG_INF("Default Canbus configuration loaded successfully.");
+        LOG_INF("Default CAN Bus configuration loaded successfully.");
     }
 
-    LOG_INF("Canbus Configuration Manager initialized successfully.");
+    LOG_INF("CAN Bus Configuration Manager initialized successfully.");
 
     ApplyJsonConfiguration();
 }
@@ -73,11 +73,11 @@ bool CanbusConfigurationManager::Update(const CanbusConfiguration& configuration
 
             auto json_config_loaded = json_configuration_service_->Load();
             if(!json_config_loaded.has_value()) {
-                LOG_ERR("Failed to load newly updated JSON configuration.");
+                LOG_ERR("Failed to load newly updated CAN Bus JSON configuration.");
                 return false;
             }
 
-            LOG_INF("JSON configuration updated successfully.");
+            LOG_INF("CAN Bus JSON configuration updated successfully.");
 
             json_config_checksum_ = json_config_loaded->checksum;
         }
@@ -88,7 +88,7 @@ bool CanbusConfigurationManager::Update(const CanbusConfiguration& configuration
         if(!cbor_configuration_service_->Save(cbor_config.get()))
             return false;
     } catch(const std::exception& e) {
-        LOG_ERR("Failed to update System configuration. %s", e.what());
+        LOG_ERR("Failed to update CAN Bus configuration. %s", e.what());
         return false;
     }
 
