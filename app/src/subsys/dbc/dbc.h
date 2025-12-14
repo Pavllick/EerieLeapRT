@@ -25,7 +25,13 @@ private:
 
    allocator_type allocator_;
 
-   const dbcppp::Message* GetDbcMessage(uint32_t frame_id) const;
+   dbcppp::Network* GetOrCreateDbcNetwork();
+   dbcppp::Message* GetDbcMessage(uint32_t frame_id);
+
+   // HACK: Every time a new message is added to the DBC file, the message address
+   // might change, due to container resizing. This function updates the message references
+   // to the new addresses.
+   void UpdateMessageReferences();
 
 public:
    Dbc(std::allocator_arg_t, allocator_type alloc);
@@ -45,9 +51,9 @@ public:
    bool IsLoaded() const { return is_loaded_; }
    bool LoadDbcFile(std::streambuf& dbc_content);
 
-   DbcMessage* AddMessage(uint32_t id, std::pmr::string name, uint8_t message_size);
-   DbcMessage* GetOrRegisterMessage(uint32_t frame_id);
-   bool HasMessage(uint32_t frame_id) const;
+   DbcMessage* AddMessage(uint32_t frame_id, std::pmr::string name, uint8_t message_size);
+   DbcMessage* GetMessage(uint32_t frame_id);
+   bool HasMessage(uint32_t frame_id);
 };
 
 } // namespace eerie_leap::subsys::dbc

@@ -260,17 +260,15 @@ void encode(const Signal* sig, Signal::raw_t raw, void* buffer) noexcept
     }
 }
 template <class T>
-double raw_to_phys(const Signal* sig, Signal::raw_t raw) noexcept
+double raw_to_phys(const Signal* signal, Signal::raw_t raw) noexcept
 {
-    const Signal* sigi = static_cast<const Signal*>(sig);
     double draw = double(*reinterpret_cast<T*>(&raw));
-    return draw * sigi->Factor() + sigi->Offset();
+    return draw * signal->Factor() + signal->Offset();
 }
 template <class T>
-Signal::raw_t phys_to_raw(const Signal* sig, double phys) noexcept
+Signal::raw_t phys_to_raw(const Signal* signal, double phys) noexcept
 {
-    const Signal* sigi = static_cast<const Signal*>(sig);
-    T result = T((phys - sigi->Offset()) / sigi->Factor());
+    T result = T((phys - signal->Offset()) / signal->Factor());
     return *reinterpret_cast<Signal::raw_t*>(&result);
 }
 

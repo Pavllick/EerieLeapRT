@@ -7,6 +7,23 @@
 using namespace dbcppp;
 
 Network::Network(
+        std::allocator_arg_t
+    , allocator_type alloc)
+
+    : _version(alloc)
+    , _new_symbols(alloc)
+    , _nodes(alloc)
+    , _value_tables(alloc)
+    , _messages(alloc)
+    , _environment_variables(alloc)
+    , _attribute_definitions(alloc)
+    , _attribute_defaults(alloc)
+    , _attribute_values(alloc)
+    , _comment(alloc)
+    , _allocator(alloc)
+{}
+
+Network::Network(
       std::allocator_arg_t alloc_arg
     , allocator_type alloc
     , std::pmr::string&& version
@@ -21,17 +38,18 @@ Network::Network(
     , std::pmr::vector<Attribute>&& attribute_values
     , std::pmr::string&& comment)
 
-    : _version(std::move(version))
-    , _new_symbols(std::move(new_symbols))
-    , _bit_timing(std::move(bit_timing))
-    , _nodes(std::move(nodes))
-    , _value_tables(std::move(value_tables))
-    , _messages(std::move(messages))
-    , _environment_variables(std::move(environment_variables))
-    , _attribute_definitions(std::move(attribute_definitions))
-    , _attribute_defaults(std::move(attribute_defaults))
-    , _attribute_values(std::move(attribute_values))
-    , _comment(std::move(comment))
+    : _version(std::move(version), alloc)
+    , _new_symbols(std::move(new_symbols), alloc)
+    , _bit_timing(bit_timing)
+    , _nodes(std::move(nodes), alloc)
+    , _value_tables(std::move(value_tables), alloc)
+    , _messages(std::move(messages), alloc)
+    , _environment_variables(std::move(environment_variables), alloc)
+    , _attribute_definitions(std::move(attribute_definitions), alloc)
+    , _attribute_defaults(std::move(attribute_defaults), alloc)
+    , _attribute_values(std::move(attribute_values), alloc)
+    , _comment(std::move(comment), alloc)
+    , _allocator(alloc)
 {}
 Network Network::Clone() const
 {
@@ -251,4 +269,7 @@ bool Network::operator==(const Network& rhs) const
 bool Network::operator!=(const Network& rhs) const
 {
     return !(*this == rhs);
+}
+void Network::AddMessage(Message&& msg) {
+    _messages.push_back(std::move(msg));
 }

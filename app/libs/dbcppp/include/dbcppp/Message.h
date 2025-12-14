@@ -110,6 +110,12 @@ namespace dbcppp
         DBCPPP_MAKE_ITERABLE(Message, AttributeValues, Attribute);
         DBCPPP_MAKE_ITERABLE(Message, SignalGroups, SignalGroup);
 
+        void AddSignal(Signal&& sig);
+
+        std::pmr::vector<Signal>& GetSignals() {
+            return _signals;
+        }
+
     private:
         uint64_t _id;
         std::pmr::string _name;

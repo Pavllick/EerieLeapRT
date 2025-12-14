@@ -19,29 +19,25 @@ public:
    using allocator_type = std::pmr::polymorphic_allocator<>;
 
 private:
-   pmr_unique_ptr<dbcppp::Message> message_container_;
-   const dbcppp::Message* message_;
+   dbcppp::Message* message_;
+   int frame_id_;
 
-   std::pmr::vector<dbcppp::Signal> signals_container_;
    std::pmr::unordered_map<size_t, const dbcppp::Signal*> signals_;
 
    allocator_type allocator_;
 
    void RegisterSignal(const dbcppp::Signal* signal);
+   dbcppp::Signal* GetDbcSignal(size_t signal_name_hash);
+
+   // HACK: Every time a new signal is added to the DBC file, the signal address
+   // might change, due to container resizing. This function updates the signal references
+   // to the new addresses.
+   void UpdateSignalReferences();
 
 public:
    using SignalReader = std::function<float (size_t)>;
 
-   explicit DbcMessage(
-      std::allocator_arg_t,
-      allocator_type alloc,
-      const dbcppp::Message* message);
-   DbcMessage(
-      std::allocator_arg_t,
-      allocator_type alloc,
-      uint32_t id,
-      std::pmr::string name,
-      uint32_t message_size);
+   explicit DbcMessage(std::allocator_arg_t, allocator_type alloc, dbcppp::Message* message);
 
    DbcMessage(const DbcMessage&) = delete;
    DbcMessage& operator=(const DbcMessage&) noexcept = default;
@@ -50,22 +46,27 @@ public:
    ~DbcMessage() = default;
 
    DbcMessage(DbcMessage&& other, allocator_type alloc)
-      : message_container_(std::move(other.message_container_)),
-      message_(std::move(other.message_)),
-      signals_container_(std::move(other.signals_container_), alloc),
+      : message_(other.message_),
       signals_(std::move(other.signals_), alloc),
       allocator_(alloc) {}
+
+   // HACK: Every time a new message is added to the DBC file, the message address
+   // might change, due to container resizing. This function updates the message reference
+   // to the new address.
+   void UpdateReference(dbcppp::Message* message);
 
    uint32_t Id() const;
    std::string_view Name() const;
    uint32_t MessageSize() const;
 
    void AddSignal(std::pmr::string name, uint32_t start_bit, uint32_t size_bits, float factor, float offset, std::pmr::string unit);
-   bool HasSignal(size_t signal_name_hash) const;
-   bool HasSignal(const std::string_view signal_name) const;
+   bool HasSignal(size_t signal_name_hash);
+   bool HasSignal(const std::string_view signal_name);
 
-   double GetSignalValue(size_t signal_name_hash, const void* bytes) const;
+   double GetSignalValue(size_t signal_name_hash, const void* bytes);
    std::vector<uint8_t> EncodeMessage(const SignalReader& signal_reader);
+
+   const std::pmr::unordered_map<size_t, const dbcppp::Signal*>& GetSignals() const { return signals_; }
 };
 
 } // namespace eerie_leap::subsys::dbc

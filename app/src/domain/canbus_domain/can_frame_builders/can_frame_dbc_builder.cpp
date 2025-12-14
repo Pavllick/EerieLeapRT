@@ -25,7 +25,7 @@ CanFrame CanFrameDbcBuilder::Build(uint8_t bus_channel, uint32_t frame_id) {
         if(dbc == nullptr)
             throw std::runtime_error("DBC not loaded");
 
-        auto can_data = dbc->GetOrRegisterMessage(frame_id)->EncodeMessage(
+        auto can_data = dbc->GetMessage(frame_id)->EncodeMessage(
             [&sensor_readings_frame = sensor_readings_frame_](size_t signal_name_hash) {
                 if(!sensor_readings_frame->HasReadingValue(signal_name_hash))
                     return 0.0f;

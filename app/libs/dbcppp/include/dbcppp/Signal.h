@@ -9,7 +9,6 @@
 #include "Attribute.h"
 #include "SignalMultiplexerValue.h"
 #include "ValueEncodingDescription.h"
-#include "Signal.h"
 
 namespace dbcppp
 {
@@ -73,7 +72,11 @@ namespace dbcppp
         ~Signal() = default;
 
         Signal(Signal&& other, allocator_type alloc)
-            : _name(std::move(other._name))
+            : _decode(other._decode)
+            , _encode(other._encode)
+            , _raw_to_phys(other._raw_to_phys)
+            , _phys_to_raw(other._phys_to_raw)
+            , _name(std::move(other._name))
             , _multiplexer_indicator(other._multiplexer_indicator)
             , _multiplexer_switch_value(other._multiplexer_switch_value)
             , _start_bit(other._start_bit)
@@ -85,19 +88,26 @@ namespace dbcppp
             , _minimum(other._minimum)
             , _maximum(other._maximum)
             , _unit(std::move(other._unit))
+            , _receivers(std::move(other._receivers), alloc)
+            , _attribute_values(std::move(other._attribute_values), alloc)
+            , _value_encoding_descriptions(std::move(other._value_encoding_descriptions), alloc)
             , _comment(std::move(other._comment))
             , _extended_value_type(other._extended_value_type)
             , _signal_multiplexer_values(std::move(other._signal_multiplexer_values))
+            , _allocator(alloc)
             , _mask(other._mask)
             , _mask_signed(other._mask_signed)
             , _fixed_start_bit_0(other._fixed_start_bit_0)
             , _fixed_start_bit_1(other._fixed_start_bit_1)
             , _byte_pos(other._byte_pos)
-            , _error(other._error)
-            , _allocator(alloc) {}
+            , _error(other._error) {}
 
         Signal(const Signal& other, allocator_type alloc = {})
-            : _name(other._name)
+            : _decode(other._decode)
+            , _encode(other._encode)
+            , _raw_to_phys(other._raw_to_phys)
+            , _phys_to_raw(other._phys_to_raw)
+            , _name(other._name)
             , _multiplexer_indicator(other._multiplexer_indicator)
             , _multiplexer_switch_value(other._multiplexer_switch_value)
             , _start_bit(other._start_bit)
@@ -109,16 +119,19 @@ namespace dbcppp
             , _minimum(other._minimum)
             , _maximum(other._maximum)
             , _unit(other._unit)
+            , _receivers(other._receivers, alloc)
+            , _attribute_values(other._attribute_values, alloc)
+            , _value_encoding_descriptions(other._value_encoding_descriptions, alloc)
             , _comment(other._comment)
             , _extended_value_type(other._extended_value_type)
             , _signal_multiplexer_values(other._signal_multiplexer_values)
+            , _allocator(alloc)
             , _mask(other._mask)
             , _mask_signed(other._mask_signed)
             , _fixed_start_bit_0(other._fixed_start_bit_0)
             , _fixed_start_bit_1(other._fixed_start_bit_1)
             , _byte_pos(other._byte_pos)
-            , _error(other._error)
-            , _allocator(alloc) {}
+            , _error(other._error) {}
 
         Signal Clone() const;
 

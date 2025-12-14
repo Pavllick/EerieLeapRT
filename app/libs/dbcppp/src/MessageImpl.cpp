@@ -177,3 +177,24 @@ bool Message::operator!=(const Message& rhs) const
 {
     return !(*this == rhs);
 }
+void Message::AddSignal(Signal&& signal) {
+    _signals.push_back(std::move(signal));
+
+    bool have_mux_value = false;
+    for (const auto& sig : _signals)
+    {
+        switch (sig.MultiplexerIndicator())
+        {
+        case Signal::EMultiplexer::MuxValue:
+            have_mux_value = true;
+            break;
+        case Signal::EMultiplexer::MuxSwitch:
+            _mux_signal = &sig;
+            break;
+        }
+    }
+    if (have_mux_value && _mux_signal == nullptr)
+    {
+        _error = EErrorCode::MuxValeWithoutMuxSignal;
+    }
+}

@@ -74,7 +74,7 @@ std::unique_ptr<ISensorReader> SensorReaderFactory::Create(std::shared_ptr<Senso
         if(channel_configuration == nullptr || !channel_configuration->dbc->IsLoaded())
             return nullptr;
 
-        const auto* dbc_message = channel_configuration->dbc->GetOrRegisterMessage(
+        auto* dbc_message = channel_configuration->dbc->GetMessage(
             sensor->configuration.canbus_source->frame_id);
         if(dbc_message == nullptr)
             return nullptr;

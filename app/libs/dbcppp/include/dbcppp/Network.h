@@ -23,6 +23,10 @@ namespace dbcppp
 
         Network(
               std::allocator_arg_t
+            , allocator_type alloc);
+
+        Network(
+              std::allocator_arg_t
             , allocator_type alloc
             , std::pmr::string&& version
             , std::pmr::vector<std::pmr::string>&& new_symbols
@@ -111,6 +115,12 @@ namespace dbcppp
         DBCPPP_MAKE_ITERABLE(Network, AttributeDefinitions, AttributeDefinition);
         DBCPPP_MAKE_ITERABLE(Network, AttributeDefaults, Attribute);
         DBCPPP_MAKE_ITERABLE(Network, AttributeValues, Attribute);
+
+        void AddMessage(Message&& msg);
+
+        std::pmr::vector<Message>& GetMessages() {
+            return _messages;
+        }
 
     private:
         std::pmr::string _version;

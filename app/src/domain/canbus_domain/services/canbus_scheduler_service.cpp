@@ -41,6 +41,11 @@ WorkQueueTaskResult CanbusSchedulerService::ProcessCanbusWorkTask(CanbusTask* ta
 
         if(can_frame.data.size() > 0)
             task->canbus->SendFrame(can_frame);
+
+        LOG_HEXDUMP_DBG(
+            can_frame.data.data(),
+            can_frame.data.size(),
+            ("Can frame " + std::to_string(task->message_configuration->frame_id)).c_str());
     } catch (const std::exception& e) {
         LOG_DBG("Error processing Frame ID: %d, Error: %s", task->message_configuration->frame_id, e.what());
     }

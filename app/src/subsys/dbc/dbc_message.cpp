@@ -6,19 +6,12 @@ namespace eerie_leap::subsys::dbc {
 
 using namespace eerie_leap::utilities::string;
 
-void DbcMessage::RegisterSignal(const dbcppp::Signal* signal) {
-    size_t signal_name_hash = StringHelpers::GetHash(signal->Name());
-
-    if(!signals_.emplace(signal_name_hash, signal).second)
-        throw std::runtime_error("Failed to register signal. Signal with name '" + std::string(signal->Name()) + "' already exists.");
-}
-
 DbcMessage::DbcMessage(
     std::allocator_arg_t,
     allocator_type alloc,
-    const dbcppp::Message* message)
+    dbcppp::Message* message)
         : message_(message),
-        signals_container_(alloc),
+        frame_id_(message->Id()),
         signals_(alloc),
         allocator_(alloc) {
 
@@ -26,29 +19,32 @@ DbcMessage::DbcMessage(
         RegisterSignal(&signal);
 }
 
-DbcMessage::DbcMessage(
-    std::allocator_arg_t,
-    allocator_type alloc,
-    uint32_t id,
-    std::pmr::string name,
-    uint32_t message_size)
-        : signals_container_(alloc),
-        signals_(alloc),
-        allocator_(alloc) {
+void DbcMessage::UpdateReference(dbcppp::Message* message) {
+    message_ = message;
+}
 
-    message_container_ = make_unique_pmr<dbcppp::Message>(
-        allocator_,
-        id,
-        std::move(name),
-        message_size,
-        "",
-        std::pmr::vector<std::pmr::string>{},
-        std::pmr::vector<dbcppp::Signal>{},
-        std::pmr::vector<dbcppp::Attribute>{},
-        "",
-        std::pmr::vector<dbcppp::SignalGroup>{});
+void DbcMessage::RegisterSignal(const dbcppp::Signal* signal) {
+    size_t signal_name_hash = StringHelpers::GetHash(signal->Name());
 
-    message_ = message_container_.get();
+    if(!signals_.emplace(signal_name_hash, signal).second)
+        throw std::runtime_error("Failed to register signal. Signal with name '" + std::string(signal->Name()) + "' already exists.");
+
+    UpdateSignalReferences();
+}
+
+dbcppp::Signal* DbcMessage::GetDbcSignal(size_t signal_name_hash) {
+    dbcppp::Signal* signal = nullptr;
+    for(auto& sig : message_->GetSignals()) {
+        if(StringHelpers::GetHash(sig.Name()) == signal_name_hash) {
+            signal = &sig;
+            break;
+        }
+    }
+
+    if(signal != nullptr)
+        RegisterSignal(signal);
+
+    return signal;
 }
 
 uint32_t DbcMessage::Id() const {
@@ -64,7 +60,9 @@ uint32_t DbcMessage::MessageSize() const {
 }
 
 void DbcMessage::AddSignal(std::pmr::string name, uint32_t start_bit, uint32_t size_bits, float factor, float offset, std::pmr::string unit) {
-    signals_container_.emplace_back(
+    message_->AddSignal(dbcppp::Signal(
+        std::allocator_arg,
+        allocator_,
         message_->MessageSize(),
         std::move(name),
         dbcppp::Signal::EMultiplexer::NoMux,
@@ -83,20 +81,23 @@ void DbcMessage::AddSignal(std::pmr::string name, uint32_t start_bit, uint32_t s
         std::pmr::vector<dbcppp::ValueEncodingDescription>{},
         "",
         dbcppp::Signal::EExtendedValueType::Integer,
-        std::pmr::vector<dbcppp::SignalMultiplexerValue>{});
+        std::pmr::vector<dbcppp::SignalMultiplexerValue>{}));
 
-    RegisterSignal(&signals_container_.back());
+    RegisterSignal(&message_->GetSignals().back());
 }
 
-bool DbcMessage::HasSignal(size_t signal_name_hash) const {
-    return signals_.contains(signal_name_hash);
+bool DbcMessage::HasSignal(size_t signal_name_hash) {
+    if(signals_.contains(signal_name_hash))
+        return true;
+
+    return GetDbcSignal(signal_name_hash) != nullptr;
 }
 
-bool DbcMessage::HasSignal(const std::string_view signal_name) const {
+bool DbcMessage::HasSignal(const std::string_view signal_name) {
     return HasSignal(StringHelpers::GetHash(signal_name));
 }
 
-double DbcMessage::GetSignalValue(size_t signal_name_hash, const void* bytes) const {
+double DbcMessage::GetSignalValue(size_t signal_name_hash, const void* bytes) {
    if(!HasSignal(signal_name_hash))
       throw std::runtime_error("DBC Signal name not found.");
 
@@ -116,6 +117,14 @@ std::vector<uint8_t> DbcMessage::EncodeMessage(const SignalReader& signal_reader
    }
 
    return bytes;
+}
+
+void DbcMessage::UpdateSignalReferences() {
+    for(auto& signal : message_->GetSignals()) {
+        size_t signal_name_hash = StringHelpers::GetHash(signal.Name());
+        if(signals_.contains(signal_name_hash))
+            signals_.at(signal_name_hash) = &signal;
+    }
 }
 
 } // namespace eerie_leap::subsys::dbc
