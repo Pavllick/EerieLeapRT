@@ -9,7 +9,7 @@ using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::domain::sensor_domain::models;
 
 class SensorValidator {
-public:
+private:
     static void ValidateId(const std::vector<std::shared_ptr<Sensor>>& sensors);
 
     static void ValidateMetadata(const std::vector<std::shared_ptr<Sensor>>& sensors);
@@ -34,6 +34,7 @@ public:
     static void ValidateInterpolationMethod(std::string_view sensor_id, const SensorConfiguration& sensor_configuration);
     static void ValidateExpression(std::string_view sensor_id, const SensorConfiguration& sensor_configuration);
 
+public:
     static void Validate(const std::vector<std::shared_ptr<Sensor>>& sensors, IFsService* sd_fs_service, uint32_t gpio_channel_count, uint32_t adc_channel_count);
 };
 

@@ -3,6 +3,7 @@
 
 #include "utilities/voltage_interpolator/calibration_data.h"
 
+#include "adc_configuration_validator.h"
 #include "adc_configuration_json_parser.h"
 
 namespace eerie_leap::domain::sensor_domain::configuration::parsers {
@@ -11,6 +12,8 @@ using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::voltage_interpolator;
 
 pmr_unique_ptr<JsonAdcConfig> AdcConfigurationJsonParser::Serialize(const AdcConfiguration& configuration) {
+    AdcConfigurationValidator::Validate(configuration);
+
     auto config = make_unique_pmr<JsonAdcConfig>(Mrm::GetExtPmr());
 
     config->samples = configuration.samples;
@@ -79,6 +82,8 @@ pmr_unique_ptr<AdcConfiguration> AdcConfigurationJsonParser::Deserialize(std::pm
 
         configuration->channel_configurations->push_back(std::move(adc_channel_configuration));
     }
+
+    AdcConfigurationValidator::Validate(*configuration);
 
     return configuration;
 }

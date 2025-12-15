@@ -1,15 +1,17 @@
 #include <algorithm>
 
+#include "adc_configuration_validator.h"
 #include "adc_configuration_cbor_parser.h"
 
 namespace eerie_leap::domain::sensor_domain::configuration::parsers {
 
-pmr_unique_ptr<CborAdcConfig> AdcConfigurationCborParser::Serialize(const AdcConfiguration& adc_configuration) {
-    auto adc_config = make_unique_pmr<CborAdcConfig>(Mrm::GetExtPmr());
+pmr_unique_ptr<CborAdcConfig> AdcConfigurationCborParser::Serialize(const AdcConfiguration& configuration) {
+    AdcConfigurationValidator::Validate(configuration);
+    auto config = make_unique_pmr<CborAdcConfig>(Mrm::GetExtPmr());
 
-    adc_config->samples = adc_configuration.samples;
+    config->samples = configuration.samples;
 
-    for(const auto& channel_configuration : *adc_configuration.channel_configurations) {
+    for(const auto& channel_configuration : *configuration.channel_configurations) {
         CborAdcChannelConfig adc_channel_config(std::allocator_arg, Mrm::GetExtPmr());
 
         auto interpolation_method = channel_configuration->calibrator != nullptr
@@ -40,19 +42,19 @@ pmr_unique_ptr<CborAdcConfig> AdcConfigurationCborParser::Serialize(const AdcCon
             throw std::runtime_error("ADC channel configuration is invalid. Calibration table is missing.");
         }
 
-        adc_config->CborAdcChannelConfig_m.push_back(std::move(adc_channel_config));
+        config->CborAdcChannelConfig_m.push_back(std::move(adc_channel_config));
     }
 
-    return adc_config;
+    return config;
 }
 
-pmr_unique_ptr<AdcConfiguration> AdcConfigurationCborParser::Deserialize(std::pmr::memory_resource* mr, const CborAdcConfig& adc_config) {
+pmr_unique_ptr<AdcConfiguration> AdcConfigurationCborParser::Deserialize(std::pmr::memory_resource* mr, const CborAdcConfig& config) {
     auto configuration = make_unique_pmr<AdcConfiguration>(mr);
 
-    configuration->samples = static_cast<uint16_t>(adc_config.samples);
+    configuration->samples = static_cast<uint16_t>(config.samples);
     configuration->channel_configurations = make_shared_pmr<std::vector<std::shared_ptr<AdcChannelConfiguration>>>(mr);
 
-    for(const auto& adc_channel_config : adc_config.CborAdcChannelConfig_m) {
+    for(const auto& adc_channel_config : config.CborAdcChannelConfig_m) {
         auto adc_channel_configuration = make_shared_pmr<AdcChannelConfiguration>(mr);
 
         auto interpolation_method = static_cast<InterpolationMethod>(adc_channel_config.interpolation_method);
@@ -72,6 +74,8 @@ pmr_unique_ptr<AdcConfiguration> AdcConfigurationCborParser::Deserialize(std::pm
 
         configuration->channel_configurations->push_back(std::move(adc_channel_configuration));
     }
+
+    AdcConfigurationValidator::Validate(*configuration);
 
     return configuration;
 }
