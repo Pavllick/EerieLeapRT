@@ -11,16 +11,16 @@ namespace eerie_leap::domain::canbus_domain::configuration::parsers {
 
 using namespace eerie_leap::subsys::canbus;
 
-static void InvalidCanbusConfiguration(const uint8_t bus_channel, const std::string_view message) {
-    throw std::runtime_error(
+static void InvalidCanbusConfiguration(const uint8_t bus_channel, std::string_view message) {
+    throw std::invalid_argument(
         "Invalid CAN Bus configuration. Channel: "
         + std::to_string(bus_channel)
         + ". "
         + std::string(message));
 }
 
-static void InvalidCanMessageConfiguration(const uint8_t bus_channel, uint32_t frame_id, const std::string_view message) {
-    throw std::runtime_error(
+static void InvalidCanMessageConfiguration(const uint8_t bus_channel, uint32_t frame_id, std::string_view message) {
+    throw std::invalid_argument(
         "Invalid CAN Frame configuration. Channel: "
         + std::to_string(bus_channel)
         + ", Frame ID: "
@@ -33,9 +33,9 @@ static void InvalidCanSignalConfiguration(
     const uint8_t bus_channel,
     uint32_t frame_id,
     std::string_view signal_name,
-    const std::string_view message) {
+    std::string_view message) {
 
-    throw std::runtime_error(
+    throw std::invalid_argument(
         "Invalid CAN Signal configuration. Channel: "
         + std::to_string(bus_channel)
         + ", Frame ID: "

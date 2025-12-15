@@ -93,7 +93,7 @@ bool DbcMessage::HasSignal(size_t signal_name_hash) {
     return GetDbcSignal(signal_name_hash) != nullptr;
 }
 
-bool DbcMessage::HasSignal(const std::string_view signal_name) {
+bool DbcMessage::HasSignal(std::string_view signal_name) {
     return HasSignal(StringHelpers::GetHash(signal_name));
 }
 

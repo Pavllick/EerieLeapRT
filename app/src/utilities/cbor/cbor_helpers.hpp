@@ -12,7 +12,7 @@ public:
         return std::string(reinterpret_cast<const char*>(zstr.value), zstr.len);
     }
 
-    static zcbor_string ToZcborString(const std::string_view str) {
+    static zcbor_string ToZcborString(std::string_view str) {
         return {
             .value = reinterpret_cast<const uint8_t*>(str.data()),
             .len = static_cast<uint_fast32_t>(str.size())

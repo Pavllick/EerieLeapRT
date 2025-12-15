@@ -51,7 +51,7 @@ struct CanbusSource {
         return connection_string;
     }
 
-    static CanbusSource FromConnectionString(allocator_type alloc, const std::string_view connection_string) {
+    static CanbusSource FromConnectionString(allocator_type alloc, std::string_view connection_string) {
         if(connection_string.empty())
             throw std::invalid_argument("Invalid format: empty connection string");
 
