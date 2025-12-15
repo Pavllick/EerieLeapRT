@@ -19,10 +19,10 @@ using namespace eerie_leap::domain::sensor_domain::models;
 
 class SensorsJsonParser {
 private:
-    std::shared_ptr<IFsService> fs_service_;
+    std::shared_ptr<IFsService> sd_fs_service_;
 
 public:
-    explicit SensorsJsonParser(std::shared_ptr<IFsService> fs_service);
+    explicit SensorsJsonParser(std::shared_ptr<IFsService> sd_fs_service);
 
     pmr_unique_ptr<JsonSensorsConfig> Serialize(
         const std::vector<std::shared_ptr<Sensor>>& sensors,

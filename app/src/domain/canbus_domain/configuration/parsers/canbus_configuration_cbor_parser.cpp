@@ -10,11 +10,11 @@ namespace eerie_leap::domain::canbus_domain::configuration::parsers {
 
 using namespace eerie_leap::utilities::cbor;
 
-CanbusConfigurationCborParser::CanbusConfigurationCborParser(std::shared_ptr<IFsService> fs_service)
-    : fs_service_(std::move(fs_service)) {}
+CanbusConfigurationCborParser::CanbusConfigurationCborParser(std::shared_ptr<IFsService> sd_fs_service)
+    : sd_fs_service_(std::move(sd_fs_service)) {}
 
 pmr_unique_ptr<CborCanbusConfig> CanbusConfigurationCborParser::Serialize(const CanbusConfiguration& configuration) {
-    CanbusConfigurationValidator::Validate(configuration, fs_service_.get());
+    CanbusConfigurationValidator::Validate(configuration, sd_fs_service_.get());
 
     auto config = make_unique_pmr<CborCanbusConfig>(Mrm::GetExtPmr());
 
@@ -70,8 +70,8 @@ pmr_unique_ptr<CanbusConfiguration> CanbusConfigurationCborParser::Deserialize(s
         channel_configuration.data_bitrate = canbus_config.data_bitrate;
         channel_configuration.dbc_file_path = CborHelpers::ToStdString(canbus_config.dbc_file_path);
 
-        if(fs_service_ != nullptr && !channel_configuration.dbc_file_path.empty())
-            CanbusConfigurationParserHelpers::LoadDbcConfiguration(fs_service_.get(), channel_configuration);
+        if(sd_fs_service_ != nullptr && !channel_configuration.dbc_file_path.empty())
+            CanbusConfigurationParserHelpers::LoadDbcConfiguration(sd_fs_service_.get(), channel_configuration);
 
         for(const auto& message_config : canbus_config.CborCanMessageConfig_m) {
             auto message_configuration = make_shared_pmr<CanMessageConfiguration>(mr);
@@ -95,18 +95,18 @@ pmr_unique_ptr<CanbusConfiguration> CanbusConfigurationCborParser::Deserialize(s
                 message_configuration->signal_configurations.push_back(std::move(signal_configuration));
             }
 
-            if(fs_service_ != nullptr
-                && fs_service_->IsAvailable()
+            if(sd_fs_service_ != nullptr
+                && sd_fs_service_->IsAvailable()
                 && !message_configuration->script_path.empty()
-                && fs_service_->Exists(message_configuration->script_path)) {
+                && sd_fs_service_->Exists(message_configuration->script_path)) {
 
-                size_t script_size = fs_service_->GetFileSize(message_configuration->script_path);
+                size_t script_size = sd_fs_service_->GetFileSize(message_configuration->script_path);
 
                 if(script_size != 0) {
                     std::pmr::vector<uint8_t> buffer(script_size, Mrm::GetExtPmr());
 
                     size_t out_len = 0;
-                    fs_service_->ReadFile(message_configuration->script_path, buffer.data(), script_size, out_len);
+                    sd_fs_service_->ReadFile(message_configuration->script_path, buffer.data(), script_size, out_len);
 
                     message_configuration->lua_script = std::make_shared<LuaScript>(LuaScript::CreateExt());
                     message_configuration->lua_script->Load(std::span<const uint8_t>(buffer.data(), buffer.size()));
@@ -124,7 +124,7 @@ pmr_unique_ptr<CanbusConfiguration> CanbusConfigurationCborParser::Deserialize(s
             throw std::runtime_error("Duplicate CAN bus channel " + std::to_string(channel_configuration.bus_channel));
     }
 
-    CanbusConfigurationValidator::Validate(*configuration, fs_service_.get());
+    CanbusConfigurationValidator::Validate(*configuration, sd_fs_service_.get());
 
     return configuration;
 }

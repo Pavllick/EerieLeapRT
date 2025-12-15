@@ -16,10 +16,10 @@ using namespace eerie_leap::domain::canbus_domain::models;
 
 class CanbusConfigurationJsonParser {
 private:
-    std::shared_ptr<IFsService> fs_service_;
+    std::shared_ptr<IFsService> sd_fs_service_;
 
 public:
-    explicit CanbusConfigurationJsonParser(std::shared_ptr<IFsService> fs_service);
+    explicit CanbusConfigurationJsonParser(std::shared_ptr<IFsService> sd_fs_service);
 
     pmr_unique_ptr<JsonCanbusConfig> Serialize(const CanbusConfiguration& configuration);
     pmr_unique_ptr<CanbusConfiguration> Deserialize(std::pmr::memory_resource* mr, const JsonCanbusConfig& config);

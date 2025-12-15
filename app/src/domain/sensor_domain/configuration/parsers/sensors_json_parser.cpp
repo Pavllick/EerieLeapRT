@@ -14,23 +14,23 @@ using namespace eerie_leap::utilities::voltage_interpolator;
 using namespace eerie_leap::subsys::lua_script;
 using namespace eerie_leap::domain::sensor_domain::utilities;
 
-SensorsJsonParser::SensorsJsonParser(std::shared_ptr<IFsService> fs_service)
-    : fs_service_(std::move(fs_service)) {}
+SensorsJsonParser::SensorsJsonParser(std::shared_ptr<IFsService> sd_fs_service)
+    : sd_fs_service_(std::move(sd_fs_service)) {}
 
 pmr_unique_ptr<JsonSensorsConfig> SensorsJsonParser::Serialize(
     const std::vector<std::shared_ptr<Sensor>>& sensors,
     uint32_t gpio_channel_count,
     uint32_t adc_channel_count) {
 
-    auto config = make_unique_pmr<JsonSensorsConfig>(Mrm::GetExtPmr());
+    // NOTE: UpdateConnectionString() must be called before validation
+    for(auto& sensor : sensors)
+        sensor->configuration.UpdateConnectionString();
+    SensorValidator::Validate(sensors, sd_fs_service_.get(), gpio_channel_count, adc_channel_count);
 
+    auto config = make_unique_pmr<JsonSensorsConfig>(Mrm::GetExtPmr());
     SensorsOrderResolver order_resolver;
 
     for(auto& sensor : sensors) {
-        // NOTE: UpdateConnectionString() must be called before validation
-        sensor->configuration.UpdateConnectionString();
-        SensorValidator::Validate(*sensor, gpio_channel_count, adc_channel_count);
-
         auto sensor_config = make_unique_pmr<JsonSensorConfig>(Mrm::GetExtPmr());
 
         sensor_config->id = json::string(sensor->id);
@@ -107,18 +107,18 @@ std::vector<std::shared_ptr<Sensor>> SensorsJsonParser::Deserialize(
         sensor->configuration.UnwrapConnectionString();
 
         sensor->configuration.script_path = std::string(sensor_config.configuration.script_path);
-        if(fs_service_ != nullptr
-            && fs_service_->IsAvailable()
+        if(sd_fs_service_ != nullptr
+            && sd_fs_service_->IsAvailable()
             && !sensor->configuration.script_path.empty()
-            && fs_service_->Exists(sensor->configuration.script_path)) {
+            && sd_fs_service_->Exists(sensor->configuration.script_path)) {
 
-            size_t script_size = fs_service_->GetFileSize(sensor->configuration.script_path);
+            size_t script_size = sd_fs_service_->GetFileSize(sensor->configuration.script_path);
 
             if(script_size != 0) {
                 std::pmr::vector<uint8_t> buffer(script_size, Mrm::GetExtPmr());
 
                 size_t out_len = 0;
-                fs_service_->ReadFile(sensor->configuration.script_path, buffer.data(), script_size, out_len);
+                sd_fs_service_->ReadFile(sensor->configuration.script_path, buffer.data(), script_size, out_len);
 
                 sensor->configuration.lua_script = make_shared_pmr<LuaScript>(mr, LuaScript::CreateExt());
                 sensor->configuration.lua_script->Load(std::span<const uint8_t>(buffer.data(), buffer.size()));
@@ -163,12 +163,13 @@ std::vector<std::shared_ptr<Sensor>> SensorsJsonParser::Deserialize(
             sensor->configuration.expression_evaluator = nullptr;
         }
 
-        SensorValidator::Validate(*sensor, gpio_channel_count, adc_channel_count);
-
         order_resolver.AddSensor(std::move(sensor));
     }
 
-    return order_resolver.GetProcessingOrder();
+    auto sensors = order_resolver.GetProcessingOrder();
+    SensorValidator::Validate(sensors, sd_fs_service_.get(), gpio_channel_count, adc_channel_count);
+
+    return sensors;
 }
 
 } // eerie_leap::domain::sensor_domain::configuration::parsers
