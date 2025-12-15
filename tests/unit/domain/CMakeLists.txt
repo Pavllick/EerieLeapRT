@@ -30,11 +30,15 @@ add_subdirectory(
 add_subdirectory(
   ${APP_SRC_DIR}/../libs/nameof
   ${CMAKE_CURRENT_BINARY_DIR}/nameof)
+add_subdirectory(
+  ${APP_SRC_DIR}/../libs/eerie_memory
+  ${CMAKE_CURRENT_BINARY_DIR}/eerie_memory)
 
 target_link_libraries(app PRIVATE
     muparser
     dbcppp
     nameof
+    eerie_memory
 )
 
 set(APP_SRC_CONFIGURATION_DIR ${APP_SRC_DIR}/configuration)
@@ -46,6 +50,8 @@ file(GLOB_RECURSE APP_SRC_CONFIGURATION
 set(APP_SRC_SUBSYS_DIR ${APP_SRC_DIR}/subsys)
 file(GLOB_RECURSE APP_SRC_SUBSYS
   ${APP_SRC_SUBSYS_DIR}/random/*.cpp
+  ${APP_SRC_SUBSYS_DIR}/fs/services/fs_service.cpp
+  ${APP_SRC_SUBSYS_DIR}/fs/services/fs_service_stream_buf.cpp
   ${APP_SRC_SUBSYS_DIR}/adc/utilities/*.cpp
   ${APP_SRC_SUBSYS_DIR}/adc/models/*.cpp
   ${APP_SRC_SUBSYS_DIR}/canbus/*.cpp
