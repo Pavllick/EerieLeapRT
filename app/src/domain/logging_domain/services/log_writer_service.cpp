@@ -87,6 +87,11 @@ int LogWriterService::LogWriterStart() {
         }
     }
 
+    if(logging_configuration_manager_->Get()->logging_interval_ms < 10) {
+        LOG_ERR("Logging interval cannot be less than 10 ms.");
+        return -1;
+    }
+
     auto start_time = time_service_->GetCurrentTime();
     std::string file_name;
     for(int i = 0; i < 10; i++) {

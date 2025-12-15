@@ -1,8 +1,11 @@
+#include "logging_configuration_validator.h"
 #include "logging_configuration_json_parser.h"
 
 namespace eerie_leap::domain::logging_domain::configuration::parsers {
 
 pmr_unique_ptr<JsonLoggingConfig> LoggingConfigurationJsonParser::Serialize(const LoggingConfiguration& configuration) {
+    LoggingConfigurationValidator::Validate(configuration);
+
     auto config = make_unique_pmr<JsonLoggingConfig>(Mrm::GetExtPmr());
 
     config->logging_interval_ms = configuration.logging_interval_ms;
@@ -36,6 +39,8 @@ pmr_unique_ptr<LoggingConfiguration> LoggingConfigurationJsonParser::Deserialize
 
         configuration->sensor_configurations.emplace(sensor_logging_config.sensor_id_hash, std::move(sensor_logging_configuration));
     }
+
+    LoggingConfigurationValidator::Validate(*configuration);
 
     return configuration;
 }

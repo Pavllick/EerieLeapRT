@@ -346,7 +346,7 @@ int main(void) {
 }
 
 void SetupSystemConfiguration(std::shared_ptr<SystemConfigurationManager> system_configuration_manager) {
-    auto system_configuration = system_configuration_manager->Get();
+    auto system_configuration = make_shared_pmr<SystemConfiguration>(Mrm::GetExtPmr());
 
     system_configuration->com_user_refresh_rate_ms = 20;
 
