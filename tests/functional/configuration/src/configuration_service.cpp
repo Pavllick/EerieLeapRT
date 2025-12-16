@@ -65,79 +65,75 @@ ZTEST(configuration_service, test_CborSensorsConfig_Save_config_successfully_sav
     std::string sensor_1_unit = "km/h";
     std::string sensor_1_description = "";
     CborSensorMetadataConfig metadata_config_1 = {
-        .name = CborHelpers::ToZcborString(&sensor_1_name),
-        .unit = CborHelpers::ToZcborString(&sensor_1_unit),
-        .description = CborHelpers::ToZcborString(&sensor_1_description)
+        .name = CborHelpers::ToZcborString(sensor_1_name),
+        .unit = CborHelpers::ToZcborString(sensor_1_unit),
+        .description = CborHelpers::ToZcborString(sensor_1_description)
     };
 
     std::string sensor_1_expression = "({var_d} + {y}) * 4";
-    CborSensorConfigurationConfig configuration_config_1 = {
-        .type = 1,
-        .sampling_rate_ms = 210,
-        .interpolation_method = 1,
-        .channel = 6,
-        .channel_present = true,
-        .calibration_table_present = false,
-        .expression = CborHelpers::ToZcborString(&sensor_1_expression),
-        .expression_present = true
-    };
+    CborSensorConfigurationConfig configuration_config_1(std::allocator_arg, Mrm::GetDefaultPmr());
+    configuration_config_1.type = 1;
+    configuration_config_1.sampling_rate_ms = 210;
+    configuration_config_1.interpolation_method = 1;
+    configuration_config_1.channel = 6;
+    configuration_config_1.channel_present = true;
+    configuration_config_1.calibration_table_present = false;
+    configuration_config_1.expression = CborHelpers::ToZcborString(sensor_1_expression);
+    configuration_config_1.expression_present = true;
 
     std::string sensor_1_id = "sensor_1";
-    CborSensorConfig sensor_config_1 = {
-        .id = CborHelpers::ToZcborString(&sensor_1_id),
-        .metadata = metadata_config_1,
-        .configuration = configuration_config_1
-    };
+    CborSensorConfig sensor_config_1(std::allocator_arg, Mrm::GetDefaultPmr());
+    sensor_config_1.id = CborHelpers::ToZcborString(sensor_1_id);
+    sensor_config_1.metadata = metadata_config_1;
+    sensor_config_1.configuration = configuration_config_1;
 
     // Create second sensor config
     std::string sensor_2_name = "name 2";
     std::string sensor_2_unit = "m/s";
     std::string sensor_2_description = "";
     CborSensorMetadataConfig metadata_config_2 = {
-        .name = CborHelpers::ToZcborString(&sensor_2_name),
-        .unit = CborHelpers::ToZcborString(&sensor_2_unit),
-        .description = CborHelpers::ToZcborString(&sensor_2_description)
+        .name = CborHelpers::ToZcborString(sensor_2_name),
+        .unit = CborHelpers::ToZcborString(sensor_2_unit),
+        .description = CborHelpers::ToZcborString(sensor_2_description)
     };
 
-    CborSensorCalibrationDataMap calibration_data_map_2 = {
-        .float32float = {
-            { 1.0, 2.0 },
-            { 1.1, 2.1 },
-            { 1.2, 2.2 },
-            { 1.3, 2.3 }
-        }
+    CborSensorCalibrationDataMap calibration_data_map_2(std::allocator_arg, Mrm::GetDefaultPmr());
+    calibration_data_map_2.float32float = {
+        { 1.0, 2.0 },
+        { 1.1, 2.1 },
+        { 1.2, 2.2 },
+        { 1.3, 2.3 }
     };
 
     std::string sensor_2_expression = "({x} - 8 * {var_d}) / {f}";
-    CborSensorConfigurationConfig configuration_config_2 = {
-        .type = 1,
-        .sampling_rate_ms = 250,
-        .interpolation_method = 1,
-        .channel = 6,
-        .channel_present = true,
-        .calibration_table = calibration_data_map_2,
-        .calibration_table_present = true,
-        .expression = CborHelpers::ToZcborString(&sensor_2_expression),
-        .expression_present = true
-    };
+    CborSensorConfigurationConfig configuration_config_2(std::allocator_arg, Mrm::GetDefaultPmr());
+    configuration_config_2.type = 1;
+    configuration_config_2.sampling_rate_ms = 250;
+    configuration_config_2.interpolation_method = 1;
+    configuration_config_2.channel = 6;
+    configuration_config_2.channel_present = true;
+    configuration_config_2.calibration_table = calibration_data_map_2;
+    configuration_config_2.calibration_table_present = true;
+    configuration_config_2.expression = CborHelpers::ToZcborString(sensor_2_expression);
+    configuration_config_2.expression_present = true;
 
     std::string sensor_2_id = "sensor_2";
-    CborSensorConfig sensor_config_2 = {
-        .id = CborHelpers::ToZcborString(&sensor_2_id),
-        .metadata = metadata_config_2,
-        .configuration = configuration_config_2
-    };
+    CborSensorConfig sensor_config_2(std::allocator_arg, Mrm::GetDefaultPmr());
+    sensor_config_2.id = CborHelpers::ToZcborString(sensor_2_id);
+    sensor_config_2.metadata = metadata_config_2;
+    sensor_config_2.configuration = configuration_config_2;
 
-    CborSensorsConfig sensors_config;
-    sensors_config.CborSensorConfig_m = { sensor_config_1, sensor_config_2 };
+    CborSensorsConfig sensors_config(std::allocator_arg, Mrm::GetDefaultPmr());
+    sensors_config.CborSensorConfig_m.push_back(std::move(sensor_config_1));
+    sensors_config.CborSensorConfig_m.push_back(std::move(sensor_config_2));
 
     DtFs::InitInternalFs();
     auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
 
     fs_service->Format();
-    auto sensors_config_service = std::make_unique<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
+    auto cbor_sensors_config_service = std::make_unique<CborConfigurationService<CborSensorsConfig>>("sensors_config", fs_service);
 
-    auto save_res = sensors_config_service->Save(&sensors_config);
+    auto save_res = cbor_sensors_config_service->Save(&sensors_config);
     zassert_true(save_res);
 }
 
@@ -147,73 +143,68 @@ ZTEST(configuration_service, test_CborSensorsConfig_Load_config_successfully_sav
     std::string sensor_1_unit = "km/h";
     std::string sensor_1_description = "";
     CborSensorMetadataConfig metadata_config_1 = {
-        .name = CborHelpers::ToZcborString(&sensor_1_name),
-        .unit = CborHelpers::ToZcborString(&sensor_1_unit),
-        .description = CborHelpers::ToZcborString(&sensor_1_description)
+        .name = CborHelpers::ToZcborString(sensor_1_name),
+        .unit = CborHelpers::ToZcborString(sensor_1_unit),
+        .description = CborHelpers::ToZcborString(sensor_1_description)
     };
 
     std::string sensor_1_expression = "({var_d} + {y}) * 4";
-    CborSensorConfigurationConfig configuration_config_1 = {
-        .type = 1,
-        .sampling_rate_ms = 210,
-        .interpolation_method = 1,
-        .channel = 6,
-        .channel_present = true,
-        .calibration_table_present = false,
-        .expression = CborHelpers::ToZcborString(&sensor_1_expression),
-        .expression_present = true
-    };
+    CborSensorConfigurationConfig configuration_config_1(std::allocator_arg, Mrm::GetDefaultPmr());
+    configuration_config_1.type = 1;
+    configuration_config_1.sampling_rate_ms = 210;
+    configuration_config_1.interpolation_method = 1;
+    configuration_config_1.channel = 6;
+    configuration_config_1.channel_present = true;
+    configuration_config_1.calibration_table_present = false;
+    configuration_config_1.expression = CborHelpers::ToZcborString(sensor_1_expression);
+    configuration_config_1.expression_present = true;
 
     std::string sensor_1_id = "sensor_3";
-    CborSensorConfig sensor_config_1 = {
-        .id = CborHelpers::ToZcborString(&sensor_1_id),
-        .metadata = metadata_config_1,
-        .configuration = configuration_config_1
-    };
+    CborSensorConfig sensor_config_1(std::allocator_arg, Mrm::GetDefaultPmr());
+    sensor_config_1.id = CborHelpers::ToZcborString(sensor_1_id);
+    sensor_config_1.metadata = metadata_config_1;
+    sensor_config_1.configuration = configuration_config_1;
 
     // Create second sensor config
     std::string sensor_2_name = "name 4";
     std::string sensor_2_unit = "m/s";
     std::string sensor_2_description = "Some description 4";
     CborSensorMetadataConfig metadata_config_2 = {
-        .name = CborHelpers::ToZcborString(&sensor_2_name),
-        .unit = CborHelpers::ToZcborString(&sensor_2_unit),
-        .description = CborHelpers::ToZcborString(&sensor_2_description)
+        .name = CborHelpers::ToZcborString(sensor_2_name),
+        .unit = CborHelpers::ToZcborString(sensor_2_unit),
+        .description = CborHelpers::ToZcborString(sensor_2_description)
     };
 
-    CborSensorCalibrationDataMap calibration_data_map_2 = {
-        .float32float = {
-            { 1.0, 2.0 },
-            { 1.1, 2.1 },
-            { 1.2, 2.2 },
-            { 1.3, 2.3 }
-        }
+    CborSensorCalibrationDataMap calibration_data_map_2(std::allocator_arg, Mrm::GetDefaultPmr());
+    calibration_data_map_2.float32float = {
+        { 1.0, 2.0 },
+        { 1.1, 2.1 },
+        { 1.2, 2.2 },
+        { 1.3, 2.3 }
     };
 
     std::string sensor_2_expression = "({x} - 8 * {var_d}) / {f}";
-    CborSensorConfigurationConfig configuration_config_2 = {
-        .type = 1,
-        .sampling_rate_ms = 250,
-        .interpolation_method = 1,
-        .channel = 6,
-        .channel_present = true,
-        .calibration_table = calibration_data_map_2,
-        .calibration_table_present = true,
-        .expression = CborHelpers::ToZcborString(&sensor_2_expression),
-        .expression_present = true
-    };
+    CborSensorConfigurationConfig configuration_config_2(std::allocator_arg, Mrm::GetDefaultPmr());
+    configuration_config_2.type = 1;
+    configuration_config_2.sampling_rate_ms = 250;
+    configuration_config_2.interpolation_method = 1;
+    configuration_config_2.channel = 6;
+    configuration_config_2.channel_present = true;
+    configuration_config_2.calibration_table = calibration_data_map_2;
+    configuration_config_2.calibration_table_present = true;
+    configuration_config_2.expression = CborHelpers::ToZcborString(sensor_2_expression);
+    configuration_config_2.expression_present = true;
 
     std::string sensor_2_id = "sensor_4";
-    CborSensorConfig sensor_config_2 = {
-        .id = CborHelpers::ToZcborString(&sensor_2_id),
-        .metadata = metadata_config_2,
-        .configuration = configuration_config_2
-    };
+    CborSensorConfig sensor_config_2(std::allocator_arg, Mrm::GetDefaultPmr());
+    sensor_config_2.id = CborHelpers::ToZcborString(sensor_2_id);
+    sensor_config_2.metadata = metadata_config_2;
+    sensor_config_2.configuration = configuration_config_2;
 
     // Create sensors config with both sensors
-    CborSensorsConfig sensors_config = {
-        .CborSensorConfig_m = { sensor_config_1, sensor_config_2 }
-    };
+    CborSensorsConfig sensors_config(std::allocator_arg, Mrm::GetDefaultPmr());
+    sensors_config.CborSensorConfig_m.push_back(std::move(sensor_config_1));
+    sensors_config.CborSensorConfig_m.push_back(std::move(sensor_config_2));
 
     // Initialize services
     DtFs::InitInternalFs();

@@ -11,11 +11,13 @@ namespace eerie_leap::subsys::canbus {
 using namespace std::string_view_literals;
 
 enum class CanbusType : uint8_t {
+    NONE,
     CLASSICAL_CAN,
     CANFD
 };
 
 constexpr const std::array CanbusTypeNames = {
+    "NONE"sv,
     "CLASSICAL_CAN"sv,
     "CANFD"sv
 };

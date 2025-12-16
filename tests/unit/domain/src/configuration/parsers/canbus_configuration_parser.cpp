@@ -13,7 +13,6 @@ CanbusConfiguration canbus_configuration_parser_GetTestConfiguration() {
     channel_configuration_0.type = CanbusType::CLASSICAL_CAN;
     channel_configuration_0.bus_channel = 0;
     channel_configuration_0.bitrate = 500000;
-    channel_configuration_0.data_bitrate = 0;
 
     auto message_configuration_0_0 = std::make_shared<CanMessageConfiguration>(std::allocator_arg, Mrm::GetDefaultPmr());
     message_configuration_0_0->frame_id = 0x123;
@@ -33,7 +32,6 @@ CanbusConfiguration canbus_configuration_parser_GetTestConfiguration() {
     channel_configuration_1.type = CanbusType::CLASSICAL_CAN;
     channel_configuration_1.bus_channel = 1;
     channel_configuration_1.bitrate = 250000;
-    channel_configuration_1.data_bitrate = 0;
 
     auto message_configuration_1_0 = std::make_shared<CanMessageConfiguration>(std::allocator_arg, Mrm::GetDefaultPmr());
     message_configuration_1_0->frame_id = 0x123;
@@ -60,7 +58,6 @@ CanbusConfiguration canbus_configuration_parser_GetTestConfiguration() {
     channel_configuration_2.type = CanbusType::CANFD;
     channel_configuration_2.bus_channel = 2;
     channel_configuration_2.bitrate = 125000;
-    channel_configuration_2.data_bitrate = 0;
 
     canbus_configuration.channel_configurations.emplace(channel_configuration_0.bus_channel, std::move(channel_configuration_0));
     canbus_configuration.channel_configurations.emplace(channel_configuration_1.bus_channel, std::move(channel_configuration_1));

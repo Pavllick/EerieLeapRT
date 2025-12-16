@@ -11,7 +11,7 @@ namespace eerie_leap::subsys::adc::models {
 using namespace eerie_leap::utilities::voltage_interpolator;
 
 struct AdcConfiguration {
-    uint16_t samples;
+    uint16_t samples = 0;
 
     std::shared_ptr<std::vector<std::shared_ptr<AdcChannelConfiguration>>> channel_configurations = nullptr;
 };

@@ -16,7 +16,7 @@ struct Sensor {
     using allocator_type = std::pmr::polymorphic_allocator<>;
 
     std::pmr::string id;
-    size_t id_hash;
+    size_t id_hash = 0;
     SensorMetadata metadata;
     SensorConfiguration configuration;
 

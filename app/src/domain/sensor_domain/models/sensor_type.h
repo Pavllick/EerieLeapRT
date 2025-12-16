@@ -11,6 +11,7 @@ namespace eerie_leap::domain::sensor_domain::models {
 using namespace std::string_view_literals;
 
 enum class SensorType : std::uint32_t {
+    NONE,
     PHYSICAL_ANALOG,
     VIRTUAL_ANALOG,
     PHYSICAL_INDICATOR,
@@ -23,6 +24,7 @@ enum class SensorType : std::uint32_t {
 };
 
 constexpr const std::array SensorTypeNames = {
+    "NONE"sv,
     "PHYSICAL_ANALOG"sv,
     "VIRTUAL_ANALOG"sv,
     "PHYSICAL_INDICATOR"sv,

@@ -20,11 +20,11 @@ using namespace eerie_leap::subsys::dbc;
 struct CanChannelConfiguration {
     using allocator_type = std::pmr::polymorphic_allocator<>;
 
-    CanbusType type;
+    CanbusType type = CanbusType::NONE;
     bool is_extended_id = false;
-    uint8_t bus_channel;
-    uint32_t bitrate;
-    uint32_t data_bitrate;
+    uint8_t bus_channel = 0;
+    uint32_t bitrate = 0;
+    uint32_t data_bitrate = 0;
     std::pmr::string dbc_file_path;
     std::pmr::vector<std::shared_ptr<CanMessageConfiguration>> message_configurations;
 

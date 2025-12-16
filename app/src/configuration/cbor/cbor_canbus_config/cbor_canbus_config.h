@@ -9,23 +9,23 @@
 #include <zcbor_common.h>
 
 struct CborCanSignalConfig {
-	uint32_t start_bit;
-	uint32_t size_bits;
-	float factor;
-	float offset;
-	struct zcbor_string name;
-	struct zcbor_string unit;
+	uint32_t start_bit{};
+	uint32_t size_bits{};
+	float factor{};
+	float offset{};
+	struct zcbor_string name{};
+	struct zcbor_string unit{};
 };
 
 struct CborCanMessageConfig {
 	using allocator_type = std::pmr::polymorphic_allocator<>;
 
-	uint32_t frame_id;
-	uint32_t send_interval_ms;
-	struct zcbor_string script_path;
+	uint32_t frame_id{};
+	uint32_t send_interval_ms{};
+	struct zcbor_string script_path{};
 
-	struct zcbor_string name;
-	uint32_t message_size;
+	struct zcbor_string name{};
+	uint32_t message_size{};
 	std::pmr::vector<CborCanSignalConfig> CborCanSignalConfig_m;
 
 	CborCanMessageConfig(std::allocator_arg_t, allocator_type alloc)
@@ -49,12 +49,12 @@ struct CborCanMessageConfig {
 struct CborCanChannelConfig {
 	using allocator_type = std::pmr::polymorphic_allocator<>;
 
-	uint32_t type;
-	bool is_extended_id;
-	uint32_t bus_channel;
-	uint32_t bitrate;
-	uint32_t data_bitrate;
-	struct zcbor_string dbc_file_path;
+	uint32_t type{};
+	bool is_extended_id{};
+	uint32_t bus_channel{};
+	uint32_t bitrate{};
+	uint32_t data_bitrate{};
+	struct zcbor_string dbc_file_path{};
 	std::pmr::vector<CborCanMessageConfig> CborCanMessageConfig_m;
 
 	CborCanChannelConfig(std::allocator_arg_t, allocator_type alloc)
@@ -80,7 +80,7 @@ struct CborCanbusConfig {
 	using allocator_type = std::pmr::polymorphic_allocator<>;
 
 	std::pmr::vector<CborCanChannelConfig> CborCanChannelConfig_m;
-	uint32_t json_config_checksum;
+	uint32_t json_config_checksum{};
 
 	CborCanbusConfig(std::allocator_arg_t, allocator_type alloc)
         : CborCanChannelConfig_m(alloc) {}

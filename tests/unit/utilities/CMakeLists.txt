@@ -15,13 +15,22 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(APP_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../app/src)
 include_directories(${APP_SRC_DIR})
 
+# Path to boost include directory
+set(BOOST_INCLUDE_DIR ${APP_SRC_DIR}/../libs/boost)
+include_directories(${BOOST_INCLUDE_DIR})
+
 add_subdirectory(
   ${APP_SRC_DIR}/../libs/muparser
   ${CMAKE_CURRENT_BINARY_DIR}/muparser)
+add_subdirectory(
+  ${APP_SRC_DIR}/../libs/eerie_memory
+  ${CMAKE_CURRENT_BINARY_DIR}/eerie_memory)
 
 target_link_libraries(app PRIVATE
     muparser
+    eerie_memory
 )
+
 
 # Collect all source files for the test
 set(APP_SRC_SUBSYS_DIR ${APP_SRC_DIR}/subsys)

@@ -7,19 +7,19 @@
 #include <vector>
 
 struct CborSensorLoggingConfig {
-	uint32_t sensor_id_hash;
-	bool is_enabled;
-	bool log_raw_value;
-	bool log_only_new_data;
+	uint32_t sensor_id_hash{};
+	bool is_enabled{};
+	bool log_raw_value{};
+	bool log_only_new_data{};
 };
 
 struct CborLoggingConfig {
 	using allocator_type = std::pmr::polymorphic_allocator<>;
 
-	uint32_t logging_interval_ms;
-	uint32_t max_log_size_mb;
+	uint32_t logging_interval_ms{};
+	uint32_t max_log_size_mb{};
 	std::pmr::vector<CborSensorLoggingConfig> CborSensorLoggingConfig_m;
-	uint32_t json_config_checksum;
+	uint32_t json_config_checksum{};
 
 	CborLoggingConfig(std::allocator_arg_t, allocator_type alloc)
         : CborSensorLoggingConfig_m(alloc) {}

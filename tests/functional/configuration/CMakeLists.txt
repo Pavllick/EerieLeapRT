@@ -24,9 +24,13 @@ add_definitions(-DBOOST_SYSTEM_DISABLE_THREADS)
 add_subdirectory(
   ${APP_SRC_DIR}/../libs/muparser
   ${CMAKE_CURRENT_BINARY_DIR}/muparser)
+add_subdirectory(
+  ${APP_SRC_DIR}/../libs/eerie_memory
+  ${CMAKE_CURRENT_BINARY_DIR}/eerie_memory)
 
 target_link_libraries(app PRIVATE
     muparser
+    eerie_memory
 )
 
 set(APP_SRC_CONFIGURATION_DIR ${APP_SRC_DIR}/configuration)

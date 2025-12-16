@@ -14,21 +14,20 @@ using namespace eerie_leap::subsys::lua_script;
 struct CanMessageConfiguration {
     using allocator_type = std::pmr::polymorphic_allocator<>;
 
-    uint32_t frame_id;
-    uint32_t send_interval_ms;
+    uint32_t frame_id = 0;
+    uint32_t send_interval_ms = 0;
     std::pmr::string script_path;
 
     std::pmr::string name;
-    uint32_t message_size;
+    uint32_t message_size = 0;
     std::pmr::vector<CanSignalConfiguration> signal_configurations;
 
-    std::shared_ptr<LuaScript> lua_script;
+    std::shared_ptr<LuaScript> lua_script = nullptr;
 
     CanMessageConfiguration(std::allocator_arg_t, allocator_type alloc)
         : script_path(alloc),
         name(alloc),
-        signal_configurations(alloc),
-        lua_script(nullptr) {}
+        signal_configurations(alloc) {}
 
     CanMessageConfiguration(const CanMessageConfiguration&) = delete;
 	CanMessageConfiguration& operator=(const CanMessageConfiguration&) noexcept = default;

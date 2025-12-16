@@ -19,9 +19,13 @@ include_directories(${BOOST_INCLUDE_DIR})
 add_subdirectory(
   ${APP_SRC_DIR}/../libs/dbcppp
   ${CMAKE_CURRENT_BINARY_DIR}/dbcppp)
+add_subdirectory(
+  ${APP_SRC_DIR}/../libs/eerie_memory
+  ${CMAKE_CURRENT_BINARY_DIR}/eerie_memory)
 
 target_link_libraries(app PRIVATE
     dbcppp
+    eerie_memory
 )
 
 set(APP_SRC_SUBSYS_DIR ${APP_SRC_DIR}/subsys)

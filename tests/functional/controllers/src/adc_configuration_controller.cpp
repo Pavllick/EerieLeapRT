@@ -18,12 +18,12 @@ using namespace eerie_leap::domain::sensor_domain::configuration;
 ZTEST_SUITE(adc_configuration_manager, NULL, NULL, NULL, NULL, NULL);
 
 AdcConfiguration adc_configuration_manager_GetTestConfiguration() {
-    std::vector<CalibrationData> adc_calibration_data_samples {
+    std::pmr::vector<CalibrationData> adc_calibration_data_samples {
         {0.0, 0.0},
         {5.0, 5.0}
     };
 
-    auto adc_calibration_data_samples_ptr = std::make_shared<std::vector<CalibrationData>>(adc_calibration_data_samples);
+    auto adc_calibration_data_samples_ptr = std::make_shared<std::pmr::vector<CalibrationData>>(adc_calibration_data_samples);
     auto adc_calibrator = std::make_shared<AdcCalibrator>(InterpolationMethod::LINEAR, adc_calibration_data_samples_ptr);
 
     auto adc_channel_configuration = std::make_shared<AdcChannelConfiguration>(adc_calibrator);

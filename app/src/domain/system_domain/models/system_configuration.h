@@ -12,12 +12,12 @@ namespace eerie_leap::domain::system_domain::models {
 struct SystemConfiguration {
     using allocator_type = std::pmr::polymorphic_allocator<>;
 
-    uint64_t device_id;
-    uint32_t hw_version;
-    uint32_t sw_version;
-    uint32_t build_number;
+    uint64_t device_id = 0;
+    uint32_t hw_version = 0;
+    uint32_t sw_version = 0;
+    uint32_t build_number = 0;
 
-    uint32_t com_user_refresh_rate_ms;
+    uint32_t com_user_refresh_rate_ms = 0;
     std::pmr::vector<ComUserConfiguration> com_user_configurations;
 
     SystemConfiguration(std::allocator_arg_t, allocator_type alloc)

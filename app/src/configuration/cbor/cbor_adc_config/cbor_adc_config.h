@@ -7,8 +7,8 @@
 #include <vector>
 
 struct CborAdcCalibrationDataMap_float32float {
-	float float32float_key;
-	float float32float;
+	float float32float_key{};
+	float float32float{};
 };
 
 struct CborAdcCalibrationDataMap {
@@ -32,9 +32,9 @@ struct CborAdcCalibrationDataMap {
 struct CborAdcChannelConfig {
 	using allocator_type = std::pmr::polymorphic_allocator<>;
 
-	uint32_t interpolation_method;
-	struct CborAdcCalibrationDataMap calibration_table;
-	bool calibration_table_present;
+	uint32_t interpolation_method{};
+	CborAdcCalibrationDataMap calibration_table;
+	bool calibration_table_present{};
 
 	CborAdcChannelConfig(std::allocator_arg_t, allocator_type alloc)
         : calibration_table(std::allocator_arg, alloc) {}
@@ -54,9 +54,9 @@ struct CborAdcChannelConfig {
 struct CborAdcConfig {
 	using allocator_type = std::pmr::polymorphic_allocator<>;
 
-	uint32_t samples;
+	uint32_t samples{};
 	std::pmr::vector<CborAdcChannelConfig> CborAdcChannelConfig_m;
-	uint32_t json_config_checksum;
+	uint32_t json_config_checksum{};
 
 	CborAdcConfig(std::allocator_arg_t, allocator_type alloc)
         : CborAdcChannelConfig_m(alloc) {}

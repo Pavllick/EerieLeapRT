@@ -9,14 +9,14 @@
 #include <zcbor_common.h>
 
 struct CborSensorMetadataConfig {
-	struct zcbor_string name;
-	struct zcbor_string unit;
-	struct zcbor_string description;
+	struct zcbor_string name{};
+	struct zcbor_string unit{};
+	struct zcbor_string description{};
 };
 
 struct CborSensorCalibrationDataMap_float32float {
-	float float32float_key;
-	float float32float;
+	float float32float_key{};
+	float float32float{};
 };
 
 struct CborSensorCalibrationDataMap {
@@ -40,17 +40,17 @@ struct CborSensorCalibrationDataMap {
 struct CborSensorConfigurationConfig {
 	using allocator_type = std::pmr::polymorphic_allocator<>;
 
-	uint32_t type;
-	uint32_t sampling_rate_ms;
-	uint32_t interpolation_method;
-	uint32_t channel;
-	bool channel_present;
-	struct zcbor_string connection_string;
-	struct zcbor_string script_path;
+	uint32_t type{};
+	uint32_t sampling_rate_ms{};
+	uint32_t interpolation_method{};
+	uint32_t channel{};
+	bool channel_present{};
+	struct zcbor_string connection_string{};
+	struct zcbor_string script_path{};
 	struct CborSensorCalibrationDataMap calibration_table;
-	bool calibration_table_present;
-	struct zcbor_string expression;
-	bool expression_present;
+	bool calibration_table_present{};
+	struct zcbor_string expression{};
+	bool expression_present{};
 
 	CborSensorConfigurationConfig(std::allocator_arg_t, allocator_type alloc)
         : calibration_table(std::allocator_arg, alloc) {}
@@ -78,8 +78,8 @@ struct CborSensorConfigurationConfig {
 struct CborSensorConfig {
 	using allocator_type = std::pmr::polymorphic_allocator<>;
 
-	struct zcbor_string id;
-	struct CborSensorMetadataConfig metadata;
+	struct zcbor_string id{};
+	struct CborSensorMetadataConfig metadata{};
 	struct CborSensorConfigurationConfig configuration;
 
 	CborSensorConfig(std::allocator_arg_t, allocator_type alloc)
@@ -101,7 +101,7 @@ struct CborSensorsConfig {
 	using allocator_type = std::pmr::polymorphic_allocator<>;
 
 	std::pmr::vector<CborSensorConfig> CborSensorConfig_m;
-	uint32_t json_config_checksum;
+	uint32_t json_config_checksum{};
 
 	CborSensorsConfig(std::allocator_arg_t, allocator_type alloc)
         : CborSensorConfig_m(alloc) {}

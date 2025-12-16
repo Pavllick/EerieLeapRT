@@ -30,11 +30,15 @@ add_subdirectory(
 add_subdirectory(
   ${APP_SRC_DIR}/../libs/nameof
   ${CMAKE_CURRENT_BINARY_DIR}/nameof)
+add_subdirectory(
+  ${APP_SRC_DIR}/../libs/eerie_memory
+  ${CMAKE_CURRENT_BINARY_DIR}/eerie_memory)
 
 target_link_libraries(app PRIVATE
     dbcppp
     muparser
     nameof
+    eerie_memory
 )
 
 set(APP_SRC_CONFIGURATION_DIR ${APP_SRC_DIR}/configuration)

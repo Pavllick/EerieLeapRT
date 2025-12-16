@@ -9,10 +9,10 @@ namespace eerie_leap::domain::canbus_domain::models {
 struct CanSignalConfiguration {
     using allocator_type = std::pmr::polymorphic_allocator<>;
 
-    uint32_t start_bit;
-    uint32_t size_bits;
-    float factor = 1.0f;
-    float offset = 0.0f;
+    uint32_t start_bit = 0;
+    uint32_t size_bits = 0;
+    float factor = 1.0F;
+    float offset = 0.0F;
 
     std::pmr::string name;
     std::pmr::string unit;

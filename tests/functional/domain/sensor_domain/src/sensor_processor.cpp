@@ -49,84 +49,76 @@ using namespace eerie_leap::utilities::voltage_interpolator;
 ZTEST_SUITE(sensor_processor, NULL, NULL, NULL, NULL, NULL);
 
 std::vector<std::shared_ptr<Sensor>> sensor_processor_GetTestSensors() {
-    std::vector<CalibrationData> calibration_data_1 {
+    std::pmr::vector<CalibrationData> calibration_data_1 {
         {0.0, 0.0},
         {3.3, 100.0}
     };
-    auto calibration_data_1_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_1);
+    auto calibration_data_1_ptr = std::make_shared<std::pmr::vector<CalibrationData>>(calibration_data_1);
 
-    auto sensor_1 = std::make_shared<Sensor>("sensor_1");
-    sensor_1->metadata = {
-        .name = "Sensor 1",
-        .unit = "km/h",
-        .description = "Test Sensor 1"
-    };
-    sensor_1->configuration = {
-        .type = SensorType::PHYSICAL_ANALOG,
-        .channel = 0,
-        .sampling_rate_ms = 1000,
-        .voltage_interpolator = std::make_unique<LinearVoltageInterpolator>(calibration_data_1_ptr),
-        .expression_evaluator = std::make_unique<ExpressionEvaluator>("x * 2 + sensor_2 + 1")
-    };
+    auto sensor_1 = std::make_shared<Sensor>(std::allocator_arg, Mrm::GetDefaultPmr(), "sensor_1");
 
-    std::vector<CalibrationData> calibration_data_2 {
+    sensor_1->metadata.name = "Sensor 1";
+    sensor_1->metadata.unit = "km/h";
+    sensor_1->metadata.description = "Test Sensor 1";
+
+    sensor_1->configuration.type = SensorType::PHYSICAL_ANALOG;
+    sensor_1->configuration.channel = 0;
+    sensor_1->configuration.sampling_rate_ms = 1000;
+    sensor_1->configuration.voltage_interpolator = make_unique_pmr<LinearVoltageInterpolator>(Mrm::GetDefaultPmr(), calibration_data_1_ptr);
+    sensor_1->configuration.expression_evaluator = make_unique_pmr<ExpressionEvaluator>(Mrm::GetDefaultPmr(), "x * 2 + sensor_2 + 1");
+
+    std::pmr::vector<CalibrationData> calibration_data_2 {
         {0.0, 0.0},
         {1.0, 29.0},
         {2.0, 111.0},
         {2.5, 162.0},
         {3.3, 200.0}
     };
-    auto calibration_data_2_ptr = std::make_shared<std::vector<CalibrationData>>(calibration_data_2);
+    auto calibration_data_2_ptr = std::make_shared<std::pmr::vector<CalibrationData>>(calibration_data_2);
 
-    auto sensor_2 = std::make_shared<Sensor>("sensor_2");
-    sensor_2->metadata = {
-        .name = "Sensor 2",
-        .unit = "km/h",
-        .description = "Test Sensor 2"
-    };
-    sensor_2->configuration = {
-        .type = SensorType::PHYSICAL_ANALOG,
-        .channel = 1,
-        .sampling_rate_ms = 500,
-        .voltage_interpolator = std::make_unique<CubicSplineVoltageInterpolator>(calibration_data_2_ptr),
-        .expression_evaluator = std::make_unique<ExpressionEvaluator>("x * 4 + 1.6")
-    };
+    auto sensor_2 = std::make_shared<Sensor>(std::allocator_arg, Mrm::GetDefaultPmr(), "sensor_2");
 
-    auto sensor_3 = std::make_shared<Sensor>("sensor_3");
-    sensor_3->metadata = {
-        .name = "Sensor 3",
-        .unit = "km/h",
-        .description = "Test Sensor 3"
-    };
-    sensor_3->configuration = {
-        .type = SensorType::VIRTUAL_ANALOG,
-        .sampling_rate_ms = 2000,
-        .expression_evaluator = std::make_unique<ExpressionEvaluator>("sensor_1 + 8.34")
-    };
+    sensor_2->metadata.name = "Sensor 2";
+    sensor_2->metadata.unit = "km/h";
+    sensor_2->metadata.description = "Test Sensor 2";
 
-    auto sensor_4 = std::make_shared<Sensor>("sensor_4");
-    sensor_4->metadata = {
-        .name = "Sensor 4",
-        .unit = "",
-        .description = "Test Sensor 4"
-    };
-    sensor_4->configuration = {
-        .type = SensorType::PHYSICAL_INDICATOR,
-        .channel = 1,
-        .sampling_rate_ms = 1000
-    };
+    sensor_2->configuration.type = SensorType::PHYSICAL_ANALOG;
+    sensor_2->configuration.channel = 1;
+    sensor_2->configuration.sampling_rate_ms = 500;
+    sensor_2->configuration.voltage_interpolator = make_unique_pmr<CubicSplineVoltageInterpolator>(Mrm::GetDefaultPmr(), calibration_data_2_ptr);
+    sensor_2->configuration.expression_evaluator = make_unique_pmr<ExpressionEvaluator>(Mrm::GetDefaultPmr(), "x * 4 + 1.6");
 
-    auto sensor_5 = std::make_shared<Sensor>("sensor_5");
-    sensor_5->metadata = {
-        .name = "Sensor 5",
-        .unit = "",
-        .description = "Test Sensor 5"
-    };
-    sensor_5->configuration = {
-        .type = SensorType::VIRTUAL_INDICATOR,
-        .sampling_rate_ms = 1000,
-        .expression_evaluator = std::make_unique<ExpressionEvaluator>("sensor_1 < 400")
-    };
+    auto sensor_3 = std::make_shared<Sensor>(std::allocator_arg, Mrm::GetDefaultPmr(), "sensor_3");
+
+    sensor_3->metadata.name = "Sensor 3";
+    sensor_3->metadata.unit = "km/h";
+    sensor_3->metadata.description = "Test Sensor 3";
+
+    sensor_3->configuration.type = SensorType::VIRTUAL_ANALOG;
+    sensor_3->configuration.channel = std::nullopt;
+    sensor_3->configuration.sampling_rate_ms = 2000;
+    sensor_3->configuration.expression_evaluator = make_unique_pmr<ExpressionEvaluator>(Mrm::GetDefaultPmr(), "sensor_1 + 8.34");
+
+    auto sensor_4 = std::make_shared<Sensor>(std::allocator_arg, Mrm::GetDefaultPmr(), "sensor_4");
+
+    sensor_4->metadata.name = "Sensor 4";
+    sensor_4->metadata.unit = "";
+    sensor_4->metadata.description = "Test Sensor 4";
+
+    sensor_4->configuration.type = SensorType::PHYSICAL_INDICATOR;
+    sensor_4->configuration.channel = 1;
+    sensor_4->configuration.sampling_rate_ms = 1000;
+    sensor_4->configuration.voltage_interpolator = make_unique_pmr<CubicSplineVoltageInterpolator>(Mrm::GetDefaultPmr(), calibration_data_2_ptr);
+
+    auto sensor_5 = std::make_shared<Sensor>(std::allocator_arg, Mrm::GetDefaultPmr(), "sensor_5");
+
+    sensor_5->metadata.name = "Sensor 5";
+    sensor_5->metadata.unit = "";
+    sensor_5->metadata.description = "Test Sensor 5";
+
+    sensor_5->configuration.type = SensorType::VIRTUAL_INDICATOR;
+    sensor_5->configuration.sampling_rate_ms = 1000;
+    sensor_5->configuration.expression_evaluator = make_unique_pmr<ExpressionEvaluator>(Mrm::GetDefaultPmr(), "sensor_1 < 400");
 
     std::vector<std::shared_ptr<Sensor>> sensors = {
         sensor_1, sensor_2, sensor_3, sensor_4, sensor_5 };
@@ -139,12 +131,12 @@ std::vector<std::shared_ptr<Sensor>> sensor_processor_GetTestSensors() {
 }
 
 AdcConfiguration sensor_processor_GetTestConfiguration() {
-    std::vector<CalibrationData> adc_calibration_data_samples {
+    std::pmr::vector<CalibrationData> adc_calibration_data_samples {
         {0.0, 0.0},
         {5.0, 5.0}
     };
 
-    auto adc_calibration_data_samples_ptr = std::make_shared<std::vector<CalibrationData>>(adc_calibration_data_samples);
+    auto adc_calibration_data_samples_ptr = std::make_shared<std::pmr::vector<CalibrationData>>(adc_calibration_data_samples);
     auto adc_calibrator = std::make_shared<AdcCalibrator>(InterpolationMethod::LINEAR, adc_calibration_data_samples_ptr);
 
     auto adc_channel_configuration = std::make_shared<AdcChannelConfiguration>(adc_calibrator);

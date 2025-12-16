@@ -17,12 +17,12 @@ using namespace eerie_leap::subsys::adc::models;
 ZTEST_SUITE(adc, NULL, NULL, NULL, NULL, NULL);
 
 std::shared_ptr<AdcConfiguration> adc_GetTestConfiguration() {
-    std::vector<CalibrationData> adc_calibration_data_samples {
+    std::pmr::vector<CalibrationData> adc_calibration_data_samples {
         {0.0, 0.0},
         {3.3, 3.3}
     };
 
-    auto adc_calibration_data_samples_ptr = std::make_shared<std::vector<CalibrationData>>(adc_calibration_data_samples);
+    auto adc_calibration_data_samples_ptr = std::make_shared<std::pmr::vector<CalibrationData>>(adc_calibration_data_samples);
     auto adc_calibrator = std::make_shared<AdcCalibrator>(InterpolationMethod::LINEAR, adc_calibration_data_samples_ptr);
 
     std::vector<std::shared_ptr<AdcChannelConfiguration>> channel_configurations = {

@@ -22,7 +22,7 @@ using namespace eerie_leap::domain::sensor_domain::models::sources;
 struct SensorConfiguration {
     using allocator_type = std::pmr::polymorphic_allocator<>;
 
-    SensorType type;
+    SensorType type = SensorType::NONE;
 
     std::optional<uint32_t> channel = std::nullopt;
     std::pmr::string connection_string;
