@@ -123,7 +123,7 @@ int main(void) {
     std::shared_ptr<Cfb> cfb = nullptr;
 
     if(DtDisplay::Get() != nullptr) {
-        cfb = std::make_shared<Cfb>();
+        cfb = std::make_shared<Cfb>(DtDisplay::Get());
 
         if(!cfb->Initialize()) {
             LOG_ERR("Failed to initialize CFB.");
