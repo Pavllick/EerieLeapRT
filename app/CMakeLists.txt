@@ -1,40 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
 
-# Bootstrap and build Boost
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/../modules/boost/b2")
-    message(STATUS "Bootstrapping Boost...")
-    execute_process(
-        COMMAND ${CMAKE_SOURCE_DIR}/../modules/boost/bootstrap.sh
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/../modules/boost
-        RESULT_VARIABLE BOOTSTRAP_RESULT
-    )
-    if(NOT BOOTSTRAP_RESULT EQUAL 0)
-        message(FATAL_ERROR "Failed to bootstrap Boost")
-    endif()
-
-    message(STATUS "Building Boost headers and tools...")
-    execute_process(
-        COMMAND ${CMAKE_SOURCE_DIR}/../modules/boost/b2 headers tools/bcp
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/../modules/boost
-        RESULT_VARIABLE B2_HEADERS_RESULT
-    )
-    if(NOT B2_HEADERS_RESULT EQUAL 0)
-        message(FATAL_ERROR "Failed to build Boost headers and tools")
-    endif()
-
-    file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/libs/boost)
-
-    message(STATUS "Extracting Boost.Spirit.X3, Boost.Fusion and Boost.JSON headers...")
-    execute_process(
-        COMMAND ${CMAKE_SOURCE_DIR}/../modules/boost/dist/bin/bcp boost/spirit boost/fusion boost/json ${CMAKE_SOURCE_DIR}/libs/boost
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/../modules/boost
-        RESULT_VARIABLE BCP_RESULT
-    )
-    if(NOT BCP_RESULT EQUAL 0)
-        message(FATAL_ERROR "Failed to extract Boost.Spirit.X3, Boost.Fusion and Boost.JSON headers")
-    endif()
-endif()
-
 # Apply patches before build
 function(apply_patches patch_dir target_dir)
     file(GLOB_RECURSE files RELATIVE ${CMAKE_SOURCE_DIR} "${patch_dir}/*.patch")
@@ -124,8 +89,10 @@ endfunction()
 # generate_zcbor_configuration("sensors_config.cddl" "cbor_sensors_config")
 # generate_zcbor_configuration("system_config.cddl" "cbor_system_config")
 
-# Add the Lua Zephyr module
-set(EXTRA_ZEPHYR_MODULES "${CMAKE_CURRENT_SOURCE_DIR}/../modules/lua_zephyr")
+# Add Zephyr modules
+set(EXTRA_ZEPHYR_MODULES
+    "${CMAKE_CURRENT_SOURCE_DIR}/../modules/lua_zephyr"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../modules/eerie_leap_common")
 
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(errie_leap)
@@ -141,31 +108,15 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Process nested HTTP domain CMake file
 add_subdirectory(src/domain/http_domain)
 
-add_definitions(-DBOOST_SYSTEM_DISABLE_THREADS)
-add_definitions(-DBOOST_JSON_STACK_BUFFER_SIZE=1024)
-
 # Collect all source files
 file(GLOB_RECURSE APP_SOURCES
   src/*.cpp
   src/*.c
 )
 
-add_subdirectory(libs/dbcppp)
-add_subdirectory(libs/muparser)
-add_subdirectory(libs/nameof)
-add_subdirectory(libs/eerie_memory)
-
-target_link_libraries(app PRIVATE
-    dbcppp
-    muparser
-    nameof
-    eerie_memory
-)
-
 # Include headers
 target_include_directories(app PRIVATE
   src
-  libs/boost
 )
 
 # Add sources to the app target

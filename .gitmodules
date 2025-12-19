@@ -1,6 +1,4 @@
-[submodule "modules/boost"]
-	path = modules/boost
-	url = https://github.com/boostorg/boost.git
-[submodule "modules/lua"]
-	path = modules/lua
-	url = https://github.com/rodrigopex/lua_zephyr.git
+[submodule "modules/eerie_leap_common"]
+	path = modules/eerie_leap_common
+	url = https://github.com/Pavllick/eerie_leap_common.git
+	branch = main
