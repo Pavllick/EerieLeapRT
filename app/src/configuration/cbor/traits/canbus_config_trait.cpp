@@ -1,6 +1,4 @@
-#pragma once
-
-#include "cbor_trait.h"
+#include "configuration/cbor/cbor_trait.h"
 #include <configuration/cbor/cbor_canbus_config/cbor_canbus_config.h>
 #include "configuration/cbor/cbor_canbus_config/cbor_canbus_config_cbor_encode.h"
 #include "configuration/cbor/cbor_canbus_config/cbor_canbus_config_cbor_decode.h"
@@ -8,11 +6,14 @@
 
 namespace eerie_leap::configuration::cbor::traits {
 
-template <>
-struct CborTrait<CborCanbusConfig> {
-    static constexpr auto Encode = cbor_encode_CborCanbusConfig;
-    static constexpr auto Decode = cbor_decode_CborCanbusConfig;
-    static constexpr auto GetSerializingSize = cbor_get_size_CborCanbusConfig;
-};
+struct CborCanbusConfigTraitRegistrar {
+    CborCanbusConfigTraitRegistrar() {
+        CborTraitRegistry::Register<CborCanbusConfig>(
+            cbor_encode_CborCanbusConfig,
+            cbor_decode_CborCanbusConfig,
+            cbor_get_size_CborCanbusConfig
+        );
+    }
+} CborCanbusConfigTraitRegistrar;
 
 } // namespace eerie_leap::configuration::cbor::traits

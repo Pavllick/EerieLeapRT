@@ -15,7 +15,7 @@
 
 #include "configuration/json/json_serializer.h"
 
-#include "loaded_config.hpp"
+#include "configuration/services/loaded_config.hpp"
 
 namespace eerie_leap::configuration::services {
 
