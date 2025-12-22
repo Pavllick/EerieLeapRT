@@ -9,6 +9,7 @@
 #include "subsys/device_tree/dt_fs.h"
 #include "subsys/device_tree/dt_modbus.h"
 #include "subsys/device_tree/dt_display.h"
+#include "subsys/device_tree/dt_canbus.h"
 
 #include "subsys/fs/services/fs_service.h"
 #include "subsys/fs/services/sdmmc_service.h"
@@ -229,7 +230,7 @@ int main(void) {
         gpio->GetChannelCount(),
         adc_configuration_manager->Get()->GetChannelCount());
 
-    auto canbus_service = std::make_shared<CanbusService>(sd_fs_service, canbus_configuration_manager);
+    auto canbus_service = std::make_shared<CanbusService>(DtCanbus::Get, canbus_configuration_manager);
 
     // TODO: For test purposes only
     SetupTestSensors(sensors_configuration_manager);
