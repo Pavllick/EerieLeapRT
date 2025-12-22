@@ -51,3 +51,11 @@ config EERIE_LEAP_ADC_CALIBRATION_SAMPLING_RATE_MS
 config EERIE_LEAP_CANBUS_AUTO_DETECT_INTERVAL_MS
 	int "Canbus auto detect activity check interval ms"
 	default 5000
+
+config EERIE_LEAP_FS_SD_THREAD_STACK_SIZE
+	int "SD thread stack size"
+	default 3072
+
+config EERIE_LEAP_SD_CHECK_INTERVAL_MS
+	int "SD check interval ms"
+	default 1000
