@@ -68,7 +68,7 @@ pmr_unique_ptr<CanbusConfiguration> CanbusConfigurationCborParser::Deserialize(s
         channel_configuration.bus_channel = static_cast<uint8_t>(canbus_config.bus_channel);
         channel_configuration.bitrate = canbus_config.bitrate;
         channel_configuration.data_bitrate = canbus_config.data_bitrate;
-        channel_configuration.dbc_file_path = CborHelpers::ToStdString(canbus_config.dbc_file_path);
+        channel_configuration.dbc_file_path = CborHelpers::ToPmrString(mr, canbus_config.dbc_file_path);
 
         if(sd_fs_service_ != nullptr && !channel_configuration.dbc_file_path.empty())
             CanbusConfigurationParserHelpers::LoadDbcConfiguration(sd_fs_service_.get(), channel_configuration);
@@ -78,8 +78,8 @@ pmr_unique_ptr<CanbusConfiguration> CanbusConfigurationCborParser::Deserialize(s
 
             message_configuration->frame_id = message_config.frame_id;
             message_configuration->send_interval_ms = message_config.send_interval_ms;
-            message_configuration->script_path = CborHelpers::ToStdString(message_config.script_path);
-            message_configuration->name = CborHelpers::ToStdString(message_config.name);
+            message_configuration->script_path = CborHelpers::ToPmrString(mr, message_config.script_path);
+            message_configuration->name = CborHelpers::ToPmrString(mr, message_config.name);
             message_configuration->message_size = message_config.message_size;
 
             for(const auto& signal_config : message_config.CborCanSignalConfig_m) {
@@ -89,8 +89,8 @@ pmr_unique_ptr<CanbusConfiguration> CanbusConfigurationCborParser::Deserialize(s
                 signal_configuration.size_bits = signal_config.size_bits;
                 signal_configuration.factor = signal_config.factor;
                 signal_configuration.offset = signal_config.offset;
-                signal_configuration.name = CborHelpers::ToStdString(signal_config.name);
-                signal_configuration.unit = CborHelpers::ToStdString(signal_config.unit);
+                signal_configuration.name = CborHelpers::ToPmrString(mr, signal_config.name);
+                signal_configuration.unit = CborHelpers::ToPmrString(mr, signal_config.unit);
 
                 message_configuration->signal_configurations.push_back(std::move(signal_configuration));
             }

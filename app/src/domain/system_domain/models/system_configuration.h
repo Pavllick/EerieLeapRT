@@ -45,7 +45,7 @@ struct SystemConfiguration {
         snprintf(version_str, sizeof(version_str), "%u.%u.%u",
             hw_version_major, hw_version_minor, hw_version_patch);
 
-        return std::string(version_str);
+        return {version_str};
     }
 
     std::string GetFormattedSwVersion() const {
@@ -57,7 +57,7 @@ struct SystemConfiguration {
         snprintf(version_str, sizeof(version_str), "%u.%u.%u.%u",
             sw_version_major, sw_version_minor, sw_version_patch, build_number);
 
-        return std::string(version_str);
+        return {version_str};
     }
 
     [[nodiscard]] static constexpr uint32_t GetConfigHwVersion() {

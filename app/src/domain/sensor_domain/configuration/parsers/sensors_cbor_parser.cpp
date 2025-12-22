@@ -109,7 +109,7 @@ std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
     SensorsOrderResolver order_resolver;
 
     for(const auto& sensor_config : sensors_config.CborSensorConfig_m) {
-        auto sensor = make_shared_pmr<Sensor>(mr, CborHelpers::ToStdString(sensor_config.id));
+        auto sensor = make_shared_pmr<Sensor>(mr, CborHelpers::ToPmrString(mr, sensor_config.id));
 
         sensor->configuration.type = static_cast<SensorType>(sensor_config.configuration.type);
 
@@ -118,10 +118,10 @@ std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
         else
             sensor->configuration.channel = std::nullopt;
 
-        sensor->configuration.connection_string = CborHelpers::ToStdString(sensor_config.configuration.connection_string);
+        sensor->configuration.connection_string = CborHelpers::ToPmrString(mr, sensor_config.configuration.connection_string);
         sensor->configuration.UnwrapConnectionString();
 
-        sensor->configuration.script_path = CborHelpers::ToStdString(sensor_config.configuration.script_path);
+        sensor->configuration.script_path = CborHelpers::ToPmrString(mr, sensor_config.configuration.script_path);
         if(sd_fs_service_ != nullptr
             && sd_fs_service_->IsAvailable()
             && !sensor->configuration.script_path.empty()
@@ -177,10 +177,10 @@ std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
         else
             sensor->configuration.expression_evaluator = nullptr;
 
-        sensor->metadata.unit = CborHelpers::ToStdString(sensor_config.metadata.unit);
-        sensor->metadata.name = CborHelpers::ToStdString(sensor_config.metadata.name);
+        sensor->metadata.unit = CborHelpers::ToPmrString(mr, sensor_config.metadata.unit);
+        sensor->metadata.name = CborHelpers::ToPmrString(mr, sensor_config.metadata.name);
 
-        sensor->metadata.description = CborHelpers::ToStdString(sensor_config.metadata.description);
+        sensor->metadata.description = CborHelpers::ToPmrString(mr, sensor_config.metadata.description);
 
         order_resolver.AddSensor(std::move(sensor));
     }

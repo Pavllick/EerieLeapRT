@@ -141,6 +141,7 @@ int main(void) {
     auto sd_fs_mp = DtFs::GetSdFsMp();
     if(sd_fs_mp.has_value()) {
         sd_fs_service = std::make_shared<SdmmcService>(sd_fs_mp.value(), DtFs::GetSdDiskName());
+        sd_fs_service->RegisterIsSdCardPresentHandler(DtFs::IsSdCardPresent);
         if(!sd_fs_service->Initialize()) {
             LOG_ERR("Failed to initialize SD File System.");
         }
