@@ -59,3 +59,7 @@ config EERIE_LEAP_FS_SD_THREAD_STACK_SIZE
 config EERIE_LEAP_SD_CHECK_INTERVAL_MS
 	int "SD check interval ms"
 	default 1000
+
+config EERIE_LEAP_SD_CARD_USER_CONFIG_DIR
+	string "User config directory"
+	default "configuration"

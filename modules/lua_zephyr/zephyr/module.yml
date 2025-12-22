@@ -1,4 +1,0 @@
-name: lua
-build:
-  cmake: .
-  kconfig: Kconfig.lua_module

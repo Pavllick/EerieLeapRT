@@ -91,7 +91,7 @@ endfunction()
 
 # Add Zephyr modules
 set(EXTRA_ZEPHYR_MODULES
-    "${CMAKE_CURRENT_SOURCE_DIR}/../modules/lua_zephyr"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../modules/eerie_leap_lua"
     "${CMAKE_CURRENT_SOURCE_DIR}/../modules/eerie_leap_common")
 
 # Boost is linked through eerie_leap_common module
