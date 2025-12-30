@@ -261,7 +261,7 @@ And GDB in another:
 
 **Required Tools**
 
-STM32CubeProgrammer needs to be installed on the host machine. If using Docker, you can take advantage of the build script expecting to find STM32CubeCLT in `tools/st-stm32cubeclt_1.19.0.sh`. Source the tool from the [ST Website](https://www.st.com/en/development-tools/stm32cubeclt.html) and unpack it to `tools/st-stm32cubeclt_1.19.0.sh`. The Dockerfile will take care of installing it during the build process.
+STM32CubeProgrammer needs to be installed on the host machine. If using Docker, you can take advantage of the build script expecting to find STM32CubeCLT in `tools/st-stm32cubeclt_1.20.0.sh`. Source the tool from the [ST Website](https://www.st.com/en/development-tools/stm32cubeclt.html) and unpack it to `tools/st-stm32cubeclt_1.20.0.sh`. The Dockerfile will take care of installing it during the build process.
 
 **Build:**  
 ```shell

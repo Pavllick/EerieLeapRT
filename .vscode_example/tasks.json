@@ -9,7 +9,9 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "problemMatcher": ["$gcc"],
+            "problemMatcher": [
+                "$gcc"
+            ],
             "detail": "Build the Zephyr project using native_sim POSIX board"
         },
         {
@@ -20,7 +22,9 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "problemMatcher": ["$gcc"],
+            "problemMatcher": [
+                "$gcc"
+            ],
             "detail": "Build the Zephyr project using native_sim POSIX board"
         },
         {
@@ -31,7 +35,9 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "problemMatcher": ["$gcc"],
+            "problemMatcher": [
+                "$gcc"
+            ],
             "detail": "Build the Zephyr project using native_sim POSIX board"
         },
         {
@@ -42,7 +48,9 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "problemMatcher": ["$gcc"],
+            "problemMatcher": [
+                "$gcc"
+            ],
             "detail": "Build the Zephyr project using native_sim POSIX board",
             "options": {
                 "statusbar": {
@@ -58,8 +66,23 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "problemMatcher": ["$gcc"],
+            "problemMatcher": [
+                "$gcc"
+            ],
             "detail": "Build the Zephyr project using native_sim POSIX board"
+        },
+        {
+            "label": "Build QEMUx86_64",
+            "type": "shell",
+            "command": "west build -p auto -b qemu_x86_64 ./app",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Build the Zephyr project using qemu_x86_64 QEMU sim"
         },
         {
             "label": "Build QEMU Cortex A9",
@@ -69,7 +92,9 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "problemMatcher": ["$gcc"],
+            "problemMatcher": [
+                "$gcc"
+            ],
             "detail": "Build the Zephyr project using native_sim POSIX board"
         },
         {
@@ -77,9 +102,8 @@
             "group": "build",
             "detail": "Prepare debugserver for QEMU. Press F5",
             "type": "shell",
-			"command": "ninja debugserver -C build -v",
-            "args": [
-            ],
+            "command": "ninja debugserver -C build -v",
+            "args": [],
             "presentation": {
                 "reveal": "always",
                 "panel": "dedicated",

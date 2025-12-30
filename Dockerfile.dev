@@ -55,10 +55,10 @@ RUN mkdir -p /home/${USERNAME}/zephyr/workspace/utilities/
 RUN mkdir -p /home/${USERNAME}/zephyr/workspace/project/tools/
 
 COPY ./tools/ /home/${USERNAME}/zephyr/workspace/project/tools/
-RUN if [ -f "/home/${USERNAME}/zephyr/workspace/project/tools/st-stm32cubeclt_1.19.0.sh" ]; then \
-    sudo chmod +x "/home/${USERNAME}/zephyr/workspace/project/tools/st-stm32cubeclt_1.19.0.sh" && \
-    echo | sudo LICENSE_ALREADY_ACCEPTED=1 "/home/${USERNAME}/zephyr/workspace/project/tools/st-stm32cubeclt_1.19.0.sh" && \
-    echo 'export PATH=$PATH:/opt/st/stm32cubeclt_1.19.0/STM32CubeProgrammer/bin' >> "/home/${USERNAME}/.bashrc"; \
+RUN if [ -f "/home/${USERNAME}/zephyr/workspace/project/tools/st-stm32cubeclt_1.20.0.sh" ]; then \
+    sudo chmod +x "/home/${USERNAME}/zephyr/workspace/project/tools/st-stm32cubeclt_1.20.0.sh" && \
+    echo | sudo LICENSE_ALREADY_ACCEPTED=1 "/home/${USERNAME}/zephyr/workspace/project/tools/st-stm32cubeclt_1.20.0.sh" && \
+    echo 'export PATH=$PATH:/opt/st/stm32cubeclt_1.20.0/STM32CubeProgrammer/bin' >> "/home/${USERNAME}/.bashrc"; \
 fi
 
 # Setup OpenOCD for ESP32
