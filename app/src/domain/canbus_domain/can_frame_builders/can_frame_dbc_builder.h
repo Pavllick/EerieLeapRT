@@ -20,7 +20,7 @@ public:
         std::shared_ptr<CanbusService> canbus_service,
         std::shared_ptr<SensorReadingsFrame> sensor_readings_frame);
 
-    CanFrame Build(uint8_t bus_channel, uint32_t frame_id);
+    std::vector<uint8_t> Build(uint8_t bus_channel, uint32_t frame_id);
 };
 
 } // namespace eerie_leap::domain::canbus_domain::can_frame_builders

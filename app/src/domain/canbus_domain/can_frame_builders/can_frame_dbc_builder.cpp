@@ -18,14 +18,14 @@ CanFrameDbcBuilder::CanFrameDbcBuilder(
         : canbus_service_(std::move(canbus_service)),
         sensor_readings_frame_(std::move(sensor_readings_frame)) {}
 
-CanFrame CanFrameDbcBuilder::Build(uint8_t bus_channel, uint32_t frame_id) {
+std::vector<uint8_t> CanFrameDbcBuilder::Build(uint8_t bus_channel, uint32_t frame_id) {
     try {
         auto dbc = canbus_service_->GetChannelConfiguration(bus_channel)->dbc;
 
         if(dbc == nullptr)
             throw std::runtime_error("DBC not loaded");
 
-        auto can_data = dbc->GetMessage(frame_id)->EncodeMessage(
+        auto can_frame_data = dbc->GetMessage(frame_id)->EncodeMessage(
             [&sensor_readings_frame = sensor_readings_frame_](size_t signal_name_hash) {
                 if(!sensor_readings_frame->HasReadingValue(signal_name_hash))
                     return 0.0f;
@@ -33,18 +33,9 @@ CanFrame CanFrameDbcBuilder::Build(uint8_t bus_channel, uint32_t frame_id) {
                 return sensor_readings_frame->GetReadingValue(signal_name_hash);
             });
 
-        CanFrame can_frame_new = {
-            .id = frame_id,
-            .is_transmit = true,
-            .data = std::move(can_data)
-        };
-
-        return can_frame_new;
+        return can_frame_data;
     } catch (const std::exception& e) {
-        return {
-            .id = frame_id,
-            .is_transmit = true
-        };
+        return {};
     }
 }
 

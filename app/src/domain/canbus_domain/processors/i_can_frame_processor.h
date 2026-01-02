@@ -1,22 +1,22 @@
 #pragma once
 
 #include <memory>
+#include <vector>
+#include <span>
 
-#include "subsys/canbus/can_frame.h"
 #include "domain/canbus_domain/models/can_message_configuration.h"
 
 namespace eerie_leap::domain::canbus_domain::processors {
 
-using namespace eerie_leap::subsys::canbus;
 using namespace eerie_leap::domain::canbus_domain::models;
 
 class ICanFrameProcessor {
 public:
     virtual ~ICanFrameProcessor() = default;
 
-    virtual CanFrame Process(
+    virtual std::vector<uint8_t> Process(
         const CanMessageConfiguration& message_configuration,
-        const CanFrame& can_frame) = 0;
+        std::span<const uint8_t> can_frame_data) = 0;
 };
 
 } // namespace eerie_leap::domain::canbus_domain::processors

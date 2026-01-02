@@ -103,8 +103,8 @@ pmr_unique_ptr<CborSensorsConfig> SensorsCborParser::Serialize(
 std::vector<std::shared_ptr<Sensor>> SensorsCborParser::Deserialize(
     std::pmr::memory_resource* mr,
     const CborSensorsConfig& sensors_config,
-    size_t gpio_channel_count,
-    size_t adc_channel_count) {
+    uint32_t gpio_channel_count,
+    uint32_t adc_channel_count) {
 
     SensorsOrderResolver order_resolver;
 

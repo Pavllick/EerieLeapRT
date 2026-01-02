@@ -34,17 +34,22 @@ void CanbusSchedulerService::Initialize() {
 
 WorkQueueTaskResult CanbusSchedulerService::ProcessCanbusWorkTask(CanbusTask* task) {
     try {
-        auto can_frame = task->can_frame_dbc_builder->Build(task->bus_channel, task->message_configuration->frame_id);
+        auto can_frame_data = task->can_frame_dbc_builder->Build(
+            task->bus_channel, task->message_configuration->frame_id);
 
-        for(const auto& processor : *task->can_frame_processors)
-            can_frame = processor->Process(*task->message_configuration, can_frame);
+        for(const auto& processor : *task->can_frame_processors) {
+            auto processed_data = processor->Process(*task->message_configuration, can_frame_data);
 
-        if(can_frame.data.size() > 0)
-            task->canbus->SendFrame(can_frame);
+            if(!processed_data.empty())
+                can_frame_data = processed_data;
+        }
+
+        if(can_frame_data.size() > 0)
+            task->canbus->SendFrame(task->bus_channel, can_frame_data);
 
         LOG_HEXDUMP_DBG(
-            can_frame.data.data(),
-            can_frame.data.size(),
+            can_frame_data.data(),
+            can_frame_data.size(),
             ("Can frame " + std::to_string(task->message_configuration->frame_id)).c_str());
     } catch (const std::exception& e) {
         LOG_DBG("Error processing Frame ID: %d, Error: %s", task->message_configuration->frame_id, e.what());

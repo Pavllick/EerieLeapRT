@@ -37,9 +37,9 @@ public:
         std::shared_ptr<SensorReadingsFrame> sensor_readings_frame,
         std::string function_name);
 
-    CanFrame Process(
+    std::vector<uint8_t> Process(
         const CanMessageConfiguration& message_configuration,
-        const CanFrame& can_frame) override;
+        std::span<const uint8_t> can_frame_data) override;
 };
 
 } // namespace eerie_leap::domain::canbus_domain::processors
