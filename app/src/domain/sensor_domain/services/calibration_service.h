@@ -1,6 +1,8 @@
 #pragma once
 
 #include <memory>
+#include <optional>
+
 #include <zephyr/kernel.h>
 
 #include "utilities/guid/guid_generator.h"
@@ -31,7 +33,7 @@ private:
     std::shared_ptr<ITimeService> time_service_;
     std::shared_ptr<GuidGenerator> guid_generator_;
     std::shared_ptr<AdcConfigurationManager> adc_configuration_manager_;
-    WorkQueueTask<SensorTask> calibration_task_;
+    std::optional<WorkQueueTask<SensorTask>> calibration_task_;
     std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service_;
 
     std::unique_ptr<SensorTask> CreateCalibrationTask(int channel);
