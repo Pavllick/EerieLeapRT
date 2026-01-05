@@ -115,10 +115,10 @@ int LogWriterService::LogWriterStart() {
 
     LOG_INF("Logging started. Log file created: %s", file_name.c_str());
 
-    work_queue_task_->user_data->logging_interval_ms =
+    work_queue_task_->GetUserdata()->logging_interval_ms =
         K_MSEC(logging_configuration_manager_->Get()->logging_interval_ms);
-    work_queue_task_->user_data->start_time = start_time;
-    work_queue_task_->user_data->logger = logger_;
+    work_queue_task_->GetUserdata()->start_time = start_time;
+    work_queue_task_->GetUserdata()->logger = logger_;
 
     atomic_set(&logger_running_, 1);
     work_queue_thread_->ScheduleTask(*work_queue_task_);

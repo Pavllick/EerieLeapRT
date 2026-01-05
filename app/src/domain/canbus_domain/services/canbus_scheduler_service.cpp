@@ -126,7 +126,7 @@ void CanbusSchedulerService::Restart() {
 
 void CanbusSchedulerService::Pause() {
     for(auto& work_queue_task : work_queue_tasks_) {
-        LOG_INF("Canceling task for Frame ID: %d", work_queue_task.user_data->message_configuration->frame_id);
+        LOG_INF("Canceling task for Frame ID: %d", work_queue_task.GetUserdata()->message_configuration->frame_id);
 
         while(work_queue_thread_->CancelTask(work_queue_task))
             k_sleep(K_MSEC(1));

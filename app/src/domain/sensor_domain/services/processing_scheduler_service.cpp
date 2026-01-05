@@ -128,7 +128,7 @@ void ProcessingSchedulerService::Restart() {
 
 void ProcessingSchedulerService::Pause() {
     for(auto& work_queue_task : work_queue_tasks_) {
-        LOG_INF("Canceling task for sensor: %s", work_queue_task.user_data->sensor->id.c_str());
+        LOG_INF("Canceling task for sensor: %s", work_queue_task.GetUserdata()->sensor->id.c_str());
 
         while(work_queue_thread_->CancelTask(work_queue_task))
             k_sleep(K_MSEC(1));
