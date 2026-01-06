@@ -91,7 +91,7 @@ void CalibrationService::Start(int channel) {
         return;
 
     calibration_task_ = work_queue_thread_->CreateTask(ProcessCalibrationWorkTask, std::move(calibration_task));
-    work_queue_thread_->ScheduleTask(calibration_task_.value());
+    calibration_task_.value().Schedule();
 
     k_sleep(K_MSEC(1));
 
@@ -101,7 +101,7 @@ void CalibrationService::Start(int channel) {
 void CalibrationService::Stop() {
 
     if(calibration_task_.has_value()) {
-        while(!work_queue_thread_->CancelTask(calibration_task_.value()))
+        while(calibration_task_.value().Cancel())
             k_sleep(K_MSEC(1));
     }
 

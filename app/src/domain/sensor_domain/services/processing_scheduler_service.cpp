@@ -92,7 +92,7 @@ std::unique_ptr<SensorTask> ProcessingSchedulerService::CreateSensorTask(std::sh
 
 void ProcessingSchedulerService::StartTasks() {
     for(auto& work_queue_task : work_queue_tasks_)
-        work_queue_thread_->ScheduleTask(work_queue_task);
+        work_queue_task.Schedule();
 
     k_sleep(K_MSEC(1));
 }
@@ -109,7 +109,7 @@ void ProcessingSchedulerService::Start() {
         if(task == nullptr)
             continue;
 
-        work_queue_tasks_.push_back(
+        work_queue_tasks_.emplace_back(
             work_queue_thread_->CreateTask(ProcessSensorWorkTask, std::move(task)));
         LOG_INF("Created task for sensor: %s", sensor->id.c_str());
     }
@@ -130,7 +130,7 @@ void ProcessingSchedulerService::Pause() {
     for(auto& work_queue_task : work_queue_tasks_) {
         LOG_INF("Canceling task for sensor: %s", work_queue_task.GetUserdata()->sensor->id.c_str());
 
-        while(work_queue_thread_->CancelTask(work_queue_task))
+        while(work_queue_task.Cancel())
             k_sleep(K_MSEC(1));
     }
 
@@ -139,7 +139,7 @@ void ProcessingSchedulerService::Pause() {
 
 void ProcessingSchedulerService::Resume() {
     for(auto& work_queue_task : work_queue_tasks_)
-        work_queue_thread_->ScheduleTask(work_queue_task);
+        work_queue_task.Schedule();
 
     LOG_INF("Processing Scheduler Service resumed.");
 }

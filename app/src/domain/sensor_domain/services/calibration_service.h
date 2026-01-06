@@ -29,11 +29,11 @@ private:
     static constexpr int thread_stack_size_ = 4096;
     static constexpr int thread_priority_ = 6;
    std::unique_ptr<WorkQueueThread> work_queue_thread_;
+   std::optional<WorkQueueTask<SensorTask>> calibration_task_;
 
     std::shared_ptr<ITimeService> time_service_;
     std::shared_ptr<GuidGenerator> guid_generator_;
     std::shared_ptr<AdcConfigurationManager> adc_configuration_manager_;
-    std::optional<WorkQueueTask<SensorTask>> calibration_task_;
     std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service_;
 
     std::unique_ptr<SensorTask> CreateCalibrationTask(int channel);

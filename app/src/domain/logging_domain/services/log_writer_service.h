@@ -32,7 +32,7 @@ private:
     static constexpr int thread_stack_size_ = CONFIG_EERIE_LEAP_LOG_WRITER_STACK_SIZE;
     static constexpr int thread_priority_ = 8;
     std::unique_ptr<WorkQueueThread> work_queue_thread_;
-    std::unique_ptr<WorkQueueTask<LogWriterTask>> work_queue_task_;
+    std::optional<WorkQueueTask<LogWriterTask>> work_queue_task_;
 
     std::shared_ptr<IFsService> fs_service_;
     std::shared_ptr<LoggingConfigurationManager> logging_configuration_manager_;

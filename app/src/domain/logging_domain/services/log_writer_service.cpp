@@ -23,7 +23,7 @@ LogWriterService::LogWriterService(
     std::shared_ptr<ITimeService> time_service,
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame)
         : work_queue_thread_(nullptr),
-        work_queue_task_(nullptr),
+        work_queue_task_(std::nullopt),
         fs_service_(std::move(fs_service)),
         logging_configuration_manager_(std::move(logging_configuration_manager)),
         time_service_(std::move(time_service)),
@@ -45,8 +45,7 @@ void LogWriterService::Initialize() {
     task->time_service = time_service_;
     task->sensor_readings_frame = sensor_readings_frame_;
 
-    work_queue_task_ = std::make_unique<WorkQueueTask<LogWriterTask>>(
-        work_queue_thread_->CreateTask(ProcessWorkTask, std::move(task)));
+    work_queue_task_ = work_queue_thread_->CreateTask(ProcessWorkTask, std::move(task));
 
     LOG_INF("Log writer service initialized.");
 }
@@ -115,13 +114,13 @@ int LogWriterService::LogWriterStart() {
 
     LOG_INF("Logging started. Log file created: %s", file_name.c_str());
 
-    work_queue_task_->GetUserdata()->logging_interval_ms =
+    work_queue_task_.value().GetUserdata()->logging_interval_ms =
         K_MSEC(logging_configuration_manager_->Get()->logging_interval_ms);
-    work_queue_task_->GetUserdata()->start_time = start_time;
-    work_queue_task_->GetUserdata()->logger = logger_;
+    work_queue_task_.value().GetUserdata()->start_time = start_time;
+    work_queue_task_.value().GetUserdata()->logger = logger_;
 
     atomic_set(&logger_running_, 1);
-    work_queue_thread_->ScheduleTask(*work_queue_task_);
+    work_queue_task_.value().Schedule();
 
     return 0;
 }
@@ -130,7 +129,7 @@ int LogWriterService::LogWriterStop() {
     if(!atomic_get(&logger_running_))
         return -1;
 
-    work_queue_thread_->CancelTask(*work_queue_task_);
+    work_queue_task_.value().Cancel();
     atomic_set(&logger_running_, 0);
 
     logger_->StopLogging();

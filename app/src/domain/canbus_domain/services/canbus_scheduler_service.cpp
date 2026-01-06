@@ -45,7 +45,7 @@ WorkQueueTaskResult CanbusSchedulerService::ProcessCanbusWorkTask(CanbusTask* ta
         }
 
         if(can_frame_data.size() > 0)
-            task->canbus->SendFrame(task->bus_channel, can_frame_data);
+            task->canbus->SendFrame(task->message_configuration->frame_id, can_frame_data);
 
         LOG_HEXDUMP_DBG(
             can_frame_data.data(),
@@ -92,7 +92,7 @@ std::unique_ptr<CanbusTask> CanbusSchedulerService::CreateTask(uint8_t bus_chann
 
 void CanbusSchedulerService::StartTasks() {
     for(auto& work_queue_task : work_queue_tasks_)
-        work_queue_thread_->ScheduleTask(work_queue_task);
+        work_queue_task.Schedule();
 
     k_sleep(K_MSEC(1));
 }
@@ -128,7 +128,7 @@ void CanbusSchedulerService::Pause() {
     for(auto& work_queue_task : work_queue_tasks_) {
         LOG_INF("Canceling task for Frame ID: %d", work_queue_task.GetUserdata()->message_configuration->frame_id);
 
-        while(work_queue_thread_->CancelTask(work_queue_task))
+        while(work_queue_task.Cancel())
             k_sleep(K_MSEC(1));
     }
 
@@ -137,7 +137,7 @@ void CanbusSchedulerService::Pause() {
 
 void CanbusSchedulerService::Resume() {
     for(auto& work_queue_task : work_queue_tasks_)
-        work_queue_thread_->ScheduleTask(work_queue_task);
+        work_queue_task.Schedule();
 
     LOG_INF("CANBus Scheduler Service resumed.");
 }
