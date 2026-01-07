@@ -19,6 +19,7 @@
 #include "subsys/time/time_service.h"
 #include "subsys/time/rtc_provider.h"
 #include "subsys/time/boot_elapsed_time_provider.h"
+#include "subsys/cdmp/services/cdmp_service.h"
 
 #include "configuration/services/cbor_configuration_service.h"
 #include "configuration/services/json_configuration_service.h"
@@ -35,10 +36,6 @@
 #include "domain/canbus_domain/services/canbus_scheduler_service.h"
 
 #include "domain/logging_domain/services/log_writer_service.h"
-
-#include "domain/user_com_domain/user_com.h"
-#include "domain/user_com_domain/services/com_polling/com_polling_interface_service.h"
-#include "domain/user_com_domain/services/com_reading/com_reading_interface_service.h"
 
 #include "controllers/logging_controller.h"
 #include "controllers/com_polling_controller.h"
@@ -76,6 +73,7 @@ using namespace eerie_leap::subsys::gpio;
 using namespace eerie_leap::subsys::cfb;
 using namespace eerie_leap::subsys::modbus;
 using namespace eerie_leap::subsys::time;
+using namespace eerie_leap::subsys::cdmp::services;
 
 using namespace eerie_leap::configuration::json::configs;
 using namespace eerie_leap::configuration::services;
@@ -85,9 +83,6 @@ using namespace eerie_leap::domain::canbus_domain::configuration;
 using namespace eerie_leap::domain::system_domain::configuration;
 using namespace eerie_leap::domain::sensor_domain::services;
 using namespace eerie_leap::domain::sensor_domain::sensor_readers;
-using namespace eerie_leap::domain::user_com_domain;
-using namespace eerie_leap::domain::user_com_domain::services::com_reading;
-using namespace eerie_leap::domain::user_com_domain::services::com_polling;
 using namespace eerie_leap::domain::logging_domain::services;
 using namespace eerie_leap::domain::logging_domain::configuration;
 
@@ -232,6 +227,14 @@ int main(void) {
 
     auto canbus_service = std::make_shared<CanbusService>(DtCanbus::Get, canbus_configuration_manager);
 
+    auto cdmp_service = std::make_shared<CdmpService>(
+        time_service,
+        canbus_service->GetCanbus(0),
+        CdmpDeviceType::LOGGER,
+        0xABCD);
+    cdmp_service->Initialize();
+    cdmp_service->Start();
+
     // TODO: For test purposes only
     SetupTestSensors(sensors_configuration_manager);
 
@@ -262,37 +265,6 @@ int main(void) {
             sensors_configuration_manager,
             logging_configuration_manager,
             display_controller);
-    }
-
-    std::shared_ptr<ComPollingInterfaceService> com_polling_interface_service = nullptr;
-    std::shared_ptr<ComReadingInterfaceService> com_reading_interface_service = nullptr;
-    std::shared_ptr<ComPollingController> com_polling_controller = nullptr;
-    if(DtModbus::Get() != nullptr) {
-        auto modbus = std::make_shared<Modbus>(DtModbus::Get());
-        auto user_com_interface = std::make_shared<UserCom>(modbus, system_configuration_manager);
-        user_com_interface->Initialize();
-
-        if(user_com_interface->GetUsers()->size() == 0)
-            user_com_interface->ResolveUserIds();
-
-        auto com_user_configurations = user_com_interface->GetUsers();
-        LOG_INF("User IDs count: %zu", com_user_configurations->size());
-        for(auto com_user_configuration : *com_user_configurations)
-            LOG_INF("Com User Device ID: %llu, Server ID: %hu", com_user_configuration.device_id, com_user_configuration.server_id);
-
-        com_polling_interface_service = std::make_shared<ComPollingInterfaceService>(user_com_interface);
-        com_polling_interface_service->Initialize();
-
-        com_reading_interface_service = std::make_shared<ComReadingInterfaceService>(
-            user_com_interface,
-            sensor_readings_frame,
-            system_configuration_manager->Get()->com_user_refresh_rate_ms);
-        com_reading_interface_service->Initialize();
-
-        if(logging_controller != nullptr) {
-            com_polling_controller = std::make_shared<ComPollingController>(user_com_interface, com_polling_interface_service, logging_controller);
-            com_polling_controller->Initialize();
-        }
     }
 
     auto sensor_reader_factory = std::make_shared<SensorReaderFactory>(
@@ -358,45 +330,47 @@ void SetupSystemConfiguration(std::shared_ptr<SystemConfigurationManager> system
 void SetupCanbusConfiguration(std::shared_ptr<CanbusConfigurationManager> canbus_configuration_manager) {
     auto canbus_configuration = make_shared_pmr<CanbusConfiguration>(Mrm::GetExtPmr());
 
-    canbus_configuration->channel_configurations.clear();
+    // ============================================
+    // CANBus 0
+    // ============================================
 
     CanChannelConfiguration canbus_channel_configuration_0(std::allocator_arg, Mrm::GetExtPmr());
-    canbus_channel_configuration_0.type = CanbusType::CANFD;
+    canbus_channel_configuration_0.type = CanbusType::CLASSICAL_CAN;
     canbus_channel_configuration_0.is_extended_id = false;
-    canbus_channel_configuration_0.bus_channel = 1;
-    canbus_channel_configuration_0.bitrate = 1000000;
-    canbus_channel_configuration_0.data_bitrate = 2000000;
-    canbus_channel_configuration_0.dbc_file_path = "configuration/canbus_0.dbc";
+    canbus_channel_configuration_0.bus_channel = 0;
+    canbus_channel_configuration_0.bitrate = 1'000'000;
+    // canbus_channel_configuration_0.data_bitrate = 2000000;
+    // canbus_channel_configuration_0.dbc_file_path = "configuration/canbus_0.dbc";
 
-    auto message_configuration_0 = make_shared_pmr<CanMessageConfiguration>(Mrm::GetExtPmr());
-    message_configuration_0->frame_id = 790;
-    message_configuration_0->send_interval_ms = 10;
-    canbus_channel_configuration_0.message_configurations.emplace_back(std::move(message_configuration_0));
+    // auto message_configuration_0 = make_shared_pmr<CanMessageConfiguration>(Mrm::GetExtPmr());
+    // message_configuration_0->frame_id = 790;
+    // message_configuration_0->send_interval_ms = 10;
+    // canbus_channel_configuration_0.message_configurations.emplace_back(std::move(message_configuration_0));
 
-    auto message_configuration_1 = make_shared_pmr<CanMessageConfiguration>(Mrm::GetExtPmr());
-    message_configuration_1->frame_id = 809;
-    message_configuration_1->send_interval_ms = 10;
-    canbus_channel_configuration_0.message_configurations.emplace_back(std::move(message_configuration_1));
+    // auto message_configuration_1 = make_shared_pmr<CanMessageConfiguration>(Mrm::GetExtPmr());
+    // message_configuration_1->frame_id = 809;
+    // message_configuration_1->send_interval_ms = 10;
+    // canbus_channel_configuration_0.message_configurations.emplace_back(std::move(message_configuration_1));
 
-    auto message_configuration_2 = make_shared_pmr<CanMessageConfiguration>(Mrm::GetExtPmr());
-    message_configuration_2->frame_id = 1087;
-    message_configuration_2->send_interval_ms = 10;
-    message_configuration_2->script_path = "scripts/e46_smg_gear.lua";
-    canbus_channel_configuration_0.message_configurations.emplace_back(std::move(message_configuration_2));
+    // auto message_configuration_2 = make_shared_pmr<CanMessageConfiguration>(Mrm::GetExtPmr());
+    // message_configuration_2->frame_id = 1087;
+    // message_configuration_2->send_interval_ms = 10;
+    // message_configuration_2->script_path = "scripts/e46_smg_gear.lua";
+    // canbus_channel_configuration_0.message_configurations.emplace_back(std::move(message_configuration_2));
 
-    auto message_configuration_3 = make_shared_pmr<CanMessageConfiguration>(Mrm::GetExtPmr());
-    message_configuration_3->frame_id = 100;
-    message_configuration_3->send_interval_ms = 10;
-    message_configuration_3->name = "EL_FRAME_0";
-    message_configuration_3->message_size = 8;
+    // auto message_configuration_3 = make_shared_pmr<CanMessageConfiguration>(Mrm::GetExtPmr());
+    // message_configuration_3->frame_id = 100;
+    // message_configuration_3->send_interval_ms = 10;
+    // message_configuration_3->name = "EL_FRAME_0";
+    // message_configuration_3->message_size = 8;
 
-    CanSignalConfiguration signal_configuration_0(std::allocator_arg, Mrm::GetExtPmr());
-    signal_configuration_0.start_bit = 16;
-    signal_configuration_0.size_bits = 16;
-    signal_configuration_0.name = "sensor_1";
-    signal_configuration_0.unit = "km/h";
-    message_configuration_3->signal_configurations.emplace_back(std::move(signal_configuration_0));
-    canbus_channel_configuration_0.message_configurations.emplace_back(std::move(message_configuration_3));
+    // CanSignalConfiguration signal_configuration_0(std::allocator_arg, Mrm::GetExtPmr());
+    // signal_configuration_0.start_bit = 16;
+    // signal_configuration_0.size_bits = 16;
+    // signal_configuration_0.name = "sensor_1";
+    // signal_configuration_0.unit = "km/h";
+    // message_configuration_3->signal_configurations.emplace_back(std::move(signal_configuration_0));
+    // canbus_channel_configuration_0.message_configurations.emplace_back(std::move(message_configuration_3));
 
     // for(int i = 0; i < 20; i++) {
     //     auto message_configuration = make_shared_pmr<CanMessageConfiguration>(Mrm::GetExtPmr());
@@ -417,9 +391,38 @@ void SetupCanbusConfiguration(std::shared_ptr<CanbusConfigurationManager> canbus
     //     canbus_channel_configuration_0.message_configurations.emplace_back(std::move(message_configuration));
     // }
 
+    auto message_configuration_0 = make_shared_pmr<CanMessageConfiguration>(Mrm::GetExtPmr());
+    message_configuration_0->name = "EL_FRAME_0";
+    message_configuration_0->message_size = 8;
+    message_configuration_0->frame_id = 790;
+    message_configuration_0->send_interval_ms = 20;
+
+    CanSignalConfiguration signal_configuration_0(std::allocator_arg, Mrm::GetExtPmr());
+    signal_configuration_0.start_bit = 16;
+    signal_configuration_0.size_bits = 16;
+    signal_configuration_0.name = "sensor_1";
+    signal_configuration_0.unit = "km/h";
+    signal_configuration_0.factor = 0.1;
+    message_configuration_0->signal_configurations.emplace_back(std::move(signal_configuration_0));
+    canbus_channel_configuration_0.message_configurations.emplace_back(std::move(message_configuration_0));
+
     canbus_configuration->channel_configurations.emplace(
         canbus_channel_configuration_0.bus_channel,
         std::move(canbus_channel_configuration_0));
+
+    // ============================================
+    // CANBus 1
+    // ============================================
+
+    CanChannelConfiguration canbus_channel_configuration_1(std::allocator_arg, Mrm::GetExtPmr());
+    canbus_channel_configuration_1.type = CanbusType::CLASSICAL_CAN;
+    canbus_channel_configuration_1.is_extended_id = false;
+    canbus_channel_configuration_1.bus_channel = 1;
+    canbus_channel_configuration_1.bitrate = 1'000'000;
+
+    canbus_configuration->channel_configurations.emplace(
+        canbus_channel_configuration_1.bus_channel,
+        std::move(canbus_channel_configuration_1));
 
     canbus_configuration_manager->Update(*canbus_configuration);
 }
