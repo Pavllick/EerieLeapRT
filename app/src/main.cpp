@@ -228,12 +228,14 @@ int main(void) {
     auto canbus_service = std::make_shared<CanbusService>(DtCanbus::Get, canbus_configuration_manager);
 
     auto cdmp_service = std::make_shared<CdmpService>(
-        time_service,
         canbus_service->GetCanbus(0),
         CdmpDeviceType::LOGGER,
         0xABCD);
     cdmp_service->Initialize();
     cdmp_service->Start();
+
+    // cdmp_service->GetCommandService()->SendCommand(
+    //     255, CdmpServiceCommandCode::STATUS_REQUEST);
 
     // TODO: For test purposes only
     SetupTestSensors(sensors_configuration_manager);
