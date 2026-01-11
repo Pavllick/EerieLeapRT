@@ -6,15 +6,15 @@
 #include "utilities/guid/guid_generator.h"
 
 #include "subsys/device_tree/dt_configurator.h"
+#include "subsys/device_tree/dt_adc.h"
+#include "subsys/device_tree/dt_gpio.h"
 #include "subsys/device_tree/dt_fs.h"
-#include "subsys/device_tree/dt_modbus.h"
 #include "subsys/device_tree/dt_display.h"
 #include "subsys/device_tree/dt_canbus.h"
 
 #include "subsys/fs/services/fs_service.h"
 #include "subsys/fs/services/sdmmc_service.h"
 #include "subsys/gpio/gpio_factory.hpp"
-#include "subsys/modbus/modbus.h"
 #include "subsys/cfb/cfb.h"
 #include "subsys/time/time_service.h"
 #include "subsys/time/rtc_provider.h"
@@ -70,7 +70,6 @@ using namespace eerie_leap::subsys::device_tree;
 using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::subsys::gpio;
 using namespace eerie_leap::subsys::cfb;
-using namespace eerie_leap::subsys::modbus;
 using namespace eerie_leap::subsys::time;
 
 using namespace eerie_leap::configuration::json::configs;
@@ -196,13 +195,18 @@ int main(void) {
     auto json_canbus_config_service = std::make_unique<JsonConfigurationService<JsonCanbusConfig>>(
         "canbus_config", sd_fs_service);
 
+    AdcFactory adc_factory(DtAdc::Get);
+    auto adc_manager = adc_factory.Create();
+    adc_manager->Initialize();
+
     auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(
-        std::move(cbor_adc_config_service), std::move(json_adc_config_service));
+        std::move(cbor_adc_config_service), std::move(json_adc_config_service), adc_manager);
 
     // TODO: For test purposes only
     // SetupAdcConfiguration(adc_configuration_manager);
 
-    auto gpio = GpioFactory::Create();
+    GpioFactory gpio_factory(DtGpio::Get);
+    auto gpio = gpio_factory.Create();
     gpio->Initialize();
 
     auto system_configuration_manager = std::make_shared<SystemConfigurationManager>(
