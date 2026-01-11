@@ -19,7 +19,6 @@
 #include "subsys/time/time_service.h"
 #include "subsys/time/rtc_provider.h"
 #include "subsys/time/boot_elapsed_time_provider.h"
-#include "subsys/cdmp/services/cdmp_service.h"
 
 #include "configuration/services/cbor_configuration_service.h"
 #include "configuration/services/json_configuration_service.h"
@@ -34,11 +33,11 @@
 #include "domain/sensor_domain/services/calibration_service.h"
 #include "domain/canbus_domain/services/canbus_service.h"
 #include "domain/canbus_domain/services/canbus_scheduler_service.h"
+#include "domain/canbus_com_domain/services/canbus_com_service.h"
 
 #include "domain/logging_domain/services/log_writer_service.h"
 
 #include "controllers/logging_controller.h"
-#include "controllers/com_polling_controller.h"
 #include "controllers/display_controller.h"
 
 // Test sensors includes
@@ -73,7 +72,6 @@ using namespace eerie_leap::subsys::gpio;
 using namespace eerie_leap::subsys::cfb;
 using namespace eerie_leap::subsys::modbus;
 using namespace eerie_leap::subsys::time;
-using namespace eerie_leap::subsys::cdmp::services;
 
 using namespace eerie_leap::configuration::json::configs;
 using namespace eerie_leap::configuration::services;
@@ -85,6 +83,7 @@ using namespace eerie_leap::domain::sensor_domain::services;
 using namespace eerie_leap::domain::sensor_domain::sensor_readers;
 using namespace eerie_leap::domain::logging_domain::services;
 using namespace eerie_leap::domain::logging_domain::configuration;
+using namespace eerie_leap::domain::canbus_com_domain::services;
 
 using namespace eerie_leap::controllers;
 
@@ -227,15 +226,9 @@ int main(void) {
 
     auto canbus_service = std::make_shared<CanbusService>(DtCanbus::Get, canbus_configuration_manager);
 
-    auto cdmp_service = std::make_shared<CdmpService>(
-        canbus_service->GetCanbus(0),
-        CdmpDeviceType::LOGGER,
-        0xABCD);
-    cdmp_service->Initialize();
-    cdmp_service->Start();
-
-    // cdmp_service->GetCommandService()->SendCommand(
-    //     255, CdmpServiceCommandCode::STATUS_REQUEST);
+    auto canbus_com_service = std::make_shared<CanbusComService>(canbus_service);
+    canbus_com_service->Initialize();
+    canbus_com_service->Start();
 
     // TODO: For test purposes only
     SetupTestSensors(sensors_configuration_manager);
@@ -266,6 +259,7 @@ int main(void) {
             log_writer_service,
             sensors_configuration_manager,
             logging_configuration_manager,
+            canbus_com_service,
             display_controller);
     }
 
