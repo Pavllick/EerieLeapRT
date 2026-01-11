@@ -113,9 +113,7 @@ bool SensorsConfigurationManager::Update(const std::vector<std::shared_ptr<Senso
         return false;
     }
 
-    Get(true);
-
-    return true;
+    return Get(true) != nullptr;
 }
 
 const std::vector<std::shared_ptr<Sensor>>* SensorsConfigurationManager::Get(bool force_load) {

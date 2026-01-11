@@ -107,9 +107,7 @@ bool AdcConfigurationManager::Update(const AdcConfiguration& configuration, bool
         return false;
     }
 
-    Get(true);
-
-    return true;
+    return Get(true) != nullptr;
 }
 
 std::shared_ptr<IAdcManager> AdcConfigurationManager::Get(bool force_load) {

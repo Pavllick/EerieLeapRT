@@ -307,8 +307,8 @@ int main(void) {
     // calibration_service->Stop();
 
     while(true) {
-        SystemInfo::PrintHeapInfo();
-        SystemInfo::PrintStackInfo();
+        // SystemInfo::PrintHeapInfo();
+        // SystemInfo::PrintStackInfo();
         k_msleep(SLEEP_TIME_MS);
     }
 
@@ -373,7 +373,7 @@ void SetupCanbusConfiguration(std::shared_ptr<CanbusConfigurationManager> canbus
     //     auto message_configuration = make_shared_pmr<CanMessageConfiguration>(Mrm::GetExtPmr());
     //     message_configuration->frame_id = 100 + i;
     //     message_configuration->send_interval_ms = 10;
-    //     message_configuration->name = "EL_FRAME_0";
+    //     message_configuration->name = "EL_FRAME_" + std::to_string(i);
     //     message_configuration->message_size = 8 * 8;
 
     //     for(int j = 0; j < 4 * 8; j++) {
@@ -388,6 +388,8 @@ void SetupCanbusConfiguration(std::shared_ptr<CanbusConfigurationManager> canbus
     //     canbus_channel_configuration_0.message_configurations.emplace_back(std::move(message_configuration));
     // }
 
+    // NOTE: This frame is transmitted at 20ms interval
+    //       with sensor_1 value
     auto message_configuration_0 = make_shared_pmr<CanMessageConfiguration>(Mrm::GetExtPmr());
     message_configuration_0->name = "EL_FRAME_0";
     message_configuration_0->message_size = 8;
@@ -411,11 +413,27 @@ void SetupCanbusConfiguration(std::shared_ptr<CanbusConfigurationManager> canbus
     // CANBus 1
     // ============================================
 
+    // NOTE: This frame is expected to be received
+    //       managed by sensor_6
     CanChannelConfiguration canbus_channel_configuration_1(std::allocator_arg, Mrm::GetExtPmr());
     canbus_channel_configuration_1.type = CanbusType::CLASSICAL_CAN;
     canbus_channel_configuration_1.is_extended_id = false;
     canbus_channel_configuration_1.bus_channel = 1;
     canbus_channel_configuration_1.bitrate = 1'000'000;
+
+    auto message_configuration_1_0 = make_shared_pmr<CanMessageConfiguration>(Mrm::GetExtPmr());
+    message_configuration_1_0->name = "EL_FRAME_1_0";
+    message_configuration_1_0->message_size = 8;
+    message_configuration_1_0->frame_id = 790;
+
+    CanSignalConfiguration signal_configuration_1_0(std::allocator_arg, Mrm::GetExtPmr());
+    signal_configuration_1_0.start_bit = 16;
+    signal_configuration_1_0.size_bits = 16;
+    signal_configuration_1_0.name = "RPM";
+    signal_configuration_1_0.unit = "RPM";
+    signal_configuration_1_0.factor = 0.156;
+    message_configuration_1_0->signal_configurations.emplace_back(std::move(signal_configuration_1_0));
+    canbus_channel_configuration_1.message_configurations.emplace_back(std::move(message_configuration_1_0));
 
     canbus_configuration->channel_configurations.emplace(
         canbus_channel_configuration_1.bus_channel,
@@ -460,8 +478,8 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
     // Test Sensors
 
     std::pmr::vector<CalibrationData> calibration_data_1 {
-        {0.0, 2000.0},
-        {5.0, 2100.0}
+        {0.0, 0.0},
+        {5.0, 100.0}
     };
     auto calibration_data_1_ptr = std::make_shared<std::pmr::vector<CalibrationData>>(calibration_data_1);
 
@@ -473,8 +491,8 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
 
     sensor_1->configuration.type = SensorType::PHYSICAL_ANALOG;
     sensor_1->configuration.channel = 0;
-    sensor_1->configuration.script_path = "scripts/sensor_1.lua";
-    sensor_1->configuration.sampling_rate_ms = 1000;
+    // sensor_1->configuration.script_path = "scripts/sensor_1.lua";
+    sensor_1->configuration.sampling_rate_ms = 50;
     sensor_1->configuration.voltage_interpolator = make_unique_pmr<LinearVoltageInterpolator>(Mrm::GetExtPmr(), calibration_data_1_ptr);
     // sensor_1->configuration.expression_evaluator = make_unique_pmr<ExpressionEvaluator>(Mrm::GetExtPmr(), "x * 2 + sensor_2 + 1");
 
@@ -534,7 +552,7 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
 
     sensor_6->configuration.type = SensorType::CANBUS_ANALOG;
     sensor_6->configuration.sampling_rate_ms = 1000;
-    sensor_6->configuration.canbus_source = make_unique_pmr<CanbusSource>(Mrm::GetExtPmr(), 0, 790, "RPM");
+    sensor_6->configuration.canbus_source = make_unique_pmr<CanbusSource>(Mrm::GetExtPmr(), 1, 790, "RPM");
 
     auto sensor_7 = make_shared_pmr<Sensor>(Mrm::GetExtPmr(), "sensor_7");
 
@@ -585,10 +603,10 @@ void SetupTestSensors(std::shared_ptr<SensorsConfigurationManager> sensors_confi
 
     //     sensor->configuration.type = SensorType::PHYSICAL_ANALOG;
     //     sensor->configuration.channel = 0;
-    //     sensor->configuration.script_path = "scripts/sensor_1.lua";
+    //     // sensor->configuration.script_path = "scripts/sensor_1.lua";
     //     sensor->configuration.sampling_rate_ms = 50;
     //     sensor->configuration.voltage_interpolator = make_unique_pmr<LinearVoltageInterpolator>(Mrm::GetExtPmr(), calibration_data_1_ptr);
-    //     sensor->configuration.expression_evaluator = make_unique_pmr<ExpressionEvaluator>(Mrm::GetExtPmr(), "x * 2 + 1");
+    //     // sensor->configuration.expression_evaluator = make_unique_pmr<ExpressionEvaluator>(Mrm::GetExtPmr(), "x * 2 + 1");
 
     //     sensors.push_back(sensor);
     // }

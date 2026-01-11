@@ -93,9 +93,7 @@ bool LoggingConfigurationManager::Update(const LoggingConfiguration& configurati
         return false;
     }
 
-    Get(true);
-
-    return true;
+    return Get(true) != nullptr;
 }
 
 std::shared_ptr<LoggingConfiguration> LoggingConfigurationManager::Get(bool force_load) {

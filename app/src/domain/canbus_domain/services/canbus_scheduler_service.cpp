@@ -74,13 +74,13 @@ std::unique_ptr<CanbusTask> CanbusSchedulerService::CreateTask(uint8_t bus_chann
         return nullptr;
     }
 
-    if(message_configuration->send_interval_ms == 0)
+    if(!message_configuration->send_interval_ms.has_value())
         return nullptr;
 
     InitializeScript(*message_configuration);
 
     auto task = std::make_unique<CanbusTask>();
-    task->send_interval_ms = K_MSEC(message_configuration->send_interval_ms);
+    task->send_interval_ms = K_MSEC(message_configuration->send_interval_ms.value());
     task->bus_channel = bus_channel;
     task->message_configuration = std::move(message_configuration);
     task->canbus = canbus;

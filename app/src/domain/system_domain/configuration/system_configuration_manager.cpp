@@ -184,9 +184,7 @@ bool SystemConfigurationManager::Update(const SystemConfiguration& configuration
         return false;
     }
 
-    Get(true);
-
-    return true;
+    return Get(true) != nullptr;
 }
 
 std::shared_ptr<SystemConfiguration> SystemConfigurationManager::Get(bool force_load) {
