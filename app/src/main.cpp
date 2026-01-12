@@ -237,7 +237,7 @@ int main(void) {
     // TODO: For test purposes only
     SetupTestSensors(sensors_configuration_manager);
 
-    auto sensor_readings_frame = std::make_shared<SensorReadingsFrame>();
+    auto sensor_readings_frame = make_shared_pmr<SensorReadingsFrame>(Mrm::GetExtPmr());
 
     std::shared_ptr<LoggingController> logging_controller = nullptr;
     if(sd_fs_service != nullptr) {
