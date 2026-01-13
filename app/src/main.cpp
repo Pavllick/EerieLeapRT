@@ -29,7 +29,8 @@
 #include "domain/logging_domain/configuration/logging_configuration_manager.h"
 #include "domain/canbus_domain/configuration/canbus_configuration_manager.h"
 #include "domain/sensor_domain/sensor_readers/sensor_reader_factory.h"
-#include "domain/sensor_domain/services/processing_scheduler_service.h"
+#include "domain/sensor_domain/isr_sensor_readers/isr_sensor_reader_factory.h"
+#include "domain/sensor_domain/services/sensors_processing_service.h"
 #include "domain/sensor_domain/services/calibration_service.h"
 #include "domain/canbus_domain/services/canbus_service.h"
 #include "domain/canbus_domain/services/canbus_scheduler_service.h"
@@ -80,6 +81,7 @@ using namespace eerie_leap::domain::canbus_domain::configuration;
 using namespace eerie_leap::domain::system_domain::configuration;
 using namespace eerie_leap::domain::sensor_domain::services;
 using namespace eerie_leap::domain::sensor_domain::sensor_readers;
+using namespace eerie_leap::domain::sensor_domain::isr_sensor_readers;
 using namespace eerie_leap::domain::logging_domain::services;
 using namespace eerie_leap::domain::logging_domain::configuration;
 using namespace eerie_leap::domain::canbus_com_domain::services;
@@ -272,20 +274,26 @@ int main(void) {
         guid_generator,
         gpio,
         adc_configuration_manager,
+        sensor_readings_frame);
+
+    auto isr_sensor_reader_factory = std::make_shared<IsrSensorReaderFactory>(
+        time_service,
+        guid_generator,
         sensor_readings_frame,
         canbus_service);
 
-    auto processing_scheduler_service = std::make_shared<ProcessingSchedulerService>(
+    auto sensors_processing_service = std::make_shared<SensorsProcessingService>(
         sensors_configuration_manager,
         sensor_readings_frame,
-        sensor_reader_factory);
-    processing_scheduler_service->Initialize();
+        sensor_reader_factory,
+        isr_sensor_reader_factory);
+    sensors_processing_service->Initialize();
 
     auto calibration_service = std::make_shared<CalibrationService>(
         time_service,
         guid_generator,
         adc_configuration_manager,
-        processing_scheduler_service);
+        sensors_processing_service);
     calibration_service->Initialize();
 
     auto canbus_scheduler_service = std::make_shared<CanbusSchedulerService>(
@@ -299,10 +307,10 @@ int main(void) {
         system_configuration_manager,
         adc_configuration_manager,
         sensors_configuration_manager,
-        processing_scheduler_service);
+        sensors_processing_service);
 #endif // CONFIG_NETWORKING
 
-    processing_scheduler_service->Start();
+    sensors_processing_service->Start();
     canbus_scheduler_service->Start();
 
     // TODO: Remove this and integrate into http server

@@ -24,7 +24,7 @@ EerieLeap implements a layered architecture designed for real-time sensor monito
 
 The system follows a pipeline architecture where sensor data flows from hardware inputs through processing stages to independent outputs:
 
-**Hardware Input → ProcessingSchedulerService → [LogWriterService | Controllers/Views]**
+**Hardware Input → SensorsProcessingService → [LogWriterService | Controllers/Views]**
 
 **Hardware Output ← CanbusSchedulerService**
 
@@ -37,7 +37,7 @@ The system follows a pipeline architecture where sensor data flows from hardware
 - Hardware-agnostic design allows the same codebase to run across different platforms
 
 **Domain Layer** (`app/src/domain`)
-- **ProcessingSchedulerService**: Collects and processes sensor data from all sources (digital inputs, analog inputs, CAN Bus messages). Each sensor operates on an independent schedule with configurable sample rates.
+- **SensorsProcessingService**: Collects and processes sensor data from all sources (digital inputs, analog inputs, CAN Bus messages). Each sensor operates on an independent schedule with configurable sample rates.
 - **CanbusSchedulerService**: Streams processed data to external devices over CAN Bus. Each outgoing message operates on an independent schedule.
 - **LogWriterService**: Handles persistent storage of sensor data in ASAM MDF format, operating independently from other outputs
 - Domain services coordinate data flow and implement core business logic
@@ -56,7 +56,7 @@ The system employs a dual-format configuration architecture:
 
 ### Data Flow
 
-1. **Data Collection**: ProcessingSchedulerService coordinates sensor readings from all sources (digital, analog, CAN Bus). Each sensor operates on an independent schedule based on its configured sample rate.
+1. **Data Collection**: SensorsProcessingService coordinates sensor readings from all sources (digital, analog, CAN Bus). Each sensor operates on an independent schedule based on its configured sample rate.
 2. **Processing**: Raw data is collected from hardware through Zephyr device APIs, then processed and validated by domain services
 3. **Parallel Outputs**:
    - LogWriterService writes processed data to persistent storage independently
@@ -100,9 +100,9 @@ With seldom exceptions, the core codebase does not rely on third-party library A
 
 ### Domain
 
-The domain layer is responsible for business logic and data processing. It is located in the `app/src/domain` directory. Two main components are **ProcessingSchedulerService** and **CanbusSchedulerService**.
+The domain layer is responsible for business logic and data processing. It is located in the `app/src/domain` directory. Two main components are **SensorsProcessingService** and **CanbusSchedulerService**.
 
-**ProcessingSchedulerService** is responsible for collection and processing of sensor data. It is located in `app/src/domain/sensor_domain/services` directory.
+**SensorsProcessingService** is responsible for collection and processing of sensor data. It is located in `app/src/domain/sensor_domain/services` directory.
 
 **CanbusSchedulerService** is responsible for collection and processing of CAN Bus data. It is located in `app/src/domain/canbus_domain/services` directory.
 

@@ -11,7 +11,7 @@
 #include "configuration/json/json_serializer.h"
 #include "domain/sensor_domain/configuration/parsers/sensors_json_parser.h"
 #include "domain/sensor_domain/configuration/sensors_configuration_manager.h"
-#include "domain/sensor_domain/services/processing_scheduler_service.h"
+#include "domain/sensor_domain/services/sensors_processing_service.h"
 
 namespace eerie_leap::domain::http_domain::controllers::api {
 
@@ -32,7 +32,7 @@ private:
 
     static std::unique_ptr<SensorsJsonParser> sensors_json_parser_;
     static std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager_;
-    static std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service_;
+    static std::shared_ptr<SensorsProcessingService> sensors_processing_service_;
     static std::unique_ptr<JsonSerializer<JsonSensorsConfig>> json_serializer_;
 
     static void UpdateSensorsConfig(const std::span<const uint8_t>& buffer);
@@ -46,7 +46,7 @@ public:
 
     SensorsApiController(
         std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager,
-        std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service);
+        std::shared_ptr<SensorsProcessingService> sensors_processing_service);
 };
 
 } // namespace eerie_leap::domain::http_domain::controllers::api

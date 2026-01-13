@@ -27,14 +27,14 @@ void HttpServer::Initialize(
     std::shared_ptr<SystemConfigurationManager> system_configuration_manager,
     std::shared_ptr<AdcConfigurationManager> adc_configuration_manager,
     std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager,
-    std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service) {
+    std::shared_ptr<SensorsProcessingService> sensors_processing_service) {
 
         system_configuration_manager_ = std::move(system_configuration_manager);
         adc_configuration_manager_ = std::move(adc_configuration_manager);
         sensors_configuration_manager_ = sensors_configuration_manager;
-        processing_scheduler_service_ = processing_scheduler_service;
+        sensors_processing_service_ = sensors_processing_service;
 
-        sensors_http_controller_ = std::make_shared<SensorsApiController>(sensors_configuration_manager, processing_scheduler_service);
+        sensors_http_controller_ = std::make_shared<SensorsApiController>(sensors_configuration_manager, sensors_processing_service);
     }
 
 void HttpServer::Start() {

@@ -12,12 +12,12 @@ std::pmr::string SensorsApiController::sensors_config_get_buffer_;
 
 std::unique_ptr<SensorsJsonParser> SensorsApiController::sensors_json_parser_ = nullptr;
 std::shared_ptr<SensorsConfigurationManager> SensorsApiController::sensors_configuration_manager_ = nullptr;
-std::shared_ptr<ProcessingSchedulerService> SensorsApiController::processing_scheduler_service_ = nullptr;
+std::shared_ptr<SensorsProcessingService> SensorsApiController::sensors_processing_service_ = nullptr;
 std::unique_ptr<JsonSerializer<JsonSensorsConfig>> SensorsApiController::json_serializer_ = nullptr;
 
 SensorsApiController::SensorsApiController(
     std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager,
-    std::shared_ptr<ProcessingSchedulerService> processing_scheduler_service) {
+    std::shared_ptr<SensorsProcessingService> sensors_processing_service) {
 
     if(sensors_config_post_buffer_.empty())
         sensors_config_post_buffer_.resize(sensors_config_post_buffer_size_);
@@ -28,8 +28,8 @@ SensorsApiController::SensorsApiController(
     if(!sensors_configuration_manager_)
         sensors_configuration_manager_ = std::move(sensors_configuration_manager);
 
-    if(!processing_scheduler_service_)
-        processing_scheduler_service_ = std::move(processing_scheduler_service);
+    if(!sensors_processing_service_)
+        sensors_processing_service_ = std::move(sensors_processing_service);
 
     if(!json_serializer_)
         json_serializer_ = std::make_unique<JsonSerializer<JsonSensorsConfig>>();
@@ -62,7 +62,8 @@ void SensorsApiController::UpdateSensorsConfig(const std::span<const uint8_t>& b
     if(!sensors_configuration_manager_->Update(sensors))
         throw std::runtime_error("Failed to update sensors configuration.");
 
-    processing_scheduler_service_->Restart();
+    sensors_processing_service_->Stop();
+    sensors_processing_service_->Start();
 }
 
 int SensorsApiController::sensors_config_post_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data) {
