@@ -224,9 +224,9 @@ int main(void) {
     // SetupCanbusConfiguration(canbus_configuration_manager);
 
     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
-        sd_fs_service,
         std::move(cbor_sensors_config_service),
         std::move(json_sensors_config_service),
+        sd_fs_service,
         gpio->GetChannelCount(),
         adc_configuration_manager->Get()->GetChannelCount());
 
@@ -269,6 +269,12 @@ int main(void) {
             display_controller);
     }
 
+    auto isr_sensor_reader_factory = std::make_shared<IsrSensorReaderFactory>(
+        time_service,
+        guid_generator,
+        sensor_readings_frame,
+        canbus_service);
+
     auto sensor_reader_factory = std::make_shared<SensorReaderFactory>(
         time_service,
         guid_generator,
@@ -276,17 +282,11 @@ int main(void) {
         adc_configuration_manager,
         sensor_readings_frame);
 
-    auto isr_sensor_reader_factory = std::make_shared<IsrSensorReaderFactory>(
-        time_service,
-        guid_generator,
-        sensor_readings_frame,
-        canbus_service);
-
     auto sensors_processing_service = std::make_shared<SensorsProcessingService>(
         sensors_configuration_manager,
         sensor_readings_frame,
-        sensor_reader_factory,
-        isr_sensor_reader_factory);
+        isr_sensor_reader_factory,
+        sensor_reader_factory);
     sensors_processing_service->Initialize();
 
     auto calibration_service = std::make_shared<CalibrationService>(

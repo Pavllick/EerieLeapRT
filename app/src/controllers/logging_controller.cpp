@@ -37,6 +37,9 @@ LoggingController::LoggingController(
 }
 
 int LoggingController::LogWriterStart() {
+    if(log_writer_service_->IsRunning())
+        return 0;
+
     int res = log_writer_service_->LogWriterStart();
 
     if(res == 0)
@@ -46,6 +49,9 @@ int LoggingController::LogWriterStart() {
 }
 
 int LoggingController::LogWriterStop() {
+    if(!log_writer_service_->IsRunning())
+        return 0;
+
     int res = log_writer_service_->LogWriterStop();
 
     if(res == 0)

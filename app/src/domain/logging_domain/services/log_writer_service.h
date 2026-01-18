@@ -59,6 +59,8 @@ public:
 
     int LogWriterStart();
     int LogWriterStop();
+
+    bool IsRunning() const;
 };
 
 } // namespace eerie_leap::domain::logging_domain::services

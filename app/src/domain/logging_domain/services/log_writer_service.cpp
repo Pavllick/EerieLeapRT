@@ -142,17 +142,17 @@ int LogWriterService::LogWriterStop() {
 
 WorkQueueTaskResult LogWriterService::ProcessWorkTask(LogWriterTask* task) {
     auto time_now = task->time_service->GetCurrentTime();
-    for(const auto& [sensor_id, reading] : task->sensor_readings_frame->GetReadings()) {
-        if(reading.status != ReadingStatus::PROCESSED && reading.sensor->configuration.type != SensorType::CANBUS_RAW)
-            continue;
-
+    for(const auto& [sensor_id, reading] : task->sensor_readings_frame->GetProcessedReadings())
         task->logger->LogReading(time_now, reading);
-    }
 
     return {
         .reschedule = true,
         .delay = task->logging_interval_ms
     };
+}
+
+bool LogWriterService::IsRunning() const {
+    return atomic_get(&logger_running_);
 }
 
 } // namespace eerie_leap::domain::logging_domain::services
