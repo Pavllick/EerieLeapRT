@@ -24,9 +24,8 @@ ZTEST(system_configuration_manager, test_SystemConfigurationManager_Save_config_
     fs_service->Format();
 
     auto cbor_system_configuration_service = std::make_unique<CborConfigurationService<CborSystemConfig>>("system_config", fs_service);
-    auto json_system_configuration_service = std::make_unique<JsonConfigurationService<JsonSystemConfig>>("system_config", fs_service);
     auto system_configuration_manager = std::make_shared<SystemConfigurationManager>(
-        std::move(cbor_system_configuration_service), std::move(json_system_configuration_service));
+        std::move(cbor_system_configuration_service));
 
     SystemConfiguration system_configuration(std::allocator_arg, Mrm::GetDefaultPmr());
     system_configuration.hw_version = 23456;
@@ -48,9 +47,8 @@ ZTEST(system_configuration_manager, test_SystemConfigurationManager_Save_config_
     fs_service->Format();
 
     auto cbor_system_configuration_service = std::make_unique<CborConfigurationService<CborSystemConfig>>("system_config", fs_service);
-    auto json_system_configuration_service = std::make_unique<JsonConfigurationService<JsonSystemConfig>>("system_config", fs_service);
     auto system_configuration_manager = std::make_shared<SystemConfigurationManager>(
-        std::move(cbor_system_configuration_service), std::move(json_system_configuration_service));
+        std::move(cbor_system_configuration_service));
 
     SystemConfiguration system_configuration(std::allocator_arg, Mrm::GetDefaultPmr());
     system_configuration.device_id = 14;
@@ -59,10 +57,9 @@ ZTEST(system_configuration_manager, test_SystemConfigurationManager_Save_config_
     zassert_true(result);
 
     cbor_system_configuration_service = std::make_unique<CborConfigurationService<CborSystemConfig>>("system_config", fs_service);
-    json_system_configuration_service = std::make_unique<JsonConfigurationService<JsonSystemConfig>>("system_config", fs_service);
     system_configuration_manager = nullptr;
     system_configuration_manager = std::make_shared<SystemConfigurationManager>(
-        std::move(cbor_system_configuration_service), std::move(json_system_configuration_service));
+        std::move(cbor_system_configuration_service));
 
     auto saved_system_configuration = system_configuration_manager->Get();
 

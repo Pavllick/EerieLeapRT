@@ -170,15 +170,20 @@ sensors_reader_HelperInstances sensors_reader_GetReadingInstances() {
 
     const auto adc_configuration = sensors_reader_GetTestConfiguration();
 
-    auto adc_configuration_service = std::make_unique<CborConfigurationService<CborAdcConfig>>("adc_config", fs_service);
-    auto json_configuration_service = std::make_unique<JsonConfigurationService<JsonAdcConfig>>("adc_config", fs_service);
+    auto cbor_adc_config_service = std::make_unique<CborConfigurationService<CborAdcConfig>>("adc_config", fs_service);
+    auto json_adc_config_service = std::make_unique<JsonConfigurationService<JsonAdcConfig>>("adc_config", fs_service);
+
+    AdcFactory adc_factory(nullptr);
+    auto adc_manager = adc_factory.Create();
+    adc_manager->Initialize();
+
     auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(
-        std::move(adc_configuration_service), std::move(json_configuration_service));
+        std::move(cbor_adc_config_service), std::move(json_adc_config_service), adc_manager);
 
     auto gpio = std::make_shared<GpioSimulator>();
     gpio->Initialize();
 
-    auto sensor_readings_frame = std::make_shared<SensorReadingsFrame>();
+    auto sensor_readings_frame = make_shared_pmr<SensorReadingsFrame>(Mrm::GetDefaultPmr());
     auto sensors = sensors_reader_GetTestSensors();
 
     auto sensor_readers = std::make_shared<std::vector<std::shared_ptr<ISensorReader>>>();
@@ -230,45 +235,47 @@ ZTEST(sensors_reader, test_Read) {
     auto sensor_readings_frame = helper.sensor_readings_frame;
     auto sensor_readers = helper.sensor_readers;
 
-    auto readings = sensor_readings_frame->GetReadings();
-    zassert_equal(readings.size(), 0);
+    std::vector<std::string> sensor_names {"sensor_1", "sensor_2", "sensor_3", "sensor_4", "sensor_5"};
+
+    for(auto& sensor_name : sensor_names)
+        zassert_false(sensor_readings_frame->HasReading(sensor_name));
 
     for(int i = 0; i < sensor_readers->size(); i++)
         sensor_readers->at(i)->Read();
 
-    readings = sensor_readings_frame->GetReadings();
-    zassert_equal(readings.size(), 5);
+    for(auto& sensor_name : sensor_names)
+        zassert_true(sensor_readings_frame->HasReading(sensor_name));
 
-    auto reading = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_2"));
-    zassert_equal(reading->status, ReadingStatus::RAW);
-    zassert_true(reading->value.has_value());
-    zassert_true(reading->timestamp.has_value());
-    zassert_true(reading->id.AsUint64() > 0);
-    zassert_between_inclusive(reading->value.value(), 0, 3.3);
+    auto reading_2 = sensor_readings_frame->GetReading("sensor_2");
+    zassert_equal(reading_2.status, ReadingStatus::RAW);
+    zassert_true(reading_2.value.has_value());
+    zassert_true(reading_2.timestamp.has_value());
+    zassert_true(reading_2.id.AsUint64() > 0);
+    zassert_between_inclusive(reading_2.value.value(), 0, 3.3);
 
-    reading = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_1"));
-    zassert_equal(reading->status, ReadingStatus::RAW);
-    zassert_true(reading->value.has_value());
-    zassert_true(reading->timestamp.has_value());
-    zassert_true(reading->id.AsUint64() > 0);
-    zassert_between_inclusive(reading->value.value(), 0, 3.3);
+    auto reading_1 = sensor_readings_frame->GetReading("sensor_1");
+    zassert_equal(reading_1.status, ReadingStatus::RAW);
+    zassert_true(reading_1.value.has_value());
+    zassert_true(reading_1.timestamp.has_value());
+    zassert_true(reading_1.id.AsUint64() > 0);
+    zassert_between_inclusive(reading_1.value.value(), 0, 3.3);
 
-    reading = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_3"));
-    zassert_equal(reading->status, ReadingStatus::UNINITIALIZED);
-    zassert_true(reading->timestamp.has_value());
-    zassert_true(reading->id.AsUint64() > 0);
-    zassert_false(reading->value.has_value());
+    auto reading_3 = sensor_readings_frame->GetReading("sensor_3");
+    zassert_equal(reading_3.status, ReadingStatus::UNINITIALIZED);
+    zassert_true(reading_3.timestamp.has_value());
+    zassert_true(reading_3.id.AsUint64() > 0);
+    zassert_false(reading_3.value.has_value());
 
-    reading = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_4"));
-    zassert_equal(reading->status, ReadingStatus::RAW);
-    zassert_true(reading->timestamp.has_value());
-    zassert_true(reading->id.AsUint64() > 0);
-    zassert_true(reading->value.has_value());
-    zassert_true(reading->value.value() == 1 || reading->value.value() == 0);
+    auto reading_4 = sensor_readings_frame->GetReading("sensor_4");
+    zassert_equal(reading_4.status, ReadingStatus::RAW);
+    zassert_true(reading_4.timestamp.has_value());
+    zassert_true(reading_4.id.AsUint64() > 0);
+    zassert_true(reading_4.value.has_value());
+    zassert_true(reading_4.value.value() == 1 || reading_4.value.value() == 0);
 
-    reading = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_5"));
-    zassert_equal(reading->status, ReadingStatus::UNINITIALIZED);
-    zassert_true(reading->timestamp.has_value());
-    zassert_true(reading->id.AsUint64() > 0);
-    zassert_false(reading->value.has_value());
+    auto reading_5 = sensor_readings_frame->GetReading("sensor_5");
+    zassert_equal(reading_5.status, ReadingStatus::UNINITIALIZED);
+    zassert_true(reading_5.timestamp.has_value());
+    zassert_true(reading_5.id.AsUint64() > 0);
+    zassert_false(reading_5.value.has_value());
 }

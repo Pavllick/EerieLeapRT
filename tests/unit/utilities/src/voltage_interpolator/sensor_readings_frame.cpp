@@ -82,7 +82,7 @@ struct sensor_readings_frame_GetTestSensors_HelperInstances {
 
 sensor_readings_frame_GetTestSensors_HelperInstances sensor_readings_frame_GetHelperInstances() {
     auto guid_generator = std::make_shared<GuidGenerator>();
-    auto sensor_readings_frame = std::make_shared<SensorReadingsFrame>();
+    auto sensor_readings_frame = make_shared_pmr<SensorReadingsFrame>(Mrm::GetDefaultPmr());
 
     return sensor_readings_frame_GetTestSensors_HelperInstances {
         .guid_generator = guid_generator,
@@ -97,36 +97,33 @@ ZTEST(sensor_readings_frame, test_AddOrUpdateReading) {
         auto sensor_readings_frame = helper.sensor_readings_frame;
         auto sensors = sensor_readings_frame_GetTestSensors();
 
-        auto readings = sensor_readings_frame->GetReadings();
-        zassert_equal(readings.size(), 0);
-
-        auto reading1 = std::make_shared<SensorReading>(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[1]);
+        SensorReading reading1(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[1]);
+        reading1.source = ReadingSource::PROCESSING;
         sensor_readings_frame->AddOrUpdateReading(reading1);
 
-        readings = sensor_readings_frame->GetReadings();
-        zassert_equal(readings.size(), 1);
+        zassert_equal(sensor_readings_frame->HasReading("sensor_2"), true);
 
-        auto fr_reading = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_2"));
-        zassert_equal(fr_reading->status, ReadingStatus::UNINITIALIZED);
-        zassert_false(fr_reading->value.has_value());
+        auto fr_reading_1 = sensor_readings_frame->GetReading("sensor_2");
+        zassert_equal(fr_reading_1.status, ReadingStatus::UNINITIALIZED);
+        zassert_false(fr_reading_1.value.has_value());
 
-        auto reading2 = std::make_shared<SensorReading>(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[1]);
-        reading2->status = ReadingStatus::PROCESSED;
-        reading2->value = 1.6;
+        SensorReading reading2(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[1]);
+        reading2.source = ReadingSource::PROCESSING;
+        reading2.status = ReadingStatus::PROCESSED;
+        reading2.value = 1.6;
         sensor_readings_frame->AddOrUpdateReading(reading2);
 
-        readings = sensor_readings_frame->GetReadings();
-        zassert_equal(readings.size(), 1);
+        zassert_equal(sensor_readings_frame->HasReading("sensor_2"), true);
 
-        fr_reading = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_2"));
-        zassert_equal(fr_reading->status, ReadingStatus::PROCESSED);
-        zassert_true(fr_reading->value.has_value());
+        auto fr_reading_2 = sensor_readings_frame->GetReading("sensor_2");
+        zassert_equal(fr_reading_2.status, ReadingStatus::PROCESSED);
+        zassert_true(fr_reading_2.value.has_value());
 
-        auto reading3 = std::make_shared<SensorReading>(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[2]);
+        SensorReading reading3(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[2]);
+        reading3.source = ReadingSource::PROCESSING;
         sensor_readings_frame->AddOrUpdateReading(reading3);
 
-        readings = sensor_readings_frame->GetReadings();
-        zassert_equal(readings.size(), 2);
+        zassert_equal(sensor_readings_frame->HasReading("sensor_3"), true);
 }
 
 ZTEST(sensor_readings_frame, test_GetReading) {
@@ -136,16 +133,18 @@ ZTEST(sensor_readings_frame, test_GetReading) {
     auto sensor_readings_frame = helper.sensor_readings_frame;
     auto sensors = sensor_readings_frame_GetTestSensors();
 
-    auto reading1 = std::make_shared<SensorReading>(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[1]);
+    SensorReading reading1(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[1]);
+    reading1.source = ReadingSource::PROCESSING;
     sensor_readings_frame->AddOrUpdateReading(reading1);
-    auto reading2 = std::make_shared<SensorReading>(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[2]);
+    SensorReading reading2(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[2]);
+    reading2.source = ReadingSource::PROCESSING;
     sensor_readings_frame->AddOrUpdateReading(reading2);
 
-    auto rf_reading1 = sensor_readings_frame->GetReading(StringHelpers::GetHash("sensor_2"));
-    zassert_str_equal(rf_reading1->sensor->id.c_str(), "sensor_2");
+    auto rf_reading1 = sensor_readings_frame->GetReading("sensor_2");
+    zassert_str_equal(rf_reading1.sensor->id.c_str(), "sensor_2");
 
-    auto rf_reading2 = sensor_readings_frame->GetReading(StringHelpers::GetHash("sensor_3"));
-    zassert_str_equal(rf_reading2->sensor->id.c_str(), "sensor_3");
+    auto rf_reading2 = sensor_readings_frame->GetReading("sensor_3");
+    zassert_str_equal(rf_reading2.sensor->id.c_str(), "sensor_3");
 }
 
 ZTEST_EXPECT_FAIL(sensor_readings_frame, test_GetReading_no_sensor);
@@ -157,59 +156,11 @@ ZTEST(sensor_readings_frame, test_GetReading_no_sensor) {
     auto sensors = sensor_readings_frame_GetTestSensors();
 
     try {
-        sensor_readings_frame->GetReading(StringHelpers::GetHash("sensor_2"));
+        sensor_readings_frame->GetReading("sensor_2");
         zassert_true(true, "GetReading expected to fail, but it didn't.");
     } catch(...) {
         zassert_true(false, "GetReading failed as expected due to missing sensor reading.");
     }
-
-    auto reading1 = std::make_shared<SensorReading>(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[1]);
-    sensor_readings_frame->AddOrUpdateReading(reading1);
-    auto reading2 = std::make_shared<SensorReading>(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[2]);
-    sensor_readings_frame->AddOrUpdateReading(reading2);
-
-    auto rf_reading1 = sensor_readings_frame->GetReading(StringHelpers::GetHash("sensor_2"));
-    zassert_str_equal(rf_reading1->sensor->id.c_str(), "sensor_2");
-
-    auto rf_reading2 = sensor_readings_frame->GetReading(StringHelpers::GetHash("sensor_3"));
-    zassert_str_equal(rf_reading2->sensor->id.c_str(), "sensor_3");
-
-    try {
-        sensor_readings_frame->GetReading(StringHelpers::GetHash("sensor_1"));
-        zassert_true(true, "GetReading expected to fail, but it didn't.");
-    } catch(...) {
-        zassert_true(false, "GetReading failed as expected due to missing sensor reading.");
-    }
-}
-
-ZTEST(sensor_readings_frame, test_GetReadings) {
-    auto helper = sensor_readings_frame_GetHelperInstances();
-
-    auto guid_generator = helper.guid_generator;
-    auto sensor_readings_frame = helper.sensor_readings_frame;
-    auto sensors = sensor_readings_frame_GetTestSensors();
-
-    auto readings = sensor_readings_frame->GetReadings();
-    zassert_equal(readings.size(), 0);
-
-    auto reading1 = std::make_shared<SensorReading>(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[1]);
-    sensor_readings_frame->AddOrUpdateReading(reading1);
-    auto reading2 = std::make_shared<SensorReading>(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[2]);
-    sensor_readings_frame->AddOrUpdateReading(reading2);
-
-    auto rf_reading1 = sensor_readings_frame->GetReading(StringHelpers::GetHash("sensor_2"));
-    zassert_str_equal(rf_reading1->sensor->id.c_str(), "sensor_2");
-
-    auto rf_reading2 = sensor_readings_frame->GetReading(StringHelpers::GetHash("sensor_3"));
-    zassert_str_equal(rf_reading2->sensor->id.c_str(), "sensor_3");
-
-    readings = sensor_readings_frame->GetReadings();
-    zassert_equal(readings.size(), 2);
-
-    auto fr_reading1 = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_2"));
-    zassert_str_equal(fr_reading1->sensor->id.c_str(), "sensor_2");
-    auto fr_reading2 = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_3"));
-    zassert_str_equal(fr_reading2->sensor->id.c_str(), "sensor_3");
 }
 
 ZTEST(sensor_readings_frame, test_ClearReadings) {
@@ -219,34 +170,57 @@ ZTEST(sensor_readings_frame, test_ClearReadings) {
     auto sensor_readings_frame = helper.sensor_readings_frame;
     auto sensors = sensor_readings_frame_GetTestSensors();
 
-    auto readings = sensor_readings_frame->GetReadings();
+    auto readings = sensor_readings_frame->GetProcessedReadings();
     zassert_equal(readings.size(), 0);
-    auto reading_values = sensor_readings_frame->GetReadings();
-    zassert_equal(reading_values.size(), 0);
 
-    auto reading1 = std::make_shared<SensorReading>(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[0]);
-    reading1->value = 2.4;
-    reading1->status = ReadingStatus::PROCESSED;
+    SensorReading reading1(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[0]);
+    reading1.source = ReadingSource::ISR;
+    reading1.value = 2.4;
+    reading1.status = ReadingStatus::RAW;
     sensor_readings_frame->AddOrUpdateReading(reading1);
-    auto reading2 = std::make_shared<SensorReading>(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[1]);
-    reading2->status = ReadingStatus::ERROR;
+
+    SensorReading reading2(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[1]);
+    reading2.source = ReadingSource::PROCESSING;
+    reading2.status = ReadingStatus::ERROR;
     sensor_readings_frame->AddOrUpdateReading(reading2);
-    auto reading3 = std::make_shared<SensorReading>(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[2]);
-    reading3->value = 2.6;
-    reading3->status = ReadingStatus::PROCESSED;
+
+    SensorReading reading3(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[2]);
+    reading3.source = ReadingSource::PROCESSING;
+    reading3.value = 2.6;
+    reading3.status = ReadingStatus::PROCESSED;
     sensor_readings_frame->AddOrUpdateReading(reading3);
 
-    readings = sensor_readings_frame->GetReadings();
-    zassert_equal(readings.size(), 3);
+    zassert_equal(sensor_readings_frame->HasIsrReading("sensor_1"), true);
+    zassert_equal(sensor_readings_frame->HasIsrReading("sensor_2"), false);
+    zassert_equal(sensor_readings_frame->HasIsrReading("sensor_3"), false);
 
-    zassert_equal(sensor_readings_frame->HasReadingValue(StringHelpers::GetHash("sensor_1")), true);
-    zassert_equal(sensor_readings_frame->HasReadingValue(StringHelpers::GetHash("sensor_2")), false);
-    zassert_equal(sensor_readings_frame->HasReadingValue(StringHelpers::GetHash("sensor_3")), true);
+    zassert_equal(sensor_readings_frame->HasReading("sensor_1"), false);
+    zassert_equal(sensor_readings_frame->HasReading("sensor_2"), true);
+    zassert_equal(sensor_readings_frame->HasReading("sensor_3"), true);
+
+    zassert_equal(sensor_readings_frame->HasProcessedReading("sensor_1"), false);
+    zassert_equal(sensor_readings_frame->HasProcessedReading("sensor_2"), false);
+    zassert_equal(sensor_readings_frame->HasProcessedReading("sensor_3"), true);
+
+    zassert_equal(sensor_readings_frame->HasReadingValue("sensor_1"), false);
+    zassert_equal(sensor_readings_frame->HasReadingValue("sensor_2"), false);
+    zassert_equal(sensor_readings_frame->HasReadingValue("sensor_3"), true);
 
     sensor_readings_frame->ClearReadings();
 
-    readings = sensor_readings_frame->GetReadings();
-    zassert_equal(readings.size(), 0);
-    reading_values = sensor_readings_frame->GetReadings();
-    zassert_equal(reading_values.size(), 0);
+    zassert_equal(sensor_readings_frame->HasIsrReading("sensor_1"), false);
+    zassert_equal(sensor_readings_frame->HasIsrReading("sensor_2"), false);
+    zassert_equal(sensor_readings_frame->HasIsrReading("sensor_3"), false);
+
+    zassert_equal(sensor_readings_frame->HasReading("sensor_1"), false);
+    zassert_equal(sensor_readings_frame->HasReading("sensor_2"), false);
+    zassert_equal(sensor_readings_frame->HasReading("sensor_3"), false);
+
+    zassert_equal(sensor_readings_frame->HasProcessedReading("sensor_1"), false);
+    zassert_equal(sensor_readings_frame->HasProcessedReading("sensor_2"), false);
+    zassert_equal(sensor_readings_frame->HasProcessedReading("sensor_3"), false);
+
+    zassert_equal(sensor_readings_frame->HasReadingValue("sensor_1"), false);
+    zassert_equal(sensor_readings_frame->HasReadingValue("sensor_2"), false);
+    zassert_equal(sensor_readings_frame->HasReadingValue("sensor_3"), false);
 }

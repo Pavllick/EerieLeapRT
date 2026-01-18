@@ -107,9 +107,9 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
     auto json_sensors_configuration_service = std::make_unique<JsonConfigurationService<JsonSensorsConfig>>("sensors_config", fs_service);
 
     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
-        nullptr,
         std::move(cbor_sensors_configuration_service),
         std::move(json_sensors_configuration_service),
+        nullptr,
         16,
         16);
 
@@ -158,9 +158,9 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
     auto json_sensors_configuration_service = std::make_unique<JsonConfigurationService<JsonSensorsConfig>>("sensors_config", fs_service);
 
     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
-        nullptr,
         std::move(cbor_sensors_configuration_service),
         std::move(json_sensors_configuration_service),
+        nullptr,
         16,
         16);
 
@@ -171,9 +171,9 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
     json_sensors_configuration_service = std::make_unique<JsonConfigurationService<JsonSensorsConfig>>("sensors_config", fs_service);
     sensors_configuration_manager = nullptr;
     sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
-        nullptr,
         std::move(cbor_sensors_configuration_service),
         std::move(json_sensors_configuration_service),
+        nullptr,
         16,
         16);
 
@@ -219,9 +219,9 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
     auto json_sensors_configuration_service = std::make_unique<JsonConfigurationService<JsonSensorsConfig>>("sensors_config", fs_service);
 
     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
-        nullptr,
         std::move(cbor_sensors_configuration_service),
         std::move(json_sensors_configuration_service),
+        nullptr,
         16,
         16);
 
@@ -281,9 +281,9 @@ ZTEST(sensors_configuration_manager, test_SensorsConfigurationManager_Save_confi
     auto json_sensors_configuration_service = std::make_unique<JsonConfigurationService<JsonSensorsConfig>>("sensors_config", fs_service);
 
     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
-        nullptr,
         std::move(cbor_sensors_configuration_service),
         std::move(json_sensors_configuration_service),
+        nullptr,
         16,
         16);
 

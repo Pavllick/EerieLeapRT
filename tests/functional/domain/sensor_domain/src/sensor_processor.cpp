@@ -17,15 +17,16 @@
 #include "subsys/device_tree/dt_fs.h"
 #include "domain/sensor_domain/utilities/sensors_order_resolver.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
+#include "domain/sensor_domain/models/sensor.h"
+#include "domain/sensor_domain/models/reading_status.h"
 #include "domain/sensor_domain/sensor_readers/i_sensor_reader.h"
 #include "domain/sensor_domain/sensor_readers/sensor_reader_physical_analog.h"
 #include "domain/sensor_domain/sensor_readers/sensor_reader_physical_indicator.h"
 #include "domain/sensor_domain/sensor_readers/sensor_reader_virtual_analog.h"
 #include "domain/sensor_domain/sensor_readers/sensor_reader_virtual_indicator.h"
-#include "domain/sensor_domain/processors/sensor_processor.h"
+#include "domain/sensor_domain/processors/adc_reading_processor.h"
+#include "domain/sensor_domain/processors/expression_processor.h"
 
-#include "domain/sensor_domain/models/sensor.h"
-#include "domain/sensor_domain/models/reading_status.h"
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
 
@@ -172,10 +173,15 @@ sensor_processor_HelperInstances sensor_processor_GetReadingInstances() {
 
     std::shared_ptr<GuidGenerator> guid_generator = std::make_shared<GuidGenerator>();
 
-    auto adc_configuration_service = std::make_unique<CborConfigurationService<CborAdcConfig>>("adc_config", fs_service);
-    auto json_configuration_service = std::make_unique<JsonConfigurationService<JsonAdcConfig>>("adc_config", fs_service);
+    auto cbor_adc_config_service = std::make_unique<CborConfigurationService<CborAdcConfig>>("adc_config", fs_service);
+    auto json_adc_config_service = std::make_unique<JsonConfigurationService<JsonAdcConfig>>("adc_config", fs_service);
+
+    AdcFactory adc_factory(nullptr);
+    auto adc_manager = adc_factory.Create();
+    adc_manager->Initialize();
+
     auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(
-        std::move(adc_configuration_service), std::move(json_configuration_service));
+        std::move(cbor_adc_config_service), std::move(json_adc_config_service), adc_manager);
 
     const auto adc_configuration = sensor_processor_GetTestConfiguration();
     adc_configuration_manager->Update(adc_configuration);
@@ -183,7 +189,7 @@ sensor_processor_HelperInstances sensor_processor_GetReadingInstances() {
     auto gpio = std::make_shared<GpioSimulator>();
     gpio->Initialize();
 
-    auto sensor_readings_frame = std::make_shared<SensorReadingsFrame>();
+    auto sensor_readings_frame = make_shared_pmr<SensorReadingsFrame>(Mrm::GetDefaultPmr());
     auto sensors = sensor_processor_GetTestSensors();
 
     auto sensor_readers = std::make_shared<std::vector<std::shared_ptr<ISensorReader>>>();
@@ -230,6 +236,25 @@ sensor_processor_HelperInstances sensor_processor_GetReadingInstances() {
     };
 }
 
+class ReadingProcessedProcessor : public IReadingProcessor {
+private:
+    std::shared_ptr<SensorReadingsFrame> sensor_readings_frame_;
+
+public:
+    explicit ReadingProcessedProcessor(std::shared_ptr<SensorReadingsFrame> sensor_readings_frame)
+        : sensor_readings_frame_(std::move(sensor_readings_frame)) {}
+
+    void ProcessReading(const size_t sensor_id_hash) override {
+        if(!sensor_readings_frame_->HasReading(sensor_id_hash))
+            return;
+
+        auto reading = sensor_readings_frame_->GetReading(sensor_id_hash);
+
+        reading.status = ReadingStatus::PROCESSED;
+        sensor_readings_frame_->AddOrUpdateReading(reading);
+    }
+};
+
 ZTEST(sensor_processor, test_ProcessReading) {
     auto helper = sensor_processor_GetReadingInstances();
 
@@ -240,8 +265,8 @@ ZTEST(sensor_processor, test_ProcessReading) {
     for(int i = 0; i < sensor_readers->size(); i++)
         sensor_readers->at(i)->Read();
 
-    auto reading_2 = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_2"));
-    auto reading_1 = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_1"));
+    auto reading_2 = sensor_readings_frame->GetReading("sensor_2");
+    auto reading_1 = sensor_readings_frame->GetReading("sensor_1");
 
     for(auto& sensor : sensors) {
         if(sensor->configuration.expression_evaluator != nullptr) {
@@ -252,39 +277,44 @@ ZTEST(sensor_processor, test_ProcessReading) {
         }
     }
 
-    float reading_1_value = sensors[1]->configuration.voltage_interpolator->Interpolate(reading_1->value.value());
-    float reading_2_value = sensors[0]->configuration.voltage_interpolator->Interpolate(reading_2->value.value());
+    float reading_1_value = sensors[1]->configuration.voltage_interpolator->Interpolate(reading_1.value.value());
+    float reading_2_value = sensors[0]->configuration.voltage_interpolator->Interpolate(reading_2.value.value());
 
-    SensorProcessor sensor_processor(sensor_readings_frame);
+    std::vector<std::shared_ptr<IReadingProcessor>> reading_processors;
+    reading_processors.push_back(std::make_shared<AdcReadingProcessor>(sensor_readings_frame));
+    reading_processors.push_back(std::make_shared<ExpressionProcessor>(sensor_readings_frame));
+    reading_processors.push_back(std::make_shared<ReadingProcessedProcessor>(sensor_readings_frame));
 
-    for(auto& sensor : sensors)
-        sensor_processor.ProcessReading(sensor_readings_frame->GetReading(sensor->id_hash));
+    for(auto& sensor : sensors) {
+        for(auto& reading_processor : reading_processors)
+            reading_processor->ProcessReading(sensor->id_hash);
+    }
 
-    auto proc_reading_2 = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_2"));
-    zassert_equal(proc_reading_2->status, ReadingStatus::PROCESSED);
-    zassert_true(proc_reading_2->value.has_value());
+    auto proc_reading_2 = sensor_readings_frame->GetReading("sensor_2");
+    zassert_equal(proc_reading_2.status, ReadingStatus::PROCESSED);
+    zassert_true(proc_reading_2.value.has_value());
     float proc_reading_2_value = reading_2_value * 4 + 1.6;
-    zassert_equal(proc_reading_2->value.value(), proc_reading_2_value);
+    zassert_equal(proc_reading_2.value.value(), proc_reading_2_value);
 
-    auto proc_reading_1 = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_1"));
-    zassert_equal(proc_reading_1->status, ReadingStatus::PROCESSED);
-    zassert_true(proc_reading_1->value.has_value());
+    auto proc_reading_1 = sensor_readings_frame->GetReading("sensor_1");
+    zassert_equal(proc_reading_1.status, ReadingStatus::PROCESSED);
+    zassert_true(proc_reading_1.value.has_value());
     float proc_reading_1_value = reading_1_value * 2 + proc_reading_2_value + 1;
-    zassert_equal(proc_reading_1->value.value(), proc_reading_1_value);
+    zassert_equal(proc_reading_1.value.value(), proc_reading_1_value);
 
-    auto proc_reading_3 = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_3"));
-    zassert_equal(proc_reading_3->status, ReadingStatus::PROCESSED);
-    zassert_true(proc_reading_3->value.has_value());
+    auto proc_reading_3 = sensor_readings_frame->GetReading("sensor_3");
+    zassert_equal(proc_reading_3.status, ReadingStatus::PROCESSED);
+    zassert_true(proc_reading_3.value.has_value());
     float proc_reading_3_value = proc_reading_1_value + 8.34;
-    zassert_equal(proc_reading_3->value.value(), proc_reading_3_value);
+    zassert_equal(proc_reading_3.value.value(), proc_reading_3_value);
 
-    auto proc_reading_4 = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_4"));
-    zassert_equal(proc_reading_4->status, ReadingStatus::PROCESSED);
-    zassert_true(proc_reading_4->value.has_value());
-    zassert_true(proc_reading_4->value.value() == 1 || proc_reading_4->value.value() == 0);
+    auto proc_reading_4 = sensor_readings_frame->GetReading("sensor_4");
+    zassert_equal(proc_reading_4.status, ReadingStatus::PROCESSED);
+    zassert_true(proc_reading_4.value.has_value());
+    zassert_true(proc_reading_4.value.value() == 1 || proc_reading_4.value.value() == 0);
 
-    auto proc_reading_5 = sensor_readings_frame->GetReadings().at(StringHelpers::GetHash("sensor_5"));
-    zassert_equal(proc_reading_5->status, ReadingStatus::PROCESSED);
-    zassert_true(proc_reading_5->value.has_value());
-    zassert_true(proc_reading_5->value.value() ==  proc_reading_1_value < 400);
+    auto proc_reading_5 = sensor_readings_frame->GetReading("sensor_5");
+    zassert_equal(proc_reading_5.status, ReadingStatus::PROCESSED);
+    zassert_true(proc_reading_5.value.has_value());
+    zassert_true(proc_reading_5.value.value() ==  proc_reading_1_value < 400);
 }

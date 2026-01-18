@@ -47,17 +47,21 @@ ZTEST(adc_configuration_manager, test_AdcConfigurationManager_Save_config_succes
 
     fs_service->Format();
 
+    AdcFactory adc_factory(nullptr);
+    auto adc_manager = adc_factory.Create();
+    adc_manager->Initialize();
+
     auto adc_configuration_service = std::make_unique<CborConfigurationService<CborAdcConfig>>("adc_config", fs_service);
     auto json_configuration_service = std::make_unique<JsonConfigurationService<JsonAdcConfig>>("adc_config", fs_service);
     auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(
-        std::move(adc_configuration_service), std::move(json_configuration_service));
+        std::move(adc_configuration_service), std::move(json_configuration_service), adc_manager);
 
     auto adc_configuration = adc_configuration_manager_GetTestConfiguration();
 
     bool result = adc_configuration_manager->Update(adc_configuration);
     zassert_true(result);
 
-    auto adc_manager = adc_configuration_manager->Get();
+    adc_manager = adc_configuration_manager->Get();
 
     for(int i = 0; i < adc_manager->GetChannelCount(); i++) {
         auto adc_channel_configuration = adc_manager->GetChannelConfiguration(i);
@@ -80,10 +84,14 @@ ZTEST(adc_configuration_manager, test_AdcConfigurationManager_Save_config_and_Lo
 
     fs_service->Format();
 
+    AdcFactory adc_factory(nullptr);
+    auto adc_manager = adc_factory.Create();
+    adc_manager->Initialize();
+
     auto adc_configuration_service = std::make_unique<CborConfigurationService<CborAdcConfig>>("adc_config", fs_service);
     auto json_configuration_service = std::make_unique<JsonConfigurationService<JsonAdcConfig>>("adc_config", fs_service);
     auto adc_configuration_manager = std::make_shared<AdcConfigurationManager>(
-        std::move(adc_configuration_service), std::move(json_configuration_service));
+        std::move(adc_configuration_service), std::move(json_configuration_service), adc_manager);
 
     auto adc_configuration = adc_configuration_manager_GetTestConfiguration();
 
@@ -94,9 +102,9 @@ ZTEST(adc_configuration_manager, test_AdcConfigurationManager_Save_config_and_Lo
     json_configuration_service = std::make_unique<JsonConfigurationService<JsonAdcConfig>>("adc_config", fs_service);
     adc_configuration_manager = nullptr;
     adc_configuration_manager = std::make_shared<AdcConfigurationManager>(
-        std::move(adc_configuration_service), std::move(json_configuration_service));
+        std::move(adc_configuration_service), std::move(json_configuration_service), adc_manager);
 
-    auto adc_manager = adc_configuration_manager->Get();
+    adc_manager = adc_configuration_manager->Get();
 
     for(int i = 0; i < adc_manager->GetChannelCount(); i++) {
         auto adc_channel_configuration = adc_manager->GetChannelConfiguration(i);
