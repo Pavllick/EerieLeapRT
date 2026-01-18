@@ -188,8 +188,6 @@ int main(void) {
     auto cbor_canbus_config_service = std::make_unique<CborConfigurationService<CborCanbusConfig>>(
         "canbus_config", fs_service);
 
-    auto json_system_config_service = std::make_unique<JsonConfigurationService<JsonSystemConfig>>(
-        "system_config", sd_fs_service);
     auto json_adc_config_service = std::make_unique<JsonConfigurationService<JsonAdcConfig>>(
         "adc_config", sd_fs_service);
     auto json_sensors_config_service = std::make_unique<JsonConfigurationService<JsonSensorsConfig>>(
@@ -212,7 +210,7 @@ int main(void) {
     gpio->Initialize();
 
     auto system_configuration_manager = std::make_shared<SystemConfigurationManager>(
-        std::move(cbor_system_config_service), std::move(json_system_config_service));
+        std::move(cbor_system_config_service));
 
     // TODO: For test purposes only
     // SetupSystemConfiguration(system_configuration_manager);
@@ -329,8 +327,6 @@ int main(void) {
 
 void SetupSystemConfiguration(std::shared_ptr<SystemConfigurationManager> system_configuration_manager) {
     auto system_configuration = make_shared_pmr<SystemConfiguration>(Mrm::GetExtPmr());
-
-    system_configuration->com_user_refresh_rate_ms = 20;
 
     system_configuration_manager->Update(*system_configuration);
 }
