@@ -27,10 +27,11 @@ std::vector<uint8_t> CanFrameDbcBuilder::Build(uint8_t bus_channel, uint32_t fra
 
         auto can_frame_data = dbc->GetMessage(frame_id)->EncodeMessage(
             [&sensor_readings_frame = sensor_readings_frame_](size_t signal_name_hash) {
-                if(!sensor_readings_frame->HasReadingValue(signal_name_hash))
+                auto reading_optioanl = sensor_readings_frame->TryGetReadingValue(signal_name_hash);
+                if(!reading_optioanl)
                     return 0.0f;
 
-                return sensor_readings_frame->GetReadingValue(signal_name_hash);
+                return reading_optioanl.value();
             });
 
         return can_frame_data;
