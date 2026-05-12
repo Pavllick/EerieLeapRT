@@ -1,11 +1,15 @@
 #include <zephyr/ztest.h>
+#include <eerie_memory.hpp>
 
+#include "utilities/memory/memory_resource_manager.h"
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
 #include "subsys/math_parser/expression_evaluator.h"
 #include "domain/sensor_domain/models/sensor.h"
 #include "domain/sensor_domain/utilities/sensors_order_resolver.h"
 
+using namespace eerie_memory;
+using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::voltage_interpolator;
 using namespace eerie_leap::subsys::math_parser;
 using namespace eerie_leap::domain::sensor_domain::models;

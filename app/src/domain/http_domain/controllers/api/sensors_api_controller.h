@@ -6,7 +6,6 @@
 #include <zephyr/net/http/service.h>
 #include <zephyr/data/json.h>
 
-#include "utilities/memory/memory_resource_manager.h"
 #include "configuration/json/configs/json_sensors_config.h"
 #include "configuration/json/json_serializer.h"
 #include "domain/sensor_domain/configuration/parsers/sensors_json_parser.h"
@@ -15,13 +14,12 @@
 
 namespace eerie_leap::domain::http_domain::controllers::api {
 
-using namespace eerie_leap::utilities::memory;
-using namespace eerie_leap::configuration::json::configs;
-using namespace eerie_leap::configuration::json;
+namespace json = eerie_leap::configuration::json;
 
-using namespace eerie_leap::domain::sensor_domain::configuration::parsers;
-using namespace eerie_leap::domain::sensor_domain::configuration;
-using namespace eerie_leap::domain::sensor_domain::services;
+using eerie_leap::configuration::json::configs::JsonSensorsConfig;
+using eerie_leap::domain::sensor_domain::configuration::parsers::SensorsJsonParser;
+using eerie_leap::domain::sensor_domain::configuration::SensorsConfigurationManager;
+using eerie_leap::domain::sensor_domain::services::SensorsProcessingService;
 
 class SensorsApiController {
 private:
@@ -33,7 +31,7 @@ private:
     static std::unique_ptr<SensorsJsonParser> sensors_json_parser_;
     static std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager_;
     static std::shared_ptr<SensorsProcessingService> sensors_processing_service_;
-    static std::unique_ptr<JsonSerializer<JsonSensorsConfig>> json_serializer_;
+    static std::unique_ptr<json::JsonSerializer<JsonSensorsConfig>> json_serializer_;
 
     static void UpdateSensorsConfig(const std::span<const uint8_t>& buffer);
 

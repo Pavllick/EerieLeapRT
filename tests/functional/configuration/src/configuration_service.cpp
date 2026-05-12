@@ -22,8 +22,7 @@ ZTEST(configuration_service, test_CborSystemConfig_Save_config_successfully_save
     memset(&system_config, 0, sizeof(system_config));
 
     system_config.device_id = 12;
-    system_config.hw_version = 22;
-    system_config.sw_version = 2422;
+    system_config.build_number = 22;
 
     DtFs::InitInternalFs();
     auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
@@ -40,8 +39,7 @@ ZTEST(configuration_service, test_CborSystemConfig_Load_config_successfully_save
     memset(&system_config, 0, sizeof(system_config));
 
     system_config.device_id = 14;
-    system_config.hw_version = 46;
-    system_config.sw_version = 8624;
+    system_config.build_number = 46;
 
     DtFs::InitInternalFs();
     auto fs_service = std::make_shared<FsService>(DtFs::GetInternalFsMp().value());
@@ -55,8 +53,7 @@ ZTEST(configuration_service, test_CborSystemConfig_Load_config_successfully_save
     auto loaded_config = system_config_service->Load();
     zassert_true(loaded_config.has_value());
     zassert_equal(loaded_config.value().config->device_id, 14);
-    zassert_equal(loaded_config.value().config->hw_version, 46);
-    zassert_equal(loaded_config.value().config->sw_version, 8624);
+    zassert_equal(loaded_config.value().config->build_number, 46);
 }
 
 ZTEST(configuration_service, test_CborSensorsConfig_Save_config_successfully_saved) {

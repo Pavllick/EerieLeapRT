@@ -5,6 +5,7 @@
 namespace eerie_leap::views::animations {
 
 using namespace eerie_leap::views::animations::utilities;
+using namespace eerie_leap::subsys::cfb;
 
 WaveLinesAnimation::WaveLinesAnimation(std::shared_ptr<Cfb> cfb)
     : cfb_(std::move(cfb)), frame_(0) {}

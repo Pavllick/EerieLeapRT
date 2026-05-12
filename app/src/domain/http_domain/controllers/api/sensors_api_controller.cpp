@@ -1,9 +1,14 @@
 #include <utility>
 #include <zephyr/logging/log.h>
 
+#include "utilities/memory/memory_resource_manager.h"
+
 #include "sensors_api_controller.h"
 
 namespace eerie_leap::domain::http_domain::controllers::api {
+
+using namespace eerie_leap::utilities::memory;
+using namespace eerie_leap::configuration::json;
 
 LOG_MODULE_REGISTER(sensors_api_controller_logger);
 
@@ -13,7 +18,6 @@ std::pmr::string SensorsApiController::sensors_config_get_buffer_;
 std::unique_ptr<SensorsJsonParser> SensorsApiController::sensors_json_parser_ = nullptr;
 std::shared_ptr<SensorsConfigurationManager> SensorsApiController::sensors_configuration_manager_ = nullptr;
 std::shared_ptr<SensorsProcessingService> SensorsApiController::sensors_processing_service_ = nullptr;
-std::unique_ptr<JsonSerializer<JsonSensorsConfig>> SensorsApiController::json_serializer_ = nullptr;
 
 SensorsApiController::SensorsApiController(
     std::shared_ptr<SensorsConfigurationManager> sensors_configuration_manager,
@@ -30,9 +34,6 @@ SensorsApiController::SensorsApiController(
 
     if(!sensors_processing_service_)
         sensors_processing_service_ = std::move(sensors_processing_service);
-
-    if(!json_serializer_)
-        json_serializer_ = std::make_unique<JsonSerializer<JsonSensorsConfig>>();
 }
 
 int SensorsApiController::sensors_config_get_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data) {
@@ -43,7 +44,7 @@ int SensorsApiController::sensors_config_get_handler(http_client_ctx *client, en
         const auto* sensors = sensors_configuration_manager_->Get();
         // TODO: Get GPIO and ADC channel count
         auto config = sensors_json_parser_->Serialize(*sensors, 16, 16);
-        sensors_config_get_buffer_ = json_serializer_->Serialize(*config);
+        sensors_config_get_buffer_ = JsonSerializer<JsonSensorsConfig>::Serialize(*config);
 
         response_ctx->body = (uint8_t*)sensors_config_get_buffer_.c_str();
         response_ctx->body_len = sensors_config_get_buffer_.size();
@@ -56,7 +57,7 @@ int SensorsApiController::sensors_config_get_handler(http_client_ctx *client, en
 void SensorsApiController::UpdateSensorsConfig(const std::span<const uint8_t>& buffer) {
     // TODO: Get GPIO and ADC channel count
     std::string_view json_str(reinterpret_cast<const char*>(buffer.data()), buffer.size());
-    auto json_sensors_config = json_serializer_->Deserialize(json_str);
+    auto json_sensors_config = JsonSerializer<JsonSensorsConfig>::Deserialize(json_str);
     auto sensors = sensors_json_parser_->Deserialize(Mrm::GetExtPmr(), *json_sensors_config, 16, 16);
 
     if(!sensors_configuration_manager_->Update(sensors))

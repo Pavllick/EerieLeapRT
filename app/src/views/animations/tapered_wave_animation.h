@@ -9,7 +9,8 @@
 
 namespace eerie_leap::views::animations {
 
-using namespace eerie_leap::subsys::cfb;
+using eerie_leap::subsys::cfb::Cfb;
+using eerie_leap::subsys::cfb::Coordinate;
 
 class TaperedWaveAnimation : public IAnimation {
 private:

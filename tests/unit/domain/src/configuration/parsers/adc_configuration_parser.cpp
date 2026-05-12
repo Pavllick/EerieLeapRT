@@ -1,8 +1,15 @@
 #include <zephyr/ztest.h>
+#include <eerie_memory.hpp>
 
+#include "utilities/memory/memory_resource_manager.h"
 #include "domain/sensor_domain/configuration/parsers/adc_configuration_cbor_parser.h"
 #include "domain/sensor_domain/configuration/parsers/adc_configuration_json_parser.h"
 
+using namespace eerie_memory;
+using namespace eerie_leap::utilities::memory;
+using namespace eerie_leap::utilities::voltage_interpolator;
+using namespace eerie_leap::subsys::adc::utilities;
+using namespace eerie_leap::subsys::adc::models;
 using namespace eerie_leap::domain::sensor_domain::configuration::parsers;
 
 ZTEST_SUITE(adc_configuration_parser, NULL, NULL, NULL, NULL, NULL);

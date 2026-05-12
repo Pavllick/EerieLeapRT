@@ -7,6 +7,8 @@
 
 namespace eerie_leap::controllers {
 
+using namespace eerie_leap::views::animations;
+
 DisplayController::DisplayController(std::shared_ptr<Cfb> cfb)
     : cfb_(std::move(cfb)), current_animation_index_(0) { }
 

@@ -9,8 +9,8 @@
 
 namespace eerie_leap::controllers {
 
-using namespace eerie_leap::subsys::cfb;
-using namespace eerie_leap::views::animations;
+using eerie_leap::subsys::cfb::Cfb;
+using eerie_leap::views::animations::IAnimation;
 
 class DisplayController {
 private:

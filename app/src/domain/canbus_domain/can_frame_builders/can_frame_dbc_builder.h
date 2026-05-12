@@ -7,8 +7,8 @@
 
 namespace eerie_leap::domain::canbus_domain::can_frame_builders {
 
-using namespace eerie_leap::domain::canbus_domain::services;
-using namespace eerie_leap::domain::sensor_domain::utilities;
+using eerie_leap::domain::canbus_domain::services::CanbusService;
+using eerie_leap::domain::sensor_domain::utilities::SensorReadingsFrame;
 
 class CanFrameDbcBuilder {
 private:

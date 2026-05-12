@@ -5,8 +5,10 @@
 
 namespace eerie_leap::domain::canbus_domain::services {
 
+using namespace eerie_leap::subsys::threading;
 using namespace eerie_leap::domain::sensor_domain::models;
 using namespace eerie_leap::domain::script_domain::utilities;
+using namespace eerie_leap::domain::canbus_domain::processors;
 
 LOG_MODULE_REGISTER(canbus_scheduler_logger);
 
@@ -34,6 +36,15 @@ void CanbusSchedulerService::Initialize() {
 
 WorkQueueTaskResult CanbusSchedulerService::ProcessCanbusWorkTask(CanbusTask* task) {
     try {
+        if(!task->canbus->IsValid()) {
+            LOG_ERR("Canbus is not valid");
+
+            return {
+                .reschedule = false,
+                .delay = K_NO_WAIT
+            };
+        }
+
         auto can_frame_data = task->can_frame_dbc_builder->Build(
             task->bus_channel, task->message_configuration->frame_id);
 
@@ -45,7 +56,7 @@ WorkQueueTaskResult CanbusSchedulerService::ProcessCanbusWorkTask(CanbusTask* ta
         }
 
         if(can_frame_data.size() > 0)
-            task->canbus->SendFrame(task->message_configuration->frame_id, can_frame_data);
+            (*task->canbus)->SendFrame(task->message_configuration->frame_id, can_frame_data);
 
         LOG_HEXDUMP_DBG(
             can_frame_data.data(),

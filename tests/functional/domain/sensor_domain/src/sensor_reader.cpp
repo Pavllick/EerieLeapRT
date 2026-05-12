@@ -1,5 +1,7 @@
 #include <zephyr/ztest.h>
+#include <eerie_memory.hpp>
 
+#include "utilities/memory/memory_resource_manager.h"
 #include "utilities/guid/guid_generator.h"
 #include "utilities/string/string_helpers.h"
 
@@ -31,8 +33,13 @@
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
 
+using namespace eerie_memory;
+using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::utilities::string;
+using namespace eerie_leap::utilities::voltage_interpolator;
+
+using namespace eerie_leap::configuration::services;
 
 using namespace eerie_leap::subsys::device_tree;
 using namespace eerie_leap::subsys::adc;
@@ -40,12 +47,12 @@ using namespace eerie_leap::subsys::adc::models;
 using namespace eerie_leap::subsys::gpio;
 using namespace eerie_leap::subsys::time;
 using namespace eerie_leap::subsys::math_parser;
+using namespace eerie_leap::subsys::fs::services;
 
 using namespace eerie_leap::domain::sensor_domain::configuration;
 using namespace eerie_leap::domain::sensor_domain::sensor_readers;
 
 using namespace eerie_leap::domain::sensor_domain::models;
-using namespace eerie_leap::utilities::voltage_interpolator;
 
 ZTEST_SUITE(sensors_reader, NULL, NULL, NULL, NULL, NULL);
 

@@ -8,7 +8,7 @@
 
 namespace eerie_leap::domain::canbus_domain::processors {
 
-using namespace eerie_leap::domain::canbus_domain::models;
+using eerie_leap::domain::canbus_domain::models::CanMessageConfiguration;
 
 class ICanFrameProcessor {
 public:

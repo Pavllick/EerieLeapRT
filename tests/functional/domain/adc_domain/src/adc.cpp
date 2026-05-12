@@ -10,6 +10,7 @@
 #include "subsys/adc/adc_simulator.h"
 #include "subsys/adc/adc_emulator.h"
 
+using namespace eerie_leap::utilities::voltage_interpolator;
 using namespace eerie_leap::subsys::device_tree;
 using namespace eerie_leap::subsys::adc;
 using namespace eerie_leap::subsys::adc::models;

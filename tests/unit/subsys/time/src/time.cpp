@@ -1,5 +1,7 @@
+#include <chrono>
 #include <memory>
 #include <regex>
+
 #include <zephyr/kernel.h>
 #include <zephyr/ztest.h>
 
@@ -7,6 +9,7 @@
 #include "subsys/time/i_time_provider.h"
 #include "subsys/time/boot_elapsed_time_provider.h"
 
+using namespace std::chrono;
 using namespace eerie_leap::subsys::time;
 
 ZTEST_SUITE(time, NULL, NULL, NULL, NULL, NULL);

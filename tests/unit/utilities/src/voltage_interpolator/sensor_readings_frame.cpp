@@ -1,5 +1,7 @@
 #include <zephyr/ztest.h>
+#include <eerie_memory.hpp>
 
+#include "utilities/memory/memory_resource_manager.h"
 #include "utilities/guid/guid_generator.h"
 #include "utilities/string/string_helpers.h"
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
@@ -9,6 +11,8 @@
 #include "domain/sensor_domain/models/reading_status.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 
+using namespace eerie_memory;
+using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::guid;
 using namespace eerie_leap::utilities::string;
 using namespace eerie_leap::utilities::voltage_interpolator;

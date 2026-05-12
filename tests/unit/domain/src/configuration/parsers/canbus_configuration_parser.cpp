@@ -1,8 +1,13 @@
 #include <zephyr/ztest.h>
+#include <eerie_memory.hpp>
 
+#include "utilities/memory/memory_resource_manager.h"
 #include "domain/canbus_domain/configuration/parsers/canbus_configuration_cbor_parser.h"
 #include "domain/canbus_domain/configuration/parsers/canbus_configuration_json_parser.h"
 
+using namespace eerie_memory;
+using namespace eerie_leap::utilities::memory;
+using namespace eerie_leap::domain::canbus_domain::models;
 using namespace eerie_leap::domain::canbus_domain::configuration::parsers;
 
 ZTEST_SUITE(canbus_configuration_parser, NULL, NULL, NULL, NULL, NULL);

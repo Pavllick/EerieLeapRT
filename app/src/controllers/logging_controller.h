@@ -11,10 +11,11 @@
 
 namespace eerie_leap::controllers {
 
-using namespace eerie_leap::domain::sensor_domain::configuration;
-using namespace eerie_leap::domain::logging_domain::services;
-using namespace eerie_leap::domain::logging_domain::loggers;
-using namespace eerie_leap::domain::canbus_com_domain::services;
+using eerie_leap::domain::sensor_domain::configuration::SensorsConfigurationManager;
+using eerie_leap::domain::logging_domain::configuration::LoggingConfigurationManager;
+using eerie_leap::domain::logging_domain::services::LogWriterService;
+using eerie_leap::domain::logging_domain::loggers::Mdf4LoggerSensorReading;
+using eerie_leap::domain::canbus_com_domain::services::CanbusComService;
 
 class LoggingController {
 private:

@@ -8,8 +8,8 @@
 
 namespace eerie_leap::domain::canbus_domain::processors {
 
-using namespace eerie_leap::domain::canbus_domain::services;
-using namespace eerie_leap::domain::sensor_domain::utilities;
+using eerie_leap::domain::canbus_domain::services::CanbusService;
+using eerie_leap::domain::sensor_domain::utilities::SensorReadingsFrame;
 
 // NOTE: calls lua function named according to function_name_ argument
 // with CAN frame ID and CAN frame byte array as arguments

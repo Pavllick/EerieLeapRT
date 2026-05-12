@@ -11,9 +11,10 @@ static constexpr uint16_t http_service_port_ = 8080;
 
 namespace eerie_leap::domain::http_domain::services {
 
-using namespace eerie_leap::domain::system_domain::configuration;
-using namespace eerie_leap::domain::sensor_domain::configuration;
-using namespace eerie_leap::domain::sensor_domain::services;
+using eerie_leap::domain::system_domain::configuration::SystemConfigurationManager;
+using eerie_leap::domain::sensor_domain::configuration::AdcConfigurationManager;
+using eerie_leap::domain::sensor_domain::configuration::SensorsConfigurationManager;
+using eerie_leap::domain::sensor_domain::services::SensorsProcessingService;
 
 class HttpServer {
 private:

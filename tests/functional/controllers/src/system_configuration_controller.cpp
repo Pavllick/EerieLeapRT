@@ -28,8 +28,6 @@ ZTEST(system_configuration_manager, test_SystemConfigurationManager_Save_config_
         std::move(cbor_system_configuration_service));
 
     SystemConfiguration system_configuration(std::allocator_arg, Mrm::GetDefaultPmr());
-    system_configuration.hw_version = 23456;
-    system_configuration.sw_version = 87654;
 
     bool result = system_configuration_manager->Update(system_configuration);
     zassert_true(result);
@@ -64,6 +62,6 @@ ZTEST(system_configuration_manager, test_SystemConfigurationManager_Save_config_
     auto saved_system_configuration = system_configuration_manager->Get();
 
     zassert_equal(saved_system_configuration->device_id, system_configuration.device_id);
-    zassert_equal(saved_system_configuration->hw_version, 0x02090006);
-    zassert_equal(saved_system_configuration->sw_version, 0x07080004);
+    zassert_equal(saved_system_configuration->hw_version, SystemConfiguration::hw_version);
+    zassert_equal(saved_system_configuration->sw_version, SystemConfiguration::sw_version);
 }

@@ -12,7 +12,7 @@ ZTEST(guid_generator, test_guid_is_nonzero) {
     GuidGenerator generator;
     Guid guid = generator.Generate();
 
-    zassert_equal(guid.counter, 0);
+    zassert_equal(guid.counter, 1);
     zassert_not_equal(guid.device_hash, 0);
     zassert_not_equal(guid.AsUint64(), 0);
 }

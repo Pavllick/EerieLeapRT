@@ -10,9 +10,13 @@
 
 #include "domain/sensor_domain/configuration/adc_configuration_manager.h"
 
+using namespace eerie_leap::utilities::voltage_interpolator;
 using namespace eerie_leap::configuration::services;
 using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::subsys::device_tree;
+using namespace eerie_leap::subsys::adc;
+using namespace eerie_leap::subsys::adc::utilities;
+using namespace eerie_leap::subsys::adc::models;
 using namespace eerie_leap::domain::sensor_domain::configuration;
 
 ZTEST_SUITE(adc_configuration_manager, NULL, NULL, NULL, NULL, NULL);

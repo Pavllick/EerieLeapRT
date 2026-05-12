@@ -2,7 +2,9 @@
 #include <vector>
 #include <zephyr/kernel.h>
 #include <zephyr/ztest.h>
+#include <eerie_memory.hpp>
 
+#include "utilities/memory/memory_resource_manager.h"
 #include "utilities/cbor/cbor_helpers.hpp"
 #include "configuration/cbor/cbor_system_config/cbor_system_config.h"
 #include "configuration/cbor/cbor_sensors_config/cbor_sensors_config.h"
@@ -18,6 +20,8 @@
 #include "utilities/voltage_interpolator/linear_voltage_interpolator.hpp"
 #include "utilities/voltage_interpolator/cubic_spline_voltage_interpolator.hpp"
 
+using namespace eerie_memory;
+using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::cbor;
 using namespace eerie_leap::utilities::voltage_interpolator;
 using namespace eerie_leap::configuration::services;

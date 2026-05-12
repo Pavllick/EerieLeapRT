@@ -6,24 +6,23 @@
 #include <zephyr/kernel.h>
 
 #include "subsys/threading/work_queue_thread.h"
-#include "domain/canbus_domain/can_frame_builders/can_frame_dbc_builder.h"
-#include "domain/canbus_domain/models/can_channel_configuration.h"
 #include "domain/sensor_domain/utilities/sensor_readings_frame.hpp"
 #include "domain/canbus_domain/configuration/canbus_configuration_manager.h"
 #include "domain/canbus_domain/models/can_message_configuration.h"
 #include "domain/canbus_domain/services/canbus_service.h"
-#include "domain/canbus_domain/can_frame_builders/can_frame_dbc_builder.h"
-#include "domain/canbus_domain/processors/i_can_frame_processor.h"
 
 #include "canbus_task.hpp"
 
 namespace eerie_leap::domain::canbus_domain::services {
 
-using namespace eerie_leap::subsys::threading;
-using namespace eerie_leap::domain::sensor_domain::utilities;
-using namespace eerie_leap::domain::canbus_domain::configuration;
-using namespace eerie_leap::domain::canbus_domain::can_frame_builders;
-using namespace eerie_leap::domain::canbus_domain::processors;
+namespace threading = eerie_leap::subsys::threading;
+
+using threading::WorkQueueThread;
+using threading::WorkQueueTaskResult;
+using eerie_leap::domain::sensor_domain::utilities::SensorReadingsFrame;
+using eerie_leap::domain::canbus_domain::configuration::CanbusConfigurationManager;
+using eerie_leap::domain::canbus_domain::models::CanMessageConfiguration;
+using eerie_leap::domain::canbus_domain::services::CanbusService;
 
 class CanbusSchedulerService {
 private:
@@ -35,7 +34,7 @@ private:
     std::shared_ptr<CanbusService> canbus_service_;
     std::shared_ptr<SensorReadingsFrame> sensor_readings_frame_;
 
-    std::vector<WorkQueueTask<CanbusTask>> work_queue_tasks_;
+    std::vector<threading::WorkQueueTask<CanbusTask>> work_queue_tasks_;
     std::shared_ptr<CanFrameDbcBuilder> can_frame_dbc_builder_;
     std::shared_ptr<std::vector<std::shared_ptr<ICanFrameProcessor>>> can_frame_processors_;
 

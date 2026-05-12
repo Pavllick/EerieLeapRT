@@ -1,5 +1,6 @@
 #include <memory>
 #include <zephyr/logging/log.h>
+#include <eerie_memory.hpp>
 
 #include "utilities/memory/memory_resource_manager.h"
 #include "utilities/dev_tools/system_info.h"
@@ -62,6 +63,7 @@ using namespace eerie_leap::domain::sensor_domain::models;
 #include "domain/http_domain/services/http_server.h"
 #endif // CONFIG_NETWORKING
 
+using namespace eerie_memory;
 using namespace eerie_leap::utilities::memory;
 using namespace eerie_leap::utilities::dev_tools;
 using namespace eerie_leap::utilities::guid;
@@ -72,16 +74,23 @@ using namespace eerie_leap::subsys::fs::services;
 using namespace eerie_leap::subsys::gpio;
 using namespace eerie_leap::subsys::cfb;
 using namespace eerie_leap::subsys::time;
+using namespace eerie_leap::subsys::canbus;
+using namespace eerie_leap::subsys::adc;
+using namespace eerie_leap::subsys::adc::utilities;
 
 using namespace eerie_leap::configuration::json::configs;
 using namespace eerie_leap::configuration::services;
 
+using namespace eerie_leap::domain::canbus_domain::models;
 using namespace eerie_leap::domain::canbus_domain::services;
 using namespace eerie_leap::domain::canbus_domain::configuration;
 using namespace eerie_leap::domain::system_domain::configuration;
+using namespace eerie_leap::domain::sensor_domain::models;
+using namespace eerie_leap::domain::sensor_domain::configuration;
 using namespace eerie_leap::domain::sensor_domain::services;
 using namespace eerie_leap::domain::sensor_domain::sensor_readers;
 using namespace eerie_leap::domain::sensor_domain::isr_sensor_readers;
+using namespace eerie_leap::domain::logging_domain::models;
 using namespace eerie_leap::domain::logging_domain::services;
 using namespace eerie_leap::domain::logging_domain::configuration;
 using namespace eerie_leap::domain::canbus_com_domain::services;

@@ -1,8 +1,13 @@
 #include <zephyr/ztest.h>
+#include <eerie_memory.hpp>
 
+#include "utilities/memory/memory_resource_manager.h"
 #include "domain/logging_domain/configuration/parsers/logging_configuration_cbor_parser.h"
 #include "domain/logging_domain/configuration/parsers/logging_configuration_json_parser.h"
 
+using namespace eerie_memory;
+using namespace eerie_leap::utilities::memory;
+using namespace eerie_leap::domain::logging_domain::models;
 using namespace eerie_leap::domain::logging_domain::configuration::parsers;
 
 ZTEST_SUITE(logging_configuration_parser, NULL, NULL, NULL, NULL, NULL);
