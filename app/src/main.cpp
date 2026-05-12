@@ -219,7 +219,7 @@ int main(void) {
         std::move(cbor_canbus_config_service), std::move(json_canbus_config_service), sd_fs_service);
 
     // TODO: For test purposes only
-    // SetupCanbusConfiguration(canbus_configuration_manager);
+    SetupCanbusConfiguration(canbus_configuration_manager);
 
     auto sensors_configuration_manager = std::make_shared<SensorsConfigurationManager>(
         std::move(cbor_sensors_config_service),
@@ -398,20 +398,37 @@ void SetupCanbusConfiguration(std::shared_ptr<CanbusConfigurationManager> canbus
 
     // NOTE: This frame is transmitted at 20ms interval
     //       with sensor_1 value
-    auto message_configuration_0 = make_shared_pmr<CanMessageConfiguration>(Mrm::GetExtPmr());
-    message_configuration_0->name = "EL_FRAME_0";
-    message_configuration_0->message_size = 8;
-    message_configuration_0->frame_id = 790;
-    message_configuration_0->send_interval_ms = 20;
+    // auto message_configuration_0 = make_shared_pmr<CanMessageConfiguration>(Mrm::GetExtPmr());
+    // message_configuration_0->name = "EL_FRAME_0";
+    // message_configuration_0->message_size = 8;
+    // message_configuration_0->frame_id = 790;
+    // message_configuration_0->send_interval_ms = 20;
 
-    CanSignalConfiguration signal_configuration_0(std::allocator_arg, Mrm::GetExtPmr());
-    signal_configuration_0.start_bit = 16;
-    signal_configuration_0.size_bits = 16;
-    signal_configuration_0.name = "sensor_1";
-    signal_configuration_0.unit = "km/h";
-    signal_configuration_0.factor = 0.1;
-    message_configuration_0->signal_configurations.emplace_back(std::move(signal_configuration_0));
-    canbus_channel_configuration_0.message_configurations.emplace_back(std::move(message_configuration_0));
+    // CanSignalConfiguration signal_configuration_0(std::allocator_arg, Mrm::GetExtPmr());
+    // signal_configuration_0.start_bit = 16;
+    // signal_configuration_0.size_bits = 16;
+    // signal_configuration_0.name = "sensor_1";
+    // signal_configuration_0.unit = "km/h";
+    // signal_configuration_0.factor = 0.1;
+    // message_configuration_0->signal_configurations.emplace_back(std::move(signal_configuration_0));
+    // canbus_channel_configuration_0.message_configurations.emplace_back(std::move(message_configuration_0));
+
+    for(int i = 0; i < 3; i++) {
+        auto message_configuration = make_shared_pmr<CanMessageConfiguration>(Mrm::GetExtPmr());
+        message_configuration->frame_id = 100 + i;
+        message_configuration->name = "EL_FRAME_" + std::to_string(i);
+        message_configuration->message_size = 8;
+        message_configuration->send_interval_ms = 20;
+
+        CanSignalConfiguration signal_configuration(std::allocator_arg, Mrm::GetExtPmr());
+        signal_configuration.start_bit = 0;
+        signal_configuration.size_bits = 16;
+        signal_configuration.name = "sensor_" + std::to_string(i);
+        signal_configuration.unit = "km/h";
+        message_configuration->signal_configurations.emplace_back(std::move(signal_configuration));
+
+        canbus_channel_configuration_0.message_configurations.emplace_back(std::move(message_configuration));
+    }
 
     canbus_configuration->channel_configurations.emplace(
         canbus_channel_configuration_0.bus_channel,
