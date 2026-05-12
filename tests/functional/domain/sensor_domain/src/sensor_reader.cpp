@@ -237,43 +237,57 @@ ZTEST(sensors_reader, test_Read) {
 
     std::vector<std::string> sensor_names {"sensor_1", "sensor_2", "sensor_3", "sensor_4", "sensor_5"};
 
-    for(auto& sensor_name : sensor_names)
-        zassert_false(sensor_readings_frame->HasReading(sensor_name));
+    for(auto& sensor_name : sensor_names) {
+        auto sensor_hash = StringHelpers::GetHash(sensor_name);
+        zassert_false(sensor_readings_frame->HasReading(sensor_hash));
+    }
 
     for(int i = 0; i < sensor_readers->size(); i++)
         sensor_readers->at(i)->Read();
 
-    for(auto& sensor_name : sensor_names)
-        zassert_true(sensor_readings_frame->HasReading(sensor_name));
+    for(auto& sensor_name : sensor_names) {
+        auto sensor_hash = StringHelpers::GetHash(sensor_name);
+        zassert_true(sensor_readings_frame->HasReading(sensor_hash));
+    }
 
-    auto reading_2 = sensor_readings_frame->GetReading("sensor_2");
+    auto reading_2_opt = sensor_readings_frame->TryGetReading("sensor_2");
+    zassert_true(reading_2_opt.has_value());
+    auto& reading_2 = reading_2_opt.value();
     zassert_equal(reading_2.status, ReadingStatus::RAW);
     zassert_true(reading_2.value.has_value());
     zassert_true(reading_2.timestamp.has_value());
     zassert_true(reading_2.id.AsUint64() > 0);
     zassert_between_inclusive(reading_2.value.value(), 0, 3.3);
 
-    auto reading_1 = sensor_readings_frame->GetReading("sensor_1");
+    auto reading_1_opt = sensor_readings_frame->TryGetReading("sensor_1");
+    zassert_true(reading_1_opt.has_value());
+    auto& reading_1 = reading_1_opt.value();
     zassert_equal(reading_1.status, ReadingStatus::RAW);
     zassert_true(reading_1.value.has_value());
     zassert_true(reading_1.timestamp.has_value());
     zassert_true(reading_1.id.AsUint64() > 0);
     zassert_between_inclusive(reading_1.value.value(), 0, 3.3);
 
-    auto reading_3 = sensor_readings_frame->GetReading("sensor_3");
+    auto reading_3_opt = sensor_readings_frame->TryGetReading("sensor_3");
+    zassert_true(reading_3_opt.has_value());
+    auto& reading_3 = reading_3_opt.value();
     zassert_equal(reading_3.status, ReadingStatus::UNINITIALIZED);
     zassert_true(reading_3.timestamp.has_value());
     zassert_true(reading_3.id.AsUint64() > 0);
     zassert_false(reading_3.value.has_value());
 
-    auto reading_4 = sensor_readings_frame->GetReading("sensor_4");
+    auto reading_4_opt = sensor_readings_frame->TryGetReading("sensor_4");
+    zassert_true(reading_4_opt.has_value());
+    auto& reading_4 = reading_4_opt.value();
     zassert_equal(reading_4.status, ReadingStatus::RAW);
     zassert_true(reading_4.timestamp.has_value());
     zassert_true(reading_4.id.AsUint64() > 0);
     zassert_true(reading_4.value.has_value());
     zassert_true(reading_4.value.value() == 1 || reading_4.value.value() == 0);
 
-    auto reading_5 = sensor_readings_frame->GetReading("sensor_5");
+    auto reading_5_opt = sensor_readings_frame->TryGetReading("sensor_5");
+    zassert_true(reading_5_opt.has_value());
+    auto& reading_5 = reading_5_opt.value();
     zassert_equal(reading_5.status, ReadingStatus::UNINITIALIZED);
     zassert_true(reading_5.timestamp.has_value());
     zassert_true(reading_5.id.AsUint64() > 0);

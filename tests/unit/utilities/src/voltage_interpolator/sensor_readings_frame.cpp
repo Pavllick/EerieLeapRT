@@ -97,33 +97,34 @@ ZTEST(sensor_readings_frame, test_AddOrUpdateReading) {
         auto sensor_readings_frame = helper.sensor_readings_frame;
         auto sensors = sensor_readings_frame_GetTestSensors();
 
-        SensorReading reading1(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[1]);
+        SensorReading reading1(guid_generator->Generate(), sensors[1]);
         reading1.source = ReadingSource::PROCESSING;
         sensor_readings_frame->AddOrUpdateReading(reading1);
 
-        zassert_equal(sensor_readings_frame->HasReading("sensor_2"), true);
+        zassert_equal(sensor_readings_frame->HasReading(sensors[1]->id_hash), true);
 
-        auto fr_reading_1 = sensor_readings_frame->GetReading("sensor_2");
-        zassert_equal(fr_reading_1.status, ReadingStatus::UNINITIALIZED);
-        zassert_false(fr_reading_1.value.has_value());
+        auto fr_reading_1 = sensor_readings_frame->TryGetReading("sensor_2");
+        zassert_equal(fr_reading_1.value().status, ReadingStatus::UNINITIALIZED);
+        zassert_false(fr_reading_1.value().value.has_value());
 
-        SensorReading reading2(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[1]);
+        SensorReading reading2(guid_generator->Generate(), sensors[1]);
         reading2.source = ReadingSource::PROCESSING;
         reading2.status = ReadingStatus::PROCESSED;
         reading2.value = 1.6;
         sensor_readings_frame->AddOrUpdateReading(reading2);
 
-        zassert_equal(sensor_readings_frame->HasReading("sensor_2"), true);
+        zassert_equal(sensor_readings_frame->HasReading(sensors[1]->id_hash), true);
 
-        auto fr_reading_2 = sensor_readings_frame->GetReading("sensor_2");
-        zassert_equal(fr_reading_2.status, ReadingStatus::PROCESSED);
-        zassert_true(fr_reading_2.value.has_value());
+        auto fr_reading_2 = sensor_readings_frame->TryGetReading("sensor_2");
+        zassert_true(fr_reading_2.has_value());
+        zassert_equal(fr_reading_2.value().status, ReadingStatus::PROCESSED);
+        zassert_true(fr_reading_2.value().value.has_value());
 
-        SensorReading reading3(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[2]);
+        SensorReading reading3(guid_generator->Generate(), sensors[2]);
         reading3.source = ReadingSource::PROCESSING;
         sensor_readings_frame->AddOrUpdateReading(reading3);
 
-        zassert_equal(sensor_readings_frame->HasReading("sensor_3"), true);
+        zassert_equal(sensor_readings_frame->HasReading(sensors[2]->id_hash), true);
 }
 
 ZTEST(sensor_readings_frame, test_GetReading) {
@@ -133,21 +134,22 @@ ZTEST(sensor_readings_frame, test_GetReading) {
     auto sensor_readings_frame = helper.sensor_readings_frame;
     auto sensors = sensor_readings_frame_GetTestSensors();
 
-    SensorReading reading1(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[1]);
+    SensorReading reading1(guid_generator->Generate(), sensors[1]);
     reading1.source = ReadingSource::PROCESSING;
     sensor_readings_frame->AddOrUpdateReading(reading1);
-    SensorReading reading2(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[2]);
+    SensorReading reading2(guid_generator->Generate(), sensors[2]);
     reading2.source = ReadingSource::PROCESSING;
     sensor_readings_frame->AddOrUpdateReading(reading2);
 
-    auto rf_reading1 = sensor_readings_frame->GetReading("sensor_2");
-    zassert_str_equal(rf_reading1.sensor->id.c_str(), "sensor_2");
+    auto rf_reading1 = sensor_readings_frame->TryGetReading("sensor_2");
+    zassert_true(rf_reading1.has_value());
+    zassert_str_equal(rf_reading1.value().sensor->id.c_str(), "sensor_2");
 
-    auto rf_reading2 = sensor_readings_frame->GetReading("sensor_3");
-    zassert_str_equal(rf_reading2.sensor->id.c_str(), "sensor_3");
+    auto rf_reading2 = sensor_readings_frame->TryGetReading("sensor_3");
+    zassert_true(rf_reading2.has_value());
+    zassert_str_equal(rf_reading2.value().sensor->id.c_str(), "sensor_3");
 }
 
-ZTEST_EXPECT_FAIL(sensor_readings_frame, test_GetReading_no_sensor);
 ZTEST(sensor_readings_frame, test_GetReading_no_sensor) {
     auto helper = sensor_readings_frame_GetHelperInstances();
 
@@ -155,12 +157,8 @@ ZTEST(sensor_readings_frame, test_GetReading_no_sensor) {
     auto sensor_readings_frame = helper.sensor_readings_frame;
     auto sensors = sensor_readings_frame_GetTestSensors();
 
-    try {
-        sensor_readings_frame->GetReading("sensor_2");
-        zassert_true(true, "GetReading expected to fail, but it didn't.");
-    } catch(...) {
-        zassert_true(false, "GetReading failed as expected due to missing sensor reading.");
-    }
+    auto reading = sensor_readings_frame->TryGetReading("sensor_2");
+    zassert_false(reading.has_value());
 }
 
 ZTEST(sensor_readings_frame, test_ClearReadings) {
@@ -173,54 +171,53 @@ ZTEST(sensor_readings_frame, test_ClearReadings) {
     auto readings = sensor_readings_frame->GetProcessedReadings();
     zassert_equal(readings.size(), 0);
 
-    SensorReading reading1(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[0]);
+    SensorReading reading1(guid_generator->Generate(), sensors[0]);
     reading1.source = ReadingSource::ISR;
     reading1.value = 2.4;
     reading1.status = ReadingStatus::RAW;
     sensor_readings_frame->AddOrUpdateReading(reading1);
 
-    SensorReading reading2(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[1]);
+    SensorReading reading2(guid_generator->Generate(), sensors[1]);
     reading2.source = ReadingSource::PROCESSING;
     reading2.status = ReadingStatus::ERROR;
     sensor_readings_frame->AddOrUpdateReading(reading2);
 
-    SensorReading reading3(std::allocator_arg, Mrm::GetDefaultPmr(), guid_generator->Generate(), sensors[2]);
+    SensorReading reading3(guid_generator->Generate(), sensors[2]);
     reading3.source = ReadingSource::PROCESSING;
     reading3.value = 2.6;
     reading3.status = ReadingStatus::PROCESSED;
     sensor_readings_frame->AddOrUpdateReading(reading3);
 
-    zassert_equal(sensor_readings_frame->HasIsrReading("sensor_1"), true);
-    zassert_equal(sensor_readings_frame->HasIsrReading("sensor_2"), false);
-    zassert_equal(sensor_readings_frame->HasIsrReading("sensor_3"), false);
+    zassert_equal(sensor_readings_frame->HasIsrReading(sensors[0]->id_hash), true);
+    zassert_equal(sensor_readings_frame->HasIsrReading(sensors[1]->id_hash), false);
+    zassert_equal(sensor_readings_frame->HasIsrReading(sensors[2]->id_hash), false);
 
-    zassert_equal(sensor_readings_frame->HasReading("sensor_1"), false);
-    zassert_equal(sensor_readings_frame->HasReading("sensor_2"), true);
-    zassert_equal(sensor_readings_frame->HasReading("sensor_3"), true);
+    zassert_equal(sensor_readings_frame->HasReading(sensors[0]->id_hash), false);
+    zassert_equal(sensor_readings_frame->HasReading(sensors[1]->id_hash), true);
+    zassert_equal(sensor_readings_frame->HasReading(sensors[2]->id_hash), true);
 
-    zassert_equal(sensor_readings_frame->HasProcessedReading("sensor_1"), false);
-    zassert_equal(sensor_readings_frame->HasProcessedReading("sensor_2"), false);
-    zassert_equal(sensor_readings_frame->HasProcessedReading("sensor_3"), true);
+    readings = sensor_readings_frame->GetProcessedReadings();
+    zassert_equal(readings.size(), 1);
+    zassert_equal(readings.contains(sensors[2]->id_hash), true);
 
-    zassert_equal(sensor_readings_frame->HasReadingValue("sensor_1"), false);
-    zassert_equal(sensor_readings_frame->HasReadingValue("sensor_2"), false);
-    zassert_equal(sensor_readings_frame->HasReadingValue("sensor_3"), true);
+    zassert_equal(sensor_readings_frame->TryGetReadingValue(sensors[0]->id_hash).has_value(), false);
+    zassert_equal(sensor_readings_frame->TryGetReadingValue(sensors[1]->id_hash).has_value(), false);
+    zassert_equal(sensor_readings_frame->TryGetReadingValue(sensors[2]->id_hash).has_value(), true);
 
     sensor_readings_frame->ClearReadings();
 
-    zassert_equal(sensor_readings_frame->HasIsrReading("sensor_1"), false);
-    zassert_equal(sensor_readings_frame->HasIsrReading("sensor_2"), false);
-    zassert_equal(sensor_readings_frame->HasIsrReading("sensor_3"), false);
+    zassert_equal(sensor_readings_frame->HasIsrReading(sensors[0]->id_hash), false);
+    zassert_equal(sensor_readings_frame->HasIsrReading(sensors[1]->id_hash), false);
+    zassert_equal(sensor_readings_frame->HasIsrReading(sensors[2]->id_hash), false);
 
-    zassert_equal(sensor_readings_frame->HasReading("sensor_1"), false);
-    zassert_equal(sensor_readings_frame->HasReading("sensor_2"), false);
-    zassert_equal(sensor_readings_frame->HasReading("sensor_3"), false);
+    zassert_equal(sensor_readings_frame->HasReading(sensors[0]->id_hash), false);
+    zassert_equal(sensor_readings_frame->HasReading(sensors[1]->id_hash), false);
+    zassert_equal(sensor_readings_frame->HasReading(sensors[2]->id_hash), false);
 
-    zassert_equal(sensor_readings_frame->HasProcessedReading("sensor_1"), false);
-    zassert_equal(sensor_readings_frame->HasProcessedReading("sensor_2"), false);
-    zassert_equal(sensor_readings_frame->HasProcessedReading("sensor_3"), false);
+    readings = sensor_readings_frame->GetProcessedReadings();
+    zassert_equal(readings.size(), 0);
 
-    zassert_equal(sensor_readings_frame->HasReadingValue("sensor_1"), false);
-    zassert_equal(sensor_readings_frame->HasReadingValue("sensor_2"), false);
-    zassert_equal(sensor_readings_frame->HasReadingValue("sensor_3"), false);
+    zassert_equal(sensor_readings_frame->TryGetReadingValue(sensors[0]->id_hash).has_value(), false);
+    zassert_equal(sensor_readings_frame->TryGetReadingValue(sensors[1]->id_hash).has_value(), false);
+    zassert_equal(sensor_readings_frame->TryGetReadingValue(sensors[2]->id_hash).has_value(), false);
 }
