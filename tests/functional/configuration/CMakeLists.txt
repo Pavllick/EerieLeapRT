@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20.0)
 
-set(EL_COMMON_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/eerie_leap_common)
+set(EL_COMMON_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/eerie_leap_rt_core)
 
 set(EXTRA_ZEPHYR_MODULES
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/eerie_leap_lua"

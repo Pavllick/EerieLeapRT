@@ -13,7 +13,7 @@
             "servertype": "openocd",
             "interface": "jtag",
             "toolchainPrefix": "xtensa-espressif_esp32s3_zephyr-elf",
-            "armToolchainPath": "/home/ubuntu/zephyr-sdk-0.17.4/xtensa-espressif_esp32s3_zephyr-elf/bin/",
+            "armToolchainPath": "/home/ubuntu/zephyr-sdk-1.0.1/xtensa-espressif_esp32s3_zephyr-elf/bin/",
             "serverpath": "/home/ubuntu/zephyr/workspace/utilities/openocd-esp32/bin/openocd",
             "showDevDebugOutput": "raw",
             "configFiles": [
@@ -55,9 +55,9 @@
             "runToEntryPoint": "main",
             "servertype": "openocd",
             "interface": "swd",
-            "svdFile": "/opt/st/stm32cubeclt_1.19.0/STMicroelectronics_CMSIS_SVD/STM32H743.svd",
+            "svdFile": "/opt/st/stm32cubeclt_1.20.0/STMicroelectronics_CMSIS_SVD/STM32H743.svd",
             "toolchainPrefix": "arm-zephyr-eabi",
-            "armToolchainPath": "/home/ubuntu/zephyr-sdk-0.17.4/arm-zephyr-eabi/bin/",
+            "armToolchainPath": "/home/ubuntu/zephyr-sdk-1.0.1/arm-zephyr-eabi/bin/",
             "showDevDebugOutput": "raw",
             "configFiles": [
                 "${workspaceFolder}/boards/mcudev/devebox_stm32h743_hw_20/support/openocd.cfg"
@@ -108,7 +108,7 @@
                 }
             ],
             // "miDebuggerPath": "/usr/bin/gdb-multiarch",
-            "miDebuggerPath": "/zephyr-sdk-0.17.0/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb",
+            "miDebuggerPath": "/zephyr-sdk-1.0.1/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb",
             "logging": {
                 "engineLogging": true
             }

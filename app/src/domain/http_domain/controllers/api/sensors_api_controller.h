@@ -35,9 +35,9 @@ private:
 
     static void UpdateSensorsConfig(const std::span<const uint8_t>& buffer);
 
-    static int sensors_config_get_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data);
-    static int sensors_config_post_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data);
-    static int sensors_config_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data);
+    static int sensors_config_get_handler(http_client_ctx *client, enum http_transaction_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data);
+    static int sensors_config_post_handler(http_client_ctx *client, enum http_transaction_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data);
+    static int sensors_config_handler(http_client_ctx *client, enum http_transaction_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data);
 
 public:
     static http_resource_detail_dynamic sensors_config_resource_detail;

@@ -36,11 +36,11 @@ SensorsApiController::SensorsApiController(
         sensors_processing_service_ = std::move(sensors_processing_service);
 }
 
-int SensorsApiController::sensors_config_get_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data) {
-    if (status == HTTP_SERVER_DATA_ABORTED)
+int SensorsApiController::sensors_config_get_handler(http_client_ctx *client, enum http_transaction_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data) {
+    if (status == HTTP_SERVER_TRANSACTION_ABORTED)
         return 0;
 
-    if (status == HTTP_SERVER_DATA_FINAL) {
+    if (status == HTTP_SERVER_REQUEST_DATA_FINAL) {
         const auto* sensors = sensors_configuration_manager_->Get();
         // TODO: Get GPIO and ADC channel count
         auto config = sensors_json_parser_->Serialize(*sensors, 16, 16);
@@ -67,10 +67,10 @@ void SensorsApiController::UpdateSensorsConfig(const std::span<const uint8_t>& b
     sensors_processing_service_->Start();
 }
 
-int SensorsApiController::sensors_config_post_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data) {
+int SensorsApiController::sensors_config_post_handler(http_client_ctx *client, enum http_transaction_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data) {
     static size_t cursor;
 
-	if (status == HTTP_SERVER_DATA_ABORTED) {
+	if (status == HTTP_SERVER_TRANSACTION_ABORTED) {
 		cursor = 0;
 		return 0;
 	}
@@ -85,7 +85,7 @@ int SensorsApiController::sensors_config_post_handler(http_client_ctx *client, e
 
     static std::string error_msg;
 
-	if (status == HTTP_SERVER_DATA_FINAL) {
+	if (status == HTTP_SERVER_REQUEST_DATA_FINAL) {
         LOG_DBG("JSON payload received successfully, len=%zu", cursor);
 
         try {
@@ -108,7 +108,7 @@ int SensorsApiController::sensors_config_post_handler(http_client_ctx *client, e
 	return 0;
 }
 
-int SensorsApiController::sensors_config_handler(http_client_ctx *client, enum http_data_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data) {
+int SensorsApiController::sensors_config_handler(http_client_ctx *client, enum http_transaction_status status, const http_request_ctx *request_ctx, http_response_ctx *response_ctx, void *user_data) {
 	if (client->method == HTTP_GET) {
 		return sensors_config_get_handler(client, status, request_ctx, response_ctx, user_data);
 	} else if (client->method == HTTP_POST) {

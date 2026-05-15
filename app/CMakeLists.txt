@@ -92,9 +92,9 @@ endfunction()
 # Add Zephyr modules
 set(EXTRA_ZEPHYR_MODULES
     "${CMAKE_CURRENT_SOURCE_DIR}/../modules/eerie_leap_lua"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../modules/eerie_leap_common")
+    "${CMAKE_CURRENT_SOURCE_DIR}/../modules/eerie_leap_rt_core")
 
-# Boost is linked through eerie_leap_common module
+# Boost is linked through eerie_leap_rt_core module
 # but has to be configured here
 add_definitions(-DBOOST_SYSTEM_DISABLE_THREADS)
 add_definitions(-DBOOST_JSON_STACK_BUFFER_SIZE=1024)
